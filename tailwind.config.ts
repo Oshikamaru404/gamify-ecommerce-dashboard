@@ -63,16 +63,24 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom soft colors
-				soft: {
-					blue: '#D3E4FD',
-					purple: '#E5DEFF',
-					green: '#F2FCE2',
-					pink: '#FFDEE2',
-					orange: '#FEC6A1',
-					yellow: '#FEF7CD',
-					gray: '#F1F0FB',
-					peach: '#FDE1D3'
+				iptv: {
+					blue: '#0EA5E9',
+					darkBlue: '#0284C7',
+					purple: '#8B5CF6',
+					darkPurple: '#7C3AED',
+					orange: '#F97316',
+					darkOrange: '#EA580C',
+					green: '#10B981',
+					darkGreen: '#059669',
+					pink: '#EC4899',
+					darkPink: '#DB2777',
+					yellow: '#F59E0B',
+					darkYellow: '#D97706',
+					dark: '#0F172A',
+					darker: '#111827',
+					darkest: '#0B1120',
+					light: '#E2E8F0',
+					lighter: '#F8FAFC'
 				}
 			},
 			borderRadius: {

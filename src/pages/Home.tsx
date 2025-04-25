@@ -5,81 +5,88 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
-import { Grid3X3, Film, Music, Microchip, Code, BookOpen, Shield, GraduationCap } from 'lucide-react';
+import { Tv, Film, Play, Globe, Laptop, Shield, Zap, Video } from 'lucide-react';
 
 const ProductSubscriptionCard = ({ 
   name, 
   price, 
   isTrial,
   features,
-  bgColor = 'bg-soft-blue'
+  bgColor = 'bg-[#1A1F2C]',
+  accentColor = 'text-[#0EA5E9]'
 }: {
   name: string;
   price: number;
   isTrial?: boolean;
   features: string[];
   bgColor?: string;
+  accentColor?: string;
 }) => (
-  <Card className={cn("overflow-hidden transition-all hover:shadow-lg hover:scale-105", bgColor)}>
-    <div className="p-8">
-      <h3 className="mb-3 text-xl font-semibold">{name}</h3>
-      <div className="mb-6">
+  <Card className={cn("overflow-hidden transition-all hover:shadow-xl transform hover:scale-105", bgColor)}>
+    <div className="p-10 text-white">
+      <h3 className="mb-4 text-2xl font-bold">{name}</h3>
+      <div className="mb-8">
         {isTrial ? (
-          <div className="text-2xl font-bold text-primary">ESSAI GRATUIT</div>
+          <div className={cn("text-3xl font-extrabold", accentColor)}>ESSAI GRATUIT</div>
         ) : (
           <div className="flex items-baseline">
-            <span className="text-4xl font-bold text-primary">${price.toFixed(2)}</span>
-            <span className="ml-2 text-sm text-muted-foreground">/ mois</span>
+            <span className={cn("text-5xl font-bold", accentColor)}>${price.toFixed(2)}</span>
+            <span className="ml-2 text-base text-gray-300">/ mois</span>
           </div>
         )}
       </div>
-      <ul className="mb-8 space-y-3">
+      <ul className="mb-10 space-y-4">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-3 text-sm">
-            <span className="text-primary text-lg">✓</span>
+          <li key={index} className="flex items-start gap-3 text-base">
+            <span className={cn("text-lg", accentColor)}>✓</span>
             {feature}
           </li>
         ))}
       </ul>
-      <Button className="w-full rounded-full text-md py-6">
-        {isTrial ? 'Essayer Gratuitement' : 'Acheter Maintenant'}
+      <Button className={cn("w-full rounded-full text-lg py-6 bg-opacity-90 hover:bg-opacity-100", 
+        isTrial ? "bg-[#8B5CF6] hover:bg-[#7C3AED]" : "bg-[#0EA5E9] hover:bg-[#0284C7]")}>
+        {isTrial ? 'Essayer Gratuitement' : 'S\'abonner Maintenant'}
       </Button>
     </div>
   </Card>
 );
 
-const ServiceCategory = ({ icon: Icon, name, color }: { icon: any, name: string, color: string }) => (
+const ServiceCategory = ({ icon: Icon, name, bgColor, iconColor }: { 
+  icon: any, 
+  name: string, 
+  bgColor: string,
+  iconColor: string 
+}) => (
   <Link to={`/products?category=${name.toLowerCase()}`}>
     <div className={cn(
-      "group flex flex-col items-center rounded-xl p-6 transition-all hover:shadow-lg cursor-pointer min-w-32",
-      color
+      "group flex flex-col items-center rounded-xl p-8 transition-all hover:shadow-2xl cursor-pointer min-w-40 transform hover:scale-105",
+      bgColor
     )}>
-      <Icon className="h-8 w-8 mb-3 group-hover:scale-110 transition-transform" />
-      <span className="text-sm font-medium">{name}</span>
+      <Icon className={cn("h-12 w-12 mb-4 group-hover:scale-125 transition-transform", iconColor)} />
+      <span className="text-base font-bold text-white">{name}</span>
     </div>
   </Link>
 );
 
 const PlatformSection = () => {
   const categories = [
-    { icon: Grid3X3, name: 'Tous', color: 'bg-soft-blue' },
-    { icon: Film, name: 'SVOD', color: 'bg-soft-purple' },
-    { icon: Music, name: 'Musique', color: 'bg-soft-green' },
-    { icon: Microchip, name: 'IA', color: 'bg-soft-peach' },
-    { icon: Code, name: 'Logiciel', color: 'bg-soft-yellow' },
-    { icon: BookOpen, name: 'En lisant', color: 'bg-soft-blue' },
-    { icon: Shield, name: 'Sécurité', color: 'bg-soft-purple' },
-    { icon: GraduationCap, name: 'Learning', color: 'bg-soft-green' },
+    { icon: Tv, name: 'Chaînes Live', bgColor: 'bg-[#1A1F2C]', iconColor: 'text-[#0EA5E9]' },
+    { icon: Film, name: 'Films', bgColor: 'bg-[#1E293B]', iconColor: 'text-[#8B5CF6]' },
+    { icon: Video, name: 'Séries', bgColor: 'bg-[#1A1F2C]', iconColor: 'text-[#F97316]' },
+    { icon: Play, name: 'Sports', bgColor: 'bg-[#1E293B]', iconColor: 'text-[#10B981]' },
+    { icon: Laptop, name: 'VOD', bgColor: 'bg-[#1A1F2C]', iconColor: 'text-[#EC4899]' },
+    { icon: Globe, name: 'International', bgColor: 'bg-[#1E293B]', iconColor: 'text-[#F59E0B]' }
   ];
 
   return (
-    <div className="flex justify-center gap-4 overflow-x-auto py-8 px-4">
+    <div className="flex justify-center gap-6 py-10 px-4 overflow-x-auto">
       {categories.map((category) => (
         <ServiceCategory
           key={category.name}
           icon={category.icon}
           name={category.name}
-          color={category.color}
+          bgColor={category.bgColor}
+          iconColor={category.iconColor}
         />
       ))}
     </div>
@@ -90,38 +97,38 @@ const WhyChooseUs = () => {
   const features = [
     {
       icon: '⚡',
-      title: 'Livraison en temps réel',
-      description: 'Recevez vos codes instantanément après l\'achat'
+      title: 'Ultra Rapide',
+      description: 'Streaming sans tampon avec notre infrastructure optimisée'
     },
     {
       icon: '🔒',
-      title: 'Sécurité SSL',
-      description: 'Transactions protégées par un certificat SSL'
+      title: 'Sécurité Maximale',
+      description: 'Connexions cryptées et navigation privée garantie'
     },
     {
       icon: '💬',
-      title: 'Service 24/7',
-      description: 'Support client disponible à tout moment'
+      title: 'Support 24/7',
+      description: 'Notre équipe technique est disponible à tout moment'
     },
     {
-      icon: '💰',
-      title: 'Garantie de remboursement',
-      description: 'Satisfait ou remboursé sous 30 jours'
+      icon: '💻',
+      title: 'Multi-appareils',
+      description: 'Compatible avec Smart TV, Android, iOS, PC et Mac'
     }
   ];
 
   return (
-    <section className="py-16">
+    <section className="py-20 bg-[#111827]">
       <div className="container">
-        <h2 className="mb-12 text-center text-3xl font-bold">
-          Pourquoi choisir GamsGo ?
+        <h2 className="mb-16 text-center text-4xl font-bold text-white">
+          Pourquoi choisir BWIVOX ?
         </h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
-            <Card key={index} className="p-6 text-center">
-              <div className="mb-4 text-4xl">{feature.icon}</div>
-              <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+            <Card key={index} className="p-8 text-center bg-[#1A1F2C] border-none hover:shadow-xl transition-all hover:transform hover:scale-105">
+              <div className="mb-6 text-5xl">{feature.icon}</div>
+              <h3 className="mb-3 text-xl font-bold text-white">{feature.title}</h3>
+              <p className="text-base text-gray-300">{feature.description}</p>
             </Card>
           ))}
         </div>
@@ -135,39 +142,40 @@ const Testimonials = () => {
     {
       avatar: "https://placekitten.com/100/100",
       name: "Marie D.",
-      text: "Excellent service! Les codes sont livrés instantanément."
+      text: "La qualité de l'image est exceptionnelle, même sur les chaînes internationales. Je recommande vivement !"
     },
     {
       avatar: "https://placekitten.com/101/101",
       name: "Pierre L.",
-      text: "Les meilleurs prix que j'ai trouvés pour les jeux en ligne."
+      text: "Le rapport qualité-prix est imbattable. Plus de 8000 chaînes et un catalogue VOD impressionnant."
     },
     {
       avatar: "https://placekitten.com/102/102",
       name: "Sophie M.",
-      text: "Le support client est très réactif et professionnel."
+      text: "L'interface est intuitive et le support client est très réactif. Parfait pour toute la famille."
     }
   ];
 
   return (
-    <section className="bg-soft-gray py-16">
+    <section className="bg-[#111827] py-20">
       <div className="container">
-        <h2 className="mb-2 text-center text-3xl font-bold">
-          98% des utilisateurs satisfaits
+        <h2 className="mb-4 text-center text-4xl font-bold text-white">
+          99% de clients satisfaits
         </h2>
+        <p className="text-center text-xl text-gray-300 mb-16">
+          Rejoignez notre communauté de téléspectateurs satisfaits
+        </p>
         <div className="mt-12 grid gap-8 md:grid-cols-3">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="p-6">
-              <div className="flex items-center gap-4">
+            <Card key={index} className="p-8 bg-[#1A1F2C] border-none hover:shadow-xl transition-all">
+              <div className="flex flex-col items-center text-center">
                 <img
                   src={testimonial.avatar}
                   alt={testimonial.name}
-                  className="h-12 w-12 rounded-full"
+                  className="h-20 w-20 rounded-full mb-6 border-4 border-[#0EA5E9]"
                 />
-                <div>
-                  <h4 className="font-semibold">{testimonial.name}</h4>
-                  <p className="text-sm text-muted-foreground">{testimonial.text}</p>
-                </div>
+                <h4 className="font-bold text-xl text-white mb-2">{testimonial.name}</h4>
+                <p className="text-base text-gray-300">{testimonial.text}</p>
               </div>
             </Card>
           ))}
@@ -180,66 +188,73 @@ const Testimonials = () => {
 const Home = () => {
   const subscriptionProducts = [
     {
-      name: "Pack Digital Premium",
-      price: 29.99,
+      name: "BWIVOX Standard",
+      price: 9.99,
       features: [
-        "Accès à ChatGPT-4",
-        "Netflix Standard",
-        "Spotify Premium",
-        "1 compte partageable",
-        "Support prioritaire 24/7"
+        "Plus de 5000 chaînes en direct",
+        "Films et séries en VOD",
+        "Qualité HD",
+        "Compatible avec 2 appareils",
+        "Support par email"
       ],
-      bgColor: "bg-soft-blue"
+      bgColor: "bg-[#1A1F2C]",
+      accentColor: "text-[#0EA5E9]"
     },
     {
-      name: "Pack Streaming Plus",
+      name: "BWIVOX Premium",
       price: 19.99,
       features: [
-        "Disney+ Premium",
-        "Netflix Basic",
-        "Prime Video",
-        "1 compte partageable",
-        "Support standard"
+        "Plus de 8000 chaînes en direct",
+        "Catalogue VOD complet",
+        "Qualité Full HD & 4K",
+        "Compatible avec 4 appareils",
+        "Support prioritaire 24/7"
       ],
-      bgColor: "bg-soft-purple"
+      bgColor: "bg-[#1E293B]",
+      accentColor: "text-[#8B5CF6]"
     },
     {
-      name: "Pack Productivité",
-      price: 24.99,
+      name: "BWIVOX Ultimate",
+      price: 29.99,
       features: [
-        "Microsoft 365",
-        "ChatGPT Plus",
-        "Grammarly Premium",
-        "1 compte partageable",
-        "Support premium"
+        "Plus de 10000 chaînes en direct",
+        "VOD Premium + Nouveautés",
+        "Qualité 4K Ultra HD",
+        "Compatible avec 6 appareils",
+        "Support VIP & installation"
       ],
-      bgColor: "bg-soft-green"
+      bgColor: "bg-[#0F172A]",
+      accentColor: "text-[#F97316]"
     }
   ];
 
   return (
     <StoreLayout>
-      <div className="container py-8">
-        <section className="mb-16 text-center">
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-            Accédez à vos services préférés à prix réduit
-          </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
-            Abonnements partagés premium pour tous vos services numériques favoris
-          </p>
-          <PlatformSection />
-        </section>
+      <div className="bg-gradient-to-b from-[#0F172A] to-[#111827] text-white">
+        <div className="container py-16">
+          <section className="mb-20 text-center">
+            <h1 className="mb-6 text-5xl font-extrabold tracking-tight md:text-6xl">
+              BWIVOX <span className="text-[#0EA5E9]">IPTV</span>
+            </h1>
+            <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-300">
+              Le service de streaming IPTV premium avec plus de 10 000 chaînes en direct,
+              films et séries du monde entier en qualité HD et 4K.
+            </p>
+            <PlatformSection />
+          </section>
 
-        <section className="mb-16">
-          <div className="grid gap-8 md:grid-cols-3">
-            {subscriptionProducts.map((product, index) => (
-              <ProductSubscriptionCard key={index} {...product} />
-            ))}
-          </div>
-        </section>
+          <section className="mb-20">
+            <h2 className="text-4xl font-bold text-center mb-16">Nos Forfaits <span className="text-[#0EA5E9]">Premium</span></h2>
+            <div className="grid gap-8 md:grid-cols-3">
+              {subscriptionProducts.map((product, index) => (
+                <ProductSubscriptionCard key={index} {...product} />
+              ))}
+            </div>
+          </section>
 
-        <WhyChooseUs />
-        <Testimonials />
+          <WhyChooseUs />
+          <Testimonials />
+        </div>
       </div>
     </StoreLayout>
   );
