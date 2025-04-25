@@ -27,17 +27,17 @@ const WhyChooseUs = () => {
   ];
 
   return (
-    <section className="py-20 bg-[#111827]">
+    <section className="py-20 bg-[#ff3d3d]">
       <div className="container">
         <h2 className="mb-16 text-center text-4xl font-bold text-white">
           Pourquoi choisir BWIVOX ?
         </h2>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
-            <Card key={index} className="p-8 text-center bg-[#1A1F2C] border-none hover:shadow-xl transition-all hover:transform hover:scale-105">
+            <Card key={index} className="p-8 text-center bg-gradient-to-br from-[#ff5555] to-[#ff7777] border-none hover:shadow-xl transition-all hover:transform hover:scale-105">
               <div className="mb-6 text-5xl">{feature.icon}</div>
               <h3 className="mb-3 text-xl font-bold text-white">{feature.title}</h3>
-              <p className="text-base text-gray-300">{feature.description}</p>
+              <p className="text-base text-gray-100">{feature.description}</p>
             </Card>
           ))}
         </div>

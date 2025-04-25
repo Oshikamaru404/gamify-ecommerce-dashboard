@@ -18,8 +18,8 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   price, 
   isTrial,
   features,
-  bgColor = 'bg-[#1A1F2C]',
-  accentColor = 'text-[#0EA5E9]'
+  bgColor = 'bg-gradient-to-br from-[#ff4d4d] to-[#ff6b6b]',
+  accentColor = 'text-white'
 }) => (
   <Card className={cn("overflow-hidden transition-all hover:shadow-xl transform hover:scale-105", bgColor)}>
     <div className="p-10 text-white">
@@ -30,7 +30,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         ) : (
           <div className="flex items-baseline">
             <span className={cn("text-5xl font-bold", accentColor)}>${price.toFixed(2)}</span>
-            <span className="ml-2 text-base text-gray-300">/ mois</span>
+            <span className="ml-2 text-base text-gray-100">/ mois</span>
           </div>
         )}
       </div>
@@ -43,7 +43,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         ))}
       </ul>
       <Button className={cn("w-full rounded-full text-lg py-6 bg-opacity-90 hover:bg-opacity-100", 
-        isTrial ? "bg-[#8B5CF6] hover:bg-[#7C3AED]" : "bg-[#0EA5E9] hover:bg-[#0284C7]")}>
+        isTrial ? "bg-white text-[#ff4d4d] hover:bg-gray-100" : "bg-white text-[#ff4d4d] hover:bg-gray-100")}>
         {isTrial ? 'Essayer Gratuitement' : 'S\'abonner Maintenant'}
       </Button>
     </div>
