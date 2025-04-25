@@ -5,12 +5,12 @@ import ServiceCategory from './ServiceCategory';
 
 const PlatformSection = () => {
   const categories = [
-    { icon: Tv, name: 'Chaînes Live', bgColor: 'bg-[#1A1F2C]', iconColor: 'text-[#0EA5E9]' },
-    { icon: Film, name: 'Films', bgColor: 'bg-[#1E293B]', iconColor: 'text-[#8B5CF6]' },
-    { icon: Video, name: 'Séries', bgColor: 'bg-[#1A1F2C]', iconColor: 'text-[#F97316]' },
-    { icon: Play, name: 'Sports', bgColor: 'bg-[#1E293B]', iconColor: 'text-[#10B981]' },
-    { icon: Laptop, name: 'VOD', bgColor: 'bg-[#1A1F2C]', iconColor: 'text-[#EC4899]' },
-    { icon: Globe, name: 'International', bgColor: 'bg-[#1E293B]', iconColor: 'text-[#F59E0B]' }
+    { icon: Tv, name: 'Chaînes Live', bgColor: 'bg-gradient-to-br from-[#ff4d4d] to-[#ff6b6b]', iconColor: 'text-white' },
+    { icon: Film, name: 'Films', bgColor: 'bg-gradient-to-br from-[#ff6b6b] to-[#ff8585]', iconColor: 'text-white' },
+    { icon: Video, name: 'Séries', bgColor: 'bg-gradient-to-br from-[#ff4d4d] to-[#ff6b6b]', iconColor: 'text-white' },
+    { icon: Play, name: 'Sports', bgColor: 'bg-gradient-to-br from-[#ff6b6b] to-[#ff8585]', iconColor: 'text-white' },
+    { icon: Laptop, name: 'VOD', bgColor: 'bg-gradient-to-br from-[#ff4d4d] to-[#ff6b6b]', iconColor: 'text-white' },
+    { icon: Globe, name: 'International', bgColor: 'bg-gradient-to-br from-[#ff6b6b] to-[#ff8585]', iconColor: 'text-white' }
   ];
 
   return (
