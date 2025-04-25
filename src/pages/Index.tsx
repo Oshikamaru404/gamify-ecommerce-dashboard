@@ -9,9 +9,9 @@ const Index = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0F172A] to-[#111827] text-white perspective">
       <div className="text-center p-8 transform transition-all duration-700 hover:scale-105">
         <div className="flex justify-center mb-8 animate-bounce">
-          <Tv className="h-24 w-24 text-[#0EA5E9] transform transition-all duration-500 hover:scale-110 hover:rotate-6" />
+          <Tv className="h-24 w-24 text-[#0EA5E9] transform transition-all duration-500 hover:scale-110 hover:rotate-6 drop-shadow-[0_0_15px_rgba(14,165,233,0.5)]" />
         </div>
-        <h1 className="text-6xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-[#0EA5E9] to-[#38BDF8] animate-fade-in">
+        <h1 className="text-6xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-[#0EA5E9] to-[#38BDF8] animate-fade-in drop-shadow-[0_0_10px_rgba(14,165,233,0.3)]">
           BWIVOX <span className="text-white">IPTV</span>
         </h1>
         <p className="text-2xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in">
