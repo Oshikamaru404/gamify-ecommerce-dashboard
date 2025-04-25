@@ -5,6 +5,7 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
+import { Grid3X3, Film, Music, Microchip, Code, BookOpen, Shield, GraduationCap } from 'lucide-react';
 
 const ProductSubscriptionCard = ({ 
   name, 
@@ -19,56 +20,67 @@ const ProductSubscriptionCard = ({
   features: string[];
   bgColor?: string;
 }) => (
-  <Card className={cn("overflow-hidden transition-all hover:shadow-lg", bgColor)}>
-    <div className="p-6">
-      <h3 className="mb-2 text-lg font-semibold">{name}</h3>
-      <div className="mb-4">
+  <Card className={cn("overflow-hidden transition-all hover:shadow-lg hover:scale-105", bgColor)}>
+    <div className="p-8">
+      <h3 className="mb-3 text-xl font-semibold">{name}</h3>
+      <div className="mb-6">
         {isTrial ? (
           <div className="text-2xl font-bold text-primary">ESSAI GRATUIT</div>
         ) : (
           <div className="flex items-baseline">
-            <span className="text-3xl font-bold text-primary">${price.toFixed(2)}</span>
-            <span className="ml-1 text-sm text-muted-foreground">/ mois</span>
+            <span className="text-4xl font-bold text-primary">${price.toFixed(2)}</span>
+            <span className="ml-2 text-sm text-muted-foreground">/ mois</span>
           </div>
         )}
       </div>
-      <ul className="mb-6 space-y-2">
+      <ul className="mb-8 space-y-3">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-2 text-sm">
-            <span className="text-primary">✓</span>
+          <li key={index} className="flex items-start gap-3 text-sm">
+            <span className="text-primary text-lg">✓</span>
             {feature}
           </li>
         ))}
       </ul>
-      <Button className="w-full rounded-full">
+      <Button className="w-full rounded-full text-md py-6">
         {isTrial ? 'Essayer Gratuitement' : 'Acheter Maintenant'}
       </Button>
     </div>
   </Card>
 );
 
+const ServiceCategory = ({ icon: Icon, name, color }: { icon: any, name: string, color: string }) => (
+  <Link to={`/products?category=${name.toLowerCase()}`}>
+    <div className={cn(
+      "group flex flex-col items-center rounded-xl p-6 transition-all hover:shadow-lg cursor-pointer min-w-32",
+      color
+    )}>
+      <Icon className="h-8 w-8 mb-3 group-hover:scale-110 transition-transform" />
+      <span className="text-sm font-medium">{name}</span>
+    </div>
+  </Link>
+);
+
 const PlatformSection = () => {
-  const platforms = [
-    { name: 'PC', icon: '🖥️', color: 'bg-soft-blue' },
-    { name: 'PlayStation', icon: '🎮', color: 'bg-soft-purple' },
-    { name: 'Xbox', icon: '🎯', color: 'bg-soft-green' },
-    { name: 'Nintendo', icon: '🎲', color: 'bg-soft-peach' },
-    { name: 'Mobile', icon: '📱', color: 'bg-soft-yellow' },
+  const categories = [
+    { icon: Grid3X3, name: 'Tous', color: 'bg-soft-blue' },
+    { icon: Film, name: 'SVOD', color: 'bg-soft-purple' },
+    { icon: Music, name: 'Musique', color: 'bg-soft-green' },
+    { icon: Microchip, name: 'IA', color: 'bg-soft-peach' },
+    { icon: Code, name: 'Logiciel', color: 'bg-soft-yellow' },
+    { icon: BookOpen, name: 'En lisant', color: 'bg-soft-blue' },
+    { icon: Shield, name: 'Sécurité', color: 'bg-soft-purple' },
+    { icon: GraduationCap, name: 'Learning', color: 'bg-soft-green' },
   ];
 
   return (
-    <div className="flex justify-center gap-4 overflow-x-auto py-8">
-      {platforms.map((platform) => (
-        <div
-          key={platform.name}
-          className={cn(
-            "flex min-w-20 flex-col items-center rounded-lg p-4 text-center transition-all hover:shadow-md",
-            platform.color
-          )}
-        >
-          <span className="text-2xl">{platform.icon}</span>
-          <span className="mt-2 text-sm font-medium">{platform.name}</span>
-        </div>
+    <div className="flex justify-center gap-4 overflow-x-auto py-8 px-4">
+      {categories.map((category) => (
+        <ServiceCategory
+          key={category.name}
+          icon={category.icon}
+          name={category.name}
+          color={category.color}
+        />
       ))}
     </div>
   );
@@ -168,35 +180,40 @@ const Testimonials = () => {
 const Home = () => {
   const subscriptionProducts = [
     {
-      name: "ChatGPT 4.0 (Plus)",
-      price: 15.54,
+      name: "Pack Digital Premium",
+      price: 29.99,
       features: [
-        "Accès à GPT-4",
-        "Réponses plus rapides",
-        "Priorité aux heures de pointe"
+        "Accès à ChatGPT-4",
+        "Netflix Standard",
+        "Spotify Premium",
+        "1 compte partageable",
+        "Support prioritaire 24/7"
       ],
       bgColor: "bg-soft-blue"
     },
     {
-      name: "ChatGPT (Web)",
-      price: 0,
-      isTrial: true,
+      name: "Pack Streaming Plus",
+      price: 19.99,
       features: [
-        "Version de base",
-        "Parfait pour découvrir",
-        "Fonctionnalités essentielles"
-      ],
-      bgColor: "bg-soft-green"
-    },
-    {
-      name: "Perplexity AI",
-      price: 16.67,
-      features: [
-        "IA avancée",
-        "Recherche intelligente",
-        "Support premium"
+        "Disney+ Premium",
+        "Netflix Basic",
+        "Prime Video",
+        "1 compte partageable",
+        "Support standard"
       ],
       bgColor: "bg-soft-purple"
+    },
+    {
+      name: "Pack Productivité",
+      price: 24.99,
+      features: [
+        "Microsoft 365",
+        "ChatGPT Plus",
+        "Grammarly Premium",
+        "1 compte partageable",
+        "Support premium"
+      ],
+      bgColor: "bg-soft-green"
     }
   ];
 
@@ -205,16 +222,16 @@ const Home = () => {
       <div className="container py-8">
         <section className="mb-16 text-center">
           <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-            Partagez l'abonnement premium avec un prix inférieur sur GamsGo
+            Accédez à vos services préférés à prix réduit
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
-            Toutes les stratégies en règle duclée et adresses caviardé à vie.
+            Abonnements partagés premium pour tous vos services numériques favoris
           </p>
           <PlatformSection />
         </section>
 
         <section className="mb-16">
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3">
             {subscriptionProducts.map((product, index) => (
               <ProductSubscriptionCard key={index} {...product} />
             ))}
