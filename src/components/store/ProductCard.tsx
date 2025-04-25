@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { cn } from '@/lib/utils';
 
@@ -39,49 +39,51 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Link to={`/products/${product.id}`} className="group perspective">
-      <div className="game-card h-full overflow-hidden rounded-xl border-0 glass-card transform-gpu">
+    <Link to={`/products/${product.id}`} className="group perspective w-full">
+      <div className="h-full overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-white/5 to-white/10 shadow-[0_8px_32px_rgba(234,56,76,0.15)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_16px_48px_rgba(234,56,76,0.3)] hover:scale-[1.02]">
         <div className="relative overflow-hidden">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="aspect-[4/3] w-full object-cover transition-all duration-500 group-hover:scale-110"
+            className="aspect-square w-full object-cover transition-all duration-500 group-hover:scale-110"
           />
-          <div className="absolute left-2 top-2 transition-transform duration-300 group-hover:translate-y-1">
-            <Badge variant="secondary" className="bg-[#0EA5E9]/90 text-white backdrop-blur-sm">
+          <div className="absolute left-4 top-4 transition-transform duration-300 group-hover:translate-y-1">
+            <Badge variant="secondary" className="bg-[#ea384c]/90 text-white backdrop-blur-sm text-lg px-4 py-1">
               {platformLabel()}
             </Badge>
           </div>
           {product.salePrice && (
-            <div className="absolute right-2 top-2 transition-transform duration-300 group-hover:translate-y-1">
-              <Badge variant="destructive" className="animate-pulse bg-gradient-to-r from-[#F43F5E] to-[#E11D48]">Sale</Badge>
+            <div className="absolute right-4 top-4 transition-transform duration-300 group-hover:translate-y-1">
+              <Badge variant="destructive" className="animate-pulse bg-white text-[#ea384c] text-lg px-4 py-1">
+                <Star className="mr-1 h-4 w-4" /> Promo
+              </Badge>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
-        <div className="p-6 relative">
-          <h3 className="mb-2 line-clamp-1 text-lg font-bold transition-colors group-hover:text-[#0EA5E9] drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]">
+        <div className="p-8 relative">
+          <h3 className="mb-4 text-2xl font-bold text-white transition-colors group-hover:text-[#ea384c] drop-shadow-[0_0_8px_rgba(234,56,76,0.3)]">
             {product.name}
           </h3>
-          <div className="mb-3 flex items-baseline gap-2">
+          <div className="mb-6 flex items-baseline gap-4">
             {product.salePrice ? (
               <>
-                <span className="text-xl font-bold text-[#0EA5E9]">${product.salePrice.toFixed(2)}</span>
-                <span className="text-sm text-muted-foreground line-through">${product.price.toFixed(2)}</span>
+                <span className="text-3xl font-bold text-[#ea384c]">${product.salePrice.toFixed(2)}</span>
+                <span className="text-xl text-white/60 line-through">${product.price.toFixed(2)}</span>
               </>
             ) : (
-              <span className="text-xl font-bold text-[#0EA5E9]">${product.price.toFixed(2)}</span>
+              <span className="text-3xl font-bold text-[#ea384c]">${product.price.toFixed(2)}</span>
             )}
           </div>
           <Button
             variant="outline"
             size="lg"
-            className="mt-2 w-full transform transition-all duration-300 bg-[#0EA5E9]/10 hover:bg-[#0EA5E9] border-[#0EA5E9]/20 hover:border-[#0EA5E9] text-white group-hover:scale-105 card-shine relative overflow-hidden"
+            className="w-full transform transition-all duration-300 bg-[#ea384c] hover:bg-[#ff1a1a] border-[#ea384c]/20 hover:border-[#ff1a1a] text-white text-xl py-6 group-hover:scale-105 relative overflow-hidden"
             onClick={handleAddToCart}
           >
-            <ShoppingCart size={18} className="mr-2" />
-            Add to Cart
+            <ShoppingCart size={24} className="mr-2" />
+            Ajouter au panier
           </Button>
         </div>
       </div>
