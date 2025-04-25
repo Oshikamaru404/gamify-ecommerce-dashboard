@@ -97,11 +97,17 @@
 
 @layer components {
   .game-card {
-    @apply relative overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl;
+    @apply relative overflow-hidden rounded-lg transition-all duration-300;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
   }
   
   .game-card:hover img {
     @apply scale-110;
+  }
+  
+  .perspective {
+    perspective: 2000px;
   }
   
   .admin-sidebar-item {
@@ -111,4 +117,20 @@
   .admin-sidebar-item.active {
     @apply bg-accent text-foreground;
   }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+  }
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
