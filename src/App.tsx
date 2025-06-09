@@ -5,18 +5,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Store Routes
+// IPTV Service Routes
 import Home from "./pages/Home";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-
-// Admin Routes
-import AdminLayout from "./layouts/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
-import Orders from "./pages/admin/Orders";
-import ManageProducts from "./pages/admin/ManageProducts";
-import EditProduct from "./pages/admin/EditProduct";
-import Settings from "./pages/admin/Settings";
+import Subscription from "./pages/Subscription";
+import Activation from "./pages/Activation";
+import Reseller from "./pages/Reseller";
+import IPTVPanel from "./pages/IPTVPanel";
+import PlayerPanel from "./pages/PlayerPanel";
 
 import NotFound from "./pages/NotFound";
 
@@ -29,20 +24,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Store Routes */}
+          {/* IPTV Service Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="products" element={<ManageProducts />} />
-            <Route path="products/edit/:id" element={<EditProduct />} />
-            <Route path="products/new" element={<EditProduct />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
+          <Route path="/subscription" element={<Subscription />} />
+          <Route path="/activation" element={<Activation />} />
+          <Route path="/reseller" element={<Reseller />} />
+          <Route path="/iptv-panel" element={<IPTVPanel />} />
+          <Route path="/player-panel" element={<PlayerPanel />} />
           
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
