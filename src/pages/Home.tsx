@@ -6,7 +6,7 @@ import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 const Home = () => {
   const subscriptionProducts = [
     {
-      name: "STRONG 8K IPTV",
+      name: "STRONG 8K IPTV 🚀",
       price: 12.99,
       features: [
         "8K Ultra HD Quality",
@@ -17,21 +17,10 @@ const Home = () => {
       ]
     },
     {
-      name: "ULTRA 8K IPTV",
-      price: 15.99,
-      features: [
-        "8K Premium Quality",
-        "7000+ Live Channels",
-        "Premium VOD Library",
-        "Multi-Device Support",
-        "VIP Support"
-      ]
-    },
-    {
-      name: "TREX IPTV",
+      name: "TREX 8K IPTV 🦖",
       price: 10.99,
       features: [
-        "HD/4K Streaming",
+        "8K/4K Streaming",
         "4000+ Channels",
         "Sports Packages",
         "Movie Collection",
@@ -39,21 +28,21 @@ const Home = () => {
       ]
     },
     {
-      name: "PROMAX OTT IPTV",
+      name: "PROMAX 4K IPTV ⚡",
       price: 18.99,
       features: [
-        "OTT Technology",
+        "4K Premium Technology",
         "8000+ Channels",
-        "4K/8K Quality",
+        "4K Quality",
         "Global Content",
         "Premium Support"
       ]
     },
     {
-      name: "TIVIONE IPTV",
+      name: "TIVIONE 4K IPTV 📺",
       price: 13.99,
       features: [
-        "Full HD Streaming",
+        "Full 4K Streaming",
         "6000+ Channels",
         "VOD Library",
         "Stable Connection",
@@ -61,7 +50,7 @@ const Home = () => {
       ]
     },
     {
-      name: "B1G IPTV",
+      name: "B1G 4K IPTV 🎬",
       price: 16.99,
       features: [
         "Big Entertainment",
@@ -69,17 +58,6 @@ const Home = () => {
         "4K Resolution",
         "Sports & Movies",
         "24/7 Service"
-      ]
-    },
-    {
-      name: "MAX OTT IPTV",
-      price: 20.99,
-      features: [
-        "Maximum Quality",
-        "10000+ Channels",
-        "8K Streaming",
-        "Complete Package",
-        "Elite Support"
       ]
     }
   ];
@@ -106,7 +84,7 @@ const Home = () => {
             <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
               Nos Abonnements <span className="text-red-600">IPTV</span>
             </h2>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {subscriptionProducts.map((product, index) => (
                 <ProductSubscriptionCard 
                   key={index} 

@@ -45,21 +45,16 @@ const StoreFooter: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">Support</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Panels</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/support" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Support
+                <Link to="/iptv-panel" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Panel IPTV
                 </Link>
               </li>
               <li>
-                <Link to="/how-to-buy" className="text-gray-600 hover:text-red-600 transition-colors">
-                  How to Buy
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Blog
+                <Link to="/player-panel" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Panel Player
                 </Link>
               </li>
             </ul>

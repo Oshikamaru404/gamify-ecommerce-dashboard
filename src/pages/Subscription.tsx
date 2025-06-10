@@ -2,11 +2,19 @@
 import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
+import { Button } from '@/components/ui/button';
+import { Zap } from 'lucide-react';
 
 const Subscription = () => {
+  const handleFreeTrial = () => {
+    const message = "Bonjour, je souhaite bénéficier de l'essai gratuit BWIVOX IPTV. Pouvez-vous m'aider?";
+    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   const subscriptionProducts = [
     {
-      name: "STRONG 8K IPTV",
+      name: "STRONG 8K IPTV 🚀",
       price: 12.99,
       features: [
         "8K Ultra HD Quality",
@@ -19,23 +27,10 @@ const Subscription = () => {
       ]
     },
     {
-      name: "ULTRA 8K IPTV",
-      price: 15.99,
-      features: [
-        "8K Premium Quality",
-        "7000+ Live Channels",
-        "Premium VOD Library",
-        "Multi-Device Support",
-        "VIP Support",
-        "International channels",
-        "Catch-up TV"
-      ]
-    },
-    {
-      name: "TREX IPTV",
+      name: "TREX 8K IPTV 🦖",
       price: 10.99,
       features: [
-        "HD/4K Streaming",
+        "8K/4K Streaming",
         "4000+ Channels",
         "Sports Packages",
         "Movie Collection",
@@ -45,12 +40,12 @@ const Subscription = () => {
       ]
     },
     {
-      name: "PROMAX OTT IPTV",
+      name: "PROMAX 4K IPTV ⚡",
       price: 18.99,
       features: [
-        "OTT Technology",
+        "4K Premium Technology",
         "8000+ Channels",
-        "4K/8K Quality",
+        "4K Quality",
         "Global Content",
         "Premium Support",
         "Adult content available",
@@ -58,10 +53,10 @@ const Subscription = () => {
       ]
     },
     {
-      name: "TIVIONE IPTV",
+      name: "TIVIONE 4K IPTV 📺",
       price: 13.99,
       features: [
-        "Full HD Streaming",
+        "Full 4K Streaming",
         "6000+ Channels",
         "VOD Library",
         "Stable Connection",
@@ -71,7 +66,7 @@ const Subscription = () => {
       ]
     },
     {
-      name: "B1G IPTV",
+      name: "B1G 4K IPTV 🎬",
       price: 16.99,
       features: [
         "Big Entertainment",
@@ -81,19 +76,6 @@ const Subscription = () => {
         "24/7 Service",
         "Premium sports packages",
         "Live events coverage"
-      ]
-    },
-    {
-      name: "MAX OTT IPTV",
-      price: 20.99,
-      features: [
-        "Maximum Quality",
-        "10000+ Channels",
-        "8K Streaming",
-        "Complete Package",
-        "Elite Support",
-        "All premium channels",
-        "Exclusive content"
       ]
     }
   ];
@@ -111,7 +93,7 @@ const Subscription = () => {
                 Choisissez parmi nos services IPTV premium avec des milliers de chaînes, 
                 films et séries en qualité 8K Ultra HD
               </p>
-              <div className="flex justify-center items-center gap-4 text-sm text-gray-500">
+              <div className="flex justify-center items-center gap-4 text-sm text-gray-500 mb-12">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span>Activé instantanément</span>
@@ -127,13 +109,27 @@ const Subscription = () => {
                   <span>Sans engagement</span>
                 </div>
               </div>
+              
+              {/* Free Trial CTA Button */}
+              <div className="mb-16">
+                <Button 
+                  onClick={handleFreeTrial}
+                  size="lg"
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-12 py-6 text-2xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+                >
+                  <Zap className="mr-3" size={28} />
+                  Essai Gratuit - Testez Maintenant !
+                </Button>
+                <p className="mt-4 text-lg text-gray-600">
+                  🎁 Testez nos services gratuitement avant de vous abonner
+                </p>
+              </div>
             </div>
           </section>
 
           <section className="mb-20">
-            <div className="max-w-7xl mx-auto">
-              {/* First row - 3 cards */}
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {subscriptionProducts.slice(0, 3).map((product, index) => (
                   <div 
                     key={index}
@@ -151,30 +147,12 @@ const Subscription = () => {
                 ))}
               </div>
 
-              {/* Second row - 2 cards centered */}
-              <div className="grid gap-8 md:grid-cols-2 justify-items-center mb-8 max-w-3xl mx-auto">
+              <div className="grid gap-8 md:grid-cols-2 justify-items-center mt-8 max-w-3xl mx-auto">
                 {subscriptionProducts.slice(3, 5).map((product, index) => (
                   <div 
                     key={index + 3}
                     className="animate-fade-in w-full max-w-sm"
                     style={{ animationDelay: `${(index + 3) * 150}ms` }}
-                  >
-                    <ProductSubscriptionCard 
-                      {...product}
-                      bgColor="bg-white"
-                      accentColor="text-red-600"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Third row - 2 cards centered */}
-              <div className="grid gap-8 md:grid-cols-2 justify-items-center max-w-3xl mx-auto">
-                {subscriptionProducts.slice(5, 7).map((product, index) => (
-                  <div 
-                    key={index + 5}
-                    className="animate-fade-in w-full max-w-sm"
-                    style={{ animationDelay: `${(index + 5) * 150}ms` }}
                   >
                     <ProductSubscriptionCard 
                       {...product}

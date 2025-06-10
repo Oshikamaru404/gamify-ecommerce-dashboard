@@ -1,26 +1,22 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 const StoreHeader: React.FC = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/subscription?search=${encodeURIComponent(searchQuery)}`);
-      setIsMenuOpen(false);
-    }
+  const handleFreeTrial = () => {
+    const message = "Bonjour, je souhaite bénéficier de l'essai gratuit BWIVOX IPTV. Pouvez-vous m'aider?";
+    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -48,21 +44,13 @@ const StoreHeader: React.FC = () => {
           <Link to="/reseller" className="text-lg font-semibold transition-colors hover:text-red-600">
             Panel Reseller
           </Link>
-          <Link to="/iptv-panel" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Panel IPTV
-          </Link>
-          <Link to="/player-panel" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Panel Player
-          </Link>
-          <Link to="/support" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Support
-          </Link>
-          <Link to="/how-to-buy" className="text-lg font-semibold transition-colors hover:text-red-600">
-            How to Buy
-          </Link>
-          <Link to="/blog" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Blog
-          </Link>
+          <Button 
+            onClick={handleFreeTrial}
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-6 py-2 text-lg"
+          >
+            <Zap className="mr-2" size={20} />
+            Free Trial
+          </Button>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -112,41 +100,16 @@ const StoreHeader: React.FC = () => {
           >
             Panel Reseller
           </Link>
-          <Link
-            to="/iptv-panel"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
+          <Button 
+            onClick={() => {
+              handleFreeTrial();
+              setIsMenuOpen(false);
+            }}
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold mt-2"
           >
-            Panel IPTV
-          </Link>
-          <Link
-            to="/player-panel"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Panel Player
-          </Link>
-          <Link
-            to="/support"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Support
-          </Link>
-          <Link
-            to="/how-to-buy"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            How to Buy
-          </Link>
-          <Link
-            to="/blog"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Blog
-          </Link>
+            <Zap className="mr-2" size={20} />
+            Free Trial
+          </Button>
         </nav>
       </div>
     </header>
