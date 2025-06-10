@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
@@ -35,14 +34,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
     } else if (serviceName.includes('trex') || serviceName.includes('🦖')) {
       return <Zap className="text-white" size={32} />;
     } else if (serviceName.includes('promax') || serviceName.includes('⚡')) {
-      return <Zap className="text-white" size={32} />;
+      return <Play className="text-white" size={32} />;
     } else if (serviceName.includes('tivione') || serviceName.includes('📺')) {
       return <Tv className="text-white" size={32} />;
     } else if (serviceName.includes('b1g') || serviceName.includes('🎬')) {
       return <Film className="text-white" size={32} />;
     } else {
       // Default icon for any other service
-      return <Play className="text-white" size={32} />;
+      return <Rocket className="text-white" size={32} />;
     }
   };
 
