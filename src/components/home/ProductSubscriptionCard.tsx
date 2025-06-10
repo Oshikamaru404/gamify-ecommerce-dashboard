@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, CheckCircle2, Plus } from 'lucide-react';
+import { MessageCircle, CheckCircle2, Plus, Rocket, Zap, Tv, Play, Film } from 'lucide-react';
 
 type ProductSubscriptionCardProps = {
   name: string;
@@ -26,6 +26,26 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
     window.open(whatsappUrl, '_blank');
   };
 
+  // Function to get appropriate icon based on service name
+  const getServiceIcon = () => {
+    const serviceName = name.toLowerCase();
+    
+    if (serviceName.includes('strong') || serviceName.includes('🚀')) {
+      return <Rocket className="text-white" size={32} />;
+    } else if (serviceName.includes('trex') || serviceName.includes('🦖')) {
+      return <Zap className="text-white" size={32} />;
+    } else if (serviceName.includes('promax') || serviceName.includes('⚡')) {
+      return <Zap className="text-white" size={32} />;
+    } else if (serviceName.includes('tivione') || serviceName.includes('📺')) {
+      return <Tv className="text-white" size={32} />;
+    } else if (serviceName.includes('b1g') || serviceName.includes('🎬')) {
+      return <Film className="text-white" size={32} />;
+    } else {
+      // Default icon for any other service
+      return <Play className="text-white" size={32} />;
+    }
+  };
+
   return (
     <div className="group perspective h-full">
       <Card className={cn(
@@ -42,9 +62,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           {/* Large Icon */}
           <div className="relative z-10 flex items-center justify-center">
             <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-xl border border-white/30 group-hover:scale-110 transition-transform duration-300">
-              <div className="text-white text-3xl font-bold">
-                {name.charAt(0)}
-              </div>
+              {getServiceIcon()}
             </div>
           </div>
 
