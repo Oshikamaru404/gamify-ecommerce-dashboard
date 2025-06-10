@@ -49,36 +49,33 @@ const StoreHeader: React.FC = () => {
             onMouseEnter={() => setIsPanelDropdownOpen(true)}
             onMouseLeave={() => setIsPanelDropdownOpen(false)}
           >
-            <button className="flex items-center gap-1 text-lg font-semibold transition-colors hover:text-red-600">
+            <button 
+              className="flex items-center gap-1 text-lg font-semibold transition-colors hover:text-red-600"
+              onClick={() => setIsPanelDropdownOpen(!isPanelDropdownOpen)}
+            >
               Panel Reseller
               <ChevronDown size={16} className={cn("transition-transform", isPanelDropdownOpen && "rotate-180")} />
             </button>
             
-            {isPanelDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50">
-                <Link 
-                  to="/activation" 
-                  className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                  onClick={() => setIsPanelDropdownOpen(false)}
-                >
-                  Activation Player
-                </Link>
-                <Link 
-                  to="/iptv-panel" 
-                  className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                  onClick={() => setIsPanelDropdownOpen(false)}
-                >
-                  Panel IPTV
-                </Link>
-                <Link 
-                  to="/player-panel" 
-                  className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                  onClick={() => setIsPanelDropdownOpen(false)}
-                >
-                  Panel Player
-                </Link>
-              </div>
-            )}
+            <div className={cn(
+              "absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50 transition-all duration-200",
+              isPanelDropdownOpen ? "opacity-100 visible" : "opacity-0 invisible"
+            )}>
+              <Link 
+                to="/activation" 
+                className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                onClick={() => setIsPanelDropdownOpen(false)}
+              >
+                Activation Player
+              </Link>
+              <Link 
+                to="/player-panel" 
+                className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                onClick={() => setIsPanelDropdownOpen(false)}
+              >
+                Panel Player
+              </Link>
+            </div>
           </div>
 
           <Button 
@@ -141,13 +138,6 @@ const StoreHeader: React.FC = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Activation Player
-              </Link>
-              <Link
-                to="/iptv-panel"
-                className="block py-2 text-base text-gray-600"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Panel IPTV
               </Link>
               <Link
                 to="/player-panel"

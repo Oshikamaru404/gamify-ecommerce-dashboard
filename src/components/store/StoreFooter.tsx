@@ -28,16 +28,6 @@ const StoreFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/reseller" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Panel Reseller
-                </Link>
-              </li>
-              <li>
-                <Link to="/iptv-panel" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Panel IPTV
-                </Link>
-              </li>
-              <li>
                 <Link to="/player-panel" className="text-gray-600 hover:text-red-600 transition-colors">
                   Panel Player
                 </Link>
@@ -45,16 +35,21 @@ const StoreFooter: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">Panels</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Information</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/iptv-panel" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Panel IPTV
+                <Link to="/blog" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Blog
                 </Link>
               </li>
               <li>
-                <Link to="/player-panel" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Panel Player
+                <Link to="/support" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Support
+                </Link>
+              </li>
+              <li>
+                <Link to="/how-to-buy" className="text-gray-600 hover:text-red-600 transition-colors">
+                  How to Buy
                 </Link>
               </li>
             </ul>
