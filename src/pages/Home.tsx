@@ -1,10 +1,14 @@
+
 import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import { Button } from '@/components/ui/button';
 import { Zap } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Home = () => {
+  const { t } = useLanguage();
+
   const subscriptionProducts = [
     {
       name: "STRONG 8K IPTV 🚀",
@@ -64,7 +68,7 @@ const Home = () => {
   ];
 
   const handleFreeTrial = () => {
-    const message = "Bonjour, je souhaite bénéficier de l'essai gratuit BWIVOX IPTV. Pouvez-vous m'aider?";
+    const message = `${t.tryFree} BWIVOX IPTV. ${t.contact}?`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -76,11 +80,10 @@ const Home = () => {
         <section className="bg-gradient-to-r from-red-600 to-red-800 text-white py-20">
           <div className="container text-center">
             <h1 className="text-6xl font-extrabold mb-6">
-              BWIVOX <span className="text-red-200">IPTV</span>
+              {t.heroTitle.split(' ')[0]} <span className="text-red-200">{t.heroTitle.split(' ')[1]}</span>
             </h1>
             <p className="text-2xl mb-8 max-w-4xl mx-auto">
-              Découvrez nos services IPTV premium avec des milliers de chaînes en direct, 
-              films et séries en qualité 8K Ultra HD
+              {t.heroSubtitle}
             </p>
             <Button 
               onClick={handleFreeTrial}
@@ -88,7 +91,7 @@ const Home = () => {
               className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-8 py-4 text-xl"
             >
               <Zap className="mr-2" size={24} />
-              Essai Gratuit
+              {t.freeTrial}
             </Button>
           </div>
         </section>
@@ -97,7 +100,7 @@ const Home = () => {
         <section className="py-20">
           <div className="container">
             <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
-              Nos Abonnements <span className="text-red-600">IPTV</span>
+              {t.subscriptionsTitle.split(' ')[0]} {t.subscriptionsTitle.split(' ')[1]} <span className="text-red-600">{t.subscriptionsTitle.split(' ')[2]}</span>
             </h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {subscriptionProducts.map((product, index) => (
@@ -116,10 +119,10 @@ const Home = () => {
         <section className="bg-red-600 text-white py-16">
           <div className="container text-center">
             <h3 className="text-4xl font-bold mb-6">
-              Prêt à commencer votre expérience IPTV ?
+              {t.ctaTitle}
             </h3>
             <p className="text-xl mb-8">
-              Contactez-nous maintenant pour obtenir votre abonnement
+              {t.ctaSubtitle}
             </p>
           </div>
         </section>

@@ -1,6 +1,6 @@
 
 import React, { ReactNode } from 'react';
-import StoreHeader from './StoreHeader';
+import StoreHeaderWithLanguage from './StoreHeaderWithLanguage';
 import StoreFooter from './StoreFooter';
 
 type StoreLayoutProps = {
@@ -10,7 +10,7 @@ type StoreLayoutProps = {
 const StoreLayout: React.FC<StoreLayoutProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen flex-col">
-      <StoreHeader />
+      <StoreHeaderWithLanguage />
       <main className="flex-1">
         {children}
       </main>

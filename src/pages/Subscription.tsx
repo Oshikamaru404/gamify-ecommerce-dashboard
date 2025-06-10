@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import { contentService } from '@/lib/contentService';
 import { SubscriptionContent } from '@/lib/contentTypes';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Subscription = () => {
+  const { t } = useLanguage();
   const [subscriptions, setSubscriptions] = useState<SubscriptionContent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,7 @@ const Subscription = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des abonnements...</p>
+          <p className="mt-4 text-gray-600">{t.loadingSubscriptions}</p>
         </div>
       </div>
     );
@@ -51,13 +53,13 @@ const Subscription = () => {
               className="inline-flex items-center text-white/80 hover:text-white transition-colors duration-200 group"
             >
               <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
-              Retour à l'accueil
+              {t.backToHome}
             </Link>
           </div>
           
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Nos <span className="text-yellow-300">Abonnements</span>
+              {t.ourSubscriptions.split(' ')[0]} <span className="text-yellow-300">{t.ourSubscriptions.split(' ')[1]}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
               Choisissez l'abonnement qui vous convient le mieux pour profiter de milliers de chaînes en haute qualité
@@ -66,15 +68,15 @@ const Subscription = () => {
             <div className="flex items-center justify-center mt-8 space-x-8">
               <div className="flex items-center">
                 <Star className="text-yellow-300 mr-2" size={24} />
-                <span className="text-lg">Qualité 4K Ultra HD</span>
+                <span className="text-lg">{t.ultraHd4k}</span>
               </div>
               <div className="flex items-center">
                 <Check className="text-green-300 mr-2" size={24} />
-                <span className="text-lg">Support 24/7</span>
+                <span className="text-lg">{t.support247}</span>
               </div>
               <div className="flex items-center">
                 <Zap className="text-blue-300 mr-2" size={24} />
-                <span className="text-lg">Activation Instantanée</span>
+                <span className="text-lg">{t.instantActivation}</span>
               </div>
             </div>
           </div>
@@ -100,14 +102,14 @@ const Subscription = () => {
         ) : (
           <div className="text-center py-16">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Aucun abonnement disponible
+              {t.noSubscriptionsAvailable}
             </h2>
             <p className="text-gray-600 mb-8">
-              Les abonnements seront bientôt disponibles.
+              {t.noSubscriptionsMessage}
             </p>
             <Button asChild>
               <Link to="/">
-                Retour à l'accueil
+                {t.backToHome}
               </Link>
             </Button>
           </div>
@@ -119,10 +121,10 @@ const Subscription = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Pourquoi choisir nos services IPTV ?
+              {t.whyChooseTitle}
             </h2>
             <p className="text-xl text-gray-600">
-              Des fonctionnalités premium pour une expérience de streaming exceptionnelle
+              {t.whyChooseSubtitle}
             </p>
           </div>
           
@@ -131,9 +133,9 @@ const Subscription = () => {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="text-red-600" size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Qualité Premium</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.premiumQuality}</h3>
               <p className="text-gray-600">
-                Profitez de vos contenus en 4K Ultra HD avec une qualité d'image exceptionnelle
+                {t.premiumQualityDesc}
               </p>
             </div>
             
@@ -141,9 +143,9 @@ const Subscription = () => {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="text-green-600" size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Fiabilité Garantie</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.guaranteedReliability}</h3>
               <p className="text-gray-600">
-                Service stable avec 99.9% de temps de fonctionnement et support technique 24/7
+                {t.guaranteedReliabilityDesc}
               </p>
             </div>
             
@@ -151,9 +153,9 @@ const Subscription = () => {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="text-blue-600" size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Activation Rapide</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.fastActivation}</h3>
               <p className="text-gray-600">
-                Votre abonnement est activé instantanément après confirmation du paiement
+                {t.fastActivationDesc}
               </p>
             </div>
           </div>

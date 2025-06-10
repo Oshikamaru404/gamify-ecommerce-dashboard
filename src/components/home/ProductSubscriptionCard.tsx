@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, CheckCircle2, Plus, Rocket, Zap, Tv, Play, Film } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type ProductSubscriptionCardProps = {
   name: string;
@@ -19,8 +21,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   bgColor = 'bg-white',
   accentColor = 'text-red-600'
 }) => {
+  const { t } = useLanguage();
+
   const handleTryNow = () => {
-    const message = `Bonjour, je suis intéressé par l'abonnement ${name} à ${price.toFixed(2)}€/mois. Pouvez-vous me donner plus d'informations?`;
+    const message = `${t.contact}, je suis intéressé par l'abonnement ${name} à ${price.toFixed(2)}${t.currency}${t.perMonth}. Pouvez-vous me donner plus d'informations?`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -83,11 +87,11 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             </h3>
             
             <div className="flex items-baseline justify-center">
-              <span className="text-lg text-gray-600 mr-1">€</span>
+              <span className="text-lg text-gray-600 mr-1">{t.currency}</span>
               <span className={cn("text-3xl font-bold transition-all duration-300 group-hover:scale-110", accentColor)}>
                 {price.toFixed(2)}
               </span>
-              <span className="text-sm text-gray-500 ml-1">/ mois</span>
+              <span className="text-sm text-gray-500 ml-1">{t.perMonth}</span>
             </div>
           </div>
 
@@ -116,14 +120,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 text-xs shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-3 rounded-xl"
               onClick={handleTryNow}
             >
-              ACHETEZ MAINTENANT
+              {t.buyNow}
             </Button>
             
             <button
               className="w-full text-red-600 hover:text-red-700 text-xs font-medium transition-colors duration-300"
               onClick={handleTryNow}
             >
-              Voir plus de détails
+              {t.viewMore}
             </button>
             
             {/* Space under button as requested */}
