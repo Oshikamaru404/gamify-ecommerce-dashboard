@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Zap } from 'lucide-react';
+import { Menu, X, Zap, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 const StoreHeader: React.FC = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isPanelDropdownOpen, setIsPanelDropdownOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -41,9 +42,45 @@ const StoreHeader: React.FC = () => {
           <Link to="/activation" className="text-lg font-semibold transition-colors hover:text-red-600">
             Activation Player
           </Link>
-          <Link to="/reseller" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Panel Reseller
-          </Link>
+          
+          {/* Panel Reseller Dropdown */}
+          <div 
+            className="relative"
+            onMouseEnter={() => setIsPanelDropdownOpen(true)}
+            onMouseLeave={() => setIsPanelDropdownOpen(false)}
+          >
+            <button className="flex items-center gap-1 text-lg font-semibold transition-colors hover:text-red-600">
+              Panel Reseller
+              <ChevronDown size={16} className={cn("transition-transform", isPanelDropdownOpen && "rotate-180")} />
+            </button>
+            
+            {isPanelDropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50">
+                <Link 
+                  to="/activation" 
+                  className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  onClick={() => setIsPanelDropdownOpen(false)}
+                >
+                  Activation Player
+                </Link>
+                <Link 
+                  to="/iptv-panel" 
+                  className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  onClick={() => setIsPanelDropdownOpen(false)}
+                >
+                  Panel IPTV
+                </Link>
+                <Link 
+                  to="/player-panel" 
+                  className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                  onClick={() => setIsPanelDropdownOpen(false)}
+                >
+                  Panel Player
+                </Link>
+              </div>
+            )}
+          </div>
+
           <Button 
             onClick={handleFreeTrial}
             className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-6 py-2 text-lg"
@@ -93,13 +130,35 @@ const StoreHeader: React.FC = () => {
           >
             Activation Player
           </Link>
-          <Link
-            to="/reseller"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Panel Reseller
-          </Link>
+          
+          {/* Mobile Panel Reseller Section */}
+          <div className="py-3">
+            <div className="text-lg font-semibold text-gray-800 mb-2">Panel Reseller</div>
+            <div className="ml-4 space-y-2">
+              <Link
+                to="/activation"
+                className="block py-2 text-base text-gray-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Activation Player
+              </Link>
+              <Link
+                to="/iptv-panel"
+                className="block py-2 text-base text-gray-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Panel IPTV
+              </Link>
+              <Link
+                to="/player-panel"
+                className="block py-2 text-base text-gray-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Panel Player
+              </Link>
+            </div>
+          </div>
+
           <Button 
             onClick={() => {
               handleFreeTrial();

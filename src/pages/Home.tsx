@@ -1,7 +1,8 @@
-
 import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
+import { Button } from '@/components/ui/button';
+import { Zap } from 'lucide-react';
 
 const Home = () => {
   const subscriptionProducts = [
@@ -62,6 +63,12 @@ const Home = () => {
     }
   ];
 
+  const handleFreeTrial = () => {
+    const message = "Bonjour, je souhaite bénéficier de l'essai gratuit BWIVOX IPTV. Pouvez-vous m'aider?";
+    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <StoreLayout>
       <div className="bg-gray-50 min-h-screen">
@@ -75,6 +82,14 @@ const Home = () => {
               Découvrez nos services IPTV premium avec des milliers de chaînes en direct, 
               films et séries en qualité 8K Ultra HD
             </p>
+            <Button 
+              onClick={handleFreeTrial}
+              size="lg"
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-8 py-4 text-xl"
+            >
+              <Zap className="mr-2" size={24} />
+              Essai Gratuit
+            </Button>
           </div>
         </section>
 
