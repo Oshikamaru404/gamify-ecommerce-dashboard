@@ -1,4 +1,3 @@
-
 import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
@@ -128,31 +127,13 @@ const Subscription = () => {
           </section>
 
           <section className="mb-20">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {subscriptionProducts.slice(0, 3).map((product, index) => (
+            <div className="max-w-7xl mx-auto">
+              <div className="grid gap-6 justify-items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                {subscriptionProducts.map((product, index) => (
                   <div 
                     key={index}
-                    className="animate-fade-in flex justify-center"
+                    className="animate-fade-in w-full max-w-[280px]"
                     style={{ animationDelay: `${index * 150}ms` }}
-                  >
-                    <div className="w-full max-w-sm">
-                      <ProductSubscriptionCard 
-                        {...product}
-                        bgColor="bg-white"
-                        accentColor="text-red-600"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid gap-8 md:grid-cols-2 justify-items-center mt-8 max-w-3xl mx-auto">
-                {subscriptionProducts.slice(3, 5).map((product, index) => (
-                  <div 
-                    key={index + 3}
-                    className="animate-fade-in w-full max-w-sm"
-                    style={{ animationDelay: `${(index + 3) * 150}ms` }}
                   >
                     <ProductSubscriptionCard 
                       {...product}

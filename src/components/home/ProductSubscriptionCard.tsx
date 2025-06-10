@@ -27,65 +27,65 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   };
 
   return (
-    <div className="group perspective h-full">
+    <div className="group perspective h-full w-full">
       <Card className={cn(
-        "relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 border-2 border-gray-100 hover:border-red-200 h-full flex flex-col", 
+        "relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 border-2 border-gray-100 hover:border-red-200 h-full flex flex-col aspect-square", 
         bgColor
       )}>
         {/* Golden Ratio Division: ~38% for icon section, ~62% for content */}
         
         {/* First Part - Large Icon Section (38% of height) */}
-        <div className="relative flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center rounded-b-[2rem]" style={{ height: '38%', minHeight: '140px' }}>
+        <div className="relative flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center rounded-b-[2rem]" style={{ height: '38%', minHeight: '120px' }}>
           {/* Decorative elements */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)] rounded-b-[2rem]"></div>
           
           {/* Large Icon */}
           <div className="relative z-10 flex items-center justify-center">
-            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-xl border border-white/30 group-hover:scale-110 transition-transform duration-300">
-              <div className="text-white text-3xl font-bold">
+            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-xl border border-white/30 group-hover:scale-110 transition-transform duration-300">
+              <div className="text-white text-2xl font-bold">
                 {name.charAt(0)}
               </div>
             </div>
           </div>
 
           {/* Animated background elements */}
-          <div className="absolute top-4 left-4 w-3 h-3 bg-white/20 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-4 right-4 w-2 h-2 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-8 right-8 w-1 h-1 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-3 left-3 w-2 h-2 bg-white/20 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-3 right-3 w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-6 right-6 w-1 h-1 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         {/* Spacing between sections */}
-        <div className="h-4"></div>
+        <div className="h-3"></div>
 
         {/* Second Part - Content Section (62% of height) */}
-        <div className="flex-1 flex flex-col mx-4 bg-gray-50/30 rounded-t-[2rem] rounded-b-xl" style={{ minHeight: '58%' }}>
+        <div className="flex-1 flex flex-col mx-3 bg-gray-50/30 rounded-t-[1.5rem] rounded-b-xl" style={{ minHeight: '58%' }}>
           {/* Service Name and Pricing */}
-          <div className="px-6 py-6 text-center">
-            <h3 className="mb-3 text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors duration-300">
+          <div className="px-4 py-4 text-center">
+            <h3 className="mb-2 text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors duration-300 leading-tight">
               {name}
             </h3>
             
             <div className="flex items-baseline justify-center">
-              <span className="text-lg text-gray-600 mr-1">€</span>
-              <span className={cn("text-3xl font-bold transition-all duration-300 group-hover:scale-110", accentColor)}>
+              <span className="text-sm text-gray-600 mr-1">€</span>
+              <span className={cn("text-2xl font-bold transition-all duration-300 group-hover:scale-110", accentColor)}>
                 {price.toFixed(2)}
               </span>
-              <span className="text-sm text-gray-500 ml-1">/ mois</span>
+              <span className="text-xs text-gray-500 ml-1">/ mois</span>
             </div>
           </div>
 
           {/* Features Section */}
-          <div className="flex-1 px-6 py-2">
-            <ul className="space-y-2">
-              {features.slice(0, 5).map((feature, index) => (
+          <div className="flex-1 px-4 py-1">
+            <ul className="space-y-1.5">
+              {features.slice(0, 4).map((feature, index) => (
                 <li 
                   key={index} 
                   className="flex items-start gap-2 text-gray-700 opacity-0 animate-fade-in transition-all duration-300"
                   style={{ animationDelay: `${index * 100}ms`, opacity: 1 }}
                 >
                   <CheckCircle2 
-                    size={14} 
-                    className={cn("mt-1 flex-shrink-0 transition-colors duration-300", accentColor)} 
+                    size={12} 
+                    className={cn("mt-0.5 flex-shrink-0 transition-colors duration-300", accentColor)} 
                   />
                   <span className="text-xs leading-relaxed">{feature}</span>
                 </li>
@@ -94,9 +94,9 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           </div>
 
           {/* Bottom Action Section - Respecting golden ratio */}
-          <div className="px-6 pb-6 pt-2" style={{ height: '38%', minHeight: '80px' }}>
+          <div className="px-4 pb-4 pt-2" style={{ height: '38%', minHeight: '70px' }}>
             <Button 
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-3 rounded-xl"
+              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-2.5 text-xs shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-2 rounded-xl"
               onClick={handleTryNow}
             >
               ACHETEZ MAINTENANT
@@ -110,7 +110,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             </button>
             
             {/* Space under button as requested */}
-            <div className="h-2"></div>
+            <div className="h-1"></div>
           </div>
         </div>
 
