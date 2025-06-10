@@ -12,6 +12,9 @@ import Activation from "./pages/Activation";
 import Reseller from "./pages/Reseller";
 import IPTVPanel from "./pages/IPTVPanel";
 import PlayerPanel from "./pages/PlayerPanel";
+import Support from "./pages/Support";
+import HowToBuy from "./pages/HowToBuy";
+import Blog from "./pages/Blog";
 
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +34,9 @@ const App = () => (
           <Route path="/reseller" element={<Reseller />} />
           <Route path="/iptv-panel" element={<IPTVPanel />} />
           <Route path="/player-panel" element={<PlayerPanel />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/how-to-buy" element={<HowToBuy />} />
+          <Route path="/blog" element={<Blog />} />
           
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />

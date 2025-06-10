@@ -2,106 +2,134 @@
 import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
-import PlatformSection from '@/components/home/PlatformSection';
-import WhyChooseUs from '@/components/home/WhyChooseUs';
-import Testimonials from '@/components/home/Testimonials';
 
 const Home = () => {
   const subscriptionProducts = [
     {
-      name: "BWIVOX Basic",
-      price: 9.99,
+      name: "STRONG 8K IPTV",
+      price: 12.99,
       features: [
-        "3000+ chaînes en direct",
-        "Films et séries en VOD",
-        "Qualité SD/HD",
-        "Compatible avec 1 appareil",
-        "Support par email"
-      ],
-      bgColor: "bg-white",
-      accentColor: "text-red-500"
+        "8K Ultra HD Quality",
+        "5000+ Live Channels",
+        "Movies & Series VOD",
+        "Anti-Freeze Technology",
+        "24/7 Support"
+      ]
     },
     {
-      name: "BWIVOX Standard",
-      price: 19.99,
+      name: "ULTRA 8K IPTV",
+      price: 15.99,
       features: [
-        "5000+ chaînes en direct",
-        "Catalogue VOD étendu",
-        "Qualité HD",
-        "Compatible avec 2 appareils",
-        "Support 24/7 par chat"
-      ],
-      bgColor: "bg-white",
-      accentColor: "text-red-500"
+        "8K Premium Quality",
+        "7000+ Live Channels",
+        "Premium VOD Library",
+        "Multi-Device Support",
+        "VIP Support"
+      ]
     },
     {
-      name: "BWIVOX Premium",
-      price: 29.99,
+      name: "TREX IPTV",
+      price: 10.99,
       features: [
-        "7000+ chaînes en direct",
-        "VOD Premium",
-        "Qualité Full HD",
-        "Compatible avec 3 appareils",
-        "Support prioritaire"
-      ],
-      bgColor: "bg-white",
-      accentColor: "text-red-500"
+        "HD/4K Streaming",
+        "4000+ Channels",
+        "Sports Packages",
+        "Movie Collection",
+        "Fast Servers"
+      ]
     },
     {
-      name: "BWIVOX Elite",
-      price: 39.99,
+      name: "PROMAX OTT IPTV",
+      price: 18.99,
       features: [
-        "8000+ chaînes en direct",
-        "VOD Premium + Sports",
-        "Qualité 4K",
-        "Compatible avec 4 appareils",
-        "Support VIP"
-      ],
-      bgColor: "bg-white",
-      accentColor: "text-red-500"
+        "OTT Technology",
+        "8000+ Channels",
+        "4K/8K Quality",
+        "Global Content",
+        "Premium Support"
+      ]
     },
     {
-      name: "BWIVOX Ultimate",
-      price: 49.99,
+      name: "TIVIONE IPTV",
+      price: 13.99,
       features: [
-        "10000+ chaînes en direct",
-        "Catalogue complet + Exclusivités",
-        "Qualité 4K Ultra HD",
-        "Compatible avec 5 appareils",
-        "Support & Installation VIP"
-      ],
-      bgColor: "bg-white",
-      accentColor: "text-red-500"
+        "Full HD Streaming",
+        "6000+ Channels",
+        "VOD Library",
+        "Stable Connection",
+        "Multi-Platform"
+      ]
+    },
+    {
+      name: "B1G IPTV",
+      price: 16.99,
+      features: [
+        "Big Entertainment",
+        "9000+ Channels",
+        "4K Resolution",
+        "Sports & Movies",
+        "24/7 Service"
+      ]
+    },
+    {
+      name: "MAX OTT IPTV",
+      price: 20.99,
+      features: [
+        "Maximum Quality",
+        "10000+ Channels",
+        "8K Streaming",
+        "Complete Package",
+        "Elite Support"
+      ]
     }
   ];
 
   return (
     <StoreLayout>
-      <div className="bg-white">
-        <div className="container py-16">
-          <section className="mb-20 text-center">
-            <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-gray-900 md:text-6xl">
-              BWIVOX <span className="text-red-500">IPTV</span>
+      <div className="bg-gray-50 min-h-screen">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-red-600 to-red-800 text-white py-20">
+          <div className="container text-center">
+            <h1 className="text-6xl font-extrabold mb-6">
+              BWIVOX <span className="text-red-200">IPTV</span>
             </h1>
-            <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-600">
-              Le service de streaming IPTV premium avec plus de 10 000 chaînes en direct,
-              films et séries du monde entier en qualité HD et 4K.
+            <p className="text-2xl mb-8 max-w-4xl mx-auto">
+              Découvrez nos services IPTV premium avec des milliers de chaînes en direct, 
+              films et séries en qualité 8K Ultra HD
             </p>
-            <PlatformSection />
-          </section>
+          </div>
+        </section>
 
-          <section className="mb-20">
-            <h2 className="text-4xl font-bold text-center mb-16">Nos Forfaits <span className="text-red-500">Premium</span></h2>
-            <div className="grid gap-8 md:grid-cols-3 lg:grid-cols-5">
+        {/* Subscription Products */}
+        <section className="py-20">
+          <div className="container">
+            <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
+              Nos Abonnements <span className="text-red-600">IPTV</span>
+            </h2>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {subscriptionProducts.map((product, index) => (
-                <ProductSubscriptionCard key={index} {...product} />
+                <ProductSubscriptionCard 
+                  key={index} 
+                  {...product}
+                  bgColor="bg-white"
+                  accentColor="text-red-600"
+                />
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <WhyChooseUs />
-          <Testimonials />
-        </div>
+        {/* Call to Action */}
+        <section className="bg-red-600 text-white py-16">
+          <div className="container text-center">
+            <h3 className="text-4xl font-bold mb-6">
+              Prêt à commencer votre expérience IPTV ?
+            </h3>
+            <p className="text-xl mb-8">
+              Contactez-nous maintenant pour obtenir votre abonnement
+            </p>
+          </div>
+        </section>
       </div>
     </StoreLayout>
   );
