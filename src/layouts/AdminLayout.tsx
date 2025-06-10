@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Settings, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Settings, Menu, X, LogOut, Edit3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -27,6 +27,11 @@ const AdminLayout = () => {
       icon: <Package size={20} />,
       label: 'Products',
       path: '/admin/products',
+    },
+    {
+      icon: <Edit3 size={20} />,
+      label: 'Content Editor',
+      path: '/admin/content',
     },
     {
       icon: <Settings size={20} />,

@@ -16,6 +16,15 @@ import Support from "./pages/Support";
 import HowToBuy from "./pages/HowToBuy";
 import Blog from "./pages/Blog";
 
+// Admin Routes
+import AdminLayout from "./layouts/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import Orders from "./pages/admin/Orders";
+import ManageProducts from "./pages/admin/ManageProducts";
+import EditProduct from "./pages/admin/EditProduct";
+import Settings from "./pages/admin/Settings";
+import ContentEditor from "./components/admin/ContentEditor";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +46,17 @@ const App = () => (
           <Route path="/support" element={<Support />} />
           <Route path="/how-to-buy" element={<HowToBuy />} />
           <Route path="/blog" element={<Blog />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="products" element={<ManageProducts />} />
+            <Route path="products/new" element={<EditProduct />} />
+            <Route path="products/edit/:id" element={<EditProduct />} />
+            <Route path="content" element={<ContentEditor />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
           
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
