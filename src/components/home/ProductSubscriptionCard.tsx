@@ -32,81 +32,80 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         "relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 border-2 border-gray-100 hover:border-red-200 h-full flex flex-col", 
         bgColor
       )}>
-        {/* Top Section with Logo and Pricing */}
-        <div className="relative p-8 pb-4">
-          {/* Decorative gradient overlay */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-red-600 to-red-500"></div>
+        {/* Golden Ratio Division: ~38% for icon section, ~62% for content */}
+        
+        {/* First Part - Large Icon Section (38% of height) */}
+        <div className="relative flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center" style={{ height: '38%', minHeight: '140px' }}>
+          {/* Decorative elements */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)]"></div>
           
-          {/* Logo/Icon Area */}
-          <div className="flex justify-center mb-6">
-            <div className="relative w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <div className="text-white text-2xl font-bold">
+          {/* Large Icon */}
+          <div className="relative z-10 flex items-center justify-center">
+            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-xl border border-white/30 group-hover:scale-110 transition-transform duration-300">
+              <div className="text-white text-3xl font-bold">
                 {name.charAt(0)}
               </div>
-              {/* Plus icon overlay */}
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
-                <Plus size={16} className="text-red-600" />
-              </div>
             </div>
           </div>
 
-          {/* Service Name */}
-          <h3 className="text-center mb-4 text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors duration-300">
-            {name}
-          </h3>
+          {/* Animated background elements */}
+          <div className="absolute top-4 left-4 w-3 h-3 bg-white/20 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-4 right-4 w-2 h-2 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-8 right-8 w-1 h-1 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </div>
 
-          {/* Pricing */}
-          <div className="text-center mb-4">
+        {/* Second Part - Content Section (62% of height) */}
+        <div className="flex-1 flex flex-col" style={{ minHeight: '62%' }}>
+          {/* Service Name and Pricing */}
+          <div className="px-6 py-6 text-center border-b border-gray-100">
+            <h3 className="mb-3 text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors duration-300">
+              {name}
+            </h3>
+            
             <div className="flex items-baseline justify-center">
               <span className="text-lg text-gray-600 mr-1">€</span>
-              <span className={cn("text-4xl font-bold transition-all duration-300 group-hover:scale-110", accentColor)}>
+              <span className={cn("text-3xl font-bold transition-all duration-300 group-hover:scale-110", accentColor)}>
                 {price.toFixed(2)}
               </span>
+              <span className="text-sm text-gray-500 ml-1">/ mois</span>
             </div>
-            <div className="text-sm text-gray-500 mt-1">/ mois</div>
           </div>
-        </div>
 
-        {/* Features Section */}
-        <div className="flex-grow px-8 pb-6">
-          <ul className="space-y-3">
-            {features.map((feature, index) => (
-              <li 
-                key={index} 
-                className="flex items-start gap-3 text-gray-700 opacity-0 animate-fade-in transition-all duration-300"
-                style={{ animationDelay: `${index * 100}ms`, opacity: 1 }}
-              >
-                <CheckCircle2 
-                  size={16} 
-                  className={cn("mt-1 flex-shrink-0 transition-colors duration-300", accentColor)} 
-                />
-                <span className="text-sm leading-relaxed">{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {/* Features Section */}
+          <div className="flex-1 px-6 py-4">
+            <ul className="space-y-2">
+              {features.slice(0, 5).map((feature, index) => (
+                <li 
+                  key={index} 
+                  className="flex items-start gap-2 text-gray-700 opacity-0 animate-fade-in transition-all duration-300"
+                  style={{ animationDelay: `${index * 100}ms`, opacity: 1 }}
+                >
+                  <CheckCircle2 
+                    size={14} 
+                    className={cn("mt-1 flex-shrink-0 transition-colors duration-300", accentColor)} 
+                  />
+                  <span className="text-xs leading-relaxed">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Bottom Action Section */}
-        <div className="px-8 pb-8 pt-4 border-t border-gray-100 bg-gray-50/50">
-          <Button 
-            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-3"
-            onClick={handleTryNow}
-          >
-            ACHETEZ MAINTENANT
-          </Button>
-          
-          <button
-            className="w-full text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-300"
-            onClick={handleTryNow}
-          >
-            Voir plus de détails
-          </button>
-        </div>
-
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none overflow-hidden">
-          <div className="absolute top-4 left-4 w-8 h-8 bg-red-500 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-4 right-4 w-6 h-6 bg-red-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+          {/* Bottom Action Section */}
+          <div className="px-6 pb-6 pt-4 border-t border-gray-100 bg-gray-50/50">
+            <Button 
+              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-2"
+              onClick={handleTryNow}
+            >
+              ACHETEZ MAINTENANT
+            </Button>
+            
+            <button
+              className="w-full text-red-600 hover:text-red-700 text-xs font-medium transition-colors duration-300"
+              onClick={handleTryNow}
+            >
+              Voir plus de détails
+            </button>
+          </div>
         </div>
 
         {/* Shine effect on hover */}
