@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Tv } from 'lucide-react';
+import { Menu, X, Tv, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -9,7 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 const StoreHeaderWithLanguage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t, isLoading } = useLanguage();
 
   const navigation = [
     { name: t.home, href: '/' },
@@ -41,7 +41,14 @@ const StoreHeaderWithLanguage: React.FC = () => {
         </div>
         
         <div className="flex lg:hidden">
-          <LanguageSelector />
+          {isLoading ? (
+            <div className="flex items-center gap-2 mr-2">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+              <span className="text-sm text-gray-500">...</span>
+            </div>
+          ) : (
+            <LanguageSelector />
+          )}
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 ml-2"
@@ -67,7 +74,14 @@ const StoreHeaderWithLanguage: React.FC = () => {
         </div>
         
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-          <LanguageSelector />
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+              <span className="text-sm text-gray-500">Détection...</span>
+            </div>
+          ) : (
+            <LanguageSelector />
+          )}
         </div>
       </nav>
       

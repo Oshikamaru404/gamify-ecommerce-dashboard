@@ -1,12 +1,14 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Language, getTranslation, Translations } from '@/lib/translations';
+import { autoDetectLanguage } from '@/lib/geolocation';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (language: Language) => void;
   t: Translations;
   isRTL: boolean;
+  isLoading: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -18,24 +20,44 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    // Récupérer la langue depuis le localStorage ou utiliser français par défaut
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored && ['fr', 'en', 'es', 'ar', 'de'].includes(stored)) {
-      return stored as Language;
-    }
-    
-    // Détecter la langue du navigateur
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith('en')) return 'en';
-    if (browserLang.startsWith('es')) return 'es';
-    if (browserLang.startsWith('ar')) return 'ar';
-    if (browserLang.startsWith('de')) return 'de';
-    
-    return 'fr'; // Français par défaut
-  });
+  const [language, setLanguageState] = useState<Language>('fr');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialiser la langue au chargement
+  useEffect(() => {
+    const initializeLanguage = async () => {
+      console.log('🔄 Initialisation de la langue...');
+      
+      // Vérifier si l'utilisateur a déjà une préférence sauvegardée
+      const storedLanguage = localStorage.getItem(STORAGE_KEY);
+      if (storedLanguage && ['fr', 'en', 'es', 'ar', 'de'].includes(storedLanguage)) {
+        console.log(`💾 Langue sauvegardée trouvée: ${storedLanguage}`);
+        setLanguageState(storedLanguage as Language);
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        // Détecter automatiquement la langue
+        const detectedLanguage = await autoDetectLanguage();
+        console.log(`🎯 Langue détectée automatiquement: ${detectedLanguage}`);
+        setLanguageState(detectedLanguage as Language);
+        
+        // Sauvegarder la langue détectée pour les prochaines visites
+        localStorage.setItem(STORAGE_KEY, detectedLanguage);
+      } catch (error) {
+        console.error('❌ Erreur lors de la détection de langue:', error);
+        setLanguageState('fr'); // Fallback vers français
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeLanguage();
+  }, []);
 
   const setLanguage = (newLanguage: Language) => {
+    console.log(`🔄 Changement de langue: ${language} → ${newLanguage}`);
     setLanguageState(newLanguage);
     localStorage.setItem(STORAGE_KEY, newLanguage);
   };
@@ -47,10 +69,11 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
+    console.log(`📝 Mise à jour DOM: langue=${language}, direction=${isRTL ? 'rtl' : 'ltr'}`);
   }, [language, isRTL]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL, isLoading }}>
       {children}
     </LanguageContext.Provider>
   );
