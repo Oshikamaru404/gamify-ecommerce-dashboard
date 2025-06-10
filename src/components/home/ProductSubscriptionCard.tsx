@@ -96,7 +96,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           {/* Bottom Action Section - Respecting golden ratio */}
           <div className="px-6 pb-6 pt-2" style={{ height: '38%', minHeight: '80px' }}>
             <Button 
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-3 rounded-xl"
+              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 text-xs shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-3 rounded-xl"
               onClick={handleTryNow}
             >
               ACHETEZ MAINTENANT
