@@ -4,93 +4,83 @@ import { Link } from 'react-router-dom';
 
 const StoreFooter: React.FC = () => {
   return (
-    <footer className="mt-auto border-t bg-soft-gray">
+    <footer className="mt-auto border-t bg-gray-50">
       <div className="container py-8 md:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
-            <h3 className="mb-4 text-lg font-semibold">GamsGo</h3>
-            <p className="text-sm text-muted-foreground">
-              The best place to buy digital game codes and accounts for all platforms.
+            <h3 className="mb-4 text-lg font-semibold text-red-600">BWIVOX IPTV</h3>
+            <p className="text-sm text-gray-600">
+              Services IPTV premium avec des milliers de chaînes en direct, 
+              films et séries en qualité 8K Ultra HD.
             </p>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Shop</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Services</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/products" className="text-muted-foreground hover:text-foreground">
-                  All Games
+                <Link to="/subscription" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Subscription IPTV
                 </Link>
               </li>
               <li>
-                <Link to="/products?platform=pc" className="text-muted-foreground hover:text-foreground">
-                  PC Games
+                <Link to="/activation" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Activation Player
                 </Link>
               </li>
               <li>
-                <Link to="/products?platform=playstation" className="text-muted-foreground hover:text-foreground">
-                  PlayStation
+                <Link to="/reseller" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Panel Reseller
                 </Link>
               </li>
               <li>
-                <Link to="/products?platform=xbox" className="text-muted-foreground hover:text-foreground">
-                  Xbox
+                <Link to="/iptv-panel" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Panel IPTV
                 </Link>
               </li>
               <li>
-                <Link to="/products?platform=nintendo" className="text-muted-foreground hover:text-foreground">
-                  Nintendo
+                <Link to="/player-panel" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Panel Player
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Support</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Support</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Contact Us
-                </a>
+                <Link to="/support" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Support
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  FAQs
-                </a>
+                <Link to="/how-to-buy" className="text-gray-600 hover:text-red-600 transition-colors">
+                  How to Buy
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Shipping
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Returns
-                </a>
+                <Link to="/blog" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Blog
+                </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Legal</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Contact</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Terms of Service
-                </a>
+                <span className="text-gray-600">Support 24/7</span>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Privacy Policy
-                </a>
+                <span className="text-gray-600">Activé instantanément</span>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Cookie Policy
-                </a>
+                <span className="text-gray-600">Sans engagement</span>
               </li>
             </ul>
           </div>
         </div>
-        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} GamsGo. All rights reserved.</p>
+        <div className="mt-8 border-t pt-8 text-center text-sm text-gray-600">
+          <p>&copy; {new Date().getFullYear()} BWIVOX IPTV. Tous droits réservés.</p>
         </div>
       </div>
     </footer>

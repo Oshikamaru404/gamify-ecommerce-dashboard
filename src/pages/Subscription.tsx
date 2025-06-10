@@ -131,20 +131,59 @@ const Subscription = () => {
           </section>
 
           <section className="mb-20">
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {subscriptionProducts.map((product, index) => (
-                <div 
-                  key={index}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 150}ms` }}
-                >
-                  <ProductSubscriptionCard 
-                    {...product}
-                    bgColor="bg-white"
-                    accentColor="text-red-600"
-                  />
-                </div>
-              ))}
+            <div className="max-w-7xl mx-auto">
+              {/* First row - 3 cards */}
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                {subscriptionProducts.slice(0, 3).map((product, index) => (
+                  <div 
+                    key={index}
+                    className="animate-fade-in flex justify-center"
+                    style={{ animationDelay: `${index * 150}ms` }}
+                  >
+                    <div className="w-full max-w-sm">
+                      <ProductSubscriptionCard 
+                        {...product}
+                        bgColor="bg-white"
+                        accentColor="text-red-600"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Second row - 2 cards centered */}
+              <div className="grid gap-8 md:grid-cols-2 justify-items-center mb-8 max-w-3xl mx-auto">
+                {subscriptionProducts.slice(3, 5).map((product, index) => (
+                  <div 
+                    key={index + 3}
+                    className="animate-fade-in w-full max-w-sm"
+                    style={{ animationDelay: `${(index + 3) * 150}ms` }}
+                  >
+                    <ProductSubscriptionCard 
+                      {...product}
+                      bgColor="bg-white"
+                      accentColor="text-red-600"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Third row - 2 cards centered */}
+              <div className="grid gap-8 md:grid-cols-2 justify-items-center max-w-3xl mx-auto">
+                {subscriptionProducts.slice(5, 7).map((product, index) => (
+                  <div 
+                    key={index + 5}
+                    className="animate-fade-in w-full max-w-sm"
+                    style={{ animationDelay: `${(index + 5) * 150}ms` }}
+                  >
+                    <ProductSubscriptionCard 
+                      {...product}
+                      bgColor="bg-white"
+                      accentColor="text-red-600"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
