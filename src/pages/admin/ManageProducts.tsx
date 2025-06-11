@@ -37,9 +37,12 @@ const ManageProducts = () => {
     return matchesSearch && matchesCategory;
   }) || [];
   
-  const handleDeleteClick = (pkg: IPTVPackage) => {
-    setPackageToDelete(pkg);
-    setDeleteDialogOpen(true);
+  const handleDeleteClick = (id: string) => {
+    const packageToDelete = packages?.find(pkg => pkg.id === id);
+    if (packageToDelete) {
+      setPackageToDelete(packageToDelete);
+      setDeleteDialogOpen(true);
+    }
   };
   
   const confirmDelete = () => {
