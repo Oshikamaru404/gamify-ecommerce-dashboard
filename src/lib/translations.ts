@@ -43,6 +43,12 @@ export interface Translations {
   ctaTitle: string;
   ctaSubtitle: string;
   
+  // Product Cards
+  currency: string;
+  perMonth: string;
+  buyNow: string;
+  viewMore: string;
+  
   // Common
   backToHome: string;
 }
@@ -90,6 +96,12 @@ const translations: Record<Language, Translations> = {
     ctaTitle: 'Prêt à commencer ?',
     ctaSubtitle: 'Rejoignez des milliers de clients satisfaits dès aujourd\'hui.',
     
+    // Product Cards
+    currency: '€',
+    perMonth: '/mois',
+    buyNow: 'Acheter maintenant',
+    viewMore: 'Voir plus de détails',
+    
     // Common
     backToHome: 'Retour à l\'accueil',
   },
@@ -134,6 +146,12 @@ const translations: Record<Language, Translations> = {
     // CTA
     ctaTitle: 'Ready to get started?',
     ctaSubtitle: 'Join thousands of satisfied customers today.',
+    
+    // Product Cards
+    currency: '€',
+    perMonth: '/month',
+    buyNow: 'Buy Now',
+    viewMore: 'View More Details',
     
     // Common
     backToHome: 'Back to home',
@@ -180,6 +198,12 @@ const translations: Record<Language, Translations> = {
     ctaTitle: '¿Listo para empezar?',
     ctaSubtitle: 'Únete a miles de clientes satisfechos hoy.',
     
+    // Product Cards
+    currency: '€',
+    perMonth: '/mes',
+    buyNow: 'Comprar Ahora',
+    viewMore: 'Ver Más Detalles',
+    
     // Common
     backToHome: 'Volver al inicio',
   },
@@ -224,6 +248,12 @@ const translations: Record<Language, Translations> = {
     // CTA
     ctaTitle: 'مستعد للبدء؟',
     ctaSubtitle: 'انضم إلى آلاف العملاء الراضين اليوم.',
+    
+    // Product Cards
+    currency: '€',
+    perMonth: '/شهر',
+    buyNow: 'اشتر الآن',
+    viewMore: 'عرض المزيد من التفاصيل',
     
     // Common
     backToHome: 'العودة إلى الرئيسية',
@@ -270,6 +300,12 @@ const translations: Record<Language, Translations> = {
     ctaTitle: 'Bereit anzufangen?',
     ctaSubtitle: 'Werden Sie noch heute einer von Tausenden zufriedener Kunden.',
     
+    // Product Cards
+    currency: '€',
+    perMonth: '/Monat',
+    buyNow: 'Jetzt Kaufen',
+    viewMore: 'Mehr Details Anzeigen',
+    
     // Common
     backToHome: 'Zurück zur Startseite',
   },
@@ -277,4 +313,27 @@ const translations: Record<Language, Translations> = {
 
 export const getTranslation = (language: Language): Translations => {
   return translations[language] || translations.fr;
+};
+
+// Helper functions for language display
+export const getLanguageFlag = (language: Language): string => {
+  const flags: Record<Language, string> = {
+    fr: '🇫🇷',
+    en: '🇺🇸',
+    es: '🇪🇸',
+    ar: '🇸🇦',
+    de: '🇩🇪',
+  };
+  return flags[language] || '🇫🇷';
+};
+
+export const getLanguageName = (language: Language): string => {
+  const names: Record<Language, string> = {
+    fr: 'Français',
+    en: 'English',
+    es: 'Español',
+    ar: 'العربية',
+    de: 'Deutsch',
+  };
+  return names[language] || 'Français';
 };
