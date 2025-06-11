@@ -3,8 +3,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Zap, ArrowRight, Check } from 'lucide-react';
+import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
+import { Zap, Star, Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Home = () => {
@@ -106,34 +106,63 @@ const Home = () => {
         <section className="py-20">
           <div className="container">
             <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
-              {t.subscriptionsTitle.split(' ')[0]} {t.subscriptionsTitle.split(' ')[1]} <span className="text-red-600">{t.subscriptionsTitle.split(' ')[2]}</span>
+              {t.subscriptionsTitle}
             </h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {subscriptionProducts.map((product) => (
-                <Card key={product.id} className="p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-white border-2 border-gray-100 hover:border-red-200">
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">{product.name}</h3>
-                    <div className="text-4xl font-bold text-red-600 mb-2">€{product.price}</div>
-                    <div className="text-gray-600">par mois</div>
-                  </div>
-                  
-                  <ul className="space-y-3 mb-8">
-                    {product.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm">
-                        <Check size={16} className="text-red-600 mt-0.5 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700">
-                    <Link to={`/product/${product.id}`} className="flex items-center justify-center gap-2">
-                      Voir les options
-                      <ArrowRight size={16} />
-                    </Link>
-                  </Button>
-                </Card>
+                <ProductSubscriptionCard
+                  key={product.id}
+                  name={product.name}
+                  price={product.price}
+                  features={product.features}
+                />
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="bg-white py-16">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                {t.whyChooseTitle}
+              </h2>
+              <p className="text-xl text-gray-600">
+                {t.whyChooseSubtitle}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star className="text-red-600" size={32} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.premiumQuality}</h3>
+                <p className="text-gray-600">
+                  {t.premiumQualityDesc}
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="text-green-600" size={32} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.guaranteedReliability}</h3>
+                <p className="text-gray-600">
+                  {t.guaranteedReliabilityDesc}
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="text-blue-600" size={32} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.fastActivation}</h3>
+                <p className="text-gray-600">
+                  {t.fastActivationDesc}
+                </p>
+              </div>
             </div>
           </div>
         </section>

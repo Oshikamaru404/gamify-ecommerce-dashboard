@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, CheckCircle2, Plus, Rocket, Zap, Tv, Play, Film } from 'lucide-react';
+import { CheckCircle2, Rocket, Zap, Tv, Play, Film } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 type ProductSubscriptionCardProps = {
@@ -22,6 +23,12 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   accentColor = 'text-red-600'
 }) => {
   const { t } = useLanguage();
+
+  // Generate product ID from name for linking
+  const productId = name.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '')
+    .replace(/^-+|-+$/g, '');
 
   const handleTryNow = () => {
     const message = `${t.contact}, je suis intéressé par l'abonnement ${name} à ${price.toFixed(2)}${t.currency}${t.perMonth}. Pouvez-vous me donner plus d'informations?`;
@@ -123,12 +130,12 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               {t.buyNow}
             </Button>
             
-            <button
-              className="w-full text-red-600 hover:text-red-700 text-xs font-medium transition-colors duration-300"
-              onClick={handleTryNow}
+            <Link 
+              to={`/product/${productId}`}
+              className="block w-full text-red-600 hover:text-red-700 text-xs font-medium transition-colors duration-300 text-center"
             >
               {t.viewMore}
-            </button>
+            </Link>
             
             {/* Space under button as requested */}
             <div className="h-2"></div>
