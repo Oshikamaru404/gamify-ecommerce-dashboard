@@ -33,12 +33,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   console.log('ProductSubscriptionCard - name:', name);
   console.log('ProductSubscriptionCard - generated productId:', productId);
 
-  const handleTryNow = () => {
-    const message = `Hello, I'm interested in ${name} at $${price.toFixed(2)}/month. Can you provide more information?`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   // Function to get appropriate icon based on service name
   const getServiceIcon = () => {
     const serviceName = name.toLowerCase();
@@ -122,12 +116,16 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
           {/* Action Section - Fixed height */}
           <div className="mt-auto">
-            <Button 
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-4 rounded-xl"
-              onClick={handleTryNow}
+            <Link 
+              to={`/product/${productId}`}
+              className="block w-full"
             >
-              Buy Now
-            </Button>
+              <Button 
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-4 rounded-xl"
+              >
+                Buy Now
+              </Button>
+            </Link>
             
             <Link 
               to={`/product/${productId}`}
