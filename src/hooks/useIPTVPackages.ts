@@ -24,6 +24,8 @@ export const useIPTVPackages = () => {
   return useQuery({
     queryKey: ['iptv-packages'],
     queryFn: async () => {
+      console.log('Fetching IPTV packages from database...');
+      
       const { data, error } = await supabase
         .from('iptv_packages')
         .select('*')
@@ -34,6 +36,7 @@ export const useIPTVPackages = () => {
         throw error;
       }
       
+      console.log('Successfully fetched IPTV packages:', data);
       return data as IPTVPackage[];
     },
   });
@@ -44,13 +47,20 @@ export const useCreateIPTVPackage = () => {
   
   return useMutation({
     mutationFn: async (packageData: Omit<IPTVPackage, 'id' | 'created_at' | 'updated_at'>) => {
+      console.log('Creating new IPTV package:', packageData);
+      
       const { data, error } = await supabase
         .from('iptv_packages')
         .insert([packageData])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating package:', error);
+        throw error;
+      }
+      
+      console.log('Successfully created package:', data);
       return data;
     },
     onSuccess: () => {
@@ -69,6 +79,8 @@ export const useUpdateIPTVPackage = () => {
   
   return useMutation({
     mutationFn: async ({ id, ...packageData }: Partial<IPTVPackage> & { id: string }) => {
+      console.log('Updating IPTV package:', id, packageData);
+      
       const { data, error } = await supabase
         .from('iptv_packages')
         .update(packageData)
@@ -76,7 +88,12 @@ export const useUpdateIPTVPackage = () => {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating package:', error);
+        throw error;
+      }
+      
+      console.log('Successfully updated package:', data);
       return data;
     },
     onSuccess: () => {
@@ -95,12 +112,19 @@ export const useDeleteIPTVPackage = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting IPTV package:', id);
+      
       const { error } = await supabase
         .from('iptv_packages')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting package:', error);
+        throw error;
+      }
+      
+      console.log('Successfully deleted package');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['iptv-packages'] });

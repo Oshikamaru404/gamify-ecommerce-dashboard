@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, Package, Tv, Edit } from 'lucide-react';
+import { Search, Plus, Package, Tv, Edit, AlertCircle } from 'lucide-react';
 import { useIPTVPackages, useCreateIPTVPackage, useUpdateIPTVPackage, useDeleteIPTVPackage, IPTVPackage } from '@/hooks/useIPTVPackages';
 import IPTVPackageCard from '@/components/admin/IPTVPackageCard';
 import PackageDialog from '@/components/admin/PackageDialog';
@@ -20,10 +21,12 @@ const ManageProducts = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<IPTVPackage | null>(null);
   
-  const { data: packages, isLoading } = useIPTVPackages();
+  const { data: packages, isLoading, error } = useIPTVPackages();
   const createPackage = useCreateIPTVPackage();
   const updatePackage = useUpdateIPTVPackage();
   const deletePackage = useDeleteIPTVPackage();
+  
+  console.log('ManageProducts render - packages:', packages, 'isLoading:', isLoading, 'error:', error);
   
   // Filter packages based on search term and category filter
   const filteredPackages = packages?.filter((pkg) => {
@@ -69,11 +72,13 @@ const ManageProducts = () => {
   };
 
   const handleEdit = (pkg: IPTVPackage) => {
+    console.log('Editing package:', pkg);
     setEditingPackage(pkg);
     setEditDialogOpen(true);
   };
 
   const handleToggleFeatured = (id: string, featured: boolean) => {
+    console.log('Toggling featured status for package:', id, 'to:', featured);
     updatePackage.mutate({
       id,
       status: featured ? 'featured' : 'active'
@@ -81,6 +86,7 @@ const ManageProducts = () => {
   };
 
   const handleSavePackage = (packageData: Omit<IPTVPackage, 'id' | 'created_at' | 'updated_at'>) => {
+    console.log('Saving package:', packageData);
     if (editingPackage) {
       updatePackage.mutate({ 
         id: editingPackage.id, 
@@ -94,13 +100,9 @@ const ManageProducts = () => {
   };
 
   const handleNewPackage = (category?: string) => {
+    console.log('Creating new package, category:', category);
     setEditingPackage(null);
-    if (category) {
-      // Pre-set the category when creating from a specific tab
-      setEditDialogOpen(true);
-    } else {
-      setEditDialogOpen(true);
-    }
+    setEditDialogOpen(true);
   };
 
   const renderPackageGrid = (packages: IPTVPackage[], emptyMessage: string) => (
@@ -132,6 +134,39 @@ const ManageProducts = () => {
       </div>
     )
   );
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Product Management</h1>
+            <p className="text-muted-foreground">
+              Manage your IPTV packages and traditional products from one place.
+            </p>
+          </div>
+        </div>
+        
+        <Card className="overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+                <AlertCircle size={28} className="text-red-600" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-red-600">Database Connection Error</h3>
+              <p className="mb-4 mt-2 text-sm text-muted-foreground text-center max-w-md">
+                Unable to connect to the database. Please check your connection and try again.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Error: {error.message}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
