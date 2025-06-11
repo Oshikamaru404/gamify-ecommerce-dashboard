@@ -12,78 +12,85 @@ const ProductDetail = () => {
   const { t } = useLanguage();
   const [selectedDuration, setSelectedDuration] = useState(1);
 
+  // Updated products data to match the IDs used in ProductSubscriptionCard
   const products: Record<string, any> = {
-    'strong-8k': {
+    'strong-8k-iptv': {
       name: "STRONG 8K IPTV 🚀",
       basePrice: 12.99,
       features: [
-        t.ultraHd4k,
-        t.premiumQuality,
-        t.support247,
-        t.fastActivation,
-        t.instantActivation
+        "8K Ultra HD Quality",
+        "5000+ Live Channels", 
+        "Movies & Series VOD",
+        "Anti-Freeze Technology",
+        "24/7 Support"
       ],
-      description: t.premiumQualityDesc
+      description: "Premium 8K streaming experience with ultra-fast servers"
     },
-    'trex-8k': {
+    'trex-8k-iptv': {
       name: "TREX 8K IPTV 🦖",
       basePrice: 10.99,
       features: [
-        t.ultraHd4k,
-        t.premiumQuality,
-        t.support247,
-        t.fastActivation,
-        t.guaranteedReliability
+        "8K/4K Streaming",
+        "4000+ Channels",
+        "Sports Packages", 
+        "Movie Collection",
+        "Fast Servers"
       ],
-      description: t.guaranteedReliabilityDesc
+      description: "Reliable streaming with extensive sports and movie content"
     },
-    'promax-4k': {
+    'promax-4k-iptv': {
       name: "PROMAX 4K IPTV ⚡",
       basePrice: 18.99,
       features: [
-        t.ultraHd4k,
-        t.premiumQuality,
-        t.support247,
-        t.fastActivation,
-        t.instantActivation
+        "4K Premium Technology",
+        "8000+ Channels",
+        "4K Quality",
+        "Global Content",
+        "Premium Support"
       ],
-      description: t.fastActivationDesc
+      description: "Premium 4K streaming with global content library"
     },
-    'tivione-4k': {
+    'tivione-4k-iptv': {
       name: "TIVIONE 4K IPTV 📺",
       basePrice: 13.99,
       features: [
-        t.ultraHd4k,
-        t.premiumQuality,
-        t.support247,
-        t.fastActivation,
-        t.guaranteedReliability
+        "Full 4K Streaming",
+        "6000+ Channels",
+        "VOD Library",
+        "Stable Connection", 
+        "Multi-Platform"
       ],
-      description: t.premiumQualityDesc
+      description: "Stable 4K streaming across multiple platforms"
     },
-    'b1g-4k': {
+    'b1g-4k-iptv': {
       name: "B1G 4K IPTV 🎬",
       basePrice: 16.99,
       features: [
-        t.ultraHd4k,
-        t.premiumQuality,
-        t.support247,
-        t.fastActivation,
-        t.instantActivation
+        "Big Entertainment",
+        "9000+ Channels",
+        "4K Resolution",
+        "Sports & Movies",
+        "24/7 Service"
       ],
-      description: t.guaranteedReliabilityDesc
+      description: "Comprehensive entertainment with extensive channel lineup"
     }
   };
 
   const product = products[productId as string];
 
+  console.log('ProductDetail - productId:', productId);
+  console.log('ProductDetail - product found:', product);
+  console.log('ProductDetail - available products:', Object.keys(products));
+
   if (!product) {
     return (
       <StoreLayout>
         <div className="container py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{t.noSubscriptionsAvailable}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <p className="text-gray-600 mb-4">Product ID: {productId}</p>
+          <p className="text-gray-600 mb-4">Available products: {Object.keys(products).join(', ')}</p>
           <Button asChild>
-            <Link to="/subscription">{t.backToHome}</Link>
+            <Link to="/subscription">Back to Subscriptions</Link>
           </Button>
         </div>
       </StoreLayout>
@@ -91,10 +98,10 @@ const ProductDetail = () => {
   }
 
   const durations = [
-    { months: 1, discount: 0, label: `1 ${t.perMonth.replace('/', '')}` },
-    { months: 3, discount: 10, label: `3 ${t.perMonth.replace('/', '')}` },
-    { months: 6, discount: 20, label: `6 ${t.perMonth.replace('/', '')}` },
-    { months: 12, discount: 30, label: `12 ${t.perMonth.replace('/', '')}` }
+    { months: 1, discount: 0, label: `1 Month` },
+    { months: 3, discount: 10, label: `3 Months` },
+    { months: 6, discount: 20, label: `6 Months` },
+    { months: 12, discount: 30, label: `12 Months` }
   ];
 
   const selectedDurationData = durations.find(d => d.months === selectedDuration) || durations[0];
@@ -103,7 +110,7 @@ const ProductDetail = () => {
   const finalPrice = originalPrice - discountAmount;
 
   const handlePurchase = () => {
-    const message = `${t.contact} ${product.name} - ${selectedDuration} ${t.perMonth.replace('/', '')} - ${t.currency}${finalPrice.toFixed(2)}`;
+    const message = `Hello, I'm interested in ${product.name} - ${selectedDuration} Month(s) - $${finalPrice.toFixed(2)}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -118,7 +125,7 @@ const ProductDetail = () => {
               className="inline-flex items-center text-white/80 hover:text-white transition-colors duration-200 group mb-6"
             >
               <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
-              {t.backToHome}
+              Back to Subscriptions
             </Link>
             
             <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -129,11 +136,11 @@ const ProductDetail = () => {
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center">
                     <Star className="text-yellow-300 mr-2" size={20} />
-                    <span>{t.premiumQuality}</span>
+                    <span>Premium Quality</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="text-green-300 mr-2" size={20} />
-                    <span>{t.support247}</span>
+                    <span>24/7 Support</span>
                   </div>
                 </div>
               </div>
@@ -145,7 +152,7 @@ const ProductDetail = () => {
           <div className="grid lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               <Card className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.productFeatures}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Features</h2>
                 <div className="grid gap-4">
                   {product.features.map((feature: string, index: number) => (
                     <div key={index} className="flex items-center gap-3">
@@ -159,7 +166,7 @@ const ProductDetail = () => {
 
             <div>
               <Card className="p-8 sticky top-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">{t.pricing}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Choose Your Plan</h3>
                 
                 <div className="space-y-3 mb-6">
                   {durations.map((duration) => (
@@ -181,7 +188,7 @@ const ProductDetail = () => {
                         )}
                       </div>
                       <div className="text-sm text-gray-600 mt-1">
-                        {t.currency}{product.basePrice}{t.perMonth}
+                        ${product.basePrice}/month
                       </div>
                     </button>
                   ))}
@@ -189,18 +196,18 @@ const ProductDetail = () => {
 
                 <div className="border-t pt-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span>{t.pricing}:</span>
-                    <span>{t.currency}{originalPrice.toFixed(2)}</span>
+                    <span>Original Price:</span>
+                    <span>${originalPrice.toFixed(2)}</span>
                   </div>
                   {selectedDurationData.discount > 0 && (
                     <div className="flex justify-between items-center mb-2 text-green-600">
-                      <span>{t.pricing} ({selectedDurationData.discount}%):</span>
-                      <span>-{t.currency}{discountAmount.toFixed(2)}</span>
+                      <span>Discount ({selectedDurationData.discount}%):</span>
+                      <span>-${discountAmount.toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center text-xl font-bold border-t pt-2">
-                    <span>{t.pricing}:</span>
-                    <span className="text-red-600">{t.currency}{finalPrice.toFixed(2)}</span>
+                    <span>Total:</span>
+                    <span className="text-red-600">${finalPrice.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -210,7 +217,7 @@ const ProductDetail = () => {
                   size="lg"
                 >
                   <MessageCircle className="mr-2" size={20} />
-                  {t.buyNow}
+                  Buy Now
                 </Button>
               </Card>
             </div>

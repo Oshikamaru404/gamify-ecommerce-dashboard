@@ -24,14 +24,17 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 }) => {
   const { t } = useLanguage();
 
-  // Generate product ID from name for linking
+  // Generate product ID from name for linking - updated to match ProductDetail
   const productId = name.toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^\w-]/g, '')
     .replace(/^-+|-+$/g, '');
 
+  console.log('ProductSubscriptionCard - name:', name);
+  console.log('ProductSubscriptionCard - generated productId:', productId);
+
   const handleTryNow = () => {
-    const message = `${t.contact}, je suis intéressé par l'abonnement ${name} à ${price.toFixed(2)}${t.currency}${t.perMonth}. Pouvez-vous me donner plus d'informations?`;
+    const message = `Hello, I'm interested in ${name} at $${price.toFixed(2)}/month. Can you provide more information?`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -90,11 +93,11 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             </h3>
             
             <div className="flex items-baseline justify-center">
-              <span className="text-lg text-gray-600 mr-1">{t.currency}</span>
+              <span className="text-lg text-gray-600 mr-1">$</span>
               <span className={cn("text-3xl font-bold transition-all duration-300 group-hover:scale-110", accentColor)}>
                 {price.toFixed(2)}
               </span>
-              <span className="text-sm text-gray-500 ml-1">{t.perMonth}</span>
+              <span className="text-sm text-gray-500 ml-1">/month</span>
             </div>
           </div>
 
@@ -123,14 +126,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-4 rounded-xl"
               onClick={handleTryNow}
             >
-              {t.buyNow}
+              Buy Now
             </Button>
             
             <Link 
               to={`/product/${productId}`}
               className="block w-full text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-300 text-center py-2"
             >
-              {t.viewMore}
+              View Details
             </Link>
           </div>
         </div>
