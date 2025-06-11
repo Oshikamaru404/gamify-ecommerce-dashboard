@@ -82,7 +82,7 @@ const GlobalContentEditor = () => {
     }
   });
 
-  // Load content from localStorage
+  // Load content from localStorage with actual BWIVOX IPTV content
   useEffect(() => {
     const stored = localStorage.getItem('global_content');
     if (stored) {
@@ -92,8 +92,9 @@ const GlobalContentEditor = () => {
         console.error('Error loading content:', error);
       }
     } else {
-      // Initialize with default content
+      // Initialize with actual BWIVOX IPTV website content
       const defaultContent: ContentItem[] = [
+        // Home Page Content
         {
           id: '1',
           page: 'home',
@@ -107,23 +108,295 @@ const GlobalContentEditor = () => {
           page: 'home',
           section: 'hero',
           key: 'subtitle',
-          value: 'Découvrez nos services IPTV premium avec une qualité exceptionnelle',
+          value: 'Découvrez nos services IPTV premium avec une qualité exceptionnelle et un support 24/7',
           type: 'text'
         },
         {
           id: '3',
-          page: 'products',
-          section: 'header',
-          key: 'title',
-          value: 'Our IPTV Products & Services',
+          page: 'home',
+          section: 'hero',
+          key: 'cta_button',
+          value: 'Commencer maintenant',
           type: 'text'
         },
         {
           id: '4',
+          page: 'home',
+          section: 'features',
+          key: 'quality_title',
+          value: 'Qualité 4K/8K Ultra HD',
+          type: 'text'
+        },
+        {
+          id: '5',
+          page: 'home',
+          section: 'features',
+          key: 'quality_description',
+          value: 'Profitez de vos contenus préférés en qualité 4K et 8K avec une fluidité parfaite',
+          type: 'textarea'
+        },
+        {
+          id: '6',
+          page: 'home',
+          section: 'features',
+          key: 'support_title',
+          value: 'Support 24/7',
+          type: 'text'
+        },
+        {
+          id: '7',
+          page: 'home',
+          section: 'features',
+          key: 'support_description',
+          value: 'Notre équipe technique est disponible 24h/24 et 7j/7 pour vous assister',
+          type: 'textarea'
+        },
+        {
+          id: '8',
+          page: 'home',
+          section: 'features',
+          key: 'compatibility_title',
+          value: 'Compatible Multi-Plateformes',
+          type: 'text'
+        },
+        {
+          id: '9',
+          page: 'home',
+          section: 'features',
+          key: 'compatibility_description',
+          value: 'Fonctionne sur tous vos appareils : Smart TV, Android, iOS, PC, MAG Box',
+          type: 'textarea'
+        },
+        // Products Page Content
+        {
+          id: '10',
+          page: 'products',
+          section: 'header',
+          key: 'title',
+          value: 'Nos Produits & Services IPTV',
+          type: 'text'
+        },
+        {
+          id: '11',
+          page: 'products',
+          section: 'header',
+          key: 'description',
+          value: 'Choisissez parmi notre gamme complète de services IPTV premium',
+          type: 'text'
+        },
+        // Subscription Category
+        {
+          id: '12',
+          page: 'products',
+          section: 'subscription',
+          key: 'title',
+          value: 'Abonnements IPTV',
+          type: 'text'
+        },
+        {
+          id: '13',
+          page: 'products',
+          section: 'subscription',
+          key: 'description',
+          value: 'Nos formules d\'abonnement IPTV avec des milliers de chaînes mondiales',
+          type: 'text'
+        },
+        // Panel IPTV Category
+        {
+          id: '14',
+          page: 'products',
+          section: 'panel-iptv',
+          key: 'title',
+          value: 'Panel IPTV',
+          type: 'text'
+        },
+        {
+          id: '15',
+          page: 'products',
+          section: 'panel-iptv',
+          key: 'description',
+          value: 'Solutions de panneau IPTV pour revendeurs et professionnels',
+          type: 'text'
+        },
+        // Panel Player Category
+        {
+          id: '16',
+          page: 'products',
+          section: 'panel-player',
+          key: 'title',
+          value: 'Panel Player',
+          type: 'text'
+        },
+        {
+          id: '17',
+          page: 'products',
+          section: 'panel-player',
+          key: 'description',
+          value: 'Applications de lecture personnalisées avec votre marque',
+          type: 'text'
+        },
+        // Activation Player Category
+        {
+          id: '18',
+          page: 'products',
+          section: 'activation-player',
+          key: 'title',
+          value: 'Activation Player',
+          type: 'text'
+        },
+        {
+          id: '19',
+          page: 'products',
+          section: 'activation-player',
+          key: 'description',
+          value: 'Codes d\'activation pour players IPTV premium',
+          type: 'text'
+        },
+        // Subscription Page Content
+        {
+          id: '20',
+          page: 'subscription',
+          section: 'header',
+          key: 'title',
+          value: 'Abonnements IPTV Premium',
+          type: 'text'
+        },
+        {
+          id: '21',
+          page: 'subscription',
+          section: 'header',
+          key: 'subtitle',
+          value: 'Choisissez la formule qui vous convient',
+          type: 'text'
+        },
+        {
+          id: '22',
           page: 'subscription',
           section: 'pricing',
           key: 'currency_symbol',
           value: '€',
+          type: 'text'
+        },
+        {
+          id: '23',
+          page: 'subscription',
+          section: 'features',
+          key: 'channels_count',
+          value: '+20,000 chaînes mondiales',
+          type: 'text'
+        },
+        {
+          id: '24',
+          page: 'subscription',
+          section: 'features',
+          key: 'vod_count',
+          value: '+80,000 films et séries',
+          type: 'text'
+        },
+        {
+          id: '25',
+          page: 'subscription',
+          section: 'features',
+          key: 'quality',
+          value: 'Qualité 4K/8K disponible',
+          type: 'text'
+        },
+        // Reseller Page Content
+        {
+          id: '26',
+          page: 'reseller',
+          section: 'header',
+          key: 'title',
+          value: 'Programme Revendeur BWIVOX',
+          type: 'text'
+        },
+        {
+          id: '27',
+          page: 'reseller',
+          section: 'header',
+          key: 'subtitle',
+          value: 'Développez votre business avec nos solutions IPTV',
+          type: 'text'
+        },
+        {
+          id: '28',
+          page: 'reseller',
+          section: 'benefits',
+          key: 'commission_title',
+          value: 'Commissions Attractives',
+          type: 'text'
+        },
+        {
+          id: '29',
+          page: 'reseller',
+          section: 'benefits',
+          key: 'commission_description',
+          value: 'Jusqu\'à 40% de commission sur chaque vente',
+          type: 'text'
+        },
+        {
+          id: '30',
+          page: 'reseller',
+          section: 'benefits',
+          key: 'support_title',
+          value: 'Support Dédié',
+          type: 'text'
+        },
+        {
+          id: '31',
+          page: 'reseller',
+          section: 'benefits',
+          key: 'support_description',
+          value: 'Équipe de support dédiée aux revendeurs 24/7',
+          type: 'text'
+        },
+        // Support Page Content
+        {
+          id: '32',
+          page: 'support',
+          section: 'header',
+          key: 'title',
+          value: 'Support Client BWIVOX',
+          type: 'text'
+        },
+        {
+          id: '33',
+          page: 'support',
+          section: 'header',
+          key: 'subtitle',
+          value: 'Nous sommes là pour vous aider 24/7',
+          type: 'text'
+        },
+        {
+          id: '34',
+          page: 'support',
+          section: 'contact',
+          key: 'telegram_title',
+          value: 'Support Telegram',
+          type: 'text'
+        },
+        {
+          id: '35',
+          page: 'support',
+          section: 'contact',
+          key: 'telegram_description',
+          value: 'Contactez-nous directement sur Telegram pour un support rapide',
+          type: 'text'
+        },
+        {
+          id: '36',
+          page: 'support',
+          section: 'contact',
+          key: 'whatsapp_title',
+          value: 'Support WhatsApp',
+          type: 'text'
+        },
+        {
+          id: '37',
+          page: 'support',
+          section: 'contact',
+          key: 'whatsapp_description',
+          value: 'Assistance technique via WhatsApp 24h/24',
           type: 'text'
         }
       ];
@@ -162,22 +435,22 @@ const GlobalContentEditor = () => {
         item.id === editingContent.id ? { ...data, id: editingContent.id } : item
       );
       saveContent(updatedContent);
-      toast.success('Content updated successfully');
+      toast.success('Contenu mis à jour avec succès');
     } else {
       // Add new content
       const newContent = [...content, { ...data, id: Date.now().toString() }];
       saveContent(newContent);
-      toast.success('Content added successfully');
+      toast.success('Contenu ajouté avec succès');
     }
     
     setIsDialogOpen(false);
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this content item?')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet élément de contenu ?')) {
       const updatedContent = content.filter(item => item.id !== id);
       saveContent(updatedContent);
-      toast.success('Content deleted');
+      toast.success('Contenu supprimé');
     }
   };
 
@@ -196,7 +469,7 @@ const GlobalContentEditor = () => {
   };
 
   const handleReset = () => {
-    if (confirm('Are you sure you want to reset all content to defaults?')) {
+    if (confirm('Êtes-vous sûr de vouloir réinitialiser tout le contenu aux valeurs par défaut ?')) {
       localStorage.removeItem('global_content');
       window.location.reload();
     }
@@ -206,19 +479,19 @@ const GlobalContentEditor = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Global Content Editor</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Éditeur de Contenu Global</h1>
           <p className="text-muted-foreground">
-            Manage content across all pages and categories
+            Gérez le contenu de votre site BWIVOX IPTV
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleReset}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Reset All
+            Réinitialiser
           </Button>
           <Button onClick={handleAdd} className="bg-red-600 hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" />
-            Add Content
+            Ajouter du Contenu
           </Button>
         </div>
       </div>
@@ -239,13 +512,13 @@ const GlobalContentEditor = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <page.icon className="h-5 w-5" />
-                  {page.name} Content
+                  Contenu de {page.name}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {Object.entries(groupContentBySection(getPageContent(page.id))).map(([section, items]) => (
                   <div key={section} className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3 capitalize">{section} Section</h3>
+                    <h3 className="text-lg font-semibold mb-3 capitalize">{section.replace('-', ' ')}</h3>
                     <div className="grid gap-3">
                       {items.map((item) => (
                         <Card key={item.id} className="p-4">
@@ -285,13 +558,13 @@ const GlobalContentEditor = () => {
                 {getPageContent(page.id).length === 0 && (
                   <div className="text-center py-8">
                     <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-muted-foreground">No content found for this page</p>
+                    <p className="text-muted-foreground">Aucun contenu trouvé pour cette page</p>
                     <Button 
                       className="mt-2" 
                       onClick={handleAdd}
                       variant="outline"
                     >
-                      Add First Content Item
+                      Ajouter le Premier Élément
                     </Button>
                   </div>
                 )}
@@ -303,7 +576,7 @@ const GlobalContentEditor = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Product Categories Content</CardTitle>
+          <CardTitle>Contenu des Catégories Produits</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
@@ -315,7 +588,7 @@ const GlobalContentEditor = () => {
                     .filter(item => item.page === 'products' && item.section === category.id)
                     .map((item) => (
                       <div key={item.id} className="flex items-center justify-between text-sm">
-                        <span>{item.key}: {item.value}</span>
+                        <span className="truncate">{item.key}: {item.value}</span>
                         <Button 
                           size="sm" 
                           variant="ghost"
@@ -343,7 +616,7 @@ const GlobalContentEditor = () => {
                   }}
                 >
                   <Plus className="h-3 w-3 mr-1" />
-                  Add {category.name} Content
+                  Ajouter Contenu {category.name}
                 </Button>
               </Card>
             ))}
@@ -355,7 +628,7 @@ const GlobalContentEditor = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingContent ? 'Edit Content' : 'Add Content'}
+              {editingContent ? 'Modifier le Contenu' : 'Ajouter du Contenu'}
             </DialogTitle>
           </DialogHeader>
           
@@ -382,7 +655,7 @@ const GlobalContentEditor = () => {
                   <FormItem>
                     <FormLabel>Section</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g., hero, pricing, features" />
+                      <Input {...field} placeholder="ex: hero, features, pricing" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -394,9 +667,9 @@ const GlobalContentEditor = () => {
                 name="key"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Key</FormLabel>
+                    <FormLabel>Clé</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g., title, description, price" />
+                      <Input {...field} placeholder="ex: title, description, price" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -408,11 +681,11 @@ const GlobalContentEditor = () => {
                 name="value"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Value</FormLabel>
+                    <FormLabel>Valeur</FormLabel>
                     <FormControl>
                       <Textarea 
                         {...field} 
-                        placeholder="Content value"
+                        placeholder="Contenu"
                         className="h-32"
                       />
                     </FormControl>
@@ -423,11 +696,11 @@ const GlobalContentEditor = () => {
               
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+                  Annuler
                 </Button>
                 <Button type="submit" className="bg-red-600 hover:bg-red-700">
                   <Save className="mr-2 h-4 w-4" />
-                  Save Content
+                  Sauvegarder
                 </Button>
               </DialogFooter>
             </form>

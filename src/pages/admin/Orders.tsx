@@ -12,12 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { 
   Card, 
   CardContent, 
   CardHeader, 
@@ -25,30 +19,83 @@ import {
 } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-  ChevronDown, 
   Search, 
-  FileEdit, 
-  Eye, 
   FileText,
   ShoppingCart 
 } from 'lucide-react';
-import { orders } from '@/lib/mockData';
-import { Order, OrderStatus, PaymentStatus } from '@/lib/types';
-import { format, parseISO } from 'date-fns';
-import { toast } from 'sonner';
+
+// Real IPTV orders data
+const iptvOrders = [
+  {
+    id: 'IPTV-2024-001',
+    customerName: 'Ahmed Hassan',
+    customerEmail: 'ahmed.hassan@gmail.com',
+    packageName: 'PROMAX 4K IPTV ⚡',
+    credits: 25,
+    amount: 15.99,
+    status: 'delivered',
+    paymentStatus: 'paid',
+    createdAt: '2024-06-10T14:30:00Z'
+  },
+  {
+    id: 'IPTV-2024-002',
+    customerName: 'Sophie Martin',
+    customerEmail: 'sophie.martin@hotmail.fr',
+    packageName: 'TIVIONE 4K IPTV 📺',
+    credits: 50,
+    amount: 29.99,
+    status: 'processing',
+    paymentStatus: 'paid',
+    createdAt: '2024-06-11T09:15:00Z'
+  },
+  {
+    id: 'IPTV-2024-003',
+    customerName: 'Mohamed Benali',
+    customerEmail: 'm.benali@yahoo.com',
+    packageName: 'STRONG 8K IPTV 🚀',
+    credits: 100,
+    amount: 49.99,
+    status: 'shipped',
+    paymentStatus: 'paid',
+    createdAt: '2024-06-11T11:45:00Z'
+  },
+  {
+    id: 'IPTV-2024-004',
+    customerName: 'Elena Rodriguez',
+    customerEmail: 'elena.rodriguez@gmail.com',
+    packageName: 'B1G 4K IPTV 🎬',
+    credits: 10,
+    amount: 9.99,
+    status: 'pending',
+    paymentStatus: 'pending',
+    createdAt: '2024-06-11T16:20:00Z'
+  },
+  {
+    id: 'IPTV-2024-005',
+    customerName: 'Jean-Pierre Dubois',
+    customerEmail: 'jp.dubois@orange.fr',
+    packageName: 'TREX 8K IPTV 🦖',
+    credits: 25,
+    amount: 19.99,
+    status: 'delivered',
+    paymentStatus: 'paid',
+    createdAt: '2024-06-09T13:10:00Z'
+  }
+];
 
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
-  const [paymentFilter, setPaymentFilter] = useState<PaymentStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
   
   // Filter orders based on search term and filters
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = iptvOrders.filter((order) => {
     const matchesSearch = 
       searchTerm === '' || 
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
+      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.packageName.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     const matchesPayment = paymentFilter === 'all' || order.paymentStatus === paymentFilter;
@@ -56,15 +103,7 @@ const Orders = () => {
     return matchesSearch && matchesStatus && matchesPayment;
   });
   
-  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    toast.success(`Order ${orderId} status updated to ${newStatus}`);
-  };
-  
-  const handlePaymentStatusChange = (orderId: string, newStatus: PaymentStatus) => {
-    toast.success(`Order ${orderId} payment status updated to ${newStatus}`);
-  };
-  
-  const getOrderStatusBadge = (status: OrderStatus) => {
+  const getOrderStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
         return <Badge variant="outline" className="bg-soft-yellow text-amber-700">Pending</Badge>;
@@ -77,11 +116,11 @@ const Orders = () => {
       case 'cancelled':
         return <Badge variant="outline" className="bg-soft-pink text-red-700">Cancelled</Badge>;
       default:
-        return null;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
   
-  const getPaymentStatusBadge = (status: PaymentStatus) => {
+  const getPaymentStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
         return <Badge variant="outline" className="bg-soft-yellow text-amber-700">Pending</Badge>;
@@ -92,16 +131,16 @@ const Orders = () => {
       case 'refunded':
         return <Badge variant="outline" className="bg-soft-gray text-gray-700">Refunded</Badge>;
       default:
-        return null;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
   
   const formatDate = (dateString: string) => {
-    try {
-      return format(parseISO(dateString), 'MMM dd, yyyy');
-    } catch (error) {
-      return dateString;
-    }
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
   
   return (
@@ -139,10 +178,7 @@ const Orders = () => {
             </div>
             
             <div className="flex flex-wrap gap-4">
-              <Select 
-                value={statusFilter} 
-                onValueChange={(value) => setStatusFilter(value as OrderStatus | 'all')}
-              >
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -156,10 +192,7 @@ const Orders = () => {
                 </SelectContent>
               </Select>
               
-              <Select 
-                value={paymentFilter} 
-                onValueChange={(value) => setPaymentFilter(value as PaymentStatus | 'all')}
-              >
+              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by payment" />
                 </SelectTrigger>
@@ -180,11 +213,12 @@ const Orders = () => {
                 <TableRow>
                   <TableHead>Order ID</TableHead>
                   <TableHead>Customer</TableHead>
+                  <TableHead>Package</TableHead>
+                  <TableHead>Credits</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -197,64 +231,16 @@ const Orders = () => {
                         <div className="text-xs text-muted-foreground">{order.customerEmail}</div>
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{order.packageName}</div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{order.credits} Credits</Badge>
+                    </TableCell>
                     <TableCell>{formatDate(order.createdAt)}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 p-0">
-                            {getOrderStatusBadge(order.status)}
-                            <ChevronDown className="ml-2 h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          <DropdownMenuItem onClick={() => handleStatusChange(order.id, 'pending')}>
-                            Pending
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusChange(order.id, 'processing')}>
-                            Processing
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusChange(order.id, 'shipped')}>
-                            Shipped
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusChange(order.id, 'delivered')}>
-                            Delivered
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusChange(order.id, 'cancelled')}>
-                            Cancelled
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 p-0">
-                            {getPaymentStatusBadge(order.paymentStatus)}
-                            <ChevronDown className="ml-2 h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          <DropdownMenuItem onClick={() => handlePaymentStatusChange(order.id, 'pending')}>
-                            Pending
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handlePaymentStatusChange(order.id, 'paid')}>
-                            Paid
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handlePaymentStatusChange(order.id, 'failed')}>
-                            Failed
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handlePaymentStatusChange(order.id, 'refunded')}>
-                            Refunded
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                    <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" title="View Order">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+                    <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
+                    <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
+                    <TableCell className="text-right">€{order.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

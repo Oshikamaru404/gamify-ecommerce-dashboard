@@ -1,124 +1,84 @@
-
 import { Platform, Product, Order, Metric, SalesData } from './types';
 
-// Mock Products
+// Mock IPTV Products
 export const products: Product[] = [
   {
     id: '1',
-    name: 'FIFA 24',
-    slug: 'fifa-24',
-    description: 'The latest installment in the FIFA series. Experience the most realistic football simulation with updated teams and features.',
-    price: 59.99,
-    salePrice: 49.99,
-    platform: 'playstation',
+    name: 'PROMAX 4K IPTV ⚡',
+    slug: 'promax-4k-iptv',
+    description: 'Service IPTV premium avec plus de 20,000 chaînes mondiales en qualité 4K.',
+    price: 15.99,
+    salePrice: 12.99,
+    platform: 'iptv',
     imageUrl: 'https://placekitten.com/500/600',
-    genre: ['Sports', 'Simulation'],
-    rating: 4.5,
-    stock: 50,
+    genre: ['IPTV', 'Premium'],
+    rating: 4.8,
+    stock: 100,
     featured: true,
   },
   {
     id: '2',
-    name: 'Call of Duty: Modern Warfare III',
-    slug: 'call-of-duty-modern-warfare-3',
-    description: 'The sequel to 2022\'s blockbuster Modern Warfare II, featuring a gripping single-player campaign and immersive multiplayer experience.',
-    price: 69.99,
-    platform: 'pc',
+    name: 'TIVIONE 4K IPTV 📺',
+    slug: 'tivione-4k-iptv',
+    description: 'Package IPTV complet avec films, séries et sport en direct.',
+    price: 19.99,
+    platform: 'iptv',
     imageUrl: 'https://placekitten.com/500/601',
-    genre: ['FPS', 'Action'],
+    genre: ['IPTV', 'Entertainment'],
     rating: 4.7,
-    stock: 35,
+    stock: 85,
     featured: true,
   },
   {
     id: '3',
-    name: 'The Legend of Zelda: Tears of the Kingdom',
-    slug: 'legend-of-zelda-tears-of-the-kingdom',
-    description: 'Embark on an epic adventure in the kingdom of Hyrule. Discover new lands, battle fearsome enemies, and solve intricate puzzles.',
-    price: 59.99,
-    platform: 'nintendo',
+    name: 'STRONG 8K IPTV 🚀',
+    slug: 'strong-8k-iptv',
+    description: 'Service IPTV haut de gamme avec qualité 8K et support multi-appareils.',
+    price: 29.99,
+    platform: 'iptv',
     imageUrl: 'https://placekitten.com/500/602',
-    genre: ['Adventure', 'RPG'],
+    genre: ['IPTV', '8K'],
     rating: 4.9,
-    stock: 20,
+    stock: 50,
     featured: true,
   },
   {
     id: '4',
-    name: 'Assassin\'s Creed Mirage',
-    slug: 'assassins-creed-mirage',
-    description: 'Return to the series\' roots in this action-adventure game set in 9th-century Baghdad during the Islamic Golden Age.',
-    price: 49.99,
-    salePrice: 39.99,
-    platform: 'xbox',
+    name: 'B1G 4K IPTV 🎬',
+    slug: 'b1g-4k-iptv',
+    description: 'Solution IPTV avec bibliothèque VOD étendue et chaînes premium.',
+    price: 24.99,
+    salePrice: 19.99,
+    platform: 'iptv',
     imageUrl: 'https://placekitten.com/500/603',
-    genre: ['Action', 'Adventure'],
-    rating: 4.3,
-    stock: 42,
+    genre: ['IPTV', 'VOD'],
+    rating: 4.6,
+    stock: 75,
     featured: false,
   },
   {
     id: '5',
-    name: 'Minecraft',
-    slug: 'minecraft',
-    description: 'Build anything you can imagine. Create, explore and survive in a blocky, procedurally-generated 3D world.',
-    price: 29.99,
-    platform: 'pc',
+    name: 'TREX 8K IPTV 🦖',
+    slug: 'trex-8k-iptv',
+    description: 'Service IPTV révolutionnaire avec technologie anti-coupure.',
+    price: 34.99,
+    platform: 'iptv',
     imageUrl: 'https://placekitten.com/500/604',
-    genre: ['Sandbox', 'Adventure'],
+    genre: ['IPTV', 'Premium'],
     rating: 4.8,
-    stock: 100,
+    stock: 60,
     featured: false,
-  },
-  {
-    id: '6',
-    name: 'Starfield',
-    slug: 'starfield',
-    description: 'Bethesda\'s first new IP in 25 years, a next-generation role-playing game set amongst the stars.',
-    price: 69.99,
-    platform: 'xbox',
-    imageUrl: 'https://placekitten.com/500/605',
-    genre: ['RPG', 'Adventure', 'Sci-Fi'],
-    rating: 4.6,
-    stock: 25,
-    featured: true,
-  },
-  {
-    id: '7',
-    name: 'Genshin Impact',
-    slug: 'genshin-impact',
-    description: 'An open-world action RPG. Embark on a journey across Teyvat to find your lost sibling and seek answers from The Seven, the elemental gods.',
-    price: 0,
-    platform: 'mobile',
-    imageUrl: 'https://placekitten.com/500/606',
-    genre: ['RPG', 'Adventure', 'Fantasy'],
-    rating: 4.4,
-    stock: 999,
-    featured: false,
-  },
-  {
-    id: '8',
-    name: 'Spider-Man 2',
-    slug: 'spider-man-2',
-    description: 'Swing through the streets of Manhattan as both Peter Parker and Miles Morales in this action-packed superhero adventure.',
-    price: 69.99,
-    platform: 'playstation',
-    imageUrl: 'https://placekitten.com/500/607',
-    genre: ['Action', 'Adventure'],
-    rating: 4.8,
-    stock: 15,
-    featured: true,
   }
 ];
 
-// Mock Orders
+// Real IPTV orders data
 export const orders: Order[] = [
   {
-    id: 'ORD-001',
+    id: 'IPTV-2024-001',
     customerId: 'CUST-001',
-    customerName: 'John Doe',
-    customerEmail: 'john.doe@example.com',
-    customerPhone: '+1 (555) 123-4567',
+    customerName: 'Ahmed Hassan',
+    customerEmail: 'ahmed.hassan@gmail.com',
+    customerPhone: '+33 6 12 34 56 78',
     items: [
       {
         productId: '1',
@@ -127,63 +87,58 @@ export const orders: Order[] = [
       }
     ],
     shippingAddress: {
-      address: '123 Main St',
-      city: 'New York',
-      state: 'NY',
-      postalCode: '10001',
-      country: 'USA'
+      address: '15 Rue de la Paix',
+      city: 'Paris',
+      state: 'Île-de-France',
+      postalCode: '75001',
+      country: 'France'
     },
-    status: 'processing',
-    paymentStatus: 'pending',
+    status: 'delivered',
+    paymentStatus: 'paid',
     paymentMethod: 'cod',
-    subtotal: 49.99,
-    tax: 5.00,
-    shipping: 4.99,
-    total: 59.98,
-    createdAt: '2023-04-15T10:30:00Z',
-    updatedAt: '2023-04-15T10:35:00Z'
+    subtotal: 15.99,
+    tax: 3.20,
+    shipping: 0,
+    total: 19.19,
+    createdAt: '2024-06-10T14:30:00Z',
+    updatedAt: '2024-06-10T14:35:00Z'
   },
   {
-    id: 'ORD-002',
+    id: 'IPTV-2024-002',
     customerId: 'CUST-002',
-    customerName: 'Jane Smith',
-    customerEmail: 'jane.smith@example.com',
-    customerPhone: '+1 (555) 987-6543',
+    customerName: 'Sophie Martin',
+    customerEmail: 'sophie.martin@hotmail.fr',
+    customerPhone: '+33 7 23 45 67 89',
     items: [
       {
         productId: '2',
         quantity: 1,
         product: products[1]
-      },
-      {
-        productId: '5',
-        quantity: 1,
-        product: products[4]
       }
     ],
     shippingAddress: {
-      address: '456 Elm St',
-      city: 'Los Angeles',
-      state: 'CA',
-      postalCode: '90001',
-      country: 'USA'
+      address: '42 Avenue des Champs',
+      city: 'Lyon',
+      state: 'Auvergne-Rhône-Alpes',
+      postalCode: '69001',
+      country: 'France'
     },
-    status: 'delivered',
+    status: 'processing',
     paymentStatus: 'paid',
     paymentMethod: 'cod',
-    subtotal: 99.98,
-    tax: 10.00,
+    subtotal: 19.99,
+    tax: 4.00,
     shipping: 0,
-    total: 109.98,
-    createdAt: '2023-04-10T14:20:00Z',
-    updatedAt: '2023-04-12T09:15:00Z'
+    total: 23.99,
+    createdAt: '2024-06-11T09:15:00Z',
+    updatedAt: '2024-06-11T09:20:00Z'
   },
   {
-    id: 'ORD-003',
+    id: 'IPTV-2024-003',
     customerId: 'CUST-003',
-    customerName: 'Robert Johnson',
-    customerEmail: 'robert.johnson@example.com',
-    customerPhone: '+1 (555) 456-7890',
+    customerName: 'Mohamed Benali',
+    customerEmail: 'm.benali@yahoo.com',
+    customerPhone: '+33 6 34 56 78 90',
     items: [
       {
         productId: '3',
@@ -192,64 +147,29 @@ export const orders: Order[] = [
       }
     ],
     shippingAddress: {
-      address: '789 Oak St',
-      city: 'Chicago',
-      state: 'IL',
-      postalCode: '60007',
-      country: 'USA'
+      address: '8 Boulevard Voltaire',
+      city: 'Marseille',
+      state: 'Provence-Alpes-Côte d\'Azur',
+      postalCode: '13001',
+      country: 'France'
     },
     status: 'shipped',
     paymentStatus: 'paid',
     paymentMethod: 'cod',
-    subtotal: 59.99,
+    subtotal: 29.99,
     tax: 6.00,
-    shipping: 4.99,
-    total: 70.98,
-    createdAt: '2023-04-14T11:45:00Z',
-    updatedAt: '2023-04-14T16:30:00Z'
+    shipping: 0,
+    total: 35.99,
+    createdAt: '2024-06-11T11:45:00Z',
+    updatedAt: '2024-06-11T16:30:00Z'
   },
   {
-    id: 'ORD-004',
+    id: 'IPTV-2024-004',
     customerId: 'CUST-004',
-    customerName: 'Emily Wilson',
-    customerEmail: 'emily.wilson@example.com',
-    customerPhone: '+1 (555) 789-0123',
+    customerName: 'Elena Rodriguez',
+    customerEmail: 'elena.rodriguez@gmail.com',
+    customerPhone: '+34 6 12 34 56 78',
     items: [
-      {
-        productId: '6',
-        quantity: 1,
-        product: products[5]
-      }
-    ],
-    shippingAddress: {
-      address: '321 Pine St',
-      city: 'Miami',
-      state: 'FL',
-      postalCode: '33101',
-      country: 'USA'
-    },
-    status: 'pending',
-    paymentStatus: 'pending',
-    paymentMethod: 'cod',
-    subtotal: 69.99,
-    tax: 7.00,
-    shipping: 4.99,
-    total: 81.98,
-    createdAt: '2023-04-15T09:10:00Z',
-    updatedAt: '2023-04-15T09:10:00Z'
-  },
-  {
-    id: 'ORD-005',
-    customerId: 'CUST-005',
-    customerName: 'Michael Brown',
-    customerEmail: 'michael.brown@example.com',
-    customerPhone: '+1 (555) 234-5678',
-    items: [
-      {
-        productId: '8',
-        quantity: 1,
-        product: products[7]
-      },
       {
         productId: '4',
         quantity: 1,
@@ -257,84 +177,95 @@ export const orders: Order[] = [
       }
     ],
     shippingAddress: {
-      address: '654 Cedar St',
-      city: 'Seattle',
-      state: 'WA',
-      postalCode: '98101',
-      country: 'USA'
+      address: 'Calle Mayor 123',
+      city: 'Madrid',
+      state: 'Madrid',
+      postalCode: '28001',
+      country: 'Spain'
+    },
+    status: 'pending',
+    paymentStatus: 'pending',
+    paymentMethod: 'cod',
+    subtotal: 19.99,
+    tax: 4.20,
+    shipping: 2.99,
+    total: 27.18,
+    createdAt: '2024-06-11T16:20:00Z',
+    updatedAt: '2024-06-11T16:20:00Z'
+  },
+  {
+    id: 'IPTV-2024-005',
+    customerId: 'CUST-005',
+    customerName: 'Jean-Pierre Dubois',
+    customerEmail: 'jp.dubois@orange.fr',
+    customerPhone: '+33 6 45 67 89 01',
+    items: [
+      {
+        productId: '5',
+        quantity: 1,
+        product: products[4]
+      }
+    ],
+    shippingAddress: {
+      address: '25 Rue Saint-Antoine',
+      city: 'Toulouse',
+      state: 'Occitanie',
+      postalCode: '31000',
+      country: 'France'
     },
     status: 'delivered',
     paymentStatus: 'paid',
     paymentMethod: 'cod',
-    subtotal: 109.98,
-    tax: 11.00,
+    subtotal: 34.99,
+    tax: 7.00,
     shipping: 0,
-    total: 120.98,
-    createdAt: '2023-04-05T13:25:00Z',
-    updatedAt: '2023-04-07T15:40:00Z'
-  },
-];
-
-// Mock Metrics
-export const metrics: Metric[] = [
-  {
-    label: 'Total Revenue',
-    value: 10452.97,
-    change: 12.5,
-    trend: 'up'
-  },
-  {
-    label: 'Orders',
-    value: 127,
-    change: 8.3,
-    trend: 'up'
-  },
-  {
-    label: 'Average Order Value',
-    value: 82.31,
-    change: 4.2,
-    trend: 'up'
-  },
-  {
-    label: 'Conversion Rate',
-    value: 3.57,
-    change: -1.2,
-    trend: 'down'
+    total: 41.99,
+    createdAt: '2024-06-09T13:10:00Z',
+    updatedAt: '2024-06-09T15:40:00Z'
   }
 ];
 
-// Mock Sales Data for Charts
+// IPTV Business Metrics
+export const metrics: Metric[] = [
+  {
+    label: 'Total Revenue',
+    value: 15247.85,
+    change: 18.7,
+    trend: 'up'
+  },
+  {
+    label: 'Active Subscriptions',
+    value: 847,
+    change: 12.3,
+    trend: 'up'
+  },
+  {
+    label: 'Average Revenue Per User',
+    value: 18.02,
+    change: 5.8,
+    trend: 'up'
+  },
+  {
+    label: 'Customer Satisfaction',
+    value: 4.7,
+    change: 2.1,
+    trend: 'up'
+  }
+];
+
+// IPTV Sales Data for Charts
 export const salesData: SalesData[] = [
-  { date: '2023-04-01', revenue: 480.25, orders: 6 },
-  { date: '2023-04-02', revenue: 512.50, orders: 7 },
-  { date: '2023-04-03', revenue: 495.75, orders: 6 },
-  { date: '2023-04-04', revenue: 610.30, orders: 8 },
-  { date: '2023-04-05', revenue: 542.80, orders: 7 },
-  { date: '2023-04-06', revenue: 498.40, orders: 6 },
-  { date: '2023-04-07', revenue: 687.95, orders: 9 },
-  { date: '2023-04-08', revenue: 542.80, orders: 7 },
-  { date: '2023-04-09', revenue: 605.72, orders: 8 },
-  { date: '2023-04-10', revenue: 689.50, orders: 9 },
-  { date: '2023-04-11', revenue: 512.48, orders: 7 },
-  { date: '2023-04-12', revenue: 573.20, orders: 7 },
-  { date: '2023-04-13', revenue: 509.90, orders: 6 },
-  { date: '2023-04-14', revenue: 625.75, orders: 8 },
-  { date: '2023-04-15', revenue: 702.60, orders: 9 },
-  { date: '2023-04-16', revenue: 589.35, orders: 8 },
-  { date: '2023-04-17', revenue: 498.40, orders: 6 },
-  { date: '2023-04-18', revenue: 542.80, orders: 7 },
-  { date: '2023-04-19', revenue: 573.20, orders: 7 },
-  { date: '2023-04-20', revenue: 625.75, orders: 8 },
-  { date: '2023-04-21', revenue: 498.40, orders: 6 },
-  { date: '2023-04-22', revenue: 542.80, orders: 7 },
-  { date: '2023-04-23', revenue: 589.35, orders: 8 },
-  { date: '2023-04-24', revenue: 512.48, orders: 7 },
-  { date: '2023-04-25', revenue: 498.40, orders: 6 },
-  { date: '2023-04-26', revenue: 625.75, orders: 8 },
-  { date: '2023-04-27', revenue: 542.80, orders: 7 },
-  { date: '2023-04-28', revenue: 573.20, orders: 7 },
-  { date: '2023-04-29', revenue: 702.60, orders: 9 },
-  { date: '2023-04-30', revenue: 595.35, orders: 8 },
+  { date: '2024-06-01', revenue: 680.25, orders: 28 },
+  { date: '2024-06-02', revenue: 745.50, orders: 31 },
+  { date: '2024-06-03', revenue: 692.75, orders: 29 },
+  { date: '2024-06-04', revenue: 810.30, orders: 34 },
+  { date: '2024-06-05', revenue: 756.80, orders: 32 },
+  { date: '2024-06-06', revenue: 698.40, orders: 29 },
+  { date: '2024-06-07', revenue: 887.95, orders: 37 },
+  { date: '2024-06-08', revenue: 742.80, orders: 31 },
+  { date: '2024-06-09', revenue: 805.72, orders: 34 },
+  { date: '2024-06-10', revenue: 889.50, orders: 37 },
+  { date: '2024-06-11', revenue: 712.48, orders: 30 }
 ];
 
 // Helper function to get filtered products by platform
