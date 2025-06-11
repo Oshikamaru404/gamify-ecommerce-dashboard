@@ -1,4 +1,3 @@
-
 import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
@@ -155,11 +154,19 @@ const IPTVPanel = () => {
             ))}
           </section>
 
-          <div className="text-center mt-16 bg-red-50 rounded-2xl p-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">{t.needHelp}</h3>
-            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              {t.fastActivationDesc}
-            </p>
+          <div className="text-center mt-16 space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
+              <p className="text-blue-800 font-medium">
+                💡 Remember: 1 credit = 1 month of service
+              </p>
+            </div>
+            
+            <div className="bg-red-50 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t.needHelp}</h3>
+              <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                {t.fastActivationDesc}
+              </p>
+            </div>
           </div>
         </div>
       </div>

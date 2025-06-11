@@ -84,13 +84,6 @@ const PlayerPanel = () => {
     }
   ];
 
-  const activationOptions = [
-    { duration: "1 Month", price: 15 },
-    { duration: "3 Months", price: 40 },
-    { duration: "6 Months", price: 70 },
-    { duration: "12 Months", price: 120 }
-  ];
-
   return (
     <StoreLayout>
       <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
@@ -158,20 +151,17 @@ const PlayerPanel = () => {
                       </ul>
 
                       <div className="space-y-3">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-3">Activation Options:</h4>
-                        {activationOptions.map((option, optIdx) => (
-                          <Button 
-                            key={optIdx}
-                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-between py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-2"
-                            onClick={() => handleContactWhatsApp(player.name, `${option.duration} - $${option.price}`)}
-                          >
-                            <div className="flex items-center gap-2">
-                              <MessageCircle size={16} />
-                              <span>{option.duration}</span>
-                            </div>
-                            <span>${option.price}</span>
-                          </Button>
-                        ))}
+                        <h4 className="text-lg font-semibold text-gray-900 mb-3">Activation Option:</h4>
+                        <Button 
+                          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-between py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                          onClick={() => handleContactWhatsApp(player.name, "12 Months - $120")}
+                        >
+                          <div className="flex items-center gap-2">
+                            <MessageCircle size={16} />
+                            <span>12 Months</span>
+                          </div>
+                          <span>$120</span>
+                        </Button>
                       </div>
                     </div>
                   </div>
