@@ -8,7 +8,6 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Order, OrderStatus, PaymentStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -61,37 +60,32 @@ const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({ orders, className
   };
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader>
-        <CardTitle>Recent Orders</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Payment</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+    <div className={cn("overflow-hidden", className)}>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Order ID</TableHead>
+            <TableHead>Customer</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Payment</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {orders.map((order) => (
+            <TableRow key={order.id}>
+              <TableCell className="font-medium">{order.id}</TableCell>
+              <TableCell>{order.customerName}</TableCell>
+              <TableCell>{formatDate(order.createdAt)}</TableCell>
+              <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
+              <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
+              <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
-                <TableCell>{order.customerName}</TableCell>
-                <TableCell>{formatDate(order.createdAt)}</TableCell>
-                <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
-                <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
-                <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

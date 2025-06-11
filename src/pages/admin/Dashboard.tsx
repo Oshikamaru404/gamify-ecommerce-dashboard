@@ -17,6 +17,7 @@ import SalesChart from '@/components/admin/SalesChart';
 import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
 import { useDashboardMetrics, usePackagesByCategory } from '@/hooks/useDashboardMetrics';
 import { useInitializeSubscriptions } from '@/hooks/useInitializeSubscriptions';
+import { orders } from '@/lib/mockData';
 
 const Dashboard = () => {
   const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics();
@@ -32,32 +33,28 @@ const Dashboard = () => {
 
   const mainMetrics = [
     {
-      title: "Total Revenue",
-      value: "$45,231.89",
-      change: "+20.1%",
+      label: "Total Revenue",
+      value: 45231.89,
+      change: 20.1,
       trend: "up" as const,
-      icon: DollarSign,
     },
     {
-      title: "Active Subscriptions", 
-      value: "2,350",
-      change: "+180.1%",
+      label: "Active Subscriptions", 
+      value: 2350,
+      change: 180.1,
       trend: "up" as const,
-      icon: Users,
     },
     {
-      title: "IPTV Packages",
-      value: totalPackages.toString(),
-      change: "+19%",
+      label: "IPTV Packages",
+      value: totalPackages,
+      change: 19,
       trend: "up" as const,
-      icon: Package,
     },
     {
-      title: "Monthly Growth",
-      value: "12.5%",
-      change: "+4.75%", 
+      label: "Monthly Growth",
+      value: 12.5,
+      change: 4.75,
       trend: "up" as const,
-      icon: TrendingUp,
     },
   ];
 
@@ -72,7 +69,7 @@ const Dashboard = () => {
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {mainMetrics.map((metric, index) => (
-          <MetricCard key={index} {...metric} />
+          <MetricCard key={index} metric={metric} />
         ))}
       </div>
 
@@ -142,7 +139,7 @@ const Dashboard = () => {
           <CardTitle>Recent Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          <RecentOrdersTable />
+          <RecentOrdersTable orders={orders.slice(0, 5)} />
         </CardContent>
       </Card>
     </div>
