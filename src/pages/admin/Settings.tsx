@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -71,10 +70,10 @@ const Settings = () => {
   const generalForm = useForm<GeneralSettingsValues>({
     resolver: zodResolver(generalSettingsSchema),
     defaultValues: {
-      storeName: 'GamsGo',
-      storeEmail: 'contact@gamsgo.com',
+      storeName: 'BWIVOX IPTV',
+      storeEmail: 'contact@bwivox.com',
       storePhone: '+1 (555) 123-4567',
-      storeAddress: '123 Game Street, Digital City, 12345',
+      storeAddress: '123 IPTV Street, Digital City, 12345',
       currency: 'USD',
     },
   });
@@ -94,9 +93,9 @@ const Settings = () => {
   const emailForm = useForm<EmailSettingsValues>({
     resolver: zodResolver(emailSettingsSchema),
     defaultValues: {
-      emailHeader: 'GamsGo - Your Digital Game Store',
-      emailFooter: '© GamsGo. All rights reserved.',
-      orderConfirmationTemplate: 'Thank you for your order! Your order #{order_id} has been received and is being processed.',
+      emailHeader: 'BWIVOX IPTV - Premium Streaming Services',
+      emailFooter: '© BWIVOX IPTV. All rights reserved.',
+      orderConfirmationTemplate: 'Thank you for your IPTV subscription order! Your order #{order_id} has been received and is being processed.',
     },
   });
   
@@ -105,7 +104,7 @@ const Settings = () => {
     defaultValues: {
       freeShippingMinimum: 100,
       shippingFee: 4.99,
-      shippingNotes: 'Digital products are delivered instantly via email.',
+      shippingNotes: 'IPTV subscriptions and player licenses are delivered instantly via email.',
     },
   });
   
@@ -132,9 +131,9 @@ const Settings = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">BWIVOX IPTV Settings</h1>
         <p className="text-muted-foreground">
-          Configure your store settings and preferences.
+          Configure your IPTV business settings and preferences.
         </p>
       </div>
       
@@ -154,7 +153,7 @@ const Settings = () => {
           </TabsTrigger>
           <TabsTrigger value="shipping" className="flex gap-2">
             <Truck size={16} />
-            <span>Shipping</span>
+            <span>Delivery</span>
           </TabsTrigger>
         </TabsList>
         
@@ -163,7 +162,7 @@ const Settings = () => {
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
               <CardDescription>
-                Configure your store's basic information.
+                Configure your IPTV business basic information.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -174,7 +173,7 @@ const Settings = () => {
                     name="storeName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Store Name</FormLabel>
+                        <FormLabel>Business Name</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -189,7 +188,7 @@ const Settings = () => {
                       name="storeEmail"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Store Email</FormLabel>
+                          <FormLabel>Business Email</FormLabel>
                           <FormControl>
                             <Input {...field} type="email" />
                           </FormControl>
@@ -203,7 +202,7 @@ const Settings = () => {
                       name="storePhone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Store Phone</FormLabel>
+                          <FormLabel>Business Phone</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -218,7 +217,7 @@ const Settings = () => {
                     name="storeAddress"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Store Address</FormLabel>
+                        <FormLabel>Business Address</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -250,7 +249,7 @@ const Settings = () => {
               <Button 
                 type="submit"
                 form="general-form"
-                className="ml-auto"
+                className="ml-auto bg-red-600 hover:bg-red-700"
               >
                 <Save size={16} className="mr-2" />
                 Save Changes

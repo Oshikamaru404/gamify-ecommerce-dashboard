@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor } from 'lucide-react';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
 type IPTVPackageCardProps = {
@@ -26,21 +26,28 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         return (
           <Badge className="bg-blue-100 text-blue-700 flex items-center gap-1">
             <Tv size={12} />
-            IPTV Subscription
+            Subscription
           </Badge>
         );
-      case 'reseller':
+      case 'panel-iptv':
         return (
           <Badge className="bg-green-100 text-green-700 flex items-center gap-1">
-            <Crown size={12} />
-            Reseller Package
+            <Monitor size={12} />
+            Panel IPTV
           </Badge>
         );
-      case 'player':
+      case 'panel-player':
         return (
           <Badge className="bg-purple-100 text-purple-700 flex items-center gap-1">
             <GamepadIcon size={12} />
-            Player License
+            Panel Player
+          </Badge>
+        );
+      case 'activation-player':
+        return (
+          <Badge className="bg-orange-100 text-orange-700 flex items-center gap-1">
+            <Crown size={12} />
+            Activation Player
           </Badge>
         );
       default:

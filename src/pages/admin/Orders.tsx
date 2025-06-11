@@ -57,12 +57,10 @@ const Orders = () => {
   });
   
   const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    // In a real application, this would update the order status in the database
     toast.success(`Order ${orderId} status updated to ${newStatus}`);
   };
   
   const handlePaymentStatusChange = (orderId: string, newStatus: PaymentStatus) => {
-    // In a real application, this would update the payment status in the database
     toast.success(`Order ${orderId} payment status updated to ${newStatus}`);
   };
   
@@ -109,17 +107,17 @@ const Orders = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
+        <h1 className="text-3xl font-bold tracking-tight">BWIVOX IPTV Orders</h1>
         <p className="text-muted-foreground">
-          Manage your customer orders and track their status.
+          Manage your IPTV customer orders and track their status.
         </p>
       </div>
       
       <Card className="overflow-hidden">
-        <CardHeader className="bg-soft-gray">
+        <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle>Order Management</CardTitle>
-            <Button variant="default" size="sm">
+            <CardTitle>IPTV Order Management</CardTitle>
+            <Button variant="default" size="sm" className="bg-red-600 hover:bg-red-700">
               <FileText className="mr-2 h-4 w-4" />
               Export Orders
             </Button>
@@ -132,7 +130,7 @@ const Orders = () => {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search orders..."
+                  placeholder="Search IPTV orders..."
                   className="pl-8"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -263,10 +261,10 @@ const Orders = () => {
             </Table>
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-soft-blue">
-                <ShoppingCart size={28} className="text-primary" />
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+                <ShoppingCart size={28} className="text-red-600" />
               </div>
-              <h3 className="mt-4 text-lg font-semibold">No orders found</h3>
+              <h3 className="mt-4 text-lg font-semibold">No IPTV orders found</h3>
               <p className="mb-4 mt-2 text-sm text-muted-foreground">
                 No orders match your current search criteria.
               </p>
