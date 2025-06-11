@@ -1,45 +1,76 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Star, Check, Zap } from 'lucide-react';
+import { ArrowLeft, Star, Check, Zap, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
-import { contentService } from '@/lib/contentService';
-import { SubscriptionContent } from '@/lib/contentTypes';
+import { Card } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Subscription = () => {
   const { t } = useLanguage();
-  const [subscriptions, setSubscriptions] = useState<SubscriptionContent[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadSubscriptions = () => {
-      try {
-        const content = contentService.getContent();
-        // Filtrer seulement les abonnements actifs
-        const activeSubscriptions = content.subscriptions.filter(sub => sub.enabled);
-        setSubscriptions(activeSubscriptions);
-      } catch (error) {
-        console.error('Error loading subscriptions:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSubscriptions();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">{t.loadingSubscriptions}</p>
-        </div>
-      </div>
-    );
-  }
+  const subscriptionProducts = [
+    {
+      id: "strong-8k",
+      name: "STRONG 8K IPTV 🚀",
+      price: 12.99,
+      features: [
+        "8K Ultra HD Quality",
+        "5000+ Live Channels",
+        "Movies & Series VOD",
+        "Anti-Freeze Technology",
+        "24/7 Support"
+      ]
+    },
+    {
+      id: "trex-8k",
+      name: "TREX 8K IPTV 🦖",
+      price: 10.99,
+      features: [
+        "8K/4K Streaming",
+        "4000+ Channels",
+        "Sports Packages",
+        "Movie Collection",
+        "Fast Servers"
+      ]
+    },
+    {
+      id: "promax-4k",
+      name: "PROMAX 4K IPTV ⚡",
+      price: 18.99,
+      features: [
+        "4K Premium Technology",
+        "8000+ Channels",
+        "4K Quality",
+        "Global Content",
+        "Premium Support"
+      ]
+    },
+    {
+      id: "tivione-4k",
+      name: "TIVIONE 4K IPTV 📺",
+      price: 13.99,
+      features: [
+        "Full 4K Streaming",
+        "6000+ Channels",
+        "VOD Library",
+        "Stable Connection",
+        "Multi-Platform"
+      ]
+    },
+    {
+      id: "b1g-4k",
+      name: "B1G 4K IPTV 🎬",
+      price: 16.99,
+      features: [
+        "Big Entertainment",
+        "9000+ Channels",
+        "4K Resolution",
+        "Sports & Movies",
+        "24/7 Service"
+      ]
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -85,35 +116,33 @@ const Subscription = () => {
 
       {/* Subscriptions Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {subscriptions.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-            {subscriptions.map((subscription) => (
-              <div key={subscription.id} className="w-full max-w-sm">
-                <ProductSubscriptionCard
-                  name={subscription.name}
-                  price={subscription.price}
-                  features={subscription.features}
-                  bgColor={subscription.bgColor}
-                  accentColor={subscription.accentColor}
-                />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+          {subscriptionProducts.map((product) => (
+            <Card key={product.id} className="w-full max-w-sm p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-white border-2 border-gray-100 hover:border-red-200">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{product.name}</h3>
+                <div className="text-4xl font-bold text-red-600 mb-2">€{product.price}</div>
+                <div className="text-gray-600">par mois</div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              {t.noSubscriptionsAvailable}
-            </h2>
-            <p className="text-gray-600 mb-8">
-              {t.noSubscriptionsMessage}
-            </p>
-            <Button asChild>
-              <Link to="/">
-                {t.backToHome}
-              </Link>
-            </Button>
-          </div>
-        )}
+              
+              <ul className="space-y-3 mb-8">
+                {product.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-sm">
+                    <Check size={16} className="text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700">
+                <Link to={`/product/${product.id}`} className="flex items-center justify-center gap-2">
+                  Voir les options
+                  <ArrowRight size={16} />
+                </Link>
+              </Button>
+            </Card>
+          ))}
+        </div>
       </div>
 
       {/* Features Section */}

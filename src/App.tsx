@@ -17,6 +17,7 @@ import PlayerPanel from "./pages/PlayerPanel";
 import Support from "./pages/Support";
 import HowToBuy from "./pages/HowToBuy";
 import Blog from "./pages/Blog";
+import ProductDetail from "./pages/ProductDetail";
 
 // Admin Routes
 import AdminLayout from "./layouts/AdminLayout";
@@ -42,6 +43,7 @@ const App = () => (
             {/* IPTV Service Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/subscription" element={<Subscription />} />
+            <Route path="/product/:productId" element={<ProductDetail />} />
             <Route path="/activation" element={<Activation />} />
             <Route path="/reseller" element={<Reseller />} />
             <Route path="/iptv-panel" element={<IPTVPanel />} />

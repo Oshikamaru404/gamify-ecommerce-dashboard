@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
-import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import { Button } from '@/components/ui/button';
-import { Zap } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Zap, ArrowRight, Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Home = () => {
@@ -11,6 +12,7 @@ const Home = () => {
 
   const subscriptionProducts = [
     {
+      id: "strong-8k",
       name: "STRONG 8K IPTV 🚀",
       price: 12.99,
       features: [
@@ -22,6 +24,7 @@ const Home = () => {
       ]
     },
     {
+      id: "trex-8k",
       name: "TREX 8K IPTV 🦖",
       price: 10.99,
       features: [
@@ -33,6 +36,7 @@ const Home = () => {
       ]
     },
     {
+      id: "promax-4k",
       name: "PROMAX 4K IPTV ⚡",
       price: 18.99,
       features: [
@@ -44,6 +48,7 @@ const Home = () => {
       ]
     },
     {
+      id: "tivione-4k",
       name: "TIVIONE 4K IPTV 📺",
       price: 13.99,
       features: [
@@ -55,6 +60,7 @@ const Home = () => {
       ]
     },
     {
+      id: "b1g-4k",
       name: "B1G 4K IPTV 🎬",
       price: 16.99,
       features: [
@@ -103,13 +109,30 @@ const Home = () => {
               {t.subscriptionsTitle.split(' ')[0]} {t.subscriptionsTitle.split(' ')[1]} <span className="text-red-600">{t.subscriptionsTitle.split(' ')[2]}</span>
             </h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {subscriptionProducts.map((product, index) => (
-                <ProductSubscriptionCard 
-                  key={index} 
-                  {...product}
-                  bgColor="bg-white"
-                  accentColor="text-red-600"
-                />
+              {subscriptionProducts.map((product) => (
+                <Card key={product.id} className="p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-white border-2 border-gray-100 hover:border-red-200">
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">{product.name}</h3>
+                    <div className="text-4xl font-bold text-red-600 mb-2">€{product.price}</div>
+                    <div className="text-gray-600">par mois</div>
+                  </div>
+                  
+                  <ul className="space-y-3 mb-8">
+                    {product.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-sm">
+                        <Check size={16} className="text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700">
+                    <Link to={`/product/${product.id}`} className="flex items-center justify-center gap-2">
+                      Voir les options
+                      <ArrowRight size={16} />
+                    </Link>
+                  </Button>
+                </Card>
               ))}
             </div>
           </div>

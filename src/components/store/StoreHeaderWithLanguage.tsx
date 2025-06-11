@@ -80,11 +80,11 @@ const StoreHeaderWithLanguage: React.FC = () => {
               isPanelDropdownOpen ? "opacity-100 visible" : "opacity-0 invisible"
             )}>
               <Link 
-                to="/activation" 
+                to="/iptv-panel" 
                 className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                 onClick={() => setIsPanelDropdownOpen(false)}
               >
-                {t.activation}
+                {t.panelIptv}
               </Link>
               <Link 
                 to="/player-panel" 
@@ -148,11 +148,11 @@ const StoreHeaderWithLanguage: React.FC = () => {
             <div className="text-lg font-semibold text-gray-800 mb-2">{t.reseller}</div>
             <div className="ml-4 space-y-2">
               <Link
-                to="/activation"
+                to="/iptv-panel"
                 className="block py-2 text-base text-gray-600"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {t.activation}
+                {t.panelIptv}
               </Link>
               <Link
                 to="/player-panel"
