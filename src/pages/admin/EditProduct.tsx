@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -64,6 +63,7 @@ const platforms: { value: Platform; label: string }[] = [
   { value: 'xbox', label: 'Xbox' },
   { value: 'nintendo', label: 'Nintendo' },
   { value: 'mobile', label: 'Mobile' },
+  { value: 'iptv', label: 'IPTV' },
 ];
 
 const productSchema = z.object({
@@ -72,7 +72,7 @@ const productSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   salePrice: z.coerce.number().min(0, 'Sale price must be a positive number').optional().nullable(),
-  platform: z.enum(['pc', 'playstation', 'xbox', 'nintendo', 'mobile']),
+  platform: z.enum(['pc', 'playstation', 'xbox', 'nintendo', 'mobile', 'iptv']),
   imageUrl: z.string().min(1, 'Image URL is required'),
   genre: z.array(z.string()).min(1, 'At least one genre is required'),
   rating: z.coerce.number().min(0, 'Rating must be a positive number').max(5, 'Rating must be 5 or lower'),
