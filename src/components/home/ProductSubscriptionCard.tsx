@@ -59,13 +59,12 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   return (
     <div className="group perspective h-full">
       <Card className={cn(
-        "relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 border-2 border-gray-100 hover:border-red-200 h-full flex flex-col", 
+        "relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 border-2 border-gray-100 hover:border-red-200 h-full flex flex-col min-h-[500px]", 
         bgColor
       )}>
-        {/* Golden Ratio Division: ~38% for icon section, ~62% for content */}
         
-        {/* First Part - Large Icon Section (38% of height) */}
-        <div className="relative flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center rounded-b-[2rem]" style={{ height: '38%', minHeight: '140px' }}>
+        {/* Icon Section - Fixed height */}
+        <div className="relative flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center rounded-b-[2rem] h-32">
           {/* Decorative elements */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)] rounded-b-[2rem]"></div>
           
@@ -82,14 +81,11 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           <div className="absolute top-8 right-8 w-1 h-1 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
-        {/* Spacing between sections */}
-        <div className="h-4"></div>
-
-        {/* Second Part - Content Section (62% of height) */}
-        <div className="flex-1 flex flex-col mx-4 bg-gray-50/30 rounded-t-[2rem] rounded-b-xl" style={{ minHeight: '58%' }}>
-          {/* Service Name and Pricing */}
-          <div className="px-6 py-6 text-center">
-            <h3 className="mb-3 text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors duration-300">
+        {/* Content Section - Flexible height */}
+        <div className="flex-1 flex flex-col p-6 bg-gray-50/30 rounded-t-[2rem] rounded-b-xl">
+          {/* Service Name and Pricing - Fixed height */}
+          <div className="text-center mb-4">
+            <h3 className="mb-3 text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors duration-300 min-h-[2.5rem] flex items-center justify-center">
               {name}
             </h3>
             
@@ -102,29 +98,29 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             </div>
           </div>
 
-          {/* Features Section */}
-          <div className="flex-1 px-6 py-2">
-            <ul className="space-y-2">
-              {features.slice(0, 5).map((feature, index) => (
+          {/* Features Section - Flexible height */}
+          <div className="flex-1 mb-6">
+            <ul className="space-y-3">
+              {features.map((feature, index) => (
                 <li 
                   key={index} 
-                  className="flex items-start gap-2 text-gray-700 opacity-0 animate-fade-in transition-all duration-300"
+                  className="flex items-start gap-3 text-gray-700 opacity-0 animate-fade-in transition-all duration-300"
                   style={{ animationDelay: `${index * 100}ms`, opacity: 1 }}
                 >
                   <CheckCircle2 
-                    size={14} 
-                    className={cn("mt-1 flex-shrink-0 transition-colors duration-300", accentColor)} 
+                    size={16} 
+                    className={cn("mt-0.5 flex-shrink-0 transition-colors duration-300", accentColor)} 
                   />
-                  <span className="text-xs leading-relaxed">{feature}</span>
+                  <span className="text-sm leading-relaxed">{feature}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Bottom Action Section - Respecting golden ratio */}
-          <div className="px-6 pb-6 pt-2" style={{ height: '38%', minHeight: '80px' }}>
+          {/* Action Section - Fixed height */}
+          <div className="mt-auto">
             <Button 
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 text-xs shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-6 rounded-xl"
+              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-4 rounded-xl"
               onClick={handleTryNow}
             >
               {t.buyNow}
@@ -132,13 +128,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             
             <Link 
               to={`/product/${productId}`}
-              className="block w-full text-red-600 hover:text-red-700 text-xs font-medium transition-colors duration-300 text-center"
+              className="block w-full text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-300 text-center py-2"
             >
               {t.viewMore}
             </Link>
-            
-            {/* Additional space under button as requested */}
-            <div className="h-4"></div>
           </div>
         </div>
 
