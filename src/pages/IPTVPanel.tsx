@@ -84,6 +84,13 @@ const IPTVPanel = () => {
             <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-600">
               {t.iptvPanelSubtitle}
             </p>
+            
+            {/* Credits Disclaimer */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-8">
+              <p className="text-blue-800 font-medium">
+                💡 Each credit is equivalent to 1 month of service activation
+              </p>
+            </div>
           </section>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
@@ -126,7 +133,8 @@ const IPTVPanel = () => {
                       <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
                         <div className="text-center">
                           <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
-                          <div className="text-sm text-gray-600 mb-4">{t.features}</div>
+                          <div className="text-sm text-gray-600 mb-2">Credits</div>
+                          <div className="text-xs text-blue-600 mb-4">({option.credits} months)</div>
                           <div className="text-2xl font-bold text-gray-900 mb-4">{t.currency}{option.price}</div>
                           <div className="text-sm text-gray-500 mb-6">
                             {t.currency}{(option.price / option.credits).toFixed(1)} {t.perMonth}

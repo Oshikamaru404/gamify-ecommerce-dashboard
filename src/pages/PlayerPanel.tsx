@@ -9,8 +9,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 const PlayerPanel = () => {
   const { t } = useLanguage();
 
-  const handleContactWhatsApp = (playerName: string) => {
-    const message = `${t.contact} ${playerName}`;
+  const handleContactWhatsApp = (playerName: string, duration: string) => {
+    const message = `${t.contact} ${playerName} - ${duration}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -84,6 +84,13 @@ const PlayerPanel = () => {
     }
   ];
 
+  const activationOptions = [
+    { duration: "1 Month", price: 15 },
+    { duration: "3 Months", price: 40 },
+    { duration: "6 Months", price: 70 },
+    { duration: "12 Months", price: 120 }
+  ];
+
   return (
     <StoreLayout>
       <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
@@ -132,14 +139,10 @@ const PlayerPanel = () => {
                       <h3 className="mb-4 text-2xl font-bold text-gray-900 group-hover:text-red-600 transition-colors duration-300">
                         {player.name}
                       </h3>
-                      <div className="relative">
-                        <div className="text-lg font-semibold text-gray-700 mb-2">{t.playerActivation}</div>
-                        <div className="text-sm text-gray-500">{t.premiumQuality}</div>
-                      </div>
                     </div>
 
                     <div className="flex-grow">
-                      <ul className="space-y-4">
+                      <ul className="space-y-4 mb-6">
                         {player.features.map((feature, idx) => (
                           <li 
                             key={idx} 
@@ -153,16 +156,23 @@ const PlayerPanel = () => {
                           </li>
                         ))}
                       </ul>
-                    </div>
 
-                    <div className="mt-8">
-                      <Button 
-                        className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center gap-2 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        onClick={() => handleContactWhatsApp(player.name)}
-                      >
-                        <MessageCircle size={20} />
-                        {t.configurePlayer}
-                      </Button>
+                      <div className="space-y-3">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-3">Activation Options:</h4>
+                        {activationOptions.map((option, optIdx) => (
+                          <Button 
+                            key={optIdx}
+                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex items-center justify-between py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-2"
+                            onClick={() => handleContactWhatsApp(player.name, `${option.duration} - $${option.price}`)}
+                          >
+                            <div className="flex items-center gap-2">
+                              <MessageCircle size={16} />
+                              <span>{option.duration}</span>
+                            </div>
+                            <span>${option.price}</span>
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </Card>
