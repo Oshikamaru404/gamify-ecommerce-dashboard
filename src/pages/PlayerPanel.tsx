@@ -3,11 +3,14 @@ import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Play, Palette, Zap, Star, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, Play, Palette, Zap, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const PlayerPanel = () => {
+  const { t } = useLanguage();
+
   const handleContactWhatsApp = (playerName: string) => {
-    const message = `Bonjour, je suis intéressé par l'activation ${playerName} pour 12 mois. Pouvez-vous me donner plus d'informations?`;
+    const message = `${t.contact} ${playerName}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -17,66 +20,66 @@ const PlayerPanel = () => {
       name: "VU Player Pro",
       icon: "📱",
       features: [
-        "Interface moderne et intuitive",
-        "Support 4K/8K",
-        "Compatible multi-plateforme",
-        "Activation immédiate",
-        "Support technique inclus"
+        t.premiumQuality,
+        t.ultraHd4k,
+        t.fastActivation,
+        t.instantActivation,
+        t.support247
       ]
     },
     {
       name: "IBO Player Pro", 
       icon: "🎮",
       features: [
-        "Player professionnel",
-        "Optimisé pour Android TV",
-        "Interface personnalisable",
-        "Activation rapide",
-        "Guide complet inclus"
+        t.premiumQuality,
+        t.ultraHd4k,
+        t.fastActivation,
+        t.instantActivation,
+        t.support247
       ]
     },
     {
       name: "STZ Player",
       icon: "📺",
       features: [
-        "Streaming haute qualité",
-        "Compatible Smart TV",
-        "Navigation simplifiée",
-        "Configuration automatique",
-        "Assistance 24/7"
+        t.premiumQuality,
+        t.ultraHd4k,
+        t.fastActivation,
+        t.instantActivation,
+        t.support247
       ]
     },
     {
       name: "RELAX Player",
       icon: "🏠",
       features: [
-        "Confort d'utilisation optimal",
-        "Design épuré",
-        "Performance stable",
-        "Installation facile",
-        "Support multilingue"
+        t.premiumQuality,
+        t.ultraHd4k,
+        t.fastActivation,
+        t.instantActivation,
+        t.support247
       ]
     },
     {
       name: "HOT Player",
       icon: "🔥",
       features: [
-        "Technologie avancée",
-        "Vitesse de chargement rapide",
-        "Qualité vidéo supérieure",
-        "Mise à jour automatique",
-        "Configuration professionnelle"
+        t.premiumQuality,
+        t.ultraHd4k,
+        t.fastActivation,
+        t.instantActivation,
+        t.support247
       ]
     },
     {
       name: "ARC Player",
       icon: "⚡",
       features: [
-        "Architecture moderne",
-        "Performance optimisée",
-        "Compatibilité étendue",
-        "Interface révolutionnaire",
-        "Innovation technologique"
+        t.premiumQuality,
+        t.ultraHd4k,
+        t.fastActivation,
+        t.instantActivation,
+        t.support247
       ]
     }
   ];
@@ -87,42 +90,40 @@ const PlayerPanel = () => {
         <div className="container py-16">
           <section className="mb-20 text-center">
             <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-gray-900 md:text-6xl">
-              Panel <span className="text-red-500">Player</span>
+              {t.playerPanelTitle}
             </h1>
             <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-600">
-              Activez votre player IPTV préféré pour 12 mois et profitez d'une expérience de streaming exceptionnelle.
+              {t.playerPanelSubtitle}
             </p>
           </section>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
             <Card className="p-8 text-center hover:shadow-xl transition-all">
               <Play className="h-16 w-16 text-red-500 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-3">Players Premium</h3>
-              <p className="text-gray-600">Large choix de players professionnels</p>
+              <h3 className="text-xl font-bold mb-3">{t.premiumQuality}</h3>
+              <p className="text-gray-600">{t.premiumQualityDesc}</p>
             </Card>
             
             <Card className="p-8 text-center hover:shadow-xl transition-all">
               <Palette className="h-16 w-16 text-red-500 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-3">Interface Optimisée</h3>
-              <p className="text-gray-600">Interfaces modernes et intuitives</p>
+              <h3 className="text-xl font-bold mb-3">{t.fastActivation}</h3>
+              <p className="text-gray-600">{t.fastActivationDesc}</p>
             </Card>
             
             <Card className="p-8 text-center hover:shadow-xl transition-all">
               <Zap className="h-16 w-16 text-red-500 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-3">Activation Instantanée</h3>
-              <p className="text-gray-600">Activation immédiate après commande</p>
+              <h3 className="text-xl font-bold mb-3">{t.instantActivation}</h3>
+              <p className="text-gray-600">{t.fastActivationDesc}</p>
             </Card>
           </div>
 
-          {/* Players List */}
           <section className="mb-20">
             <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
-              Players <span className="text-red-600">Disponibles</span>
+              {t.configurePlayer}
             </h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {players.map((player, index) => (
                 <Card key={index} className="relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 hover:-translate-y-2 border-2 border-gray-100 hover:border-red-200 h-full bg-white">
-                  {/* Decorative gradient overlay */}
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-red-600 to-red-500"></div>
                   
                   <div className="p-8 h-full flex flex-col relative z-10">
@@ -132,8 +133,8 @@ const PlayerPanel = () => {
                         {player.name}
                       </h3>
                       <div className="relative">
-                        <div className="text-lg font-semibold text-gray-700 mb-2">Activation 12 mois</div>
-                        <div className="text-sm text-gray-500">Player premium</div>
+                        <div className="text-lg font-semibold text-gray-700 mb-2">{t.playerActivation}</div>
+                        <div className="text-sm text-gray-500">{t.premiumQuality}</div>
                       </div>
                     </div>
 
@@ -160,7 +161,7 @@ const PlayerPanel = () => {
                         onClick={() => handleContactWhatsApp(player.name)}
                       >
                         <MessageCircle size={20} />
-                        Activer {player.name}
+                        {t.configurePlayer}
                       </Button>
                     </div>
                   </div>
