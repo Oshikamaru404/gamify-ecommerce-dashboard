@@ -60,9 +60,9 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">BWIVOX IPTV Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">BWIVOX IPTV Admin Dashboard</h1>
           <p className="text-muted-foreground">
-            Manage your IPTV packages, subscriptions, and business metrics.
+            Comprehensive management center for your IPTV business operations.
           </p>
         </div>
         <Tabs defaultValue={timeRange} onValueChange={(value) => setTimeRange(value as TimeRange)}>
@@ -84,12 +84,20 @@ const Dashboard = () => {
       )}
 
       <div className="grid gap-6 lg:grid-cols-7">
-        <SalesChart className="lg:col-span-5" />
+        <Card className="lg:col-span-5">
+          <CardHeader>
+            <CardTitle>Revenue Analytics</CardTitle>
+            <CardDescription>Track your IPTV business performance over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SalesChart />
+          </CardContent>
+        </Card>
         
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Package Categories</CardTitle>
-            <CardDescription>Distribution of active packages</CardDescription>
+            <CardTitle>Package Distribution</CardTitle>
+            <CardDescription>Active packages by category</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -97,11 +105,14 @@ const Dashboard = () => {
                 <div key={category} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {getCategoryIcon(category)}
-                    <span className="capitalize font-medium">{category}</span>
+                    <span className="capitalize font-medium">{category} Packages</span>
                   </div>
                   <Badge variant="secondary">{count}</Badge>
                 </div>
               ))}
+              {(!categoryData || Object.keys(categoryData).length === 0) && (
+                <p className="text-muted-foreground text-sm">No packages found</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -112,9 +123,9 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-yellow-500" />
-              Featured Packages
+              Featured IPTV Packages
             </CardTitle>
-            <CardDescription>Your premium highlighted packages</CardDescription>
+            <CardDescription>Premium packages highlighted for customers</CardDescription>
           </CardHeader>
           <CardContent>
             {!packagesLoading && featuredPackages.length > 0 ? (
@@ -124,14 +135,23 @@ const Dashboard = () => {
                     {pkg.icon && <span className="text-2xl">{pkg.icon}</span>}
                     <div className="flex-1">
                       <p className="font-medium">{pkg.name}</p>
-                      <p className="text-sm text-muted-foreground">{pkg.category}</p>
+                      <p className="text-sm text-muted-foreground capitalize">{pkg.category} Package</p>
                     </div>
                     <Badge className="bg-yellow-100 text-yellow-700">Featured</Badge>
                   </div>
                 ))}
+                {featuredPackages.length > 3 && (
+                  <p className="text-sm text-muted-foreground text-center pt-2">
+                    +{featuredPackages.length - 3} more featured packages
+                  </p>
+                )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">No featured packages</p>
+              <div className="text-center py-8">
+                <Crown className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">No featured packages yet</p>
+                <p className="text-sm text-muted-foreground">Mark packages as featured to highlight them</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -140,9 +160,9 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5 text-blue-500" />
-              Recent Packages
+              Recent IPTV Packages
             </CardTitle>
-            <CardDescription>Recently added packages</CardDescription>
+            <CardDescription>Newly added packages in your catalog</CardDescription>
           </CardHeader>
           <CardContent>
             {!packagesLoading && activePackages.length > 0 ? (
@@ -152,18 +172,59 @@ const Dashboard = () => {
                     {pkg.icon && <span className="text-2xl">{pkg.icon}</span>}
                     <div className="flex-1">
                       <p className="font-medium">{pkg.name}</p>
-                      <p className="text-sm text-muted-foreground">{pkg.category}</p>
+                      <p className="text-sm text-muted-foreground capitalize">{pkg.category} Package</p>
                     </div>
                     <Badge className="bg-blue-100 text-blue-700">Active</Badge>
                   </div>
                 ))}
+                {activePackages.length > 3 && (
+                  <p className="text-sm text-muted-foreground text-center pt-2">
+                    +{activePackages.length - 3} more active packages
+                  </p>
+                )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">No active packages</p>
+              <div className="text-center py-8">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">No active packages</p>
+                <p className="text-sm text-muted-foreground">Create your first IPTV package to get started</p>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Common administrative tasks for your IPTV business</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg border">
+              <Tv className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="font-medium">IPTV Subscriptions</p>
+                <p className="text-sm text-muted-foreground">Manage customer subscriptions</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg border">
+              <GamepadIcon className="h-8 w-8 text-purple-600" />
+              <div>
+                <p className="font-medium">Player Licenses</p>
+                <p className="text-sm text-muted-foreground">Handle player software licenses</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg border">
+              <Crown className="h-8 w-8 text-orange-600" />
+              <div>
+                <p className="font-medium">Reseller Accounts</p>
+                <p className="text-sm text-muted-foreground">Manage reseller partnerships</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

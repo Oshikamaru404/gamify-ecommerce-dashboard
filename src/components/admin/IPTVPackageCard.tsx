@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Edit, Trash2, Star } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown } from 'lucide-react';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
 type IPTVPackageCardProps = {
@@ -23,11 +23,26 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'subscription':
-        return <Badge className="bg-blue-100 text-blue-700">Subscription</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-700 flex items-center gap-1">
+            <Tv size={12} />
+            IPTV Subscription
+          </Badge>
+        );
       case 'reseller':
-        return <Badge className="bg-green-100 text-green-700">Reseller</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-700 flex items-center gap-1">
+            <Crown size={12} />
+            Reseller Package
+          </Badge>
+        );
       case 'player':
-        return <Badge className="bg-purple-100 text-purple-700">Player</Badge>;
+        return (
+          <Badge className="bg-purple-100 text-purple-700 flex items-center gap-1">
+            <GamepadIcon size={12} />
+            Player License
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{category}</Badge>;
     }
@@ -50,13 +65,13 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-red-500">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             {pkg.icon && <span className="text-2xl">{pkg.icon}</span>}
             <div>
-              <CardTitle className="text-lg">{pkg.name}</CardTitle>
+              <CardTitle className="text-lg text-gray-900">{pkg.name}</CardTitle>
               <div className="flex gap-2 mt-1">
                 {getCategoryBadge(pkg.category)}
                 {getStatusBadge(pkg.status)}
@@ -65,27 +80,27 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hover:bg-red-50">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit(pkg)}>
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                Edit Package
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => onToggleFeatured(pkg.id, pkg.status !== 'featured')}
               >
                 <Star className="mr-2 h-4 w-4" />
-                {pkg.status === 'featured' ? 'Remove Featured' : 'Mark Featured'}
+                {pkg.status === 'featured' ? 'Remove Featured' : 'Mark as Featured'}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 className="text-destructive focus:text-destructive"
                 onClick={() => onDelete(pkg.id)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                Delete Package
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -93,30 +108,38 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
       </CardHeader>
       <CardContent>
         {pkg.description && (
-          <p className="text-sm text-gray-600 mb-3">{pkg.description}</p>
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{pkg.description}</p>
         )}
         
         <div className="space-y-2">
-          <h4 className="font-medium text-sm">Pricing (Credits):</h4>
+          <h4 className="font-medium text-sm text-gray-900">Credit-Based Pricing:</h4>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {pkg.price_10_credits && (
-              <div>10: ${pkg.price_10_credits}</div>
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">10 Credits:</span> ${pkg.price_10_credits}
+              </div>
             )}
             {pkg.price_25_credits && (
-              <div>25: ${pkg.price_25_credits}</div>
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">25 Credits:</span> ${pkg.price_25_credits}
+              </div>
             )}
             {pkg.price_50_credits && (
-              <div>50: ${pkg.price_50_credits}</div>
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">50 Credits:</span> ${pkg.price_50_credits}
+              </div>
             )}
             {pkg.price_100_credits && (
-              <div>100: ${pkg.price_100_credits}</div>
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">100 Credits:</span> ${pkg.price_100_credits}
+              </div>
             )}
           </div>
         </div>
 
         {pkg.features && pkg.features.length > 0 && (
           <div className="mt-3">
-            <h4 className="font-medium text-sm mb-1">Features:</h4>
+            <h4 className="font-medium text-sm mb-1 text-gray-900">Package Features:</h4>
             <div className="flex flex-wrap gap-1">
               {pkg.features.slice(0, 3).map((feature, idx) => (
                 <Badge key={idx} variant="outline" className="text-xs">
@@ -125,7 +148,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
               ))}
               {pkg.features.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{pkg.features.length - 3} more
+                  +{pkg.features.length - 3} more features
                 </Badge>
               )}
             </div>
