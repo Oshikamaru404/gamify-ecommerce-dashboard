@@ -27,7 +27,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     name: '',
-    category: 'subscription' as 'subscription' | 'reseller' | 'player',
+    category: 'subscription' as 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'activation-player',
     description: '',
     icon: '',
     features: [] as string[],
@@ -151,6 +151,8 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
                   <SelectItem value="subscription">Subscription</SelectItem>
                   <SelectItem value="reseller">Reseller</SelectItem>
                   <SelectItem value="player">Player</SelectItem>
+                  <SelectItem value="panel-iptv">Panel IPTV</SelectItem>
+                  <SelectItem value="activation-player">Activation Player</SelectItem>
                 </SelectContent>
               </Select>
             </div>

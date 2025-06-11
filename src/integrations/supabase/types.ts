@@ -116,7 +116,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      package_category: "subscription" | "reseller" | "player" | "panel-iptv"
+      package_category:
+        | "subscription"
+        | "reseller"
+        | "player"
+        | "panel-iptv"
+        | "activation-player"
       package_status: "active" | "inactive" | "featured"
     }
     CompositeTypes: {
@@ -233,7 +238,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      package_category: ["subscription", "reseller", "player", "panel-iptv"],
+      package_category: [
+        "subscription",
+        "reseller",
+        "player",
+        "panel-iptv",
+        "activation-player",
+      ],
       package_status: ["active", "inactive", "featured"],
     },
   },

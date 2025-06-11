@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import { Link } from 'react-router-dom';
 
 const ManageProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'subscription' | 'reseller' | 'player'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'activation-player'>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [packageToDelete, setPackageToDelete] = useState<IPTVPackage | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -44,6 +43,8 @@ const ManageProducts = () => {
     subscription: filteredPackages.filter(pkg => pkg.category === 'subscription'),
     reseller: filteredPackages.filter(pkg => pkg.category === 'reseller'),
     player: filteredPackages.filter(pkg => pkg.category === 'player'),
+    'panel-iptv': filteredPackages.filter(pkg => pkg.category === 'panel-iptv'),
+    'activation-player': filteredPackages.filter(pkg => pkg.category === 'activation-player'),
   };
   
   const handleDeleteClick = (id: string) => {
@@ -203,6 +204,8 @@ const ManageProducts = () => {
                       <SelectItem value="subscription">Subscriptions</SelectItem>
                       <SelectItem value="player">Player Licenses</SelectItem>
                       <SelectItem value="reseller">Reseller Packages</SelectItem>
+                      <SelectItem value="panel-iptv">Panel IPTV</SelectItem>
+                      <SelectItem value="activation-player">Activation Player</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -217,7 +220,7 @@ const ManageProducts = () => {
                 </div>
               ) : categoryFilter === 'all' ? (
                 <Tabs defaultValue="subscription" className="space-y-4">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="subscription">
                       Subscriptions ({packagesByCategory.subscription.length})
                     </TabsTrigger>
@@ -226,6 +229,12 @@ const ManageProducts = () => {
                     </TabsTrigger>
                     <TabsTrigger value="player">
                       Player ({packagesByCategory.player.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="panel-iptv">
+                      Panel IPTV ({packagesByCategory['panel-iptv'].length})
+                    </TabsTrigger>
+                    <TabsTrigger value="activation-player">
+                      Activation ({packagesByCategory['activation-player'].length})
                     </TabsTrigger>
                   </TabsList>
 
@@ -239,6 +248,14 @@ const ManageProducts = () => {
 
                   <TabsContent value="player">
                     {renderPackageGrid(packagesByCategory.player, "No player packages found")}
+                  </TabsContent>
+
+                  <TabsContent value="panel-iptv">
+                    {renderPackageGrid(packagesByCategory['panel-iptv'], "No panel IPTV packages found")}
+                  </TabsContent>
+
+                  <TabsContent value="activation-player">
+                    {renderPackageGrid(packagesByCategory['activation-player'], "No activation player packages found")}
                   </TabsContent>
                 </Tabs>
               ) : (
