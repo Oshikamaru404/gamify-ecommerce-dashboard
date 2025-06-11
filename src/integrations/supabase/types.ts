@@ -9,7 +9,105 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      dashboard_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_date: string | null
+          metric_name: string
+          metric_value: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_date?: string | null
+          metric_name: string
+          metric_value: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_date?: string | null
+          metric_name?: string
+          metric_value?: number
+        }
+        Relationships: []
+      }
+      iptv_packages: {
+        Row: {
+          category: Database["public"]["Enums"]["package_category"]
+          created_at: string | null
+          description: string | null
+          features: string[] | null
+          icon: string | null
+          id: string
+          name: string
+          price_10_credits: number | null
+          price_100_credits: number | null
+          price_25_credits: number | null
+          price_50_credits: number | null
+          sort_order: number | null
+          status: Database["public"]["Enums"]["package_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["package_category"]
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          icon?: string | null
+          id?: string
+          name: string
+          price_10_credits?: number | null
+          price_100_credits?: number | null
+          price_25_credits?: number | null
+          price_50_credits?: number | null
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["package_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["package_category"]
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          icon?: string | null
+          id?: string
+          name?: string
+          price_10_credits?: number | null
+          price_100_credits?: number | null
+          price_25_credits?: number | null
+          price_50_credits?: number | null
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["package_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +116,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      package_category: "subscription" | "reseller" | "player"
+      package_status: "active" | "inactive" | "featured"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +232,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      package_category: ["subscription", "reseller", "player"],
+      package_status: ["active", "inactive", "featured"],
+    },
   },
 } as const

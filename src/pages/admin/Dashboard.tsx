@@ -4,23 +4,65 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
-import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
-import { metrics, orders } from '@/lib/mockData';
+import { useDashboardMetrics, usePackagesByCategory } from '@/hooks/useDashboardMetrics';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { Badge } from '@/components/ui/badge';
+import { Package, Users, DollarSign, TrendingUp, Tv, GamepadIcon, Crown } from 'lucide-react';
 import { TimeRange } from '@/lib/types';
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
-  
-  // Filter orders for the recent orders table
-  const recentOrders = orders.slice(0, 5);
+  const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics();
+  const { data: packages, isLoading: packagesLoading } = useIPTVPackages();
+  const { data: categoryData } = usePackagesByCategory();
+
+  // Transform metrics data for display
+  const dashboardMetrics = metrics ? [
+    {
+      label: 'Total Revenue',
+      value: metrics.find(m => m.metric_name === 'total_revenue')?.metric_value || 0,
+      change: 12.5,
+      trend: 'up' as const,
+    },
+    {
+      label: 'Total Orders',
+      value: metrics.find(m => m.metric_name === 'total_orders')?.metric_value || 0,
+      change: 8.2,
+      trend: 'up' as const,
+    },
+    {
+      label: 'Active Subscriptions',
+      value: metrics.find(m => m.metric_name === 'active_subscriptions')?.metric_value || 0,
+      change: 5.1,
+      trend: 'up' as const,
+    },
+    {
+      label: 'New Customers',
+      value: metrics.find(m => m.metric_name === 'new_customers')?.metric_value || 0,
+      change: 15.3,
+      trend: 'up' as const,
+    },
+  ] : [];
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'subscription': return <Tv className="h-5 w-5" />;
+      case 'player': return <GamepadIcon className="h-5 w-5" />;
+      case 'reseller': return <Crown className="h-5 w-5" />;
+      default: return <Package className="h-5 w-5" />;
+    }
+  };
+
+  const featuredPackages = packages?.filter(pkg => pkg.status === 'featured') || [];
+  const activePackages = packages?.filter(pkg => pkg.status === 'active') || [];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">BWIVOX IPTV Dashboard</h1>
           <p className="text-muted-foreground">
-            An overview of your store performance and sales.
+            Manage your IPTV packages, subscriptions, and business metrics.
           </p>
         </div>
         <Tabs defaultValue={timeRange} onValueChange={(value) => setTimeRange(value as TimeRange)}>
@@ -33,60 +75,95 @@ const Dashboard = () => {
         </Tabs>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((metric, index) => (
-          <MetricCard key={index} metric={metric} />
-        ))}
-      </div>
+      {!metricsLoading && (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {dashboardMetrics.map((metric, index) => (
+            <MetricCard key={index} metric={metric} />
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-7">
         <SalesChart className="lg:col-span-5" />
         
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Top Selling</CardTitle>
-            <CardDescription>Your best performing products this week</CardDescription>
+            <CardTitle>Package Categories</CardTitle>
+            <CardDescription>Distribution of active packages</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[...orders]
-                .sort((a, b) => b.total - a.total)
-                .slice(0, 3)
-                .map((order) => {
-                  const topItem = order.items[0];
-                  return (
-                    <div key={order.id} className="flex items-center gap-3">
-                      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
-                        <img 
-                          src={topItem.product.imageUrl} 
-                          alt={topItem.product.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {topItem.product.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {topItem.product.platform.charAt(0).toUpperCase() + 
-                            topItem.product.platform.slice(1)}
-                        </p>
-                        <p className="text-sm font-medium">
-                          ${(topItem.product.salePrice || topItem.product.price).toFixed(2)}
-                        </p>
-                      </div>
-                      <div className="rounded-full bg-soft-green px-2 py-1 text-xs font-semibold text-green-700">
-                        {topItem.quantity} sold
-                      </div>
-                    </div>
-                  );
-                })}
+              {categoryData && Object.entries(categoryData).map(([category, count]) => (
+                <div key={category} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {getCategoryIcon(category)}
+                    <span className="capitalize font-medium">{category}</span>
+                  </div>
+                  <Badge variant="secondary">{count}</Badge>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <RecentOrdersTable orders={recentOrders} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-yellow-500" />
+              Featured Packages
+            </CardTitle>
+            <CardDescription>Your premium highlighted packages</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!packagesLoading && featuredPackages.length > 0 ? (
+              <div className="space-y-3">
+                {featuredPackages.slice(0, 3).map((pkg) => (
+                  <div key={pkg.id} className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border">
+                    {pkg.icon && <span className="text-2xl">{pkg.icon}</span>}
+                    <div className="flex-1">
+                      <p className="font-medium">{pkg.name}</p>
+                      <p className="text-sm text-muted-foreground">{pkg.category}</p>
+                    </div>
+                    <Badge className="bg-yellow-100 text-yellow-700">Featured</Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No featured packages</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-blue-500" />
+              Recent Packages
+            </CardTitle>
+            <CardDescription>Recently added packages</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!packagesLoading && activePackages.length > 0 ? (
+              <div className="space-y-3">
+                {activePackages.slice(0, 3).map((pkg) => (
+                  <div key={pkg.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border">
+                    {pkg.icon && <span className="text-2xl">{pkg.icon}</span>}
+                    <div className="flex-1">
+                      <p className="font-medium">{pkg.name}</p>
+                      <p className="text-sm text-muted-foreground">{pkg.category}</p>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-700">Active</Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No active packages</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

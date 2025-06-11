@@ -5,9 +5,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Play, Palette, Zap, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const PlayerPanel = () => {
   const { t } = useLanguage();
+  const { data: packages, isLoading } = useIPTVPackages();
 
   const handleContactWhatsApp = (playerName: string, credits: number, price: number) => {
     const message = `${t.contact} ${playerName} - ${credits} credits - ${t.currency}${price}`;
@@ -15,116 +17,23 @@ const PlayerPanel = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  const players = [
-    {
-      name: "VU Player Pro",
-      icon: "📱",
-      description: t.premiumQualityDesc,
-      features: [
-        t.premiumQuality,
-        t.ultraHd4k,
-        t.fastActivation,
-        t.instantActivation,
-        t.support247
-      ],
-      creditOptions: [
-        { credits: 10, price: 89 },
-        { credits: 25, price: 199 },
-        { credits: 50, price: 349 },
-        { credits: 100, price: 599 }
-      ]
-    },
-    {
-      name: "IBO Player Pro", 
-      icon: "🎮",
-      description: t.guaranteedReliabilityDesc,
-      features: [
-        t.premiumQuality,
-        t.ultraHd4k,
-        t.fastActivation,
-        t.instantActivation,
-        t.support247
-      ],
-      creditOptions: [
-        { credits: 10, price: 79 },
-        { credits: 25, price: 179 },
-        { credits: 50, price: 319 },
-        { credits: 100, price: 549 }
-      ]
-    },
-    {
-      name: "STZ Player",
-      icon: "📺",
-      description: t.fastActivationDesc,
-      features: [
-        t.premiumQuality,
-        t.ultraHd4k,
-        t.fastActivation,
-        t.instantActivation,
-        t.support247
-      ],
-      creditOptions: [
-        { credits: 10, price: 119 },
-        { credits: 25, price: 269 },
-        { credits: 50, price: 479 },
-        { credits: 100, price: 819 }
-      ]
-    },
-    {
-      name: "RELAX Player",
-      icon: "🏠",
-      description: t.premiumQualityDesc,
-      features: [
-        t.premiumQuality,
-        t.ultraHd4k,
-        t.fastActivation,
-        t.instantActivation,
-        t.support247
-      ],
-      creditOptions: [
-        { credits: 10, price: 99 },
-        { credits: 25, price: 219 },
-        { credits: 50, price: 389 },
-        { credits: 100, price: 669 }
-      ]
-    },
-    {
-      name: "HOT Player",
-      icon: "🔥",
-      description: t.guaranteedReliabilityDesc,
-      features: [
-        t.premiumQuality,
-        t.ultraHd4k,
-        t.fastActivation,
-        t.instantActivation,
-        t.support247
-      ],
-      creditOptions: [
-        { credits: 10, price: 109 },
-        { credits: 25, price: 249 },
-        { credits: 50, price: 439 },
-        { credits: 100, price: 759 }
-      ]
-    },
-    {
-      name: "ARC Player",
-      icon: "⚡",
-      description: t.fastActivationDesc,
-      features: [
-        t.premiumQuality,
-        t.ultraHd4k,
-        t.fastActivation,
-        t.instantActivation,
-        t.support247
-      ],
-      creditOptions: [
-        { credits: 10, price: 129 },
-        { credits: 25, price: 289 },
-        { credits: 50, price: 519 },
-        { credits: 100, price: 899 }
-      ]
-    }
-  ];
+  // Filter only player packages
+  const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
+
+  if (isLoading) {
+    return (
+      <StoreLayout>
+        <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+          <div className="container py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
+              <p className="mt-4 text-lg text-gray-600">Loading player packages...</p>
+            </div>
+          </div>
+        </div>
+      </StoreLayout>
+    );
+  }
 
   return (
     <StoreLayout>
@@ -167,14 +76,14 @@ const PlayerPanel = () => {
           </div>
 
           <section className="space-y-16">
-            {players.map((player, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            {playerPackages.map((player, index) => (
+              <div key={player.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
                   <div className="flex items-center gap-4">
-                    <div className="text-4xl">{player.icon}</div>
+                    <div className="text-4xl">{player.icon || '📱'}</div>
                     <div>
                       <h2 className="text-3xl font-bold">{player.name}</h2>
-                      <p className="text-red-100 text-lg">{player.description}</p>
+                      <p className="text-red-100 text-lg">{player.description || t.premiumQualityDesc}</p>
                     </div>
                   </div>
                 </div>
@@ -183,7 +92,7 @@ const PlayerPanel = () => {
                   <div className="mb-8">
                     <h4 className="text-xl font-bold text-gray-900 mb-4">Features:</h4>
                     <ul className="grid md:grid-cols-2 gap-3">
-                      {player.features.map((feature, idx) => (
+                      {(player.features || [t.premiumQuality, t.ultraHd4k, t.fastActivation, t.instantActivation, t.support247]).map((feature, idx) => (
                         <li 
                           key={idx} 
                           className="flex items-start gap-3 text-gray-700"
@@ -200,7 +109,12 @@ const PlayerPanel = () => {
 
                   <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t.manageSubscriptions}</h3>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    {player.creditOptions.map((option, idx) => (
+                    {[
+                      { credits: 10, price: player.price_10_credits },
+                      { credits: 25, price: player.price_25_credits },
+                      { credits: 50, price: player.price_50_credits },
+                      { credits: 100, price: player.price_100_credits },
+                    ].filter(option => option.price).map((option, idx) => (
                       <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
                         <div className="text-center">
                           <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
@@ -208,11 +122,11 @@ const PlayerPanel = () => {
                           <div className="text-xs text-blue-600 mb-4">({option.credits} months)</div>
                           <div className="text-2xl font-bold text-gray-900 mb-4">{t.currency}{option.price}</div>
                           <div className="text-sm text-gray-500 mb-6">
-                            {t.currency}{(option.price / option.credits).toFixed(1)} {t.perMonth}
+                            {t.currency}{(option.price! / option.credits).toFixed(1)} {t.perMonth}
                           </div>
                           <Button 
                             className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
-                            onClick={() => handleContactWhatsApp(player.name, option.credits, option.price)}
+                            onClick={() => handleContactWhatsApp(player.name, option.credits, option.price!)}
                           >
                             <MessageCircle className="mr-2" size={16} />
                             {t.buyNow}
@@ -225,6 +139,13 @@ const PlayerPanel = () => {
               </div>
             ))}
           </section>
+
+          {playerPackages.length === 0 && (
+            <div className="text-center py-16">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">No Player Packages Available</h3>
+              <p className="text-gray-600">Player packages are currently being updated. Please check back later.</p>
+            </div>
+          )}
 
           <div className="text-center mt-16 space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
