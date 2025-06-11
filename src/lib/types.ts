@@ -1,5 +1,4 @@
-
-export type Platform = 'pc' | 'playstation' | 'xbox' | 'nintendo' | 'mobile';
+export type Platform = 'pc' | 'playstation' | 'xbox' | 'nintendo' | 'mobile' | 'iptv';
 
 export type Product = {
   id: string;
