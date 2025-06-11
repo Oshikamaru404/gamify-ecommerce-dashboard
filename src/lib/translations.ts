@@ -49,8 +49,55 @@ export interface Translations {
   buyNow: string;
   viewMore: string;
   
+  // Activation page
+  activationTitle: string;
+  activationSubtitle: string;
+  playerActivation: string;
+  activationSteps: string;
+  step1Title: string;
+  step1Desc: string;
+  step2Title: string;
+  step2Desc: string;
+  step3Title: string;
+  step3Desc: string;
+  needHelp: string;
+  
+  // Reseller page
+  resellerTitle: string;
+  resellerSubtitle: string;
+  becomeReseller: string;
+  resellerBenefits: string;
+  highCommissions: string;
+  highCommissionsDesc: string;
+  dedicatedSupport: string;
+  dedicatedSupportDesc: string;
+  marketingTools: string;
+  marketingToolsDesc: string;
+  joinNow: string;
+  
+  // IPTV Panel page
+  iptvPanelTitle: string;
+  iptvPanelSubtitle: string;
+  manageSubscriptions: string;
+  
+  // Player Panel page
+  playerPanelTitle: string;
+  playerPanelSubtitle: string;
+  configurePlayer: string;
+  
+  // Product Detail page
+  productFeatures: string;
+  technicalSpecs: string;
+  whatYouGet: string;
+  
   // Common
   backToHome: string;
+  getStarted: string;
+  learnMore: string;
+  features: string;
+  pricing: string;
+  support: string;
+  documentation: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -102,8 +149,55 @@ const translations: Record<Language, Translations> = {
     buyNow: 'Acheter maintenant',
     viewMore: 'Voir plus de détails',
     
+    // Activation page
+    activationTitle: 'Activation de votre Player',
+    activationSubtitle: 'Suivez ces étapes simples pour activer votre service IPTV',
+    playerActivation: 'Activation Player',
+    activationSteps: 'Étapes d\'activation',
+    step1Title: 'Téléchargez l\'application',
+    step1Desc: 'Installez notre application sur votre appareil',
+    step2Title: 'Entrez vos codes',
+    step2Desc: 'Utilisez les codes que nous vous avons envoyés',
+    step3Title: 'Profitez du contenu',
+    step3Desc: 'Regardez vos chaînes et contenus préférés',
+    needHelp: 'Besoin d\'aide ?',
+    
+    // Reseller page
+    resellerTitle: 'Devenez Revendeur BWIVOX',
+    resellerSubtitle: 'Rejoignez notre programme de partenariat et générez des revenus',
+    becomeReseller: 'Devenir Revendeur',
+    resellerBenefits: 'Avantages Revendeur',
+    highCommissions: 'Commissions Élevées',
+    highCommissionsDesc: 'Gagnez jusqu\'à 40% de commission sur chaque vente',
+    dedicatedSupport: 'Support Dédié',
+    dedicatedSupportDesc: 'Équipe de support dédiée pour vous aider',
+    marketingTools: 'Outils Marketing',
+    marketingToolsDesc: 'Matériel promotionnel et outils de vente',
+    joinNow: 'Rejoindre Maintenant',
+    
+    // IPTV Panel page
+    iptvPanelTitle: 'Panel IPTV',
+    iptvPanelSubtitle: 'Gérez vos abonnements et services IPTV',
+    manageSubscriptions: 'Gérer les Abonnements',
+    
+    // Player Panel page
+    playerPanelTitle: 'Panel Player',
+    playerPanelSubtitle: 'Configurez et gérez vos players IPTV',
+    configurePlayer: 'Configurer le Player',
+    
+    // Product Detail page
+    productFeatures: 'Fonctionnalités du Produit',
+    technicalSpecs: 'Spécifications Techniques',
+    whatYouGet: 'Ce que vous obtenez',
+    
     // Common
     backToHome: 'Retour à l\'accueil',
+    getStarted: 'Commencer',
+    learnMore: 'En savoir plus',
+    features: 'Fonctionnalités',
+    pricing: 'Tarifs',
+    support: 'Support',
+    documentation: 'Documentation',
   },
   en: {
     // Navigation (en anglais pour cohérence)
@@ -153,8 +247,55 @@ const translations: Record<Language, Translations> = {
     buyNow: 'Buy Now',
     viewMore: 'View More Details',
     
+    // Activation page
+    activationTitle: 'Activate Your Player',
+    activationSubtitle: 'Follow these simple steps to activate your IPTV service',
+    playerActivation: 'Player Activation',
+    activationSteps: 'Activation Steps',
+    step1Title: 'Download the App',
+    step1Desc: 'Install our application on your device',
+    step2Title: 'Enter Your Codes',
+    step2Desc: 'Use the codes we sent you',
+    step3Title: 'Enjoy Content',
+    step3Desc: 'Watch your favorite channels and content',
+    needHelp: 'Need Help?',
+    
+    // Reseller page
+    resellerTitle: 'Become a BWIVOX Reseller',
+    resellerSubtitle: 'Join our partnership program and generate revenue',
+    becomeReseller: 'Become Reseller',
+    resellerBenefits: 'Reseller Benefits',
+    highCommissions: 'High Commissions',
+    highCommissionsDesc: 'Earn up to 40% commission on every sale',
+    dedicatedSupport: 'Dedicated Support',
+    dedicatedSupportDesc: 'Dedicated support team to help you',
+    marketingTools: 'Marketing Tools',
+    marketingToolsDesc: 'Promotional materials and sales tools',
+    joinNow: 'Join Now',
+    
+    // IPTV Panel page
+    iptvPanelTitle: 'IPTV Panel',
+    iptvPanelSubtitle: 'Manage your IPTV subscriptions and services',
+    manageSubscriptions: 'Manage Subscriptions',
+    
+    // Player Panel page
+    playerPanelTitle: 'Player Panel',
+    playerPanelSubtitle: 'Configure and manage your IPTV players',
+    configurePlayer: 'Configure Player',
+    
+    // Product Detail page
+    productFeatures: 'Product Features',
+    technicalSpecs: 'Technical Specifications',
+    whatYouGet: 'What You Get',
+    
     // Common
     backToHome: 'Back to home',
+    getStarted: 'Get Started',
+    learnMore: 'Learn More',
+    features: 'Features',
+    pricing: 'Pricing',
+    support: 'Support',
+    documentation: 'Documentation',
   },
   es: {
     // Navigation (en anglais pour cohérence)
@@ -204,8 +345,55 @@ const translations: Record<Language, Translations> = {
     buyNow: 'Comprar Ahora',
     viewMore: 'Ver Más Detalles',
     
+    // Activation page
+    activationTitle: 'Activa tu Player',
+    activationSubtitle: 'Sigue estos pasos simples para activar tu servicio IPTV',
+    playerActivation: 'Activación del Player',
+    activationSteps: 'Pasos de Activación',
+    step1Title: 'Descarga la App',
+    step1Desc: 'Instala nuestra aplicación en tu dispositivo',
+    step2Title: 'Introduce tus Códigos',
+    step2Desc: 'Usa los códigos que te enviamos',
+    step3Title: 'Disfruta del Contenido',
+    step3Desc: 'Mira tus canales y contenido favoritos',
+    needHelp: '¿Necesitas Ayuda?',
+    
+    // Reseller page
+    resellerTitle: 'Conviértete en Revendedor BWIVOX',
+    resellerSubtitle: 'Únete a nuestro programa de asociación y genera ingresos',
+    becomeReseller: 'Ser Revendedor',
+    resellerBenefits: 'Beneficios del Revendedor',
+    highCommissions: 'Comisiones Altas',
+    highCommissionsDesc: 'Gana hasta 40% de comisión en cada venta',
+    dedicatedSupport: 'Soporte Dedicado',
+    dedicatedSupportDesc: 'Equipo de soporte dedicado para ayudarte',
+    marketingTools: 'Herramientas de Marketing',
+    marketingToolsDesc: 'Material promocional y herramientas de venta',
+    joinNow: 'Unirse Ahora',
+    
+    // IPTV Panel page
+    iptvPanelTitle: 'Panel IPTV',
+    iptvPanelSubtitle: 'Gestiona tus suscripciones y servicios IPTV',
+    manageSubscriptions: 'Gestionar Suscripciones',
+    
+    // Player Panel page
+    playerPanelTitle: 'Panel del Player',
+    playerPanelSubtitle: 'Configura y gestiona tus players IPTV',
+    configurePlayer: 'Configurar Player',
+    
+    // Product Detail page
+    productFeatures: 'Características del Producto',
+    technicalSpecs: 'Especificaciones Técnicas',
+    whatYouGet: 'Lo que Obtienes',
+    
     // Common
     backToHome: 'Volver al inicio',
+    getStarted: 'Empezar',
+    learnMore: 'Saber Más',
+    features: 'Características',
+    pricing: 'Precios',
+    support: 'Soporte',
+    documentation: 'Documentación',
   },
   ar: {
     // Navigation (en anglais pour cohérence)
@@ -255,8 +443,55 @@ const translations: Record<Language, Translations> = {
     buyNow: 'اشتر الآن',
     viewMore: 'عرض المزيد من التفاصيل',
     
+    // Activation page
+    activationTitle: 'تفعيل المشغل الخاص بك',
+    activationSubtitle: 'اتبع هذه الخطوات البسيطة لتفعيل خدمة IPTV',
+    playerActivation: 'تفعيل المشغل',
+    activationSteps: 'خطوات التفعيل',
+    step1Title: 'تحميل التطبيق',
+    step1Desc: 'تثبيت التطبيق على جهازك',
+    step2Title: 'إدخال الرموز',
+    step2Desc: 'استخدم الرموز التي أرسلناها لك',
+    step3Title: 'استمتع بالمحتوى',
+    step3Desc: 'شاهد قنواتك ومحتواك المفضل',
+    needHelp: 'تحتاج مساعدة؟',
+    
+    // Reseller page
+    resellerTitle: 'كن موزع BWIVOX',
+    resellerSubtitle: 'انضم إلى برنامج الشراكة واحصل على الأرباح',
+    becomeReseller: 'أصبح موزع',
+    resellerBenefits: 'مزايا الموزع',
+    highCommissions: 'عمولات عالية',
+    highCommissionsDesc: 'احصل على عمولة تصل إلى 40% من كل عملية بيع',
+    dedicatedSupport: 'دعم مخصص',
+    dedicatedSupportDesc: 'فريق دعم مخصص لمساعدتك',
+    marketingTools: 'أدوات التسويق',
+    marketingToolsDesc: 'مواد ترويجية وأدوات بيع',
+    joinNow: 'انضم الآن',
+    
+    // IPTV Panel page
+    iptvPanelTitle: 'لوحة IPTV',
+    iptvPanelSubtitle: 'إدارة اشتراكات وخدمات IPTV',
+    manageSubscriptions: 'إدارة الاشتراكات',
+    
+    // Player Panel page
+    playerPanelTitle: 'لوحة المشغل',
+    playerPanelSubtitle: 'تكوين وإدارة مشغلات IPTV',
+    configurePlayer: 'تكوين المشغل',
+    
+    // Product Detail page
+    productFeatures: 'ميزات المنتج',
+    technicalSpecs: 'المواصفات التقنية',
+    whatYouGet: 'ما تحصل عليه',
+    
     // Common
     backToHome: 'العودة إلى الرئيسية',
+    getStarted: 'ابدأ',
+    learnMore: 'تعلم المزيد',
+    features: 'الميزات',
+    pricing: 'الأسعار',
+    support: 'الدعم',
+    documentation: 'التوثيق',
   },
   de: {
     // Navigation (en anglais pour cohérence)
@@ -306,8 +541,55 @@ const translations: Record<Language, Translations> = {
     buyNow: 'Jetzt Kaufen',
     viewMore: 'Mehr Details Anzeigen',
     
+    // Activation page
+    activationTitle: 'Aktivieren Sie Ihren Player',
+    activationSubtitle: 'Befolgen Sie diese einfachen Schritte, um Ihren IPTV-Service zu aktivieren',
+    playerActivation: 'Player-Aktivierung',
+    activationSteps: 'Aktivierungsschritte',
+    step1Title: 'App herunterladen',
+    step1Desc: 'Installieren Sie unsere Anwendung auf Ihrem Gerät',
+    step2Title: 'Codes eingeben',
+    step2Desc: 'Verwenden Sie die Codes, die wir Ihnen gesendet haben',
+    step3Title: 'Inhalte genießen',
+    step3Desc: 'Schauen Sie Ihre Lieblings-Kanäle und -Inhalte',
+    needHelp: 'Brauchen Sie Hilfe?',
+    
+    // Reseller page
+    resellerTitle: 'Werden Sie BWIVOX-Händler',
+    resellerSubtitle: 'Treten Sie unserem Partnerprogramm bei und generieren Sie Einnahmen',
+    becomeReseller: 'Händler werden',
+    resellerBenefits: 'Händler-Vorteile',
+    highCommissions: 'Hohe Provisionen',
+    highCommissionsDesc: 'Verdienen Sie bis zu 40% Provision bei jedem Verkauf',
+    dedicatedSupport: 'Dedizierter Support',
+    dedicatedSupportDesc: 'Dediziertes Support-Team zur Unterstützung',
+    marketingTools: 'Marketing-Tools',
+    marketingToolsDesc: 'Werbematerialien und Verkaufstools',
+    joinNow: 'Jetzt beitreten',
+    
+    // IPTV Panel page
+    iptvPanelTitle: 'IPTV-Panel',
+    iptvPanelSubtitle: 'Verwalten Sie Ihre IPTV-Abonnements und -Services',
+    manageSubscriptions: 'Abonnements verwalten',
+    
+    // Player Panel page
+    playerPanelTitle: 'Player-Panel',
+    playerPanelSubtitle: 'Konfigurieren und verwalten Sie Ihre IPTV-Player',
+    configurePlayer: 'Player konfigurieren',
+    
+    // Product Detail page
+    productFeatures: 'Produktfunktionen',
+    technicalSpecs: 'Technische Spezifikationen',
+    whatYouGet: 'Was Sie erhalten',
+    
     // Common
     backToHome: 'Zurück zur Startseite',
+    getStarted: 'Loslegen',
+    learnMore: 'Mehr erfahren',
+    features: 'Funktionen',
+    pricing: 'Preise',
+    support: 'Support',
+    documentation: 'Dokumentation',
   },
 };
 
