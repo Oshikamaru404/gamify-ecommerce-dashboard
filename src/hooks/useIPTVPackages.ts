@@ -14,6 +14,10 @@ export type IPTVPackage = {
   price_25_credits: number | null;
   price_50_credits: number | null;
   price_100_credits: number | null;
+  price_1_month: number | null;
+  price_3_months: number | null;
+  price_6_months: number | null;
+  price_12_months: number | null;
   status: 'active' | 'inactive' | 'featured' | null;
   sort_order: number | null;
   created_at: string | null;

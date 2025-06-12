@@ -36,11 +36,11 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
             Panel IPTV
           </Badge>
         );
-      case 'panel-player':
+      case 'player':
         return (
           <Badge className="bg-purple-100 text-purple-700 flex items-center gap-1">
             <GamepadIcon size={12} />
-            Panel Player
+            Player
           </Badge>
         );
       case 'activation-player':
@@ -68,6 +68,68 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         </Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
+
+  const renderPricing = () => {
+    if (pkg.category === 'subscription') {
+      // Show month-based pricing for subscription packages
+      return (
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-gray-900">Monthly Pricing:</h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {pkg.price_1_month && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">1 Month:</span> ${pkg.price_1_month}
+              </div>
+            )}
+            {pkg.price_3_months && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">3 Months:</span> ${pkg.price_3_months}
+              </div>
+            )}
+            {pkg.price_6_months && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">6 Months:</span> ${pkg.price_6_months}
+              </div>
+            )}
+            {pkg.price_12_months && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">12 Months:</span> ${pkg.price_12_months}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    } else {
+      // Show credit-based pricing for other packages
+      return (
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-gray-900">Credit-Based Pricing:</h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {pkg.price_10_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">10 Credits:</span> ${pkg.price_10_credits}
+              </div>
+            )}
+            {pkg.price_25_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">25 Credits:</span> ${pkg.price_25_credits}
+              </div>
+            )}
+            {pkg.price_50_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">50 Credits:</span> ${pkg.price_50_credits}
+              </div>
+            )}
+            {pkg.price_100_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">100 Credits:</span> ${pkg.price_100_credits}
+              </div>
+            )}
+          </div>
+        </div>
+      );
     }
   };
 
@@ -118,31 +180,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{pkg.description}</p>
         )}
         
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm text-gray-900">Credit-Based Pricing:</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            {pkg.price_10_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">10 Credits:</span> ${pkg.price_10_credits}
-              </div>
-            )}
-            {pkg.price_25_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">25 Credits:</span> ${pkg.price_25_credits}
-              </div>
-            )}
-            {pkg.price_50_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">50 Credits:</span> ${pkg.price_50_credits}
-              </div>
-            )}
-            {pkg.price_100_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">100 Credits:</span> ${pkg.price_100_credits}
-              </div>
-            )}
-          </div>
-        </div>
+        {renderPricing()}
 
         {pkg.features && pkg.features.length > 0 && (
           <div className="mt-3">

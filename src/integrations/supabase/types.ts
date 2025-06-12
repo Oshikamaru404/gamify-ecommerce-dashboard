@@ -66,10 +66,14 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          price_1_month: number | null
           price_10_credits: number | null
           price_100_credits: number | null
+          price_12_months: number | null
           price_25_credits: number | null
+          price_3_months: number | null
           price_50_credits: number | null
+          price_6_months: number | null
           sort_order: number | null
           status: Database["public"]["Enums"]["package_status"] | null
           updated_at: string | null
@@ -82,10 +86,14 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          price_1_month?: number | null
           price_10_credits?: number | null
           price_100_credits?: number | null
+          price_12_months?: number | null
           price_25_credits?: number | null
+          price_3_months?: number | null
           price_50_credits?: number | null
+          price_6_months?: number | null
           sort_order?: number | null
           status?: Database["public"]["Enums"]["package_status"] | null
           updated_at?: string | null
@@ -98,10 +106,14 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          price_1_month?: number | null
           price_10_credits?: number | null
           price_100_credits?: number | null
+          price_12_months?: number | null
           price_25_credits?: number | null
+          price_3_months?: number | null
           price_50_credits?: number | null
+          price_6_months?: number | null
           sort_order?: number | null
           status?: Database["public"]["Enums"]["package_status"] | null
           updated_at?: string | null
