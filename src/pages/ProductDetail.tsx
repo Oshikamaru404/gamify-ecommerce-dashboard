@@ -56,23 +56,44 @@ const ProductDetail = () => {
     );
   }
 
-  // Log the pricing data for debugging
-  console.log('ProductDetail - pricing data:', {
-    price_1_month: product.price_1_month,
-    price_3_months: product.price_3_months,
-    price_6_months: product.price_6_months,
-    price_12_months: product.price_12_months,
-    price_10_credits: product.price_10_credits,
-    price_25_credits: product.price_25_credits,
-    price_50_credits: product.price_50_credits,
-    price_100_credits: product.price_100_credits,
+  // Detailed logging for pricing data debugging
+  console.log('ProductDetail - detailed pricing analysis:', {
+    price_1_month: {
+      value: product.price_1_month,
+      type: typeof product.price_1_month,
+      isNull: product.price_1_month === null,
+      isUndefined: product.price_1_month === undefined,
+      truthyCheck: !!product.price_1_month
+    },
+    price_3_months: {
+      value: product.price_3_months,
+      type: typeof product.price_3_months,
+      isNull: product.price_3_months === null,
+      isUndefined: product.price_3_months === undefined,
+      truthyCheck: !!product.price_3_months
+    },
+    price_6_months: {
+      value: product.price_6_months,
+      type: typeof product.price_6_months,
+      isNull: product.price_6_months === null,
+      isUndefined: product.price_6_months === undefined,
+      truthyCheck: !!product.price_6_months
+    },
+    price_12_months: {
+      value: product.price_12_months,
+      type: typeof product.price_12_months,
+      isNull: product.price_12_months === null,
+      isUndefined: product.price_12_months === undefined,
+      truthyCheck: !!product.price_12_months
+    }
   });
 
   // Build duration options based on available pricing in the database
   const durations = [];
   
-  // Only add duration options if the pricing exists in the database
-  if (product.price_1_month !== null && product.price_1_month !== undefined) {
+  // Only add duration options if the pricing exists in the database and is greater than 0
+  if (product.price_1_month !== null && product.price_1_month !== undefined && product.price_1_month > 0) {
+    console.log('Adding 1 month duration:', product.price_1_month);
     durations.push({
       months: 1,
       price: product.price_1_month,
@@ -81,7 +102,8 @@ const ProductDetail = () => {
     });
   }
   
-  if (product.price_3_months !== null && product.price_3_months !== undefined) {
+  if (product.price_3_months !== null && product.price_3_months !== undefined && product.price_3_months > 0) {
+    console.log('Adding 3 months duration:', product.price_3_months);
     const monthlyEquivalent = product.price_1_month ? product.price_1_month * 3 : 0;
     durations.push({
       months: 3,
@@ -93,7 +115,8 @@ const ProductDetail = () => {
     });
   }
   
-  if (product.price_6_months !== null && product.price_6_months !== undefined) {
+  if (product.price_6_months !== null && product.price_6_months !== undefined && product.price_6_months > 0) {
+    console.log('Adding 6 months duration:', product.price_6_months);
     const monthlyEquivalent = product.price_1_month ? product.price_1_month * 6 : 0;
     durations.push({
       months: 6,
@@ -105,7 +128,8 @@ const ProductDetail = () => {
     });
   }
   
-  if (product.price_12_months !== null && product.price_12_months !== undefined) {
+  if (product.price_12_months !== null && product.price_12_months !== undefined && product.price_12_months > 0) {
+    console.log('Adding 12 months duration:', product.price_12_months);
     const monthlyEquivalent = product.price_1_month ? product.price_1_month * 12 : 0;
     durations.push({
       months: 12,
@@ -118,6 +142,7 @@ const ProductDetail = () => {
   }
 
   console.log('ProductDetail - durations built:', durations);
+  console.log('ProductDetail - total durations found:', durations.length);
 
   // If no pricing is available in the database, show a message
   if (durations.length === 0) {
