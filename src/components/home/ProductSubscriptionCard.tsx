@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Shield } from 'lucide-react';
@@ -43,10 +43,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   };
 
   return (
-    <Card className={`relative h-full transition-all duration-300 hover:shadow-2xl hover:scale-105 overflow-visible ${
+    <div className={`relative h-full transition-all duration-300 hover:shadow-2xl hover:scale-105 ${
       featured 
-        ? 'border-2 border-red-500 shadow-xl ring-4 ring-red-100' 
-        : 'border border-gray-200 hover:border-red-300'
+        ? 'ring-4 ring-red-100' 
+        : ''
     }`}>
       {featured && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
@@ -57,93 +57,105 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         </div>
       )}
 
-      {/* Gradient overlay for featured packages */}
-      {featured && (
-        <div className="absolute inset-0 bg-gradient-to-br from-red-50/30 to-transparent pointer-events-none rounded-3xl" />
-      )}
-      
-      {/* Single content section containing everything */}
-      <div className="flex flex-col h-full relative z-10 p-6">
-        {/* Icon section - now part of main content but visually separated */}
-        <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 text-center rounded-2xl mb-6 flex-shrink-0">
+      <div className="flex flex-col h-full">
+        {/* First Part - Icon Section (33% height) */}
+        <div className={`h-1/3 bg-gradient-to-br from-red-50 to-red-100 rounded-t-3xl flex items-center justify-center ${
+          featured 
+            ? 'border-2 border-red-500 border-b-0' 
+            : 'border border-gray-200 border-b-0'
+        }`}>
           {pkg.icon && (
             <div className="text-4xl drop-shadow-sm">{pkg.icon}</div>
           )}
         </div>
 
-        {/* Package Title */}
-        <h3 className="text-lg font-bold text-gray-900 mb-3 text-center leading-tight">
-          {pkg.name}
-        </h3>
-        
-        {/* Price Display */}
-        <div className="text-center mb-4">
-          <div className="text-2xl font-bold text-red-600 mb-1">
-            ${displayPrice?.toFixed(2)}
-          </div>
-          <div className="text-xs text-gray-600 font-medium">
-            {pkg.price_1_month ? '/month' : ''}
-          </div>
-          {pkg.price_1_month && pkg.price_12_months && (
-            <div className="text-xs text-green-600 font-medium mt-1">
-              Save ${((pkg.price_1_month * 12) - pkg.price_12_months).toFixed(2)} yearly
-            </div>
+        {/* Second Part - Content Section (67% height) */}
+        <Card className={`h-2/3 rounded-t-none rounded-b-3xl flex-1 ${
+          featured 
+            ? 'border-2 border-red-500 border-t-0' 
+            : 'border border-gray-200 border-t-0'
+        }`}>
+          {/* Gradient overlay for featured packages */}
+          {featured && (
+            <div className="absolute inset-0 bg-gradient-to-br from-red-50/30 to-transparent pointer-events-none rounded-b-3xl" />
           )}
-        </div>
-
-        {/* Package Description */}
-        {pkg.description && (
-          <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
-        )}
-
-        {/* Features List */}
-        <div className="space-y-3 mb-6 flex-grow">
-          {pkg.features && pkg.features.length > 0 ? (
-            pkg.features.map((feature, index) => (
-              <div key={index} className="flex items-start group">
-                <div className="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors mt-0.5">
-                  <Check className="h-3 w-3 text-green-600" />
+          
+          <div className="flex flex-col h-full relative z-10 p-6">
+            {/* Package Title */}
+            <h3 className="text-lg font-bold text-gray-900 mb-3 text-center leading-tight">
+              {pkg.name}
+            </h3>
+            
+            {/* Price Display */}
+            <div className="text-center mb-4">
+              <div className="text-2xl font-bold text-red-600 mb-1">
+                ${displayPrice?.toFixed(2)}
+              </div>
+              <div className="text-xs text-gray-600 font-medium">
+                {pkg.price_1_month ? '/month' : ''}
+              </div>
+              {pkg.price_1_month && pkg.price_12_months && (
+                <div className="text-xs text-green-600 font-medium mt-1">
+                  Save ${((pkg.price_1_month * 12) - pkg.price_12_months).toFixed(2)} yearly
                 </div>
-                <span className="text-gray-700 ml-3 text-sm leading-relaxed">{feature}</span>
-              </div>
-            ))
-          ) : (
-            <div className="flex items-start group">
-              <div className="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors mt-0.5">
-                <Check className="h-3 w-3 text-green-600" />
-              </div>
-              <span className="text-gray-700 ml-3 text-sm leading-relaxed">Premium features included</span>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* 30-Day Money Back Guarantee */}
-        <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
-          <div className="flex items-center justify-center text-green-700">
-            <Shield className="w-4 h-4 mr-2" />
-            <span className="font-semibold text-xs">30-Day Money Back Guarantee</span>
+            {/* Package Description */}
+            {pkg.description && (
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+            )}
+
+            {/* Features List */}
+            <div className="space-y-3 mb-6 flex-grow">
+              {pkg.features && pkg.features.length > 0 ? (
+                pkg.features.map((feature, index) => (
+                  <div key={index} className="flex items-start group">
+                    <div className="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors mt-0.5">
+                      <Check className="h-3 w-3 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 ml-3 text-sm leading-relaxed">{feature}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-start group">
+                  <div className="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors mt-0.5">
+                    <Check className="h-3 w-3 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 ml-3 text-sm leading-relaxed">Premium features included</span>
+                </div>
+              )}
+            </div>
+
+            {/* 30-Day Money Back Guarantee */}
+            <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+              <div className="flex items-center justify-center text-green-700">
+                <Shield className="w-4 h-4 mr-2" />
+                <span className="font-semibold text-xs">30-Day Money Back Guarantee</span>
+              </div>
+            </div>
+
+            {/* Call to Action Button */}
+            <div className="mt-auto">
+              {(pkg.category === 'subscription' || pkg.category === 'activation-player') ? (
+                <Button asChild className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                  <Link to={`/product/${productSlug}`}>
+                    Get Started Now
+                  </Link>
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleGetStarted}
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl"
+                >
+                  Get Started Now
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Call to Action Button */}
-        <div className="mt-auto">
-          {(pkg.category === 'subscription' || pkg.category === 'activation-player') ? (
-            <Button asChild className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <Link to={`/product/${productSlug}`}>
-                Get Started Now
-              </Link>
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleGetStarted}
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl"
-            >
-              Get Started Now
-            </Button>
-          )}
-        </div>
+        </Card>
       </div>
-    </Card>
+    </div>
   );
 };
 
