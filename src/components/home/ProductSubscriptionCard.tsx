@@ -62,15 +62,20 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-br from-red-50/30 to-transparent pointer-events-none" />
       )}
       
-      {/* Two-part design with golden ratio (1/3 and 2/3 proportions) */}
-      <div className="flex h-full relative z-10">
-        {/* Left section - Icon area (1/3) */}
-        <div className="w-1/3 bg-gradient-to-br from-red-50 to-red-100 flex flex-col items-center justify-center p-6 border-r border-red-200">
+      {/* Vertical two-part design */}
+      <div className="flex flex-col h-full relative z-10">
+        {/* Top section - Icon and Price area (approximately 1/3) */}
+        <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 text-center border-b border-red-200 flex-shrink-0">
           {pkg.icon && (
             <div className="text-6xl mb-4 drop-shadow-sm">{pkg.icon}</div>
           )}
           
-          {/* Price Display in icon section */}
+          {/* Package Title */}
+          <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+            {pkg.name}
+          </h3>
+          
+          {/* Price Display */}
           <div className="text-center">
             <div className="text-3xl font-bold text-red-600 mb-1">
               ${displayPrice?.toFixed(2)}
@@ -86,19 +91,13 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           </div>
         </div>
 
-        {/* Right section - Package details (2/3) */}
-        <div className="w-2/3 flex flex-col">
+        {/* Bottom section - Package details (approximately 2/3) */}
+        <div className="flex flex-col flex-grow">
           <CardContent className="p-6 h-full flex flex-col">
-            {/* Package Title and Description */}
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
-                {pkg.name}
-              </h3>
-              
-              {pkg.description && (
-                <p className="text-gray-600 text-sm leading-relaxed">{pkg.description}</p>
-              )}
-            </div>
+            {/* Package Description */}
+            {pkg.description && (
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+            )}
 
             {/* Features List */}
             <div className="space-y-3 mb-6 flex-grow">
