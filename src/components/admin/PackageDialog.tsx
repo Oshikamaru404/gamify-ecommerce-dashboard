@@ -8,23 +8,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
-import { IPTVPackage } from '@/hooks/useIPTVPackages';
+import { IPTVPackage, useCreateIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
 
 type PackageDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   package?: IPTVPackage | null;
-  onSave: (packageData: Omit<IPTVPackage, 'id' | 'created_at' | 'updated_at'>) => void;
-  title: string;
 };
 
 const PackageDialog: React.FC<PackageDialogProps> = ({
   open,
   onOpenChange,
   package: pkg,
-  onSave,
-  title,
 }) => {
+  const createPackage = useCreateIPTVPackage();
+  const updatePackage = useUpdateIPTVPackage();
+
   const [formData, setFormData] = useState({
     name: '',
     category: 'subscription' as 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'activation-player',
@@ -105,14 +104,20 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
       sort_order: parseInt(formData.sort_order) || 0,
     };
     
-    onSave(packageData);
+    if (pkg) {
+      updatePackage.mutate({ id: pkg.id, ...packageData });
+    } else {
+      createPackage.mutate(packageData);
+    }
+    
+    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>{pkg ? 'Edit Package' : 'Create New Package'}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">

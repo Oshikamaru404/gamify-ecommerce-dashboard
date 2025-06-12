@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Tv, Monitor, Crown, GamepadIcon, Home, CreditCard } from 'lucide-react';
+import { Plus, Search, Tv, Monitor, Crown, GamepadIcon } from 'lucide-react';
 import { useIPTVPackages, useDeleteIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
 import IPTVPackageCard from '@/components/admin/IPTVPackageCard';
 import PackageDialog from '@/components/admin/PackageDialog';
@@ -26,19 +26,19 @@ const ManageProducts = () => {
     pkg.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  // Categorize packages by their display location
-  const packagesByLocation = {
-    homepage: filteredPackages.filter(pkg => 
-      ['subscription', 'player', 'activation-player'].includes(pkg.category) && pkg.status !== 'inactive'
-    ),
+  // Categorize packages exactly as they appear on the website
+  const packagesByCategory = {
     subscription: filteredPackages.filter(pkg => 
       pkg.category === 'subscription' && pkg.status !== 'inactive'
     ),
-    activation: filteredPackages.filter(pkg => 
+    activationPlayer: filteredPackages.filter(pkg => 
       pkg.category === 'activation-player' && pkg.status !== 'inactive'
     ),
-    panelReseller: filteredPackages.filter(pkg => 
-      ['panel-iptv', 'player'].includes(pkg.category) && pkg.status !== 'inactive'
+    panelIptv: filteredPackages.filter(pkg => 
+      pkg.category === 'panel-iptv' && pkg.status !== 'inactive'
+    ),
+    panelPlayer: filteredPackages.filter(pkg => 
+      pkg.category === 'player' && pkg.status !== 'inactive'
     ),
     all: filteredPackages
   };
@@ -66,32 +66,32 @@ const ManageProducts = () => {
     setIsDialogOpen(true);
   };
 
-  const getLocationIcon = (location: string) => {
-    switch (location) {
-      case 'homepage': return <Home size={16} />;
-      case 'subscription': return <CreditCard size={16} />;
-      case 'activation': return <Crown size={16} />;
-      case 'panelReseller': return <Monitor size={16} />;
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'subscription': return <Tv size={16} />;
+      case 'activationPlayer': return <Crown size={16} />;
+      case 'panelIptv': return <Monitor size={16} />;
+      case 'panelPlayer': return <GamepadIcon size={16} />;
       default: return <Tv size={16} />;
     }
   };
 
-  const getLocationTitle = (location: string) => {
-    switch (location) {
-      case 'homepage': return 'Home Page Packages';
-      case 'subscription': return 'Subscription Page Packages';
-      case 'activation': return 'Activation Player Page Packages';
-      case 'panelReseller': return 'Panel Reseller Packages';
+  const getCategoryTitle = (category: string) => {
+    switch (category) {
+      case 'subscription': return 'Subscription Packages';
+      case 'activationPlayer': return 'Activation Player Packages';
+      case 'panelIptv': return 'Panel IPTV Packages';
+      case 'panelPlayer': return 'Panel Player Packages';
       default: return 'All Packages';
     }
   };
 
-  const getLocationDescription = (location: string) => {
-    switch (location) {
-      case 'homepage': return 'Packages displayed on the main homepage (subscription, player, activation)';
-      case 'subscription': return 'Packages shown specifically on the subscription page';
-      case 'activation': return 'Packages displayed on the activation player page';
-      case 'panelReseller': return 'Panel packages for resellers (IPTV panels and player panels)';
+  const getCategoryDescription = (category: string) => {
+    switch (category) {
+      case 'subscription': return 'IPTV subscription packages displayed on home page and subscription page';
+      case 'activationPlayer': return 'Activation player packages for device activation';
+      case 'panelIptv': return 'IPTV panel packages for resellers and advanced users';
+      case 'panelPlayer': return 'Player panel packages for streaming applications';
       default: return 'All packages in the system';
     }
   };
@@ -115,7 +115,7 @@ const ManageProducts = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Manage IPTV Packages</h1>
-          <p className="text-gray-600 mt-2">Organize packages by their display locations</p>
+          <p className="text-gray-600 mt-2">Manage packages by category as they appear on the website</p>
         </div>
         <Button onClick={handleCreateNew} className="bg-red-600 hover:bg-red-700">
           <Plus className="mr-2 h-4 w-4" />
@@ -138,24 +138,24 @@ const ManageProducts = () => {
         </CardContent>
       </Card>
 
-      {/* Tabs for different locations */}
-      <Tabs defaultValue="homepage" className="space-y-6">
+      {/* Tabs for different categories - exactly as on website */}
+      <Tabs defaultValue="subscription" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="homepage" className="flex items-center gap-2">
-            <Home size={16} />
-            Home Page
-          </TabsTrigger>
           <TabsTrigger value="subscription" className="flex items-center gap-2">
-            <CreditCard size={16} />
+            <Tv size={16} />
             Subscription
           </TabsTrigger>
-          <TabsTrigger value="activation" className="flex items-center gap-2">
+          <TabsTrigger value="activationPlayer" className="flex items-center gap-2">
             <Crown size={16} />
-            Activation
+            Activation Player
           </TabsTrigger>
-          <TabsTrigger value="panelReseller" className="flex items-center gap-2">
+          <TabsTrigger value="panelIptv" className="flex items-center gap-2">
             <Monitor size={16} />
-            Panel Reseller
+            Panel IPTV
+          </TabsTrigger>
+          <TabsTrigger value="panelPlayer" className="flex items-center gap-2">
+            <GamepadIcon size={16} />
+            Panel Player
           </TabsTrigger>
           <TabsTrigger value="all" className="flex items-center gap-2">
             <Tv size={16} />
@@ -163,32 +163,32 @@ const ManageProducts = () => {
           </TabsTrigger>
         </TabsList>
 
-        {Object.entries(packagesByLocation).map(([location, locationPackages]) => (
-          <TabsContent key={location} value={location} className="space-y-6">
+        {Object.entries(packagesByCategory).map(([category, categoryPackages]) => (
+          <TabsContent key={category} value={category} className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  {getLocationIcon(location)}
-                  <CardTitle>{getLocationTitle(location)}</CardTitle>
+                  {getCategoryIcon(category)}
+                  <CardTitle>{getCategoryTitle(category)}</CardTitle>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {getLocationDescription(location)}
+                  {getCategoryDescription(category)}
                 </p>
                 <div className="flex items-center gap-4 text-sm">
                   <Badge variant="outline" className="flex items-center gap-1">
                     <Tv size={12} />
-                    Total: {locationPackages.length}
+                    Total: {categoryPackages.length}
                   </Badge>
                   <Badge variant="outline" className="flex items-center gap-1">
                     <Crown size={12} />
-                    Featured: {locationPackages.filter(p => p.status === 'featured').length}
+                    Featured: {categoryPackages.filter(p => p.status === 'featured').length}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                {locationPackages.length > 0 ? (
+                {categoryPackages.length > 0 ? (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {locationPackages.map((pkg) => (
+                    {categoryPackages.map((pkg) => (
                       <IPTVPackageCard
                         key={pkg.id}
                         package={pkg}
@@ -201,15 +201,15 @@ const ManageProducts = () => {
                 ) : (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      {getLocationIcon(location)}
+                      {getCategoryIcon(category)}
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       No packages found
                     </h3>
                     <p className="text-gray-600 mb-4">
                       {searchTerm 
-                        ? `No packages match your search "${searchTerm}" in this location.`
-                        : `No packages are configured for ${getLocationTitle(location).toLowerCase()}.`
+                        ? `No packages match your search "${searchTerm}" in this category.`
+                        : `No packages are configured for ${getCategoryTitle(category).toLowerCase()}.`
                       }
                     </p>
                     <Button onClick={handleCreateNew} variant="outline">
