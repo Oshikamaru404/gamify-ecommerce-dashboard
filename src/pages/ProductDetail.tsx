@@ -35,6 +35,7 @@ const ProductDetail = () => {
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .trim();
+    console.log('ProductDetail - comparing slug:', slug, 'with productId:', productId);
     return slug === productId;
   });
 
@@ -46,6 +47,7 @@ const ProductDetail = () => {
         <div className="container py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
           <p className="text-gray-600 mb-4">Product ID: {productId}</p>
+          <p className="text-gray-600 mb-4">Available packages: {packages?.map(p => p.name).join(', ')}</p>
           <Button asChild>
             <Link to="/subscription">Back to Subscriptions</Link>
           </Button>
@@ -54,11 +56,23 @@ const ProductDetail = () => {
     );
   }
 
+  // Log the pricing data for debugging
+  console.log('ProductDetail - pricing data:', {
+    price_1_month: product.price_1_month,
+    price_3_months: product.price_3_months,
+    price_6_months: product.price_6_months,
+    price_12_months: product.price_12_months,
+    price_10_credits: product.price_10_credits,
+    price_25_credits: product.price_25_credits,
+    price_50_credits: product.price_50_credits,
+    price_100_credits: product.price_100_credits,
+  });
+
   // Build duration options based on available pricing in the database
   const durations = [];
   
   // Only add duration options if the pricing exists in the database
-  if (product.price_1_month) {
+  if (product.price_1_month !== null && product.price_1_month !== undefined) {
     durations.push({
       months: 1,
       price: product.price_1_month,
@@ -67,7 +81,7 @@ const ProductDetail = () => {
     });
   }
   
-  if (product.price_3_months) {
+  if (product.price_3_months !== null && product.price_3_months !== undefined) {
     const monthlyEquivalent = product.price_1_month ? product.price_1_month * 3 : 0;
     durations.push({
       months: 3,
@@ -79,7 +93,7 @@ const ProductDetail = () => {
     });
   }
   
-  if (product.price_6_months) {
+  if (product.price_6_months !== null && product.price_6_months !== undefined) {
     const monthlyEquivalent = product.price_1_month ? product.price_1_month * 6 : 0;
     durations.push({
       months: 6,
@@ -91,7 +105,7 @@ const ProductDetail = () => {
     });
   }
   
-  if (product.price_12_months) {
+  if (product.price_12_months !== null && product.price_12_months !== undefined) {
     const monthlyEquivalent = product.price_1_month ? product.price_1_month * 12 : 0;
     durations.push({
       months: 12,
@@ -103,6 +117,8 @@ const ProductDetail = () => {
     });
   }
 
+  console.log('ProductDetail - durations built:', durations);
+
   // If no pricing is available in the database, show a message
   if (durations.length === 0) {
     return (
@@ -110,6 +126,17 @@ const ProductDetail = () => {
         <div className="container py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Pricing Not Available</h1>
           <p className="text-gray-600 mb-4">Pricing for this package is not yet configured in the admin dashboard.</p>
+          <p className="text-gray-600 mb-4">Product: {product.name}</p>
+          <p className="text-gray-600 mb-4">Category: {product.category}</p>
+          <p className="text-gray-600 mb-4">Debug - Available pricing fields:</p>
+          <pre className="text-xs text-left bg-gray-100 p-4 rounded mb-4">
+            {JSON.stringify({
+              price_1_month: product.price_1_month,
+              price_3_months: product.price_3_months,
+              price_6_months: product.price_6_months,
+              price_12_months: product.price_12_months,
+            }, null, 2)}
+          </pre>
           <Button asChild>
             <Link to="/activation">Back to Activation</Link>
           </Button>
