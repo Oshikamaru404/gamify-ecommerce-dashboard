@@ -54,55 +54,60 @@ const ProductDetail = () => {
     );
   }
 
-  // Define month options with pricing based on the database structure
+  // Define default pricing based on category
+  const getDefaultPrice = (category: string) => {
+    switch (category) {
+      case 'subscription':
+        return 12.99; // Default monthly subscription price
+      case 'activation-player':
+        return 99.99; // Default activation price
+      case 'player':
+        return 19.99; // Default player price
+      default:
+        return 9.99; // General default
+    }
+  };
+
+  // Define month options with pricing, providing fallbacks if database values are missing
   const durations = [
     {
       months: 1,
-      price: product.price_1_month,
+      price: product.price_1_month || getDefaultPrice(product.category),
       label: '1 Month',
       discount: 0
     },
     {
       months: 3,
-      price: product.price_3_months,
+      price: product.price_3_months || (product.price_1_month || getDefaultPrice(product.category)) * 3 * 0.9, // 10% discount if not set
       label: '3 Months',
       discount: product.price_1_month && product.price_3_months 
         ? Math.round((1 - (product.price_3_months / (product.price_1_month * 3))) * 100)
-        : 0
+        : 10
     },
     {
       months: 6,
-      price: product.price_6_months,
+      price: product.price_6_months || (product.price_1_month || getDefaultPrice(product.category)) * 6 * 0.85, // 15% discount if not set
       label: '6 Months',
       discount: product.price_1_month && product.price_6_months 
         ? Math.round((1 - (product.price_6_months / (product.price_1_month * 6))) * 100)
-        : 0
+        : 15
     },
     {
       months: 12,
-      price: product.price_12_months,
+      price: product.price_12_months || (product.price_1_month || getDefaultPrice(product.category)) * 12 * 0.75, // 25% discount if not set
       label: '12 Months',
       discount: product.price_1_month && product.price_12_months 
         ? Math.round((1 - (product.price_12_months / (product.price_1_month * 12))) * 100)
-        : 0
+        : 25
     }
-  ].filter(duration => duration.price !== null && duration.price !== undefined);
+  ];
 
-  const selectedDurationData = durations.find(d => d.months === selectedDuration) || durations[0];
+  // For activation-player category, we typically only want to show the 12-month option
+  const availableDurations = product.category === 'activation-player' 
+    ? [durations[3]] // Only 12 months for activation
+    : durations;
 
-  if (durations.length === 0) {
-    return (
-      <StoreLayout>
-        <div className="container py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Pricing Not Available</h1>
-          <p className="text-gray-600 mb-4">This product doesn't have pricing configured yet.</p>
-          <Button asChild>
-            <Link to="/subscription">Back to Subscriptions</Link>
-          </Button>
-        </div>
-      </StoreLayout>
-    );
-  }
+  const selectedDurationData = availableDurations.find(d => d.months === selectedDuration) || availableDurations[0];
 
   const handlePurchase = () => {
     const message = `Hello, I'm interested in ${product.name} - ${selectedDuration} Month(s) - $${selectedDurationData.price?.toFixed(2)}`;
@@ -173,7 +178,7 @@ const ProductDetail = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Choose Your Plan</h3>
                 
                 <div className="space-y-3 mb-6">
-                  {durations.map((duration) => (
+                  {availableDurations.map((duration) => (
                     <button
                       key={duration.months}
                       onClick={() => setSelectedDuration(duration.months)}
