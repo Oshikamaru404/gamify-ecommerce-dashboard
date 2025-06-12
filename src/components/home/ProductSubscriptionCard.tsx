@@ -43,7 +43,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   };
 
   return (
-    <Card className={`relative h-full transition-all duration-300 hover:shadow-2xl hover:scale-105 overflow-hidden ${
+    <Card className={`relative h-full transition-all duration-300 hover:shadow-2xl hover:scale-105 overflow-hidden rounded-3xl ${
       featured 
         ? 'border-2 border-red-500 shadow-xl ring-4 ring-red-100' 
         : 'border border-gray-200 hover:border-red-300'
@@ -62,25 +62,25 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-br from-red-50/30 to-transparent pointer-events-none" />
       )}
       
-      {/* Vertical two-part design */}
+      {/* Vertical two-part design with spacing */}
       <div className="flex flex-col h-full relative z-10">
-        {/* Top section - Icon and Price area (approximately 1/3) */}
-        <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 text-center border-b border-red-200 flex-shrink-0">
+        {/* Top section - Icon and Price area (smaller) */}
+        <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 text-center border-b border-red-200 flex-shrink-0 rounded-t-3xl">
           {pkg.icon && (
-            <div className="text-6xl mb-4 drop-shadow-sm">{pkg.icon}</div>
+            <div className="text-4xl mb-2 drop-shadow-sm">{pkg.icon}</div>
           )}
           
           {/* Package Title */}
-          <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
             {pkg.name}
           </h3>
           
           {/* Price Display */}
           <div className="text-center">
-            <div className="text-3xl font-bold text-red-600 mb-1">
+            <div className="text-2xl font-bold text-red-600 mb-1">
               ${displayPrice?.toFixed(2)}
             </div>
-            <div className="text-sm text-gray-600 font-medium">
+            <div className="text-xs text-gray-600 font-medium">
               {pkg.price_1_month ? '/month' : ''}
             </div>
             {pkg.price_1_month && pkg.price_12_months && (
@@ -91,9 +91,12 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           </div>
         </div>
 
-        {/* Bottom section - Package details (approximately 2/3) */}
-        <div className="flex flex-col flex-grow">
-          <CardContent className="p-6 h-full flex flex-col">
+        {/* Spacing between sections */}
+        <div className="h-4 bg-white"></div>
+
+        {/* Bottom section - Package details */}
+        <div className="flex flex-col flex-grow px-1">
+          <CardContent className="p-6 h-full flex flex-col rounded-b-3xl">
             {/* Package Description */}
             {pkg.description && (
               <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
@@ -131,7 +134,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {/* Call to Action Button */}
             <div className="mt-auto">
               {(pkg.category === 'subscription' || pkg.category === 'activation-player') ? (
-                <Button asChild className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                <Button asChild className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                   <Link to={`/product/${productSlug}`}>
                     Get Started Now
                   </Link>
@@ -139,7 +142,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               ) : (
                 <Button 
                   onClick={handleGetStarted}
-                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl"
                 >
                   Get Started Now
                 </Button>
