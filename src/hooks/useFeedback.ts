@@ -22,7 +22,7 @@ export const useFeedbacks = () => {
       console.log('Fetching feedbacks from database...');
       
       const { data, error } = await supabase
-        .from('feedbacks')
+        .from('feedbacks' as any)
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -44,7 +44,7 @@ export const useApprovedFeedbacks = () => {
       console.log('Fetching approved feedbacks from database...');
       
       const { data, error } = await supabase
-        .from('feedbacks')
+        .from('feedbacks' as any)
         .select('*')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
@@ -69,7 +69,7 @@ export const useCreateFeedback = () => {
       console.log('Creating new feedback:', feedbackData);
       
       const { data, error } = await supabase
-        .from('feedbacks')
+        .from('feedbacks' as any)
         .insert([{ ...feedbackData, status: 'pending' }])
         .select()
         .single();
@@ -101,7 +101,7 @@ export const useUpdateFeedbackStatus = () => {
       console.log('Updating feedback status:', id, status);
       
       const { data, error } = await supabase
-        .from('feedbacks')
+        .from('feedbacks' as any)
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()

@@ -15,7 +15,7 @@ export const useSubscribeNewsletter = () => {
       console.log('Subscribing to newsletter:', email);
       
       const { data, error } = await supabase
-        .from('newsletter_subscriptions')
+        .from('newsletter_subscriptions' as any)
         .insert([{ email }])
         .select()
         .single();

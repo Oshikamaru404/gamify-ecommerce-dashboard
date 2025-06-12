@@ -20,6 +20,7 @@ import HowToBuy from "./pages/HowToBuy";
 import Blog from "./pages/Blog";
 import ProductDetail from "./pages/ProductDetail";
 import RefundPolicy from "./pages/RefundPolicy";
+import FeedbackSubmission from "./pages/FeedbackSubmission";
 
 // Admin Routes
 import AdminLayout from "./layouts/AdminLayout";
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/how-to-buy" element={<HowToBuy />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/feedback" element={<FeedbackSubmission />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>

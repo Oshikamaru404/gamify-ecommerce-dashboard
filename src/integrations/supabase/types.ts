@@ -57,6 +57,36 @@ export type Database = {
         }
         Relationships: []
       }
+      feedbacks: {
+        Row: {
+          comment: string
+          created_at: string
+          feedback_type: Database["public"]["Enums"]["feedback_type"]
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["feedback_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          feedback_type: Database["public"]["Enums"]["feedback_type"]
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["feedback_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          feedback_type?: Database["public"]["Enums"]["feedback_type"]
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["feedback_status"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       iptv_packages: {
         Row: {
           category: Database["public"]["Enums"]["package_category"]
@@ -120,6 +150,24 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscriptions: {
+        Row: {
+          email: string
+          id: string
+          subscribed_at: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          subscribed_at?: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          subscribed_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -128,6 +176,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      feedback_status: "pending" | "approved" | "rejected"
+      feedback_type: "positive" | "neutral" | "negative"
       package_category:
         | "subscription"
         | "reseller"
@@ -250,6 +300,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      feedback_status: ["pending", "approved", "rejected"],
+      feedback_type: ["positive", "neutral", "negative"],
       package_category: [
         "subscription",
         "reseller",
