@@ -1,9 +1,12 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
-import { Zap, Star, Check, MessageCircle } from 'lucide-react';
+import FeedbackCards from '@/components/home/FeedbackCards';
+import NewsletterSubscription from '@/components/home/NewsletterSubscription';
+import { Zap, Star, Check, MessageCircle, MessageSquarePlus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
@@ -17,10 +20,8 @@ const Home = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  // Filter packages by category
+  // Filter only subscription packages
   const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
-  const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
-  const activationPackages = packages?.filter(pkg => pkg.category === 'activation-player' && pkg.status !== 'inactive') || [];
 
   if (isLoading) {
     return (
@@ -61,12 +62,12 @@ const Home = () => {
         </section>
 
         {/* Subscription Products */}
-        {subscriptionPackages.length > 0 && (
-          <section className="py-20">
-            <div className="container">
-              <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
-                {t.subscriptionsTitle}
-              </h2>
+        <section className="py-20">
+          <div className="container">
+            <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
+              {t.subscriptionsTitle}
+            </h2>
+            {subscriptionPackages.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {subscriptionPackages.map((pkg) => (
                   <ProductSubscriptionCard
@@ -78,56 +79,39 @@ const Home = () => {
                   />
                 ))}
               </div>
-            </div>
-          </section>
-        )}
-
-        {/* Player Packages */}
-        {playerPackages.length > 0 && (
-          <section className="py-20 bg-white">
-            <div className="container">
-              <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
-                Player Packages
-              </h2>
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {playerPackages.map((pkg) => (
-                  <ProductSubscriptionCard
-                    key={pkg.id}
-                    name={pkg.name}
-                    price={pkg.price_10_credits || 15.99}
-                    features={pkg.features || ['Player Management', 'Multi-device', 'Premium Support']}
-                    packageData={pkg}
-                  />
-                ))}
+            ) : (
+              <div className="text-center py-16">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No Subscription Packages Available</h3>
+                <p className="text-gray-600">Subscription packages are currently being updated. Please check back later.</p>
               </div>
-            </div>
-          </section>
-        )}
+            )}
+          </div>
+        </section>
 
-        {/* Activation Packages */}
-        {activationPackages.length > 0 && (
-          <section className="py-20">
-            <div className="container">
-              <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
-                Activation Services
+        {/* Customer Feedback Section */}
+        <section className="py-20 bg-white">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                What Our Customers Say
               </h2>
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {activationPackages.map((pkg) => (
-                  <ProductSubscriptionCard
-                    key={pkg.id}
-                    name={pkg.name}
-                    price={pkg.price_10_credits || 99.00}
-                    features={pkg.features || ['12 Month Activation', 'Instant Setup', 'Full Support']}
-                    packageData={pkg}
-                  />
-                ))}
-              </div>
+              <p className="text-xl text-gray-600 mb-8">
+                Real feedback from our valued IPTV customers
+              </p>
+              <Link to="/feedback">
+                <Button className="bg-red-600 hover:bg-red-700 text-white">
+                  <MessageSquarePlus className="mr-2" size={20} />
+                  Share Your Feedback
+                </Button>
+              </Link>
             </div>
-          </section>
-        )}
+            
+            <FeedbackCards />
+          </div>
+        </section>
 
         {/* Features Section */}
-        <section className="bg-white py-16">
+        <section className="py-16">
           <div className="container">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -171,6 +155,9 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* Newsletter Subscription */}
+        <NewsletterSubscription />
 
         {/* Call to Action */}
         <section className="bg-red-600 text-white py-16">
