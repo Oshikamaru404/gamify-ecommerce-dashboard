@@ -13,13 +13,16 @@ import {
   GamepadIcon, 
   Crown,
   Star,
-  Activity
+  Activity,
+  MessageSquare,
+  Mail
 } from 'lucide-react';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
-import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
 
 // Define metric interface for the dashboard
 interface DashboardMetric {
@@ -29,21 +32,45 @@ interface DashboardMetric {
   trend: 'up' | 'down';
 }
 
-// Define order interface for recent orders
-interface DashboardOrder {
-  id: string;
-  customerName: string;
-  createdAt: string;
-  status: 'delivered' | 'processing' | 'pending';
-  paymentStatus: 'paid' | 'pending';
-  total: number;
-}
-
 const Dashboard = () => {
   const { data: packages = [] } = useIPTVPackages();
   const { data: metrics = [] } = useDashboardMetrics();
 
-  // Calculate package statistics based on new categories
+  // Fetch real feedback data
+  const { data: feedbacks = [] } = useQuery({
+    queryKey: ['feedbacks'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('feedbacks')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching feedbacks:', error);
+        return [];
+      }
+      return data;
+    },
+  });
+
+  // Fetch real newsletter subscriptions
+  const { data: newsletterSubscriptions = [] } = useQuery({
+    queryKey: ['newsletter-subscriptions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('newsletter_subscriptions')
+        .select('*')
+        .order('subscribed_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching newsletter subscriptions:', error);
+        return [];
+      }
+      return data;
+    },
+  });
+
+  // Calculate package statistics based on categories
   const packageStats = {
     total: packages.length,
     active: packages.filter(p => p.status === 'active').length,
@@ -55,69 +82,51 @@ const Dashboard = () => {
     activationPlayer: packages.filter(p => p.category === 'activation-player').length,
   };
 
-  // Calculate revenue metrics (example calculations based on packages)
+  // Real revenue metrics (all 0 since no real orders exist)
   const revenueMetrics = {
-    totalRevenue: packages.reduce((sum, pkg) => {
-      return sum + (pkg.price_25_credits || 0);
-    }, 0),
+    totalRevenue: 0, // No real orders yet
     avgPackagePrice: packages.length > 0 
-      ? packages.reduce((sum, pkg) => sum + (pkg.price_25_credits || 0), 0) / packages.length 
+      ? packages.reduce((sum, pkg) => sum + (pkg.price_1_month || 0), 0) / packages.length 
       : 0,
   };
 
-  // Create metric objects for the dashboard
+  // Feedback statistics
+  const feedbackStats = {
+    total: feedbacks.length,
+    pending: feedbacks.filter(f => f.status === 'pending').length,
+    resolved: feedbacks.filter(f => f.status === 'resolved').length,
+  };
+
+  // Newsletter statistics
+  const newsletterStats = {
+    total: newsletterSubscriptions.length,
+  };
+
+  // Create metric objects for the dashboard (real data)
   const dashboardMetrics: DashboardMetric[] = [
     {
       label: 'Total Packages',
       value: packageStats.total,
-      change: 12,
+      change: 0, // No change since no historical data
       trend: 'up' as const
     },
     {
       label: 'Active Packages',
       value: packageStats.active,
-      change: 8,
+      change: 0,
       trend: 'up' as const
     },
     {
       label: 'Featured Packages',
       value: packageStats.featured,
-      change: 23,
+      change: 0,
       trend: 'up' as const
     },
     {
-      label: 'Avg Package Price',
-      value: revenueMetrics.avgPackagePrice,
-      change: 5,
+      label: 'Total Revenue',
+      value: revenueMetrics.totalRevenue,
+      change: 0,
       trend: 'up' as const
-    }
-  ];
-
-  // Sample orders data
-  const sampleOrders: DashboardOrder[] = [
-    {
-      id: 'ORD-001',
-      customerName: 'John Doe',
-      createdAt: '2024-01-15T10:30:00Z',
-      status: 'delivered',
-      paymentStatus: 'paid',
-      total: 45.99
-    },
-    {
-      id: 'ORD-002',
-      customerName: 'Jane Smith',
-      createdAt: '2024-01-14T14:20:00Z',
-      status: 'processing',
-      paymentStatus: 'paid',
-      total: 85.99
-    },
-    {
-      id: 'ORD-003',
-      customerName: 'Mike Johnson',
-      createdAt: '2024-01-13T09:15:00Z',
-      status: 'pending',
-      paymentStatus: 'pending',
-      total: 25.99
     }
   ];
 
@@ -143,14 +152,12 @@ const Dashboard = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">{metric.label}</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {metric.label.includes('Price') ? `$${metric.value.toFixed(2)}` : metric.value}
+                    {metric.label.includes('Revenue') ? `$${metric.value.toFixed(2)}` : metric.value}
                   </p>
                 </div>
-                <div className={`flex items-center text-sm ${
-                  metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <div className="flex items-center text-sm text-gray-500">
                   <TrendingUp size={16} className="mr-1" />
-                  +{metric.change}%
+                  {metric.change}%
                 </div>
               </div>
             </CardContent>
@@ -227,7 +234,7 @@ const Dashboard = () => {
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-green-600 h-2 rounded-full" 
-                      style={{ width: `${(packageStats.active / packageStats.total) * 100}%` }}
+                      style={{ width: `${packageStats.total > 0 ? (packageStats.active / packageStats.total) * 100 : 0}%` }}
                     ></div>
                   </div>
                   <span className="text-sm text-gray-600">{packageStats.active}</span>
@@ -240,7 +247,7 @@ const Dashboard = () => {
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-yellow-600 h-2 rounded-full" 
-                      style={{ width: `${(packageStats.featured / packageStats.total) * 100}%` }}
+                      style={{ width: `${packageStats.total > 0 ? (packageStats.featured / packageStats.total) * 100 : 0}%` }}
                     ></div>
                   </div>
                   <span className="text-sm text-gray-600">{packageStats.featured}</span>
@@ -253,11 +260,87 @@ const Dashboard = () => {
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-gray-600 h-2 rounded-full" 
-                      style={{ width: `${(packageStats.inactive / packageStats.total) * 100}%` }}
+                      style={{ width: `${packageStats.total > 0 ? (packageStats.inactive / packageStats.total) * 100 : 0}%` }}
                     ></div>
                   </div>
                   <span className="text-sm text-gray-600">{packageStats.inactive}</span>
                 </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Customer Feedback and Newsletter Section */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Customer Feedback
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium">Total Feedback</span>
+                </div>
+                <Badge className="bg-blue-100 text-blue-700">
+                  {feedbackStats.total}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-yellow-600" />
+                  <span className="font-medium">Pending Reviews</span>
+                </div>
+                <Badge className="bg-yellow-100 text-yellow-700">
+                  {feedbackStats.pending}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-green-600" />
+                  <span className="font-medium">Resolved</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">
+                  {feedbackStats.resolved}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Newsletter Subscriptions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-green-600" />
+                  <span className="font-medium">Total Subscribers</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">
+                  {newsletterStats.total}
+                </Badge>
+              </div>
+              
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-600">
+                  {newsletterStats.total > 0 
+                    ? `${newsletterStats.total} people subscribed to your newsletter`
+                    : 'No newsletter subscriptions yet'
+                  }
+                </p>
               </div>
             </div>
           </CardContent>
@@ -269,6 +352,8 @@ const Dashboard = () => {
         <TabsList>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="orders">Recent Orders</TabsTrigger>
+          <TabsTrigger value="feedback">Feedback Reviews</TabsTrigger>
+          <TabsTrigger value="subscribers">Email Subscribers</TabsTrigger>
         </TabsList>
         
         <TabsContent value="analytics" className="space-y-4">
@@ -288,7 +373,7 @@ const Dashboard = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Total Revenue (Est.)</span>
+                    <span className="text-sm font-medium">Total Revenue</span>
                     <span className="text-2xl font-bold text-green-600">
                       ${revenueMetrics.totalRevenue.toFixed(2)}
                     </span>
@@ -315,26 +400,81 @@ const Dashboard = () => {
               <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {sampleOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{order.customerName}</p>
-                      <p className="text-sm text-gray-600">Order #{order.id}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">${order.total}</p>
+              <div className="text-center py-12">
+                <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h3>
+                <p className="text-gray-600">When customers place orders, they will appear here.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="feedback">
+          <Card>
+            <CardHeader>
+              <CardTitle>Customer Feedback Reviews</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {feedbacks.length > 0 ? (
+                <div className="space-y-4">
+                  {feedbacks.slice(0, 5).map((feedback) => (
+                    <div key={feedback.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{feedback.name}</p>
+                        <p className="text-sm text-gray-600">{feedback.comment}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(feedback.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
                       <Badge className={
-                        order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                        order.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                        feedback.status === 'resolved' ? 'bg-green-100 text-green-700' :
                         'bg-yellow-100 text-yellow-700'
                       }>
-                        {order.status}
+                        {feedback.status}
                       </Badge>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Feedback Yet</h3>
+                  <p className="text-gray-600">Customer feedback will appear here when submitted.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="subscribers">
+          <Card>
+            <CardHeader>
+              <CardTitle>Newsletter Subscribers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {newsletterSubscriptions.length > 0 ? (
+                <div className="space-y-4">
+                  {newsletterSubscriptions.slice(0, 10).map((subscription) => (
+                    <div key={subscription.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{subscription.email}</p>
+                        <p className="text-xs text-gray-500">
+                          Subscribed: {new Date(subscription.subscribed_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-700">
+                        Active
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Subscribers Yet</h3>
+                  <p className="text-gray-600">Newsletter subscribers will appear here when they sign up.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
