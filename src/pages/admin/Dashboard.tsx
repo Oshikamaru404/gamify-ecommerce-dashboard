@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -94,7 +93,7 @@ const Dashboard = () => {
   const feedbackStats = {
     total: feedbacks.length,
     pending: feedbacks.filter(f => f.status === 'pending').length,
-    resolved: feedbacks.filter(f => f.status === 'resolved').length,
+    approved: feedbacks.filter(f => f.status === 'approved').length,
   };
 
   // Newsletter statistics
@@ -305,10 +304,10 @@ const Dashboard = () => {
               <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 text-green-600" />
-                  <span className="font-medium">Resolved</span>
+                  <span className="font-medium">Approved</span>
                 </div>
                 <Badge className="bg-green-100 text-green-700">
-                  {feedbackStats.resolved}
+                  {feedbackStats.approved}
                 </Badge>
               </div>
             </div>
@@ -427,7 +426,7 @@ const Dashboard = () => {
                         </p>
                       </div>
                       <Badge className={
-                        feedback.status === 'resolved' ? 'bg-green-100 text-green-700' :
+                        feedback.status === 'approved' ? 'bg-green-100 text-green-700' :
                         'bg-yellow-100 text-yellow-700'
                       }>
                         {feedback.status}
