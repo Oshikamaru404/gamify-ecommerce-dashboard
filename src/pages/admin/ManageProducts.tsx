@@ -30,7 +30,7 @@ const ManageProducts = () => {
   // Subscription packages: month-based subscription system (category 'subscription')
   // Panel IPTV packages: credit-based system (category 'panel-iptv') 
   // Player packages: for streaming applications (category 'player')
-  // Activation packages: for device activation (category 'activation-player')
+  // Activation packages: month-based subscription system for device activation (category 'activation-player')
   const packagesByCategory = {
     subscription: filteredPackages.filter(pkg => 
       pkg.category === 'subscription' && pkg.status !== 'inactive'
@@ -95,7 +95,7 @@ const ManageProducts = () => {
       case 'subscription': return 'Month-based subscription packages displayed on home page and subscription page';
       case 'panelIptv': return 'Credit-based IPTV panel packages for resellers and advanced users';
       case 'player': return 'Player panel packages for streaming applications';
-      case 'activationPlayer': return 'Activation player packages for device activation';
+      case 'activationPlayer': return 'Month-based subscription packages for device activation and player setup';
       default: return 'All packages in the system';
     }
   };
@@ -187,7 +187,7 @@ const ManageProducts = () => {
                     <Crown size={12} />
                     Featured: {categoryPackages.filter(p => p.status === 'featured').length}
                   </Badge>
-                  {category === 'subscription' && (
+                  {(category === 'subscription' || category === 'activationPlayer') && (
                     <Badge className="bg-blue-100 text-blue-700">
                       Month-based System
                     </Badge>
@@ -195,6 +195,11 @@ const ManageProducts = () => {
                   {category === 'panelIptv' && (
                     <Badge className="bg-green-100 text-green-700">
                       Credit-based System
+                    </Badge>
+                  )}
+                  {category === 'player' && (
+                    <Badge className="bg-purple-100 text-purple-700">
+                      Player System
                     </Badge>
                   )}
                 </div>

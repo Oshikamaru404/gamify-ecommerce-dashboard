@@ -133,6 +133,8 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     onOpenChange(false);
   };
 
+  // Both subscription and activation-player categories use monthly pricing
+  // Panel IPTV and player categories use credit-based pricing
   const isMonthlyPricingCategory = formData.category === 'subscription' || formData.category === 'activation-player';
 
   return (
@@ -176,10 +178,10 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="subscription">Subscription</SelectItem>
-                  <SelectItem value="reseller">Reseller</SelectItem>
-                  <SelectItem value="player">Player</SelectItem>
-                  <SelectItem value="panel-iptv">Panel IPTV</SelectItem>
                   <SelectItem value="activation-player">Activation Player</SelectItem>
+                  <SelectItem value="panel-iptv">Panel IPTV</SelectItem>
+                  <SelectItem value="player">Player</SelectItem>
+                  <SelectItem value="reseller">Reseller</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -214,8 +216,14 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
 
           <div>
             <Label>
-              {isMonthlyPricingCategory ? 'Monthly Pricing (USD)' : 'Credit-Based Pricing (USD)'}
+              {isMonthlyPricingCategory ? 'Monthly Subscription Pricing (USD)' : 'Credit-Based Pricing (USD)'}
             </Label>
+            <p className="text-sm text-gray-600 mb-2">
+              {isMonthlyPricingCategory 
+                ? 'Set pricing for monthly subscription plans (used by Subscription and Activation Player packages)'
+                : 'Set pricing for credit-based system (used by Panel IPTV and Player packages)'
+              }
+            </p>
             {isMonthlyPricingCategory ? (
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div>
