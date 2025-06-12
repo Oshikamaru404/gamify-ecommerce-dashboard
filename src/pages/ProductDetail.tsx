@@ -54,61 +54,76 @@ const ProductDetail = () => {
     );
   }
 
-  // Define default pricing based on category
-  const getDefaultPrice = (category: string) => {
-    switch (category) {
-      case 'subscription':
-        return 12.99; // Default monthly subscription price
-      case 'activation-player':
-        return 49.99; // Default activation price per month
-      case 'player':
-        return 19.99; // Default player price
-      default:
-        return 9.99; // General default
-    }
-  };
-
-  // Define month options with pricing, providing fallbacks if database values are missing
-  const durations = [
-    {
+  // Build duration options based on available pricing in the database
+  const durations = [];
+  
+  // Only add duration options if the pricing exists in the database
+  if (product.price_1_month) {
+    durations.push({
       months: 1,
-      price: product.price_1_month || getDefaultPrice(product.category),
+      price: product.price_1_month,
       label: '1 Month',
       discount: 0
-    },
-    {
+    });
+  }
+  
+  if (product.price_3_months) {
+    const monthlyEquivalent = product.price_1_month ? product.price_1_month * 3 : 0;
+    durations.push({
       months: 3,
-      price: product.price_3_months || (product.price_1_month || getDefaultPrice(product.category)) * 3 * 0.9, // 10% discount if not set
+      price: product.price_3_months,
       label: '3 Months',
-      discount: product.price_1_month && product.price_3_months 
-        ? Math.round((1 - (product.price_3_months / (product.price_1_month * 3))) * 100)
-        : 10
-    },
-    {
+      discount: monthlyEquivalent > 0 
+        ? Math.round((1 - (product.price_3_months / monthlyEquivalent)) * 100)
+        : 0
+    });
+  }
+  
+  if (product.price_6_months) {
+    const monthlyEquivalent = product.price_1_month ? product.price_1_month * 6 : 0;
+    durations.push({
       months: 6,
-      price: product.price_6_months || (product.price_1_month || getDefaultPrice(product.category)) * 6 * 0.85, // 15% discount if not set
+      price: product.price_6_months,
       label: '6 Months',
-      discount: product.price_1_month && product.price_6_months 
-        ? Math.round((1 - (product.price_6_months / (product.price_1_month * 6))) * 100)
-        : 15
-    },
-    {
+      discount: monthlyEquivalent > 0 
+        ? Math.round((1 - (product.price_6_months / monthlyEquivalent)) * 100)
+        : 0
+    });
+  }
+  
+  if (product.price_12_months) {
+    const monthlyEquivalent = product.price_1_month ? product.price_1_month * 12 : 0;
+    durations.push({
       months: 12,
-      price: product.price_12_months || (product.price_1_month || getDefaultPrice(product.category)) * 12 * 0.75, // 25% discount if not set
+      price: product.price_12_months,
       label: '12 Months',
-      discount: product.price_1_month && product.price_12_months 
-        ? Math.round((1 - (product.price_12_months / (product.price_1_month * 12))) * 100)
-        : 25
-    }
-  ];
+      discount: monthlyEquivalent > 0 
+        ? Math.round((1 - (product.price_12_months / monthlyEquivalent)) * 100)
+        : 0
+    });
+  }
 
-  // Show all 4 duration options for all categories including activation-player
-  const availableDurations = durations;
+  // If no pricing is available in the database, show a message
+  if (durations.length === 0) {
+    return (
+      <StoreLayout>
+        <div className="container py-16 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Pricing Not Available</h1>
+          <p className="text-gray-600 mb-4">Pricing for this package is not yet configured in the admin dashboard.</p>
+          <Button asChild>
+            <Link to="/activation">Back to Activation</Link>
+          </Button>
+        </div>
+      </StoreLayout>
+    );
+  }
 
-  const selectedDurationData = availableDurations.find(d => d.months === selectedDuration) || availableDurations[0];
+  // Set the default selected duration to the first available option
+  const validSelectedDuration = durations.find(d => d.months === selectedDuration) ? selectedDuration : durations[0].months;
+  const selectedDurationData = durations.find(d => d.months === validSelectedDuration) || durations[0];
 
   const handlePurchase = () => {
-    const message = `Hello, I'm interested in ${product.name} - ${selectedDuration} Month(s) - $${selectedDurationData.price?.toFixed(2)}`;
+    const message = `Hello, I'm interested in ${product.name} - ${selectedDurationData.months} Month(s) - $${selectedDurationData.price?.toFixed(2)}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -119,11 +134,11 @@ const ProductDetail = () => {
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
           <div className="container py-12">
             <Link 
-              to="/subscription" 
+              to={product.category === 'activation-player' ? '/activation' : '/subscription'}
               className="inline-flex items-center text-white/80 hover:text-white transition-colors duration-200 group mb-6"
             >
               <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
-              Back to Subscriptions
+              Back to {product.category === 'activation-player' ? 'Activation' : 'Subscriptions'}
             </Link>
             
             <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -176,12 +191,12 @@ const ProductDetail = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Choose Your Plan</h3>
                 
                 <div className="space-y-3 mb-6">
-                  {availableDurations.map((duration) => (
+                  {durations.map((duration) => (
                     <button
                       key={duration.months}
                       onClick={() => setSelectedDuration(duration.months)}
                       className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                        selectedDuration === duration.months
+                        validSelectedDuration === duration.months
                           ? 'border-red-500 bg-red-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
