@@ -20,13 +20,30 @@ import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
 import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
-import { Metric, Order } from '@/lib/types';
+
+// Define metric interface for the dashboard
+interface DashboardMetric {
+  label: string;
+  value: number;
+  change: number;
+  trend: 'up' | 'down';
+}
+
+// Define order interface for recent orders
+interface DashboardOrder {
+  id: string;
+  customerName: string;
+  createdAt: string;
+  status: 'delivered' | 'processing' | 'pending';
+  paymentStatus: 'paid' | 'pending';
+  total: number;
+}
 
 const Dashboard = () => {
   const { data: packages = [] } = useIPTVPackages();
   const { data: metrics = [] } = useDashboardMetrics();
 
-  // Calculate package statistics
+  // Calculate package statistics based on new categories
   const packageStats = {
     total: packages.length,
     active: packages.filter(p => p.status === 'active').length,
@@ -48,31 +65,27 @@ const Dashboard = () => {
       : 0,
   };
 
-  // Create metric objects that match the Metric type
-  const dashboardMetrics: Metric[] = [
+  // Create metric objects for the dashboard
+  const dashboardMetrics: DashboardMetric[] = [
     {
-      id: '1',
       label: 'Total Packages',
       value: packageStats.total,
       change: 12,
       trend: 'up' as const
     },
     {
-      id: '2',
       label: 'Active Packages',
       value: packageStats.active,
       change: 8,
       trend: 'up' as const
     },
     {
-      id: '3',
       label: 'Featured Packages',
       value: packageStats.featured,
       change: 23,
       trend: 'up' as const
     },
     {
-      id: '4',
       label: 'Avg Package Price',
       value: revenueMetrics.avgPackagePrice,
       change: 5,
@@ -81,7 +94,7 @@ const Dashboard = () => {
   ];
 
   // Sample orders data
-  const sampleOrders: Order[] = [
+  const sampleOrders: DashboardOrder[] = [
     {
       id: 'ORD-001',
       customerName: 'John Doe',
@@ -123,8 +136,25 @@ const Dashboard = () => {
 
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {dashboardMetrics.map((metric) => (
-          <MetricCard key={metric.id} metric={metric} />
+        {dashboardMetrics.map((metric, index) => (
+          <Card key={index}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">{metric.label}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {metric.label.includes('Price') ? `$${metric.value.toFixed(2)}` : metric.value}
+                  </p>
+                </div>
+                <div className={`flex items-center text-sm ${
+                  metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  <TrendingUp size={16} className="mr-1" />
+                  +{metric.change}%
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -285,7 +315,26 @@ const Dashboard = () => {
               <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <RecentOrdersTable orders={sampleOrders} />
+              <div className="space-y-4">
+                {sampleOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{order.customerName}</p>
+                      <p className="text-sm text-gray-600">Order #{order.id}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">${order.total}</p>
+                      <Badge className={
+                        order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                        order.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }>
+                        {order.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
