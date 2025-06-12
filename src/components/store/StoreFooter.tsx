@@ -77,6 +77,11 @@ const StoreFooter: React.FC = () => {
                   How to Buy
                 </Link>
               </li>
+              <li>
+                <Link to="/refund-policy" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Refund Policy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

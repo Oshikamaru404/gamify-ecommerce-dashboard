@@ -5,72 +5,29 @@ import { ArrowLeft, Star, Check, Zap } from 'lucide-react';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import StoreLayout from '@/components/store/StoreLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const Subscription = () => {
   const { t } = useLanguage();
+  const { data: packages, isLoading } = useIPTVPackages();
 
-  const subscriptionProducts = [
-    {
-      id: "strong-8k",
-      name: "STRONG 8K IPTV 🚀",
-      price: 12.99,
-      features: [
-        "8K Ultra HD Quality",
-        "5000+ Live Channels",
-        "Movies & Series VOD",
-        "Anti-Freeze Technology",
-        "24/7 Support"
-      ]
-    },
-    {
-      id: "trex-8k",
-      name: "TREX 8K IPTV 🦖",
-      price: 10.99,
-      features: [
-        "8K/4K Streaming",
-        "4000+ Channels",
-        "Sports Packages",
-        "Movie Collection",
-        "Fast Servers"
-      ]
-    },
-    {
-      id: "promax-4k",
-      name: "PROMAX 4K IPTV ⚡",
-      price: 18.99,
-      features: [
-        "4K Premium Technology",
-        "8000+ Channels",
-        "4K Quality",
-        "Global Content",
-        "Premium Support"
-      ]
-    },
-    {
-      id: "tivione-4k",
-      name: "TIVIONE 4K IPTV 📺",
-      price: 13.99,
-      features: [
-        "Full 4K Streaming",
-        "6000+ Channels",
-        "VOD Library",
-        "Stable Connection",
-        "Multi-Platform"
-      ]
-    },
-    {
-      id: "b1g-4k",
-      name: "B1G 4K IPTV 🎬",
-      price: 16.99,
-      features: [
-        "Big Entertainment",
-        "9000+ Channels",
-        "4K Resolution",
-        "Sports & Movies",
-        "24/7 Service"
-      ]
-    }
-  ];
+  // Filter only subscription packages
+  const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
+
+  if (isLoading) {
+    return (
+      <StoreLayout>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="container py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
+              <p className="mt-4 text-lg text-gray-600">Loading subscription packages...</p>
+            </div>
+          </div>
+        </div>
+      </StoreLayout>
+    );
+  }
 
   return (
     <StoreLayout>
@@ -117,16 +74,24 @@ const Subscription = () => {
 
         {/* Subscriptions Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-            {subscriptionProducts.map((product) => (
-              <ProductSubscriptionCard
-                key={product.id}
-                name={product.name}
-                price={product.price}
-                features={product.features}
-              />
-            ))}
-          </div>
+          {subscriptionPackages.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {subscriptionPackages.map((pkg) => (
+                <ProductSubscriptionCard
+                  key={pkg.id}
+                  name={pkg.name}
+                  price={pkg.price_10_credits || 12.99}
+                  features={pkg.features || ['Premium Quality', 'HD Streaming', '24/7 Support']}
+                  packageData={pkg}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">No Subscription Packages Available</h3>
+              <p className="text-gray-600">Subscription packages are currently being updated. Please check back later.</p>
+            </div>
+          )}
         </div>
 
         {/* Features Section */}

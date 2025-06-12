@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Rocket, Zap, Tv, Play, Film } from 'lucide-react';
+import { CheckCircle2, Rocket, Zap, Tv, Play, Film, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
 type ProductSubscriptionCardProps = {
   name: string;
@@ -13,6 +14,7 @@ type ProductSubscriptionCardProps = {
   features: string[];
   bgColor?: string;
   accentColor?: string;
+  packageData?: IPTVPackage;
 };
 
 const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({ 
@@ -20,7 +22,8 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   price,
   features,
   bgColor = 'bg-white',
-  accentColor = 'text-red-600'
+  accentColor = 'text-red-600',
+  packageData
 }) => {
   const { t } = useLanguage();
 
@@ -56,7 +59,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   return (
     <div className="group perspective h-full">
       <Card className={cn(
-        "relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 border-2 border-gray-100 hover:border-red-200 h-full flex flex-col min-h-[500px]", 
+        "relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 transform hover:scale-105 border-2 border-gray-100 hover:border-red-200 h-full flex flex-col min-h-[600px]", 
         bgColor
       )}>
         
@@ -91,7 +94,17 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               <span className={cn("text-3xl font-bold transition-all duration-300 group-hover:scale-110", accentColor)}>
                 {price.toFixed(2)}
               </span>
-              <span className="text-sm text-gray-500 ml-1">/month</span>
+              <span className="text-sm text-gray-500 ml-1">
+                {packageData?.category === 'activation-player' ? '/year' : '/month'}
+              </span>
+            </div>
+
+            {/* 30-Day Money Back Guarantee */}
+            <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-2">
+              <div className="flex items-center justify-center gap-2 text-green-700">
+                <Shield size={16} />
+                <span className="text-xs font-semibold">30-Day Money Back Guarantee</span>
+              </div>
             </div>
           </div>
 

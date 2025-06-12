@@ -2,6 +2,7 @@
 import React, { ReactNode } from 'react';
 import StoreHeaderWithLanguage from './StoreHeaderWithLanguage';
 import StoreFooter from './StoreFooter';
+import SocialMediaIcons from '../SocialMediaIcons';
 
 type StoreLayoutProps = {
   children: ReactNode;
@@ -15,6 +16,7 @@ const StoreLayout: React.FC<StoreLayoutProps> = ({ children }) => {
         {children}
       </main>
       <StoreFooter />
+      <SocialMediaIcons />
     </div>
   );
 };

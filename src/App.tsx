@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ import Support from "./pages/Support";
 import HowToBuy from "./pages/HowToBuy";
 import Blog from "./pages/Blog";
 import ProductDetail from "./pages/ProductDetail";
+import RefundPolicy from "./pages/RefundPolicy";
 
 // Admin Routes
 import AdminLayout from "./layouts/AdminLayout";
@@ -51,6 +53,7 @@ const App = () => (
             <Route path="/support" element={<Support />} />
             <Route path="/how-to-buy" element={<HowToBuy />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
