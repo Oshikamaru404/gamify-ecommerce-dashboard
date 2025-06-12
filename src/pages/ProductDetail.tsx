@@ -60,7 +60,7 @@ const ProductDetail = () => {
       case 'subscription':
         return 12.99; // Default monthly subscription price
       case 'activation-player':
-        return 99.99; // Default activation price
+        return 49.99; // Default activation price per month
       case 'player':
         return 19.99; // Default player price
       default:
@@ -102,10 +102,8 @@ const ProductDetail = () => {
     }
   ];
 
-  // For activation-player category, we typically only want to show the 12-month option
-  const availableDurations = product.category === 'activation-player' 
-    ? [durations[3]] // Only 12 months for activation
-    : durations;
+  // Show all 4 duration options for all categories including activation-player
+  const availableDurations = durations;
 
   const selectedDurationData = availableDurations.find(d => d.months === selectedDuration) || availableDurations[0];
 

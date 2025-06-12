@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -132,7 +133,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     onOpenChange(false);
   };
 
-  const isSubscriptionCategory = formData.category === 'subscription';
+  const isMonthlyPricingCategory = formData.category === 'subscription' || formData.category === 'activation-player';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -213,9 +214,9 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
 
           <div>
             <Label>
-              {isSubscriptionCategory ? 'Monthly Pricing (USD)' : 'Credit-Based Pricing (USD)'}
+              {isMonthlyPricingCategory ? 'Monthly Pricing (USD)' : 'Credit-Based Pricing (USD)'}
             </Label>
-            {isSubscriptionCategory ? (
+            {isMonthlyPricingCategory ? (
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div>
                   <Label htmlFor="price_1_month" className="text-sm">1 Month</Label>
