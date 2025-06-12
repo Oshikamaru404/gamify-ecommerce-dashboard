@@ -72,11 +72,15 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   };
 
   const renderPricing = () => {
-    if (pkg.category === 'subscription') {
-      // Show month-based pricing for subscription packages
+    // Both subscription and activation-player categories use monthly pricing
+    // Panel IPTV and player categories use credit-based pricing
+    const isMonthlyPricingCategory = pkg.category === 'subscription' || pkg.category === 'activation-player';
+    
+    if (isMonthlyPricingCategory) {
+      // Show month-based pricing for subscription and activation-player packages
       return (
         <div className="space-y-2">
-          <h4 className="font-medium text-sm text-gray-900">Monthly Pricing:</h4>
+          <h4 className="font-medium text-sm text-gray-900">Monthly Subscription Pricing:</h4>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {pkg.price_1_month && (
               <div className="bg-gray-50 p-2 rounded">
@@ -102,7 +106,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         </div>
       );
     } else {
-      // Show credit-based pricing for other packages
+      // Show credit-based pricing for panel-iptv and player packages
       return (
         <div className="space-y-2">
           <h4 className="font-medium text-sm text-gray-900">Credit-Based Pricing:</h4>
