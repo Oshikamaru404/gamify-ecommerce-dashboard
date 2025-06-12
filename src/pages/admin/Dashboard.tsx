@@ -20,6 +20,7 @@ import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
 import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
+import { Metric, Order } from '@/lib/types';
 
 const Dashboard = () => {
   const { data: packages = [] } = useIPTVPackages();
@@ -47,6 +48,66 @@ const Dashboard = () => {
       : 0,
   };
 
+  // Create metric objects that match the Metric type
+  const dashboardMetrics: Metric[] = [
+    {
+      id: '1',
+      label: 'Total Packages',
+      value: packageStats.total,
+      change: 12,
+      trend: 'up' as const
+    },
+    {
+      id: '2',
+      label: 'Active Packages',
+      value: packageStats.active,
+      change: 8,
+      trend: 'up' as const
+    },
+    {
+      id: '3',
+      label: 'Featured Packages',
+      value: packageStats.featured,
+      change: 23,
+      trend: 'up' as const
+    },
+    {
+      id: '4',
+      label: 'Avg Package Price',
+      value: revenueMetrics.avgPackagePrice,
+      change: 5,
+      trend: 'up' as const
+    }
+  ];
+
+  // Sample orders data
+  const sampleOrders: Order[] = [
+    {
+      id: 'ORD-001',
+      customerName: 'John Doe',
+      createdAt: '2024-01-15T10:30:00Z',
+      status: 'delivered',
+      paymentStatus: 'paid',
+      total: 45.99
+    },
+    {
+      id: 'ORD-002',
+      customerName: 'Jane Smith',
+      createdAt: '2024-01-14T14:20:00Z',
+      status: 'processing',
+      paymentStatus: 'paid',
+      total: 85.99
+    },
+    {
+      id: 'ORD-003',
+      customerName: 'Mike Johnson',
+      createdAt: '2024-01-13T09:15:00Z',
+      status: 'pending',
+      paymentStatus: 'pending',
+      total: 25.99
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -62,34 +123,9 @@ const Dashboard = () => {
 
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Packages"
-          value={packageStats.total.toString()}
-          change="+12%"
-          trend="up"
-          icon={Package}
-        />
-        <MetricCard
-          title="Active Packages"
-          value={packageStats.active.toString()}
-          change="+8%"
-          trend="up"
-          icon={TrendingUp}
-        />
-        <MetricCard
-          title="Featured Packages"
-          value={packageStats.featured.toString()}
-          change="+23%"
-          trend="up"
-          icon={Star}
-        />
-        <MetricCard
-          title="Avg Package Price"
-          value={`$${revenueMetrics.avgPackagePrice.toFixed(2)}`}
-          change="+5%"
-          trend="up"
-          icon={DollarSign}
-        />
+        {dashboardMetrics.map((metric) => (
+          <MetricCard key={metric.id} metric={metric} />
+        ))}
       </div>
 
       {/* Package Categories Overview */}
@@ -249,7 +285,7 @@ const Dashboard = () => {
               <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <RecentOrdersTable />
+              <RecentOrdersTable orders={sampleOrders} />
             </CardContent>
           </Card>
         </TabsContent>
