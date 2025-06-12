@@ -72,10 +72,8 @@ const Home = () => {
                 {subscriptionPackages.map((pkg) => (
                   <ProductSubscriptionCard
                     key={pkg.id}
-                    name={pkg.name}
-                    price={pkg.price_1_month || 12.99}
-                    features={pkg.features || ['Premium Quality', 'HD Streaming', '24/7 Support']}
-                    packageData={pkg}
+                    package={pkg}
+                    featured={pkg.status === 'featured'}
                   />
                 ))}
               </div>

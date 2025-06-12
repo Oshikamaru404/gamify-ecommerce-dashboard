@@ -69,10 +69,8 @@ const Activation = () => {
                 {activationPackages.map((pkg) => (
                   <ProductSubscriptionCard
                     key={pkg.id}
-                    name={pkg.name}
-                    price={pkg.price_10_credits || 99.00}
-                    features={pkg.features || ['12 Month Activation', 'Instant Setup', 'Full Support']}
-                    packageData={pkg}
+                    package={pkg}
+                    featured={pkg.status === 'featured'}
                   />
                 ))}
               </div>
