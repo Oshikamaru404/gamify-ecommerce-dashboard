@@ -27,18 +27,22 @@ const ManageProducts = () => {
   ) || [];
 
   // Categorize packages exactly as they appear on the website
+  // Subscription packages: month-based subscription system (category 'subscription')
+  // Panel IPTV packages: credit-based system (category 'panel-iptv') 
+  // Player packages: for streaming applications (category 'player')
+  // Activation packages: for device activation (category 'activation-player')
   const packagesByCategory = {
     subscription: filteredPackages.filter(pkg => 
       pkg.category === 'subscription' && pkg.status !== 'inactive'
     ),
-    activationPlayer: filteredPackages.filter(pkg => 
-      pkg.category === 'activation-player' && pkg.status !== 'inactive'
-    ),
     panelIptv: filteredPackages.filter(pkg => 
       pkg.category === 'panel-iptv' && pkg.status !== 'inactive'
     ),
-    panelPlayer: filteredPackages.filter(pkg => 
+    player: filteredPackages.filter(pkg => 
       pkg.category === 'player' && pkg.status !== 'inactive'
+    ),
+    activationPlayer: filteredPackages.filter(pkg => 
+      pkg.category === 'activation-player' && pkg.status !== 'inactive'
     ),
     all: filteredPackages
   };
@@ -69,9 +73,9 @@ const ManageProducts = () => {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'subscription': return <Tv size={16} />;
-      case 'activationPlayer': return <Crown size={16} />;
       case 'panelIptv': return <Monitor size={16} />;
-      case 'panelPlayer': return <GamepadIcon size={16} />;
+      case 'player': return <GamepadIcon size={16} />;
+      case 'activationPlayer': return <Crown size={16} />;
       default: return <Tv size={16} />;
     }
   };
@@ -79,19 +83,19 @@ const ManageProducts = () => {
   const getCategoryTitle = (category: string) => {
     switch (category) {
       case 'subscription': return 'Subscription Packages';
-      case 'activationPlayer': return 'Activation Player Packages';
       case 'panelIptv': return 'Panel IPTV Packages';
-      case 'panelPlayer': return 'Panel Player Packages';
+      case 'player': return 'Player Packages';
+      case 'activationPlayer': return 'Activation Player Packages';
       default: return 'All Packages';
     }
   };
 
   const getCategoryDescription = (category: string) => {
     switch (category) {
-      case 'subscription': return 'IPTV subscription packages displayed on home page and subscription page';
+      case 'subscription': return 'Month-based subscription packages displayed on home page and subscription page';
+      case 'panelIptv': return 'Credit-based IPTV panel packages for resellers and advanced users';
+      case 'player': return 'Player panel packages for streaming applications';
       case 'activationPlayer': return 'Activation player packages for device activation';
-      case 'panelIptv': return 'IPTV panel packages for resellers and advanced users';
-      case 'panelPlayer': return 'Player panel packages for streaming applications';
       default: return 'All packages in the system';
     }
   };
@@ -145,17 +149,17 @@ const ManageProducts = () => {
             <Tv size={16} />
             Subscription
           </TabsTrigger>
-          <TabsTrigger value="activationPlayer" className="flex items-center gap-2">
-            <Crown size={16} />
-            Activation Player
-          </TabsTrigger>
           <TabsTrigger value="panelIptv" className="flex items-center gap-2">
             <Monitor size={16} />
             Panel IPTV
           </TabsTrigger>
-          <TabsTrigger value="panelPlayer" className="flex items-center gap-2">
+          <TabsTrigger value="player" className="flex items-center gap-2">
             <GamepadIcon size={16} />
-            Panel Player
+            Player
+          </TabsTrigger>
+          <TabsTrigger value="activationPlayer" className="flex items-center gap-2">
+            <Crown size={16} />
+            Activation Player
           </TabsTrigger>
           <TabsTrigger value="all" className="flex items-center gap-2">
             <Tv size={16} />
@@ -183,6 +187,16 @@ const ManageProducts = () => {
                     <Crown size={12} />
                     Featured: {categoryPackages.filter(p => p.status === 'featured').length}
                   </Badge>
+                  {category === 'subscription' && (
+                    <Badge className="bg-blue-100 text-blue-700">
+                      Month-based System
+                    </Badge>
+                  )}
+                  {category === 'panelIptv' && (
+                    <Badge className="bg-green-100 text-green-700">
+                      Credit-based System
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
