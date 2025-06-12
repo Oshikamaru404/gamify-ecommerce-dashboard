@@ -6,81 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import StoreLayout from '@/components/store/StoreLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const ProductDetail = () => {
   const { productId } = useParams();
   const { t } = useLanguage();
   const [selectedDuration, setSelectedDuration] = useState(1);
-
-  // Updated products data to match the IDs used in ProductSubscriptionCard
-  const products: Record<string, any> = {
-    'strong-8k-iptv': {
-      name: "STRONG 8K IPTV 🚀",
-      basePrice: 12.99,
-      features: [
-        "8K Ultra HD Quality",
-        "5000+ Live Channels", 
-        "Movies & Series VOD",
-        "Anti-Freeze Technology",
-        "24/7 Support"
-      ],
-      description: "Premium 8K streaming experience with ultra-fast servers"
-    },
-    'trex-8k-iptv': {
-      name: "TREX 8K IPTV 🦖",
-      basePrice: 10.99,
-      features: [
-        "8K/4K Streaming",
-        "4000+ Channels",
-        "Sports Packages", 
-        "Movie Collection",
-        "Fast Servers"
-      ],
-      description: "Reliable streaming with extensive sports and movie content"
-    },
-    'promax-4k-iptv': {
-      name: "PROMAX 4K IPTV ⚡",
-      basePrice: 18.99,
-      features: [
-        "4K Premium Technology",
-        "8000+ Channels",
-        "4K Quality",
-        "Global Content",
-        "Premium Support"
-      ],
-      description: "Premium 4K streaming with global content library"
-    },
-    'tivione-4k-iptv': {
-      name: "TIVIONE 4K IPTV 📺",
-      basePrice: 13.99,
-      features: [
-        "Full 4K Streaming",
-        "6000+ Channels",
-        "VOD Library",
-        "Stable Connection", 
-        "Multi-Platform"
-      ],
-      description: "Stable 4K streaming across multiple platforms"
-    },
-    'b1g-4k-iptv': {
-      name: "B1G 4K IPTV 🎬",
-      basePrice: 16.99,
-      features: [
-        "Big Entertainment",
-        "9000+ Channels",
-        "4K Resolution",
-        "Sports & Movies",
-        "24/7 Service"
-      ],
-      description: "Comprehensive entertainment with extensive channel lineup"
-    }
-  };
-
-  const product = products[productId as string];
+  const { data: packages, isLoading } = useIPTVPackages();
 
   console.log('ProductDetail - productId:', productId);
+  console.log('ProductDetail - packages:', packages);
+
+  if (isLoading) {
+    return (
+      <StoreLayout>
+        <div className="container py-16 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product details...</p>
+        </div>
+      </StoreLayout>
+    );
+  }
+
+  // Find the package by matching the productId with the package name (converted to slug format)
+  const product = packages?.find(pkg => {
+    const slug = pkg.name.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .replace(/--+/g, '-')
+      .trim();
+    return slug === productId;
+  });
+
   console.log('ProductDetail - product found:', product);
-  console.log('ProductDetail - available products:', Object.keys(products));
 
   if (!product) {
     return (
@@ -88,7 +46,6 @@ const ProductDetail = () => {
         <div className="container py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
           <p className="text-gray-600 mb-4">Product ID: {productId}</p>
-          <p className="text-gray-600 mb-4">Available products: {Object.keys(products).join(', ')}</p>
           <Button asChild>
             <Link to="/subscription">Back to Subscriptions</Link>
           </Button>
@@ -97,20 +54,58 @@ const ProductDetail = () => {
     );
   }
 
+  // Define month options with pricing based on the database structure
   const durations = [
-    { months: 1, discount: 0, label: `1 Month` },
-    { months: 3, discount: 10, label: `3 Months` },
-    { months: 6, discount: 20, label: `6 Months` },
-    { months: 12, discount: 30, label: `12 Months` }
-  ];
+    {
+      months: 1,
+      price: product.price_1_month,
+      label: '1 Month',
+      discount: 0
+    },
+    {
+      months: 3,
+      price: product.price_3_months,
+      label: '3 Months',
+      discount: product.price_1_month && product.price_3_months 
+        ? Math.round((1 - (product.price_3_months / (product.price_1_month * 3))) * 100)
+        : 0
+    },
+    {
+      months: 6,
+      price: product.price_6_months,
+      label: '6 Months',
+      discount: product.price_1_month && product.price_6_months 
+        ? Math.round((1 - (product.price_6_months / (product.price_1_month * 6))) * 100)
+        : 0
+    },
+    {
+      months: 12,
+      price: product.price_12_months,
+      label: '12 Months',
+      discount: product.price_1_month && product.price_12_months 
+        ? Math.round((1 - (product.price_12_months / (product.price_1_month * 12))) * 100)
+        : 0
+    }
+  ].filter(duration => duration.price !== null && duration.price !== undefined);
 
   const selectedDurationData = durations.find(d => d.months === selectedDuration) || durations[0];
-  const originalPrice = product.basePrice * selectedDuration;
-  const discountAmount = originalPrice * (selectedDurationData.discount / 100);
-  const finalPrice = originalPrice - discountAmount;
+
+  if (durations.length === 0) {
+    return (
+      <StoreLayout>
+        <div className="container py-16 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Pricing Not Available</h1>
+          <p className="text-gray-600 mb-4">This product doesn't have pricing configured yet.</p>
+          <Button asChild>
+            <Link to="/subscription">Back to Subscriptions</Link>
+          </Button>
+        </div>
+      </StoreLayout>
+    );
+  }
 
   const handlePurchase = () => {
-    const message = `Hello, I'm interested in ${product.name} - ${selectedDuration} Month(s) - $${finalPrice.toFixed(2)}`;
+    const message = `Hello, I'm interested in ${product.name} - ${selectedDuration} Month(s) - $${selectedDurationData.price?.toFixed(2)}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -131,7 +126,9 @@ const ProductDetail = () => {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
-                <p className="text-xl text-white/90 mb-6">{product.description}</p>
+                <p className="text-xl text-white/90 mb-6">
+                  {product.description || `Premium ${product.category} service with advanced features`}
+                </p>
                 
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center">
@@ -154,12 +151,19 @@ const ProductDetail = () => {
               <Card className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Features</h2>
                 <div className="grid gap-4">
-                  {product.features.map((feature: string, index: number) => (
-                    <div key={index} className="flex items-center gap-3">
+                  {product.features && product.features.length > 0 ? (
+                    product.features.map((feature: string, index: number) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <Check className="text-green-600" size={20} />
+                        <span className="text-lg">{feature}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center gap-3">
                       <Check className="text-green-600" size={20} />
-                      <span className="text-lg">{feature}</span>
+                      <span className="text-lg">Premium {product.category} features included</span>
                     </div>
-                  ))}
+                  )}
                 </div>
               </Card>
             </div>
@@ -188,27 +192,27 @@ const ProductDetail = () => {
                         )}
                       </div>
                       <div className="text-sm text-gray-600 mt-1">
-                        ${product.basePrice}/month
+                        ${duration.price?.toFixed(2)} total
                       </div>
+                      {duration.months > 1 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          ${(duration.price! / duration.months).toFixed(2)}/month
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
 
                 <div className="border-t pt-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span>Original Price:</span>
-                    <span>${originalPrice.toFixed(2)}</span>
+                  <div className="flex justify-between items-center text-xl font-bold">
+                    <span>Total:</span>
+                    <span className="text-red-600">${selectedDurationData.price?.toFixed(2)}</span>
                   </div>
                   {selectedDurationData.discount > 0 && (
-                    <div className="flex justify-between items-center mb-2 text-green-600">
-                      <span>Discount ({selectedDurationData.discount}%):</span>
-                      <span>-${discountAmount.toFixed(2)}</span>
+                    <div className="text-sm text-green-600 mt-1">
+                      Save {selectedDurationData.discount}% compared to monthly
                     </div>
                   )}
-                  <div className="flex justify-between items-center text-xl font-bold border-t pt-2">
-                    <span>Total:</span>
-                    <span className="text-red-600">${finalPrice.toFixed(2)}</span>
-                  </div>
                 </div>
 
                 <Button 
