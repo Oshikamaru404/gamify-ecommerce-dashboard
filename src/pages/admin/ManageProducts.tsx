@@ -3,357 +3,233 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, Package, Tv, Edit, AlertCircle } from 'lucide-react';
-import { useIPTVPackages, useCreateIPTVPackage, useUpdateIPTVPackage, useDeleteIPTVPackage, IPTVPackage } from '@/hooks/useIPTVPackages';
+import { Plus, Search, Tv, Monitor, Crown, GamepadIcon, Home, CreditCard } from 'lucide-react';
+import { useIPTVPackages, useDeleteIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
 import IPTVPackageCard from '@/components/admin/IPTVPackageCard';
 import PackageDialog from '@/components/admin/PackageDialog';
-import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
+import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
 const ManageProducts = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'activation-player'>('all');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [packageToDelete, setPackageToDelete] = useState<IPTVPackage | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingPackage, setEditingPackage] = useState<IPTVPackage | null>(null);
-  
-  const { data: packages, isLoading, error } = useIPTVPackages();
-  const createPackage = useCreateIPTVPackage();
-  const updatePackage = useUpdateIPTVPackage();
+  const { data: packages, isLoading } = useIPTVPackages();
   const deletePackage = useDeleteIPTVPackage();
-  
-  console.log('ManageProducts render - packages:', packages, 'isLoading:', isLoading, 'error:', error);
-  
-  // Filter packages based on search term and category filter
-  const filteredPackages = packages?.filter((pkg) => {
-    const matchesSearch = 
-      searchTerm === '' || 
-      pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (pkg.description && pkg.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (pkg.features && pkg.features.some(f => f.toLowerCase().includes(searchTerm.toLowerCase())));
-    
-    const matchesCategory = categoryFilter === 'all' || pkg.category === categoryFilter;
-    
-    return matchesSearch && matchesCategory;
-  }) || [];
+  const updatePackage = useUpdateIPTVPackage();
 
-  // Group packages by category for better organization
-  const packagesByCategory = {
-    subscription: filteredPackages.filter(pkg => pkg.category === 'subscription'),
-    reseller: filteredPackages.filter(pkg => pkg.category === 'reseller'),
-    player: filteredPackages.filter(pkg => pkg.category === 'player'),
-    'panel-iptv': filteredPackages.filter(pkg => pkg.category === 'panel-iptv'),
-    'activation-player': filteredPackages.filter(pkg => pkg.category === 'activation-player'),
-  };
-  
-  const handleDeleteClick = (id: string) => {
-    const packageToDelete = packages?.find(pkg => pkg.id === id);
-    if (packageToDelete) {
-      setPackageToDelete(packageToDelete);
-      setDeleteDialogOpen(true);
-    }
-  };
-  
-  const confirmDelete = () => {
-    if (packageToDelete) {
-      deletePackage.mutate(packageToDelete.id);
-      setDeleteDialogOpen(false);
-      setPackageToDelete(null);
-    }
-  };
-  
-  const cancelDelete = () => {
-    setDeleteDialogOpen(false);
-    setPackageToDelete(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPackage, setSelectedPackage] = useState<IPTVPackage | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Filter packages by search term
+  const filteredPackages = packages?.filter(pkg =>
+    pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pkg.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  // Categorize packages by their display location
+  const packagesByLocation = {
+    homepage: filteredPackages.filter(pkg => 
+      ['subscription', 'player', 'activation-player'].includes(pkg.category) && pkg.status !== 'inactive'
+    ),
+    subscription: filteredPackages.filter(pkg => 
+      pkg.category === 'subscription' && pkg.status !== 'inactive'
+    ),
+    activation: filteredPackages.filter(pkg => 
+      pkg.category === 'activation-player' && pkg.status !== 'inactive'
+    ),
+    panelReseller: filteredPackages.filter(pkg => 
+      ['panel-iptv', 'player'].includes(pkg.category) && pkg.status !== 'inactive'
+    ),
+    all: filteredPackages
   };
 
   const handleEdit = (pkg: IPTVPackage) => {
-    console.log('Editing package:', pkg);
-    setEditingPackage(pkg);
-    setEditDialogOpen(true);
+    setSelectedPackage(pkg);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this package?')) {
+      deletePackage.mutate(id);
+    }
   };
 
   const handleToggleFeatured = (id: string, featured: boolean) => {
-    console.log('Toggling featured status for package:', id, 'to:', featured);
     updatePackage.mutate({
       id,
       status: featured ? 'featured' : 'active'
     });
   };
 
-  const handleSavePackage = (packageData: Omit<IPTVPackage, 'id' | 'created_at' | 'updated_at'>) => {
-    console.log('Saving package:', packageData);
-    if (editingPackage) {
-      updatePackage.mutate({ 
-        id: editingPackage.id, 
-        ...packageData 
-      });
-    } else {
-      createPackage.mutate(packageData);
+  const handleCreateNew = () => {
+    setSelectedPackage(null);
+    setIsDialogOpen(true);
+  };
+
+  const getLocationIcon = (location: string) => {
+    switch (location) {
+      case 'homepage': return <Home size={16} />;
+      case 'subscription': return <CreditCard size={16} />;
+      case 'activation': return <Crown size={16} />;
+      case 'panelReseller': return <Monitor size={16} />;
+      default: return <Tv size={16} />;
     }
-    setEditDialogOpen(false);
-    setEditingPackage(null);
   };
 
-  const handleNewPackage = (category?: string) => {
-    console.log('Creating new package, category:', category);
-    setEditingPackage(null);
-    setEditDialogOpen(true);
+  const getLocationTitle = (location: string) => {
+    switch (location) {
+      case 'homepage': return 'Home Page Packages';
+      case 'subscription': return 'Subscription Page Packages';
+      case 'activation': return 'Activation Player Page Packages';
+      case 'panelReseller': return 'Panel Reseller Packages';
+      default: return 'All Packages';
+    }
   };
 
-  const renderPackageGrid = (packages: IPTVPackage[], emptyMessage: string) => (
-    packages.length > 0 ? (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {packages.map((pkg) => (
-          <IPTVPackageCard
-            key={pkg.id}
-            package={pkg}
-            onEdit={handleEdit}
-            onDelete={handleDeleteClick}
-            onToggleFeatured={handleToggleFeatured}
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
-          <Tv size={28} className="text-red-600" />
+  const getLocationDescription = (location: string) => {
+    switch (location) {
+      case 'homepage': return 'Packages displayed on the main homepage (subscription, player, activation)';
+      case 'subscription': return 'Packages shown specifically on the subscription page';
+      case 'activation': return 'Packages displayed on the activation player page';
+      case 'panelReseller': return 'Panel packages for resellers (IPTV panels and player panels)';
+      default: return 'All packages in the system';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">Manage IPTV Packages</h1>
         </div>
-        <h3 className="mt-4 text-lg font-semibold">{emptyMessage}</h3>
-        <p className="mb-4 mt-2 text-sm text-muted-foreground">
-          Start building your catalog by adding packages.
-        </p>
-        <Button onClick={() => handleNewPackage()} className="bg-red-600 hover:bg-red-700">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-600">Loading packages...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Manage IPTV Packages</h1>
+          <p className="text-gray-600 mt-2">Organize packages by their display locations</p>
+        </div>
+        <Button onClick={handleCreateNew} className="bg-red-600 hover:bg-red-700">
           <Plus className="mr-2 h-4 w-4" />
           Add Package
         </Button>
       </div>
-    )
-  );
 
-  // Error state
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Product Management</h1>
-            <p className="text-muted-foreground">
-              Manage your IPTV packages and traditional products from one place.
-            </p>
+      {/* Search Bar */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Input
+              placeholder="Search packages by name or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        </div>
-        
-        <Card className="overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
-                <AlertCircle size={28} className="text-red-600" />
-              </div>
-              <h3 className="mt-4 text-lg font-semibold text-red-600">Database Connection Error</h3>
-              <p className="mb-4 mt-2 text-sm text-muted-foreground text-center max-w-md">
-                Unable to connect to the database. Please check your connection and try again.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Error: {error.message}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Product Management</h1>
-          <p className="text-muted-foreground">
-            Manage your IPTV packages and traditional products from one place.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link to="/admin/products/new">
-              <Edit className="mr-2 h-4 w-4" />
-              Add Traditional Product
-            </Link>
-          </Button>
-          <Button onClick={() => handleNewPackage()} className="bg-red-600 hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" />
-            Add IPTV Package
-          </Button>
-        </div>
-      </div>
-      
-      <Tabs defaultValue="iptv-packages" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="iptv-packages" className="flex items-center gap-2">
-            <Tv className="h-4 w-4" />
-            IPTV Packages
+        </CardContent>
+      </Card>
+
+      {/* Tabs for different locations */}
+      <Tabs defaultValue="homepage" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="homepage" className="flex items-center gap-2">
+            <Home size={16} />
+            Home Page
           </TabsTrigger>
-          <TabsTrigger value="traditional-products" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
-            Traditional Products
+          <TabsTrigger value="subscription" className="flex items-center gap-2">
+            <CreditCard size={16} />
+            Subscription
+          </TabsTrigger>
+          <TabsTrigger value="activation" className="flex items-center gap-2">
+            <Crown size={16} />
+            Activation
+          </TabsTrigger>
+          <TabsTrigger value="panelReseller" className="flex items-center gap-2">
+            <Monitor size={16} />
+            Panel Reseller
+          </TabsTrigger>
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Tv size={16} />
+            All Packages
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="iptv-packages" className="space-y-6">
-          <Card className="overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50">
-              <CardTitle className="flex items-center gap-2">
-                <Tv className="h-5 w-5 text-red-600" />
-                IPTV Package Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="mb-6 flex flex-col gap-4 lg:flex-row">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder="Search IPTV packages, features, descriptions..."
-                      className="pl-8"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
+        {Object.entries(packagesByLocation).map(([location, locationPackages]) => (
+          <TabsContent key={location} value={location} className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  {getLocationIcon(location)}
+                  <CardTitle>{getLocationTitle(location)}</CardTitle>
                 </div>
-                
-                <div>
-                  <Select 
-                    value={categoryFilter} 
-                    onValueChange={(value) => setCategoryFilter(value as any)}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filter by category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      <SelectItem value="subscription">Subscriptions</SelectItem>
-                      <SelectItem value="player">Player Licenses</SelectItem>
-                      <SelectItem value="reseller">Reseller Packages</SelectItem>
-                      <SelectItem value="panel-iptv">Panel IPTV</SelectItem>
-                      <SelectItem value="activation-player">Activation Player</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                    <p className="mt-2 text-sm text-muted-foreground">Loading IPTV packages...</p>
-                  </div>
-                </div>
-              ) : categoryFilter === 'all' ? (
-                <Tabs defaultValue="subscription" className="space-y-4">
-                  <TabsList className="grid w-full grid-cols-5">
-                    <TabsTrigger value="subscription">
-                      Subscriptions ({packagesByCategory.subscription.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="reseller">
-                      Reseller ({packagesByCategory.reseller.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="player">
-                      Player ({packagesByCategory.player.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="panel-iptv">
-                      Panel IPTV ({packagesByCategory['panel-iptv'].length})
-                    </TabsTrigger>
-                    <TabsTrigger value="activation-player">
-                      Activation ({packagesByCategory['activation-player'].length})
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="subscription">
-                    {renderPackageGrid(packagesByCategory.subscription, "No subscription packages found")}
-                  </TabsContent>
-
-                  <TabsContent value="reseller">
-                    {renderPackageGrid(packagesByCategory.reseller, "No reseller packages found")}
-                  </TabsContent>
-
-                  <TabsContent value="player">
-                    {renderPackageGrid(packagesByCategory.player, "No player packages found")}
-                  </TabsContent>
-
-                  <TabsContent value="panel-iptv">
-                    {renderPackageGrid(packagesByCategory['panel-iptv'], "No panel IPTV packages found")}
-                  </TabsContent>
-
-                  <TabsContent value="activation-player">
-                    {renderPackageGrid(packagesByCategory['activation-player'], "No activation player packages found")}
-                  </TabsContent>
-                </Tabs>
-              ) : (
-                renderPackageGrid(filteredPackages, `No ${categoryFilter} packages found`)
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="traditional-products">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Traditional Products
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Traditional Product Management</h3>
-                <p className="text-muted-foreground mb-4">
-                  Manage your traditional products (games, software, etc.) here.
+                <p className="text-sm text-gray-600">
+                  {getLocationDescription(location)}
                 </p>
-                <Button variant="outline" asChild>
-                  <Link to="/admin/products">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Go to Products Manager
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                <div className="flex items-center gap-4 text-sm">
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Tv size={12} />
+                    Total: {locationPackages.length}
+                  </Badge>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Crown size={12} />
+                    Featured: {locationPackages.filter(p => p.status === 'featured').length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {locationPackages.length > 0 ? (
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {locationPackages.map((pkg) => (
+                      <IPTVPackageCard
+                        key={pkg.id}
+                        package={pkg}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onToggleFeatured={handleToggleFeatured}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      {getLocationIcon(location)}
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No packages found
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      {searchTerm 
+                        ? `No packages match your search "${searchTerm}" in this location.`
+                        : `No packages are configured for ${getLocationTitle(location).toLowerCase()}.`
+                      }
+                    </p>
+                    <Button onClick={handleCreateNew} variant="outline">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add First Package
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
       </Tabs>
-      
+
+      {/* Package Dialog */}
       <PackageDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        package={editingPackage}
-        onSave={handleSavePackage}
-        title={editingPackage ? 'Edit IPTV Package' : 'Create New IPTV Package'}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        package={selectedPackage}
       />
-      
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Package Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete the IPTV package "{packageToDelete?.name}"? 
-              This action cannot be undone and will remove the package from your catalog.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={cancelDelete}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete Package
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
