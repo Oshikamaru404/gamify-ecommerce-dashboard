@@ -2,12 +2,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
 
-export type NewsletterSubscription = {
-  id: string;
-  email: string;
-  subscribed_at: string;
-};
+export type NewsletterSubscription = Database['public']['Tables']['newsletter_subscriptions']['Row'];
 
 export const useSubscribeNewsletter = () => {
   return useMutation({
@@ -15,7 +12,7 @@ export const useSubscribeNewsletter = () => {
       console.log('Subscribing to newsletter:', email);
       
       const { data, error } = await supabase
-        .from('newsletter_subscriptions' as any)
+        .from('newsletter_subscriptions')
         .insert([{ email }])
         .select()
         .single();

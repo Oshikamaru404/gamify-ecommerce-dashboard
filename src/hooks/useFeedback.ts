@@ -2,18 +2,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
 
-export type FeedbackType = 'positive' | 'neutral' | 'negative';
+export type FeedbackType = Database['public']['Enums']['feedback_type'];
 
-export type Feedback = {
-  id: string;
-  name: string;
-  comment: string;
-  feedback_type: FeedbackType;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  updated_at: string | null;
-};
+export type Feedback = Database['public']['Tables']['feedbacks']['Row'];
 
 export const useFeedbacks = () => {
   return useQuery({
@@ -22,7 +15,7 @@ export const useFeedbacks = () => {
       console.log('Fetching feedbacks from database...');
       
       const { data, error } = await supabase
-        .from('feedbacks' as any)
+        .from('feedbacks')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -32,7 +25,7 @@ export const useFeedbacks = () => {
       }
       
       console.log('Successfully fetched feedbacks:', data);
-      return data as Feedback[];
+      return data;
     },
   });
 };
@@ -44,7 +37,7 @@ export const useApprovedFeedbacks = () => {
       console.log('Fetching approved feedbacks from database...');
       
       const { data, error } = await supabase
-        .from('feedbacks' as any)
+        .from('feedbacks')
         .select('*')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
@@ -56,7 +49,7 @@ export const useApprovedFeedbacks = () => {
       }
       
       console.log('Successfully fetched approved feedbacks:', data);
-      return data as Feedback[];
+      return data;
     },
   });
 };
@@ -65,11 +58,11 @@ export const useCreateFeedback = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (feedbackData: Omit<Feedback, 'id' | 'created_at' | 'updated_at' | 'status'>) => {
+    mutationFn: async (feedbackData: Database['public']['Tables']['feedbacks']['Insert']) => {
       console.log('Creating new feedback:', feedbackData);
       
       const { data, error } = await supabase
-        .from('feedbacks' as any)
+        .from('feedbacks')
         .insert([{ ...feedbackData, status: 'pending' }])
         .select()
         .single();
@@ -101,7 +94,7 @@ export const useUpdateFeedbackStatus = () => {
       console.log('Updating feedback status:', id, status);
       
       const { data, error } = await supabase
-        .from('feedbacks' as any)
+        .from('feedbacks')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
