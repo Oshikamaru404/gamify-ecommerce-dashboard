@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Star, Shield } from 'lucide-react';
+import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
@@ -29,18 +29,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
   // Determine the base price for display (prefer 1-month, fallback to others)
   const displayPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits;
-
-  const handleGetStarted = () => {
-    // For subscription packages, navigate to product detail page
-    if (pkg.category === 'subscription' || pkg.category === 'activation-player') {
-      // The Link component will handle navigation
-    } else {
-      // For other categories, use WhatsApp contact
-      const message = `Hello, I'm interested in ${pkg.name}`;
-      const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }
-  };
 
   return (
     <div className="relative h-full">
@@ -150,22 +138,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             )}
           </div>
 
-          {/* Call to Action Button */}
+          {/* View Details Button - Only navigation to product details */}
           <div className="mt-auto">
-            {(pkg.category === 'subscription' || pkg.category === 'activation-player') ? (
-              <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-                <Link to={`/product/${productSlug}`}>
-                  Get Started Now
-                </Link>
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleGetStarted}
-                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl"
-              >
-                Get Started Now
-              </Button>
-            )}
+            <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
+              <Link to={`/product/${productSlug}`}>
+                View Details
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

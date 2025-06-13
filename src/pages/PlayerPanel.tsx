@@ -1,20 +1,43 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Play, Palette, Zap, CheckCircle2 } from 'lucide-react';
+import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const PlayerPanel = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const handleContactWhatsApp = (playerName: string, credits: number, price: number) => {
     const message = `${t.contact} ${playerName} - ${credits} credits - ${t.currency}${price}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleBuyNow = (playerName: string, credits: number, price: number) => {
+    setSelectedPackage({
+      id: `player-${playerName.toLowerCase().replace(/\s+/g, '-')}`,
+      name: playerName,
+      category: 'player',
+      price: price,
+      duration: credits
+    });
+    setShowCheckout(true);
+  };
+
+  const handleCloseCheckout = () => {
+    setShowCheckout(false);
+    setSelectedPackage(null);
+  };
+
+  const handleOrderSuccess = () => {
+    console.log('Order submitted successfully');
   };
 
   // Filter only player packages
@@ -124,13 +147,22 @@ const PlayerPanel = () => {
                           <div className="text-sm text-gray-500 mb-6">
                             {t.currency}{(option.price! / option.credits).toFixed(1)} {t.perMonth}
                           </div>
-                          <Button 
-                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
-                            onClick={() => handleContactWhatsApp(player.name, option.credits, option.price!)}
-                          >
-                            <MessageCircle className="mr-2" size={16} />
-                            {t.buyNow}
-                          </Button>
+                          <div className="space-y-2">
+                            <Button 
+                              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                              onClick={() => handleBuyNow(player.name, option.credits, option.price!)}
+                            >
+                              Quick Order
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => handleContactWhatsApp(player.name, option.credits, option.price!)}
+                            >
+                              <MessageCircle className="mr-2" size={16} />
+                              WhatsApp
+                            </Button>
+                          </div>
                         </div>
                       </Card>
                     ))}
@@ -162,6 +194,15 @@ const PlayerPanel = () => {
             </div>
           </div>
         </div>
+
+        {/* Checkout Form Modal */}
+        {showCheckout && selectedPackage && (
+          <CheckoutForm
+            packageData={selectedPackage}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
+          />
+        )}
       </div>
     </StoreLayout>
   );

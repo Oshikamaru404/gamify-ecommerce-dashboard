@@ -1,18 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap } from 'lucide-react';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import StoreLayout from '@/components/store/StoreLayout';
+import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const Subscription = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   // Filter only subscription packages
   const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
+
+  const handleCloseCheckout = () => {
+    setShowCheckout(false);
+    setSelectedPackage(null);
+  };
+
+  const handleOrderSuccess = () => {
+    console.log('Order submitted successfully');
+  };
 
   if (isLoading) {
     return (
@@ -137,6 +149,15 @@ const Subscription = () => {
             </div>
           </div>
         </div>
+
+        {/* Checkout Form Modal */}
+        {showCheckout && selectedPackage && (
+          <CheckoutForm
+            packageData={selectedPackage}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
+          />
+        )}
       </div>
     </StoreLayout>
   );

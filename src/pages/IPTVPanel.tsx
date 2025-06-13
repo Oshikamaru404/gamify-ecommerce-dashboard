@@ -1,17 +1,41 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Server, Settings, BarChart3 } from 'lucide-react';
+import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const IPTVPanel = () => {
   const { t } = useLanguage();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const handleContactWhatsApp = (packageName: string, credits: number, price: number) => {
     const message = `${t.contact}, ${packageName} - ${credits} ${t.currency}${price}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleBuyNow = (packageName: string, credits: number, price: number) => {
+    setSelectedPackage({
+      id: `iptv-${packageName.toLowerCase().replace(/\s+/g, '-')}`,
+      name: packageName,
+      category: 'iptv-panel',
+      price: price,
+      duration: credits
+    });
+    setShowCheckout(true);
+  };
+
+  const handleCloseCheckout = () => {
+    setShowCheckout(false);
+    setSelectedPackage(null);
+  };
+
+  const handleOrderSuccess = () => {
+    console.log('Order submitted successfully');
   };
 
   const packages = [
@@ -138,13 +162,22 @@ const IPTVPanel = () => {
                           <div className="text-sm text-gray-500 mb-6">
                             {t.currency}{(option.price / option.credits).toFixed(1)} {t.perMonth}
                           </div>
-                          <Button 
-                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white"
-                            onClick={() => handleContactWhatsApp(pkg.name, option.credits, option.price)}
-                          >
-                            <MessageCircle className="mr-2" size={16} />
-                            {t.buyNow}
-                          </Button>
+                          <div className="space-y-2">
+                            <Button 
+                              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                              onClick={() => handleBuyNow(pkg.name, option.credits, option.price)}
+                            >
+                              Quick Order
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => handleContactWhatsApp(pkg.name, option.credits, option.price)}
+                            >
+                              <MessageCircle className="mr-2" size={16} />
+                              WhatsApp
+                            </Button>
+                          </div>
                         </div>
                       </Card>
                     ))}
@@ -169,6 +202,15 @@ const IPTVPanel = () => {
             </div>
           </div>
         </div>
+
+        {/* Checkout Form Modal */}
+        {showCheckout && selectedPackage && (
+          <CheckoutForm
+            packageData={selectedPackage}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
+          />
+        )}
       </div>
     </StoreLayout>
   );

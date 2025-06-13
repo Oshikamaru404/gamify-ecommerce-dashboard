@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import FeedbackCards from '@/components/home/FeedbackCards';
 import NewsletterSubscription from '@/components/home/NewsletterSubscription';
+import CheckoutForm from '@/components/CheckoutForm';
 import { Zap, Star, Check, MessageCircle, MessageSquarePlus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
@@ -13,11 +14,22 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 const Home = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const handleFreeTrial = () => {
     const message = `${t.tryFree} BWIVOX IPTV. ${t.contact}?`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleCloseCheckout = () => {
+    setShowCheckout(false);
+    setSelectedPackage(null);
+  };
+
+  const handleOrderSuccess = () => {
+    console.log('Order submitted successfully');
   };
 
   // Filter only subscription packages
@@ -168,6 +180,15 @@ const Home = () => {
             </p>
           </div>
         </section>
+
+        {/* Checkout Form Modal */}
+        {showCheckout && selectedPackage && (
+          <CheckoutForm
+            packageData={selectedPackage}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
+          />
+        )}
       </div>
     </StoreLayout>
   );
