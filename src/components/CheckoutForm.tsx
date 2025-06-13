@@ -91,19 +91,19 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-bold">Complete Your Order</CardTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-6 w-6 p-0"
+            className="h-8 w-8 p-0 hover:bg-gray-100"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-0">
           {/* Order Summary */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-semibold text-gray-900 mb-2">Order Summary</h3>
@@ -135,6 +135,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 onChange={handleInputChange}
                 placeholder="Enter your full name"
                 required
+                className="h-10"
               />
             </div>
 
@@ -148,6 +149,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 onChange={handleInputChange}
                 placeholder="Enter your email address"
                 required
+                className="h-10"
               />
             </div>
 
@@ -160,14 +162,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 value={formData.customerWhatsapp}
                 onChange={handleInputChange}
                 placeholder="Enter your WhatsApp number"
+                className="h-10"
               />
             </div>
 
-            <div className="space-y-3 pt-4">
+            <div className="space-y-3 pt-2">
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                className="w-full bg-green-600 hover:bg-green-700 text-white h-10"
               >
                 <CreditCard className="mr-2 h-4 w-4" />
                 {isSubmitting ? 'Submitting Order...' : 'Submit Order'}
@@ -179,7 +182,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 type="button"
                 variant="outline"
                 onClick={handleWhatsAppFallback}
-                className="w-full"
+                className="w-full h-10"
               >
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Continue with WhatsApp
@@ -187,7 +190,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
             </div>
           </form>
 
-          <div className="text-xs text-gray-500 text-center">
+          <div className="text-xs text-gray-500 text-center pt-2">
             By submitting this order, you agree to our terms of service. 
             We will contact you for payment and delivery details.
           </div>

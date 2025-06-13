@@ -1,16 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Palette, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Play, Palette, Zap, CheckCircle2, ArrowRight, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import CheckoutForm from '@/components/CheckoutForm';
 
 const PlayerPanel = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   // Filter only player packages
   const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
@@ -21,6 +24,27 @@ const PlayerPanel = () => {
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .trim();
+  };
+
+  const handleQuickCheckout = (player: any, credits: number, price: number) => {
+    setSelectedPackage({
+      id: player.id,
+      name: `${player.name} - ${credits} Credits`,
+      category: player.category,
+      price: price,
+      duration: credits // Credits represent months
+    });
+    setIsCheckoutOpen(true);
+  };
+
+  const handleCheckoutSuccess = () => {
+    setIsCheckoutOpen(false);
+    setSelectedPackage(null);
+  };
+
+  const handleCloseCheckout = () => {
+    setIsCheckoutOpen(false);
+    setSelectedPackage(null);
   };
 
   if (isLoading) {
@@ -131,6 +155,13 @@ const PlayerPanel = () => {
                           <div className="text-sm text-gray-500 mb-4">
                             {t.currency}{(option.price! / option.credits).toFixed(1)} {t.perMonth}
                           </div>
+                          <Button 
+                            onClick={() => handleQuickCheckout(player, option.credits, option.price!)}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Quick Buy
+                          </Button>
                         </Card>
                       ))}
                     </div>
@@ -138,7 +169,7 @@ const PlayerPanel = () => {
                     <div className="text-center">
                       <Button asChild className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-8 py-3 text-lg">
                         <Link to={`/product/${productSlug}`}>
-                          View Details & Purchase
+                          View Details & More Options
                           <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
                       </Button>
@@ -172,6 +203,15 @@ const PlayerPanel = () => {
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      {isCheckoutOpen && selectedPackage && (
+        <CheckoutForm
+          packageData={selectedPackage}
+          onClose={handleCloseCheckout}
+          onSuccess={handleCheckoutSuccess}
+        />
+      )}
     </StoreLayout>
   );
 };
