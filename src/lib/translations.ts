@@ -1,621 +1,554 @@
 
-export type Language = 'fr' | 'en' | 'es' | 'ar' | 'de';
-
-export interface Translations {
-  // Navigation (gardé en anglais pour cohérence)
-  home: string;
-  subscription: string;
-  activation: string;
-  reseller: string;
-  panelIptv: string;
-  playerPanel: string;
-  
-  // Hero section
-  heroTitle: string;
-  heroSubtitle: string;
-  freeTrial: string;
-  tryFree: string;
-  contact: string;
-  
-  // Subscriptions
-  subscriptionsTitle: string;
-  ourSubscriptions: string;
-  loadingSubscriptions: string;
-  noSubscriptionsAvailable: string;
-  noSubscriptionsMessage: string;
-  
-  // Features
-  ultraHd4k: string;
-  support247: string;
-  instantActivation: string;
-  premiumQuality: string;
-  premiumQualityDesc: string;
-  guaranteedReliability: string;
-  guaranteedReliabilityDesc: string;
-  fastActivation: string;
-  fastActivationDesc: string;
-  
-  // Why Choose
-  whyChooseTitle: string;
-  whyChooseSubtitle: string;
-  
-  // CTA
-  ctaTitle: string;
-  ctaSubtitle: string;
-  
-  // Product Cards
-  currency: string;
-  perMonth: string;
-  buyNow: string;
-  viewMore: string;
-  
-  // Activation page
-  activationTitle: string;
-  activationSubtitle: string;
-  playerActivation: string;
-  activationSteps: string;
-  step1Title: string;
-  step1Desc: string;
-  step2Title: string;
-  step2Desc: string;
-  step3Title: string;
-  step3Desc: string;
-  needHelp: string;
-  
-  // Reseller page
-  resellerTitle: string;
-  resellerSubtitle: string;
-  becomeReseller: string;
-  resellerBenefits: string;
-  highCommissions: string;
-  highCommissionsDesc: string;
-  dedicatedSupport: string;
-  dedicatedSupportDesc: string;
-  marketingTools: string;
-  marketingToolsDesc: string;
-  joinNow: string;
-  
-  // IPTV Panel page
-  iptvPanelTitle: string;
-  iptvPanelSubtitle: string;
-  manageSubscriptions: string;
-  
-  // Player Panel page
-  playerPanelTitle: string;
-  playerPanelSubtitle: string;
-  configurePlayer: string;
-  
-  // Product Detail page
-  productFeatures: string;
-  technicalSpecs: string;
-  whatYouGet: string;
-  
-  // Common
-  backToHome: string;
-  getStarted: string;
-  learnMore: string;
-  features: string;
-  pricing: string;
-  support: string;
-  documentation: string;
-}
-
-const translations: Record<Language, Translations> = {
-  fr: {
-    // Navigation (en anglais pour cohérence)
-    home: 'Home',
-    subscription: 'Subscription IPTV',
-    activation: 'Activation Player',
-    reseller: 'Panel Reseller',
-    panelIptv: 'Panel IPTV',
-    playerPanel: 'Panel Player',
-    
-    // Hero section
-    heroTitle: 'Services IPTV',
-    heroSubtitle: 'Profitez de milliers de chaînes en direct, films et séries en qualité 8K Ultra HD avec nos services IPTV premium.',
-    freeTrial: 'Essai Gratuit',
-    tryFree: 'Bonjour, je souhaite bénéficier de l\'essai gratuit',
-    contact: 'Pouvez-vous m\'aider',
-    
-    // Subscriptions
-    subscriptionsTitle: 'Nos Abonnements IPTV',
-    ourSubscriptions: 'Nos Abonnements',
-    loadingSubscriptions: 'Chargement des abonnements...',
-    noSubscriptionsAvailable: 'Aucun abonnement disponible',
-    noSubscriptionsMessage: 'Aucun abonnement n\'est actuellement disponible. Veuillez revenir plus tard.',
-    
-    // Features
-    ultraHd4k: 'Ultra HD 4K/8K',
-    support247: 'Support 24/7',
-    instantActivation: 'Activation Instantanée',
-    premiumQuality: 'Qualité Premium',
-    premiumQualityDesc: 'Streaming en qualité 4K/8K avec une technologie anti-gel avancée.',
-    guaranteedReliability: 'Fiabilité Garantie',
-    guaranteedReliabilityDesc: 'Serveurs haute performance avec un uptime de 99.9%.',
-    fastActivation: 'Activation Rapide',
-    fastActivationDesc: 'Votre service est activé instantanément après le paiement.',
-    
-    // Why Choose
-    whyChooseTitle: 'Pourquoi Choisir BWIVOX ?',
-    whyChooseSubtitle: 'Découvrez les avantages de nos services IPTV premium.',
-    
-    // CTA
-    ctaTitle: 'Prêt à commencer ?',
-    ctaSubtitle: 'Rejoignez des milliers de clients satisfaits dès aujourd\'hui.',
-    
-    // Product Cards
-    currency: '€',
-    perMonth: '/mois',
-    buyNow: 'Acheter maintenant',
-    viewMore: 'Voir plus de détails',
-    
-    // Activation page
-    activationTitle: 'Activation de votre Player',
-    activationSubtitle: 'Suivez ces étapes simples pour activer votre service IPTV',
-    playerActivation: 'Activation Player',
-    activationSteps: 'Étapes d\'activation',
-    step1Title: 'Téléchargez l\'application',
-    step1Desc: 'Installez notre application sur votre appareil',
-    step2Title: 'Entrez vos codes',
-    step2Desc: 'Utilisez les codes que nous vous avons envoyés',
-    step3Title: 'Profitez du contenu',
-    step3Desc: 'Regardez vos chaînes et contenus préférés',
-    needHelp: 'Besoin d\'aide ?',
-    
-    // Reseller page
-    resellerTitle: 'Devenez Revendeur BWIVOX',
-    resellerSubtitle: 'Rejoignez notre programme de partenariat et générez des revenus',
-    becomeReseller: 'Devenir Revendeur',
-    resellerBenefits: 'Avantages Revendeur',
-    highCommissions: 'Commissions Élevées',
-    highCommissionsDesc: 'Gagnez jusqu\'à 40% de commission sur chaque vente',
-    dedicatedSupport: 'Support Dédié',
-    dedicatedSupportDesc: 'Équipe de support dédiée pour vous aider',
-    marketingTools: 'Outils Marketing',
-    marketingToolsDesc: 'Matériel promotionnel et outils de vente',
-    joinNow: 'Rejoindre Maintenant',
-    
-    // IPTV Panel page
-    iptvPanelTitle: 'Panel IPTV',
-    iptvPanelSubtitle: 'Gérez vos abonnements et services IPTV',
-    manageSubscriptions: 'Gérer les Abonnements',
-    
-    // Player Panel page
-    playerPanelTitle: 'Panel Player',
-    playerPanelSubtitle: 'Configurez et gérez vos players IPTV',
-    configurePlayer: 'Configurer le Player',
-    
-    // Product Detail page
-    productFeatures: 'Fonctionnalités du Produit',
-    technicalSpecs: 'Spécifications Techniques',
-    whatYouGet: 'Ce que vous obtenez',
-    
-    // Common
-    backToHome: 'Retour à l\'accueil',
-    getStarted: 'Commencer',
-    learnMore: 'En savoir plus',
-    features: 'Fonctionnalités',
-    pricing: 'Tarifs',
-    support: 'Support',
-    documentation: 'Documentation',
-  },
+export const translations = {
   en: {
-    // Navigation (en anglais pour cohérence)
+    // Navigation
     home: 'Home',
-    subscription: 'Subscription IPTV',
-    activation: 'Activation Player',
-    reseller: 'Panel Reseller',
-    panelIptv: 'Panel IPTV',
-    playerPanel: 'Panel Player',
+    subscription: 'Subscription',
+    products: 'Products',
+    support: 'Support',
+    howToBuy: 'How to Buy',
+    blog: 'Blog',
+    freeTrialBtn: 'Free Trial',
+    tryNowBtn: 'Try Now',
     
-    // Hero section
-    heroTitle: 'IPTV Services',
-    heroSubtitle: 'Enjoy thousands of live channels, movies and series in 8K Ultra HD quality with our premium IPTV services.',
-    freeTrial: 'Free Trial',
-    tryFree: 'Hello, I would like to benefit from the free trial',
-    contact: 'Can you help me',
-    
-    // Subscriptions
-    subscriptionsTitle: 'Our IPTV Subscriptions',
-    ourSubscriptions: 'Our Subscriptions',
-    loadingSubscriptions: 'Loading subscriptions...',
-    noSubscriptionsAvailable: 'No subscriptions available',
-    noSubscriptionsMessage: 'No subscriptions are currently available. Please check back later.',
-    
-    // Features
-    ultraHd4k: 'Ultra HD 4K/8K',
-    support247: '24/7 Support',
-    instantActivation: 'Instant Activation',
-    premiumQuality: 'Premium Quality',
-    premiumQualityDesc: '4K/8K quality streaming with advanced anti-freeze technology.',
-    guaranteedReliability: 'Guaranteed Reliability',
-    guaranteedReliabilityDesc: 'High performance servers with 99.9% uptime.',
-    fastActivation: 'Fast Activation',
-    fastActivationDesc: 'Your service is activated instantly after payment.',
-    
-    // Why Choose
-    whyChooseTitle: 'Why Choose BWIVOX?',
-    whyChooseSubtitle: 'Discover the advantages of our premium IPTV services.',
-    
-    // CTA
-    ctaTitle: 'Ready to get started?',
-    ctaSubtitle: 'Join thousands of satisfied customers today.',
-    
-    // Product Cards
-    currency: '€',
-    perMonth: '/month',
-    buyNow: 'Buy Now',
-    viewMore: 'View More Details',
-    
-    // Activation page
-    activationTitle: 'Activate Your Player',
-    activationSubtitle: 'Follow these simple steps to activate your IPTV service',
-    playerActivation: 'Player Activation',
-    activationSteps: 'Activation Steps',
-    step1Title: 'Download the App',
-    step1Desc: 'Install our application on your device',
-    step2Title: 'Enter Your Codes',
-    step2Desc: 'Use the codes we sent you',
-    step3Title: 'Enjoy Content',
-    step3Desc: 'Watch your favorite channels and content',
-    needHelp: 'Need Help?',
-    
-    // Reseller page
-    resellerTitle: 'Become a BWIVOX Reseller',
-    resellerSubtitle: 'Join our partnership program and generate revenue',
-    becomeReseller: 'Become Reseller',
-    resellerBenefits: 'Reseller Benefits',
-    highCommissions: 'High Commissions',
-    highCommissionsDesc: 'Earn up to 40% commission on every sale',
-    dedicatedSupport: 'Dedicated Support',
-    dedicatedSupportDesc: 'Dedicated support team to help you',
-    marketingTools: 'Marketing Tools',
-    marketingToolsDesc: 'Promotional materials and sales tools',
-    joinNow: 'Join Now',
-    
-    // IPTV Panel page
-    iptvPanelTitle: 'IPTV Panel',
-    iptvPanelSubtitle: 'Manage your IPTV subscriptions and services',
-    manageSubscriptions: 'Manage Subscriptions',
-    
-    // Player Panel page
-    playerPanelTitle: 'Player Panel',
-    playerPanelSubtitle: 'Configure and manage your IPTV players',
-    configurePlayer: 'Configure Player',
-    
-    // Product Detail page
-    productFeatures: 'Product Features',
-    technicalSpecs: 'Technical Specifications',
-    whatYouGet: 'What You Get',
-    
-    // Common
-    backToHome: 'Back to home',
+    // Hero Section
+    heroTitle: 'IPTV 4K Premium Streaming Experience',
+    heroDescription: 'Stream thousands of channels and movies in stunning 4K quality. Experience entertainment like never before with our premium IPTV service.',
     getStarted: 'Get Started',
     learnMore: 'Learn More',
-    features: 'Features',
-    pricing: 'Pricing',
-    support: 'Support',
-    documentation: 'Documentation',
-  },
-  es: {
-    // Navigation (en anglais pour cohérence)
-    home: 'Home',
-    subscription: 'Subscription IPTV',
-    activation: 'Activation Player',
-    reseller: 'Panel Reseller',
-    panelIptv: 'Panel IPTV',
-    playerPanel: 'Panel Player',
-    
-    // Hero section
-    heroTitle: 'Servicios IPTV',
-    heroSubtitle: 'Disfruta de miles de canales en vivo, películas y series en calidad 8K Ultra HD con nuestros servicios IPTV premium.',
-    freeTrial: 'Prueba Gratuita',
-    tryFree: 'Hola, me gustaría beneficiarme de la prueba gratuita',
-    contact: 'Puedes ayudarme',
-    
-    // Subscriptions
-    subscriptionsTitle: 'Nuestras Suscripciones IPTV',
-    ourSubscriptions: 'Nuestras Suscripciones',
-    loadingSubscriptions: 'Cargando suscripciones...',
-    noSubscriptionsAvailable: 'No hay suscripciones disponibles',
-    noSubscriptionsMessage: 'No hay suscripciones disponibles actualmente. Por favor, vuelve más tarde.',
     
     // Features
-    ultraHd4k: 'Ultra HD 4K/8K',
-    support247: 'Soporte 24/7',
-    instantActivation: 'Activación Instantánea',
-    premiumQuality: 'Calidad Premium',
-    premiumQualityDesc: 'Streaming en calidad 4K/8K con tecnología anti-congelación avanzada.',
-    guaranteedReliability: 'Fiabilidad Garantizada',
-    guaranteedReliabilityDesc: 'Servidores de alto rendimiento con 99.9% de tiempo activo.',
-    fastActivation: 'Activación Rápida',
-    fastActivationDesc: 'Tu servicio se activa instantáneamente después del pago.',
-    
-    // Why Choose
-    whyChooseTitle: '¿Por qué elegir BWIVOX?',
-    whyChooseSubtitle: 'Descubre las ventajas de nuestros servicios IPTV premium.',
-    
-    // CTA
-    ctaTitle: '¿Listo para empezar?',
-    ctaSubtitle: 'Únete a miles de clientes satisfechos hoy.',
-    
-    // Product Cards
-    currency: '€',
-    perMonth: '/mes',
-    buyNow: 'Comprar Ahora',
-    viewMore: 'Ver Más Detalles',
-    
-    // Activation page
-    activationTitle: 'Activa tu Player',
-    activationSubtitle: 'Sigue estos pasos simples para activar tu servicio IPTV',
-    playerActivation: 'Activación del Player',
-    activationSteps: 'Pasos de Activación',
-    step1Title: 'Descarga la App',
-    step1Desc: 'Instala nuestra aplicación en tu dispositivo',
-    step2Title: 'Introduce tus Códigos',
-    step2Desc: 'Usa los códigos que te enviamos',
-    step3Title: 'Disfruta del Contenido',
-    step3Desc: 'Mira tus canales y contenido favoritos',
-    needHelp: '¿Necesitas Ayuda?',
-    
-    // Reseller page
-    resellerTitle: 'Conviértete en Revendedor BWIVOX',
-    resellerSubtitle: 'Únete a nuestro programa de asociación y genera ingresos',
-    becomeReseller: 'Ser Revendedor',
-    resellerBenefits: 'Beneficios del Revendedor',
-    highCommissions: 'Comisiones Altas',
-    highCommissionsDesc: 'Gana hasta 40% de comisión en cada venta',
-    dedicatedSupport: 'Soporte Dedicado',
-    dedicatedSupportDesc: 'Equipo de soporte dedicado para ayudarte',
-    marketingTools: 'Herramientas de Marketing',
-    marketingToolsDesc: 'Material promocional y herramientas de venta',
-    joinNow: 'Unirse Ahora',
-    
-    // IPTV Panel page
-    iptvPanelTitle: 'Panel IPTV',
-    iptvPanelSubtitle: 'Gestiona tus suscripciones y servicios IPTV',
-    manageSubscriptions: 'Gestionar Suscripciones',
-    
-    // Player Panel page
-    playerPanelTitle: 'Panel del Player',
-    playerPanelSubtitle: 'Configura y gestiona tus players IPTV',
-    configurePlayer: 'Configurar Player',
-    
-    // Product Detail page
-    productFeatures: 'Características del Producto',
-    technicalSpecs: 'Especificaciones Técnicas',
-    whatYouGet: 'Lo que Obtienes',
-    
-    // Common
-    backToHome: 'Volver al inicio',
-    getStarted: 'Empezar',
-    learnMore: 'Saber Más',
-    features: 'Características',
-    pricing: 'Precios',
-    support: 'Soporte',
-    documentation: 'Documentación',
-  },
-  ar: {
-    // Navigation (en anglais pour cohérence)
-    home: 'Home',
-    subscription: 'Subscription IPTV',
-    activation: 'Activation Player',
-    reseller: 'Panel Reseller',
-    panelIptv: 'Panel IPTV',
-    playerPanel: 'Panel Player',
-    
-    // Hero section
-    heroTitle: 'خدمات IPTV',
-    heroSubtitle: 'استمتع بآلاف القنوات المباشرة والأفلام والمسلسلات بجودة 8K Ultra HD مع خدمات IPTV المميزة لدينا.',
-    freeTrial: 'تجربة مجانية',
-    tryFree: 'مرحبا، أود الاستفادة من التجربة المجانية',
-    contact: 'هل يمكنك مساعدتي',
-    
-    // Subscriptions
-    subscriptionsTitle: 'اشتراكات IPTV لدينا',
-    ourSubscriptions: 'اشتراكاتنا',
-    loadingSubscriptions: 'جاري تحميل الاشتراكات...',
-    noSubscriptionsAvailable: 'لا توجد اشتراكات متاحة',
-    noSubscriptionsMessage: 'لا توجد اشتراكات متاحة حاليًا. يرجى المراجعة لاحقًا.',
-    
-    // Features
-    ultraHd4k: 'Ultra HD 4K/8K',
-    support247: 'دعم 24/7',
-    instantActivation: 'تفعيل فوري',
-    premiumQuality: 'جودة مميزة',
-    premiumQualityDesc: 'بث بجودة 4K/8K مع تقنية مكافحة التجمد المتقدمة.',
-    guaranteedReliability: 'موثوقية مضمونة',
-    guaranteedReliabilityDesc: 'خوادم عالية الأداء مع وقت تشغيل 99.9%.',
-    fastActivation: 'تفعيل سريع',
-    fastActivationDesc: 'يتم تفعيل خدمتك فورًا بعد الدفع.',
-    
-    // Why Choose
-    whyChooseTitle: 'لماذا تختار BWIVOX؟',
-    whyChooseSubtitle: 'اكتشف مزايا خدمات IPTV المميزة لدينا.',
-    
-    // CTA
-    ctaTitle: 'مستعد للبدء؟',
-    ctaSubtitle: 'انضم إلى آلاف العملاء الراضين اليوم.',
-    
-    // Product Cards
-    currency: '€',
-    perMonth: '/شهر',
-    buyNow: 'اشتر الآن',
-    viewMore: 'عرض المزيد من التفاصيل',
-    
-    // Activation page
-    activationTitle: 'تفعيل المشغل الخاص بك',
-    activationSubtitle: 'اتبع هذه الخطوات البسيطة لتفعيل خدمة IPTV',
-    playerActivation: 'تفعيل المشغل',
-    activationSteps: 'خطوات التفعيل',
-    step1Title: 'تحميل التطبيق',
-    step1Desc: 'تثبيت التطبيق على جهازك',
-    step2Title: 'إدخال الرموز',
-    step2Desc: 'استخدم الرموز التي أرسلناها لك',
-    step3Title: 'استمتع بالمحتوى',
-    step3Desc: 'شاهد قنواتك ومحتواك المفضل',
-    needHelp: 'تحتاج مساعدة؟',
-    
-    // Reseller page
-    resellerTitle: 'كن موزع BWIVOX',
-    resellerSubtitle: 'انضم إلى برنامج الشراكة واحصل على الأرباح',
-    becomeReseller: 'أصبح موزع',
-    resellerBenefits: 'مزايا الموزع',
-    highCommissions: 'عمولات عالية',
-    highCommissionsDesc: 'احصل على عمولة تصل إلى 40% من كل عملية بيع',
-    dedicatedSupport: 'دعم مخصص',
-    dedicatedSupportDesc: 'فريق دعم مخصص لمساعدتك',
-    marketingTools: 'أدوات التسويق',
-    marketingToolsDesc: 'مواد ترويجية وأدوات بيع',
-    joinNow: 'انضم الآن',
-    
-    // IPTV Panel page
-    iptvPanelTitle: 'لوحة IPTV',
-    iptvPanelSubtitle: 'إدارة اشتراكات وخدمات IPTV',
-    manageSubscriptions: 'إدارة الاشتراكات',
-    
-    // Player Panel page
-    playerPanelTitle: 'لوحة المشغل',
-    playerPanelSubtitle: 'تكوين وإدارة مشغلات IPTV',
-    configurePlayer: 'تكوين المشغل',
-    
-    // Product Detail page
-    productFeatures: 'ميزات المنتج',
-    technicalSpecs: 'المواصفات التقنية',
-    whatYouGet: 'ما تحصل عليه',
-    
-    // Common
-    backToHome: 'العودة إلى الرئيسية',
-    getStarted: 'ابدأ',
-    learnMore: 'تعلم المزيد',
-    features: 'الميزات',
-    pricing: 'الأسعار',
-    support: 'الدعم',
-    documentation: 'التوثيق',
-  },
-  de: {
-    // Navigation (en anglais pour cohérence)
-    home: 'Home',
-    subscription: 'Subscription IPTV',
-    activation: 'Activation Player',
-    reseller: 'Panel Reseller',
-    panelIptv: 'Panel IPTV',
-    playerPanel: 'Panel Player',
-    
-    // Hero section
-    heroTitle: 'IPTV Services',
-    heroSubtitle: 'Genießen Sie Tausende von Live-Kanälen, Filmen und Serien in 8K Ultra HD-Qualität mit unseren Premium-IPTV-Services.',
-    freeTrial: 'Kostenlose Testversion',
-    tryFree: 'Hallo, ich möchte von der kostenlosen Testversion profitieren',
-    contact: 'Können Sie mir helfen',
-    
-    // Subscriptions
-    subscriptionsTitle: 'Unsere IPTV-Abonnements',
-    ourSubscriptions: 'Unsere Abonnements',
-    loadingSubscriptions: 'Abonnements werden geladen...',
-    noSubscriptionsAvailable: 'Keine Abonnements verfügbar',
-    noSubscriptionsMessage: 'Derzeit sind keine Abonnements verfügbar. Bitte schauen Sie später wieder vorbei.',
-    
-    // Features
-    ultraHd4k: 'Ultra HD 4K/8K',
+    premiumChannels: 'Premium Channels',
+    premiumChannelsDesc: 'Access to 5000+ premium TV channels from around the world',
+    vodLibrary: 'VOD Library',
+    vodLibraryDesc: 'Unlimited access to movies and series library',
     support247: '24/7 Support',
-    instantActivation: 'Sofortige Aktivierung',
-    premiumQuality: 'Premium-Qualität',
-    premiumQualityDesc: '4K/8K-Qualitäts-Streaming mit fortschrittlicher Anti-Freeze-Technologie.',
-    guaranteedReliability: 'Garantierte Zuverlässigkeit',
-    guaranteedReliabilityDesc: 'Hochleistungsserver mit 99,9% Betriebszeit.',
-    fastActivation: 'Schnelle Aktivierung',
-    fastActivationDesc: 'Ihr Service wird sofort nach der Zahlung aktiviert.',
+    support247Desc: 'Round-the-clock customer support for all your needs',
     
-    // Why Choose
-    whyChooseTitle: 'Warum BWIVOX wählen?',
-    whyChooseSubtitle: 'Entdecken Sie die Vorteile unserer Premium-IPTV-Services.',
+    // Footer
+    footerDescription: 'Premium IPTV streaming service offering the best entertainment experience with thousands of channels and on-demand content.',
+    quickLinks: 'Quick Links',
+    services: 'Services',
+    legal: 'Legal',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    followUs: 'Follow Us',
+    subscribeNewsletter: 'Subscribe to our newsletter',
+    emailPlaceholder: 'Enter your email',
+    subscribe: 'Subscribe',
+    allRightsReserved: 'All rights reserved.',
     
-    // CTA
-    ctaTitle: 'Bereit anzufangen?',
-    ctaSubtitle: 'Werden Sie noch heute einer von Tausenden zufriedener Kunden.',
+    // Testimonials
+    testimonialsTitle: 'What Our Customers Say',
+    testimonialsDescription: 'Discover why thousands of customers choose our IPTV service',
     
-    // Product Cards
-    currency: '€',
-    perMonth: '/Monat',
-    buyNow: 'Jetzt Kaufen',
-    viewMore: 'Mehr Details Anzeigen',
+    // Why Choose Us
+    whyChooseTitle: 'Why Choose Our IPTV Service?',
+    whyChooseDescription: 'Experience the best in entertainment technology',
+    qualityStreaming: 'Quality Streaming',
+    qualityStreamingDesc: 'Crystal clear 4K streaming with no buffering',
+    globalContent: 'Global Content',
+    globalContentDesc: 'Content from all around the world in multiple languages',
+    easySetup: 'Easy Setup',
+    easySetupDesc: 'Quick and simple installation on any device',
+    affordablePricing: 'Affordable Pricing',
+    affordablePricingDesc: 'Best value for money with flexible pricing plans',
     
-    // Activation page
-    activationTitle: 'Aktivieren Sie Ihren Player',
-    activationSubtitle: 'Befolgen Sie diese einfachen Schritte, um Ihren IPTV-Service zu aktivieren',
-    playerActivation: 'Player-Aktivierung',
-    activationSteps: 'Aktivierungsschritte',
-    step1Title: 'App herunterladen',
-    step1Desc: 'Installieren Sie unsere Anwendung auf Ihrem Gerät',
-    step2Title: 'Codes eingeben',
-    step2Desc: 'Verwenden Sie die Codes, die wir Ihnen gesendet haben',
-    step3Title: 'Inhalte genießen',
-    step3Desc: 'Schauen Sie Ihre Lieblings-Kanäle und -Inhalte',
-    needHelp: 'Brauchen Sie Hilfe?',
+    // Platform Selection
+    platformTitle: 'Choose Your Platform',
+    platformDescription: 'Select your preferred IPTV platform for the best streaming experience',
     
-    // Reseller page
-    resellerTitle: 'Werden Sie BWIVOX-Händler',
-    resellerSubtitle: 'Treten Sie unserem Partnerprogramm bei und generieren Sie Einnahmen',
-    becomeReseller: 'Händler werden',
-    resellerBenefits: 'Händler-Vorteile',
-    highCommissions: 'Hohe Provisionen',
-    highCommissionsDesc: 'Verdienen Sie bis zu 40% Provision bei jedem Verkauf',
-    dedicatedSupport: 'Dedizierter Support',
-    dedicatedSupportDesc: 'Dediziertes Support-Team zur Unterstützung',
-    marketingTools: 'Marketing-Tools',
-    marketingToolsDesc: 'Werbematerialien und Verkaufstools',
-    joinNow: 'Jetzt beitreten',
-    
-    // IPTV Panel page
-    iptvPanelTitle: 'IPTV-Panel',
-    iptvPanelSubtitle: 'Verwalten Sie Ihre IPTV-Abonnements und -Services',
-    manageSubscriptions: 'Abonnements verwalten',
-    
-    // Player Panel page
-    playerPanelTitle: 'Player-Panel',
-    playerPanelSubtitle: 'Konfigurieren und verwalten Sie Ihre IPTV-Player',
-    configurePlayer: 'Player konfigurieren',
-    
-    // Product Detail page
-    productFeatures: 'Produktfunktionen',
-    technicalSpecs: 'Technische Spezifikationen',
-    whatYouGet: 'Was Sie erhalten',
+    // Service Categories
+    iptvSubscription: 'IPTV Subscription',
+    iptvSubscriptionDesc: 'Monthly and yearly subscription plans with premium channels',
+    panelIptv: 'Panel IPTV',
+    panelIptvDesc: 'Manage your IPTV service with our advanced control panel',
+    playerActivation: 'Player Activation',
+    playerActivationDesc: 'Activate your IPTV player with our premium service',
     
     // Common
-    backToHome: 'Zurück zur Startseite',
-    getStarted: 'Loslegen',
-    learnMore: 'Mehr erfahren',
-    features: 'Funktionen',
-    pricing: 'Preise',
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    save: 'Save',
+    edit: 'Edit',
+    delete: 'Delete',
+    back: 'Back',
+    next: 'Next',
+    previous: 'Previous',
+    
+    // Admin specific
+    adminDashboard: 'IPTV Admin Dashboard',
+    adminTitle: 'IPTV Admin',
+    deleteAllFeedback: 'Delete All Approved Feedback',
+    deleteAllFeedbackConfirm: 'Are you sure you want to delete all approved feedback? This action cannot be undone.',
+    resetSales: 'Reset Product Sales',
+    resetSalesConfirm: 'Are you sure you want to reset all product sales to zero? This action cannot be undone.',
+    feedbackDeleted: 'All approved feedback has been deleted successfully.',
+    salesReset: 'Product sales have been reset to zero successfully.',
+  },
+  
+  fr: {
+    // Navigation
+    home: 'Accueil',
+    subscription: 'Abonnement',
+    products: 'Produits',
     support: 'Support',
-    documentation: 'Dokumentation',
+    howToBuy: 'Comment Acheter',
+    blog: 'Blog',
+    freeTrialBtn: 'Essai Gratuit',
+    tryNowBtn: 'Essayer Maintenant',
+    
+    // Hero Section
+    heroTitle: 'IPTV 4K Expérience de Streaming Premium',
+    heroDescription: 'Diffusez des milliers de chaînes et de films en qualité 4K époustouflante. Vivez le divertissement comme jamais auparavant avec notre service IPTV premium.',
+    getStarted: 'Commencer',
+    learnMore: 'En Savoir Plus',
+    
+    // Features
+    premiumChannels: 'Chaînes Premium',
+    premiumChannelsDesc: 'Accès à plus de 5000 chaînes TV premium du monde entier',
+    vodLibrary: 'Bibliothèque VOD',
+    vodLibraryDesc: 'Accès illimité à la bibliothèque de films et séries',
+    support247: 'Support 24/7',
+    support247Desc: 'Support client 24h/24 pour tous vos besoins',
+    
+    // Footer
+    footerDescription: 'Service de streaming IPTV premium offrant la meilleure expérience de divertissement avec des milliers de chaînes et du contenu à la demande.',
+    quickLinks: 'Liens Rapides',
+    services: 'Services',
+    legal: 'Légal',
+    privacyPolicy: 'Politique de Confidentialité',
+    termsOfService: 'Conditions de Service',
+    followUs: 'Suivez-nous',
+    subscribeNewsletter: 'Abonnez-vous à notre newsletter',
+    emailPlaceholder: 'Entrez votre email',
+    subscribe: 'S\'abonner',
+    allRightsReserved: 'Tous droits réservés.',
+    
+    // Testimonials
+    testimonialsTitle: 'Ce Que Disent Nos Clients',
+    testimonialsDescription: 'Découvrez pourquoi des milliers de clients choisissent notre service IPTV',
+    
+    // Why Choose Us
+    whyChooseTitle: 'Pourquoi Choisir Notre Service IPTV?',
+    whyChooseDescription: 'Découvrez le meilleur de la technologie de divertissement',
+    qualityStreaming: 'Streaming de Qualité',
+    qualityStreamingDesc: 'Streaming 4K cristallin sans mise en mémoire tampon',
+    globalContent: 'Contenu Global',
+    globalContentDesc: 'Contenu du monde entier en plusieurs langues',
+    easySetup: 'Installation Facile',
+    easySetupDesc: 'Installation rapide et simple sur tout appareil',
+    affordablePricing: 'Prix Abordable',
+    affordablePricingDesc: 'Meilleur rapport qualité-prix avec des plans tarifaires flexibles',
+    
+    // Platform Selection
+    platformTitle: 'Choisissez Votre Plateforme',
+    platformDescription: 'Sélectionnez votre plateforme IPTV préférée pour la meilleure expérience de streaming',
+    
+    // Service Categories
+    iptvSubscription: 'Abonnement IPTV',
+    iptvSubscriptionDesc: 'Plans d\'abonnement mensuels et annuels avec chaînes premium',
+    panelIptv: 'Panel IPTV',
+    panelIptvDesc: 'Gérez votre service IPTV avec notre panneau de contrôle avancé',
+    playerActivation: 'Activation du Lecteur',
+    playerActivationDesc: 'Activez votre lecteur IPTV avec notre service premium',
+    
+    // Common
+    loading: 'Chargement...',
+    error: 'Erreur',
+    success: 'Succès',
+    cancel: 'Annuler',
+    confirm: 'Confirmer',
+    save: 'Enregistrer',
+    edit: 'Modifier',
+    delete: 'Supprimer',
+    back: 'Retour',
+    next: 'Suivant',
+    previous: 'Précédent',
+    
+    // Admin specific
+    adminDashboard: 'Tableau de Bord IPTV Admin',
+    adminTitle: 'Admin IPTV',
+    deleteAllFeedback: 'Supprimer Tous les Commentaires Approuvés',
+    deleteAllFeedbackConfirm: 'Êtes-vous sûr de vouloir supprimer tous les commentaires approuvés? Cette action ne peut pas être annulée.',
+    resetSales: 'Réinitialiser les Ventes de Produits',
+    resetSalesConfirm: 'Êtes-vous sûr de vouloir réinitialiser toutes les ventes de produits à zéro? Cette action ne peut pas être annulée.',
+    feedbackDeleted: 'Tous les commentaires approuvés ont été supprimés avec succès.',
+    salesReset: 'Les ventes de produits ont été réinitialisées à zéro avec succès.',
+  },
+  
+  es: {
+    // Navigation
+    home: 'Inicio',
+    subscription: 'Suscripción',
+    products: 'Productos',
+    support: 'Soporte',
+    howToBuy: 'Cómo Comprar',
+    blog: 'Blog',
+    freeTrialBtn: 'Prueba Gratis',
+    tryNowBtn: 'Probar Ahora',
+    
+    // Hero Section
+    heroTitle: 'IPTV 4K Experiencia de Streaming Premium',
+    heroDescription: 'Transmite miles de canales y películas en calidad 4K impresionante. Experimenta el entretenimiento como nunca antes con nuestro servicio IPTV premium.',
+    getStarted: 'Comenzar',
+    learnMore: 'Saber Más',
+    
+    // Features
+    premiumChannels: 'Canales Premium',
+    premiumChannelsDesc: 'Acceso a más de 5000 canales de TV premium de todo el mundo',
+    vodLibrary: 'Biblioteca VOD',
+    vodLibraryDesc: 'Acceso ilimitado a la biblioteca de películas y series',
+    support247: 'Soporte 24/7',
+    support247Desc: 'Soporte al cliente las 24 horas para todas sus necesidades',
+    
+    // Footer
+    footerDescription: 'Servicio de streaming IPTV premium que ofrece la mejor experiencia de entretenimiento con miles de canales y contenido bajo demanda.',
+    quickLinks: 'Enlaces Rápidos',
+    services: 'Servicios',
+    legal: 'Legal',
+    privacyPolicy: 'Política de Privacidad',
+    termsOfService: 'Términos de Servicio',
+    followUs: 'Síguenos',
+    subscribeNewsletter: 'Suscríbete a nuestro boletín',
+    emailPlaceholder: 'Ingresa tu email',
+    subscribe: 'Suscribirse',
+    allRightsReserved: 'Todos los derechos reservados.',
+    
+    // Testimonials
+    testimonialsTitle: 'Lo Que Dicen Nuestros Clientes',
+    testimonialsDescription: 'Descubre por qué miles de clientes eligen nuestro servicio IPTV',
+    
+    // Why Choose Us
+    whyChooseTitle: '¿Por Qué Elegir Nuestro Servicio IPTV?',
+    whyChooseDescription: 'Experimenta lo mejor en tecnología de entretenimiento',
+    qualityStreaming: 'Streaming de Calidad',
+    qualityStreamingDesc: 'Streaming 4K cristalino sin buffering',
+    globalContent: 'Contenido Global',
+    globalContentDesc: 'Contenido de todo el mundo en múltiples idiomas',
+    easySetup: 'Configuración Fácil',
+    easySetupDesc: 'Instalación rápida y simple en cualquier dispositivo',
+    affordablePricing: 'Precios Asequibles',
+    affordablePricingDesc: 'La mejor relación calidad-precio con planes de precios flexibles',
+    
+    // Platform Selection
+    platformTitle: 'Elige Tu Plataforma',
+    platformDescription: 'Selecciona tu plataforma IPTV preferida para la mejor experiencia de streaming',
+    
+    // Service Categories
+    iptvSubscription: 'Suscripción IPTV',
+    iptvSubscriptionDesc: 'Planes de suscripción mensuales y anuales con canales premium',
+    panelIptv: 'Panel IPTV',
+    panelIptvDesc: 'Gestiona tu servicio IPTV con nuestro panel de control avanzado',
+    playerActivation: 'Activación del Reproductor',
+    playerActivationDesc: 'Activa tu reproductor IPTV con nuestro servicio premium',
+    
+    // Common
+    loading: 'Cargando...',
+    error: 'Error',
+    success: 'Éxito',
+    cancel: 'Cancelar',
+    confirm: 'Confirmar',
+    save: 'Guardar',
+    edit: 'Editar',
+    delete: 'Eliminar',
+    back: 'Atrás',
+    next: 'Siguiente',
+    previous: 'Anterior',
+    
+    // Admin specific
+    adminDashboard: 'Panel de Administración IPTV',
+    adminTitle: 'Admin IPTV',
+    deleteAllFeedback: 'Eliminar Todos los Comentarios Aprobados',
+    deleteAllFeedbackConfirm: '¿Estás seguro de que quieres eliminar todos los comentarios aprobados? Esta acción no se puede deshacer.',
+    resetSales: 'Restablecer Ventas de Productos',
+    resetSalesConfirm: '¿Estás seguro de que quieres restablecer todas las ventas de productos a cero? Esta acción no se puede deshacer.',
+    feedbackDeleted: 'Todos los comentarios aprobados han sido eliminados exitosamente.',
+    salesReset: 'Las ventas de productos han sido restablecidas a cero exitosamente.',
+  },
+  
+  de: {
+    // Navigation
+    home: 'Startseite',
+    subscription: 'Abonnement',
+    products: 'Produkte',
+    support: 'Support',
+    howToBuy: 'Wie Kaufen',
+    blog: 'Blog',
+    freeTrialBtn: 'Kostenlose Testversion',
+    tryNowBtn: 'Jetzt Testen',
+    
+    // Hero Section
+    heroTitle: 'IPTV 4K Premium Streaming-Erlebnis',
+    heroDescription: 'Streamen Sie Tausende von Kanälen und Filmen in atemberaubender 4K-Qualität. Erleben Sie Unterhaltung wie nie zuvor mit unserem Premium-IPTV-Service.',
+    getStarted: 'Loslegen',
+    learnMore: 'Mehr Erfahren',
+    
+    // Features
+    premiumChannels: 'Premium-Kanäle',
+    premiumChannelsDesc: 'Zugang zu über 5000 Premium-TV-Kanälen aus aller Welt',
+    vodLibrary: 'VOD-Bibliothek',
+    vodLibraryDesc: 'Unbegrenzter Zugang zur Film- und Serienbibliothek',
+    support247: '24/7 Support',
+    support247Desc: 'Rund-um-die-Uhr-Kundensupport für alle Ihre Bedürfnisse',
+    
+    // Footer
+    footerDescription: 'Premium-IPTV-Streaming-Service, der das beste Unterhaltungserlebnis mit Tausenden von Kanälen und On-Demand-Inhalten bietet.',
+    quickLinks: 'Schnelle Links',
+    services: 'Dienstleistungen',
+    legal: 'Rechtliches',
+    privacyPolicy: 'Datenschutzrichtlinie',
+    termsOfService: 'Nutzungsbedingungen',
+    followUs: 'Folgen Sie uns',
+    subscribeNewsletter: 'Abonnieren Sie unseren Newsletter',
+    emailPlaceholder: 'E-Mail eingeben',
+    subscribe: 'Abonnieren',
+    allRightsReserved: 'Alle Rechte vorbehalten.',
+    
+    // Testimonials
+    testimonialsTitle: 'Was Unsere Kunden Sagen',
+    testimonialsDescription: 'Entdecken Sie, warum Tausende von Kunden unseren IPTV-Service wählen',
+    
+    // Why Choose Us
+    whyChooseTitle: 'Warum Unseren IPTV-Service Wählen?',
+    whyChooseDescription: 'Erleben Sie das Beste in der Unterhaltungstechnologie',
+    qualityStreaming: 'Qualitäts-Streaming',
+    qualityStreamingDesc: 'Kristallklares 4K-Streaming ohne Pufferung',
+    globalContent: 'Globaler Inhalt',
+    globalContentDesc: 'Inhalte aus aller Welt in mehreren Sprachen',
+    easySetup: 'Einfache Einrichtung',
+    easySetupDesc: 'Schnelle und einfache Installation auf jedem Gerät',
+    affordablePricing: 'Erschwingliche Preise',
+    affordablePricingDesc: 'Bestes Preis-Leistungs-Verhältnis mit flexiblen Preisplänen',
+    
+    // Platform Selection
+    platformTitle: 'Wählen Sie Ihre Plattform',
+    platformDescription: 'Wählen Sie Ihre bevorzugte IPTV-Plattform für das beste Streaming-Erlebnis',
+    
+    // Service Categories
+    iptvSubscription: 'IPTV-Abonnement',
+    iptvSubscriptionDesc: 'Monatliche und jährliche Abonnementpläne mit Premium-Kanälen',
+    panelIptv: 'Panel IPTV',
+    panelIptvDesc: 'Verwalten Sie Ihren IPTV-Service mit unserem erweiterten Kontrollpanel',
+    playerActivation: 'Player-Aktivierung',
+    playerActivationDesc: 'Aktivieren Sie Ihren IPTV-Player mit unserem Premium-Service',
+    
+    // Common
+    loading: 'Wird geladen...',
+    error: 'Fehler',
+    success: 'Erfolg',
+    cancel: 'Abbrechen',
+    confirm: 'Bestätigen',
+    save: 'Speichern',
+    edit: 'Bearbeiten',
+    delete: 'Löschen',
+    back: 'Zurück',
+    next: 'Weiter',
+    previous: 'Vorherige',
+    
+    // Admin specific
+    adminDashboard: 'IPTV Admin Dashboard',
+    adminTitle: 'IPTV Admin',
+    deleteAllFeedback: 'Alle Genehmigten Feedbacks Löschen',
+    deleteAllFeedbackConfirm: 'Sind Sie sicher, dass Sie alle genehmigten Feedbacks löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+    resetSales: 'Produktverkäufe Zurücksetzen',
+    resetSalesConfirm: 'Sind Sie sicher, dass Sie alle Produktverkäufe auf null zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+    feedbackDeleted: 'Alle genehmigten Feedbacks wurden erfolgreich gelöscht.',
+    salesReset: 'Produktverkäufe wurden erfolgreich auf null zurückgesetzt.',
+  },
+  
+  it: {
+    // Navigation
+    home: 'Home',
+    subscription: 'Abbonamento',
+    products: 'Prodotti',
+    support: 'Supporto',
+    howToBuy: 'Come Acquistare',
+    blog: 'Blog',
+    freeTrialBtn: 'Prova Gratuita',
+    tryNowBtn: 'Prova Ora',
+    
+    // Hero Section
+    heroTitle: 'IPTV 4K Esperienza di Streaming Premium',
+    heroDescription: 'Guarda migliaia di canali e film in qualità 4K straordinaria. Vivi l\'intrattenimento come mai prima d\'ora con il nostro servizio IPTV premium.',
+    getStarted: 'Inizia',
+    learnMore: 'Scopri di Più',
+    
+    // Features
+    premiumChannels: 'Canali Premium',
+    premiumChannelsDesc: 'Accesso a oltre 5000 canali TV premium da tutto il mondo',
+    vodLibrary: 'Libreria VOD',
+    vodLibraryDesc: 'Accesso illimitato alla libreria di film e serie',
+    support247: 'Supporto 24/7',
+    support247Desc: 'Supporto clienti 24 ore su 24 per tutte le tue esigenze',
+    
+    // Footer
+    footerDescription: 'Servizio di streaming IPTV premium che offre la migliore esperienza di intrattenimento con migliaia di canali e contenuti on-demand.',
+    quickLinks: 'Link Rapidi',
+    services: 'Servizi',
+    legal: 'Legale',
+    privacyPolicy: 'Politica sulla Privacy',
+    termsOfService: 'Termini di Servizio',
+    followUs: 'Seguici',
+    subscribeNewsletter: 'Iscriviti alla nostra newsletter',
+    emailPlaceholder: 'Inserisci la tua email',
+    subscribe: 'Iscriviti',
+    allRightsReserved: 'Tutti i diritti riservati.',
+    
+    // Testimonials
+    testimonialsTitle: 'Cosa Dicono i Nostri Clienti',
+    testimonialsDescription: 'Scopri perché migliaia di clienti scelgono il nostro servizio IPTV',
+    
+    // Why Choose Us
+    whyChooseTitle: 'Perché Scegliere il Nostro Servizio IPTV?',
+    whyChooseDescription: 'Vivi il meglio della tecnologia dell\'intrattenimento',
+    qualityStreaming: 'Streaming di Qualità',
+    qualityStreamingDesc: 'Streaming 4K cristallino senza buffering',
+    globalContent: 'Contenuti Globali',
+    globalContentDesc: 'Contenuti da tutto il mondo in più lingue',
+    easySetup: 'Configurazione Facile',
+    easySetupDesc: 'Installazione rapida e semplice su qualsiasi dispositivo',
+    affordablePricing: 'Prezzi Accessibili',
+    affordablePricingDesc: 'Miglior rapporto qualità-prezzo con piani tariffari flessibili',
+    
+    // Platform Selection
+    platformTitle: 'Scegli la Tua Piattaforma',
+    platformDescription: 'Seleziona la tua piattaforma IPTV preferita per la migliore esperienza di streaming',
+    
+    // Service Categories
+    iptvSubscription: 'Abbonamento IPTV',
+    iptvSubscriptionDesc: 'Piani di abbonamento mensili e annuali con canali premium',
+    panelIptv: 'Panel IPTV',
+    panelIptvDesc: 'Gestisci il tuo servizio IPTV con il nostro pannello di controllo avanzato',
+    playerActivation: 'Attivazione Player',
+    playerActivationDesc: 'Attiva il tuo player IPTV con il nostro servizio premium',
+    
+    // Common
+    loading: 'Caricamento...',
+    error: 'Errore',
+    success: 'Successo',
+    cancel: 'Annulla',
+    confirm: 'Conferma',
+    save: 'Salva',
+    edit: 'Modifica',
+    delete: 'Elimina',
+    back: 'Indietro',
+    next: 'Avanti',
+    previous: 'Precedente',
+    
+    // Admin specific
+    adminDashboard: 'Dashboard Admin IPTV',
+    adminTitle: 'Admin IPTV',
+    deleteAllFeedback: 'Elimina Tutti i Feedback Approvati',
+    deleteAllFeedbackConfirm: 'Sei sicuro di voler eliminare tutti i feedback approvati? Questa azione non può essere annullata.',
+    resetSales: 'Reimposta Vendite Prodotti',
+    resetSalesConfirm: 'Sei sicuro di voler reimpostare tutte le vendite dei prodotti a zero? Questa azione non può essere annullata.',
+    feedbackDeleted: 'Tutti i feedback approvati sono stati eliminati con successo.',
+    salesReset: 'Le vendite dei prodotti sono state reimpostate a zero con successo.',
+  },
+  
+  ar: {
+    // Navigation
+    home: 'الرئيسية',
+    subscription: 'الاشتراك',
+    products: 'المنتجات',
+    support: 'الدعم',
+    howToBuy: 'كيفية الشراء',
+    blog: 'المدونة',
+    freeTrialBtn: 'تجربة مجانية',
+    tryNowBtn: 'جرب الآن',
+    
+    // Hero Section
+    heroTitle: 'IPTV 4K تجربة البث المتميزة',
+    heroDescription: 'شاهد آلاف القنوات والأفلام بجودة 4K مذهلة. استمتع بالترفيه كما لم تستمتع من قبل مع خدمة IPTV المتميزة.',
+    getStarted: 'ابدأ',
+    learnMore: 'اعرف المزيد',
+    
+    // Features
+    premiumChannels: 'قنوات مميزة',
+    premiumChannelsDesc: 'الوصول إلى أكثر من 5000 قناة تلفزيونية مميزة من جميع أنحاء العالم',
+    vodLibrary: 'مكتبة VOD',
+    vodLibraryDesc: 'وصول غير محدود إلى مكتبة الأفلام والمسلسلات',
+    support247: 'دعم 24/7',
+    support247Desc: 'دعم العملاء على مدار الساعة لجميع احتياجاتك',
+    
+    // Footer
+    footerDescription: 'خدمة البث المتميزة IPTV التي تقدم أفضل تجربة ترفيهية مع آلاف القنوات والمحتوى حسب الطلب.',
+    quickLinks: 'روابط سريعة',
+    services: 'الخدمات',
+    legal: 'قانوني',
+    privacyPolicy: 'سياسة الخصوصية',
+    termsOfService: 'شروط الخدمة',
+    followUs: 'تابعنا',
+    subscribeNewsletter: 'اشترك في نشرتنا الإخبارية',
+    emailPlaceholder: 'أدخل بريدك الإلكتروني',
+    subscribe: 'اشترك',
+    allRightsReserved: 'جميع الحقوق محفوظة.',
+    
+    // Testimonials
+    testimonialsTitle: 'ما يقوله عملاؤنا',
+    testimonialsDescription: 'اكتشف لماذا يختار آلاف العملاء خدمة IPTV الخاصة بنا',
+    
+    // Why Choose Us
+    whyChooseTitle: 'لماذا تختار خدمة IPTV الخاصة بنا؟',
+    whyChooseDescription: 'استمتع بأفضل ما في تكنولوجيا الترفيه',
+    qualityStreaming: 'بث عالي الجودة',
+    qualityStreamingDesc: 'بث 4K واضح بدون انقطاع',
+    globalContent: 'محتوى عالمي',
+    globalContentDesc: 'محتوى من جميع أنحاء العالم بلغات متعددة',
+    easySetup: 'إعداد سهل',
+    easySetupDesc: 'تثبيت سريع وبسيط على أي جهاز',
+    affordablePricing: 'أسعار معقولة',
+    affordablePricingDesc: 'أفضل قيمة مقابل المال مع خطط تسعير مرنة',
+    
+    // Platform Selection
+    platformTitle: 'اختر منصتك',
+    platformDescription: 'اختر منصة IPTV المفضلة لديك لأفضل تجربة بث',
+    
+    // Service Categories
+    iptvSubscription: 'اشتراك IPTV',
+    iptvSubscriptionDesc: 'خطط اشتراك شهرية وسنوية مع قنوات مميزة',
+    panelIptv: 'لوحة IPTV',
+    panelIptvDesc: 'إدارة خدمة IPTV الخاصة بك مع لوحة التحكم المتقدمة',
+    playerActivation: 'تفعيل المشغل',
+    playerActivationDesc: 'فعل مشغل IPTV الخاص بك مع خدمتنا المميزة',
+    
+    // Common
+    loading: 'جاري التحميل...',
+    error: 'خطأ',
+    success: 'نجح',
+    cancel: 'إلغاء',
+    confirm: 'تأكيد',
+    save: 'حفظ',
+    edit: 'تحرير',
+    delete: 'حذف',
+    back: 'رجوع',
+    next: 'التالي',
+    previous: 'السابق',
+    
+    // Admin specific
+    adminDashboard: 'لوحة إدارة IPTV',
+    adminTitle: 'إدارة IPTV',
+    deleteAllFeedback: 'حذف جميع التعليقات المعتمدة',
+    deleteAllFeedbackConfirm: 'هل أنت متأكد من رغبتك في حذف جميع التعليقات المعتمدة؟ لا يمكن التراجع عن هذا الإجراء.',
+    resetSales: 'إعادة تعيين مبيعات المنتجات',
+    resetSalesConfirm: 'هل أنت متأكد من رغبتك في إعادة تعيين جميع مبيعات المنتجات إلى الصفر؟ لا يمكن التراجع عن هذا الإجراء.',
+    feedbackDeleted: 'تم حذف جميع التعليقات المعتمدة بنجاح.',
+    salesReset: 'تم إعادة تعيين مبيعات المنتجات إلى الصفر بنجاح.',
   },
 };
 
-export const getTranslation = (language: Language): Translations => {
-  return translations[language] || translations.fr;
+export const languageNames = {
+  en: 'English',
+  fr: 'Français', 
+  es: 'Español',
+  de: 'Deutsch',
+  it: 'Italiano',
+  ar: 'العربية'
 };
 
-// Helper functions for language display
-export const getLanguageFlag = (language: Language): string => {
-  const flags: Record<Language, string> = {
-    fr: '🇫🇷',
-    en: '🇺🇸',
-    es: '🇪🇸',
-    ar: '🇸🇦',
-    de: '🇩🇪',
-  };
-  return flags[language] || '🇫🇷';
-};
-
-export const getLanguageName = (language: Language): string => {
-  const names: Record<Language, string> = {
-    fr: 'Français',
-    en: 'English',
-    es: 'Español',
-    ar: 'العربية',
-    de: 'Deutsch',
-  };
-  return names[language] || 'Français';
-};
+// Ordered list for language selector (English, French, Spanish, German, Italian, Arabic)
+export const orderedLanguages = ['en', 'fr', 'es', 'de', 'it', 'ar'] as const;

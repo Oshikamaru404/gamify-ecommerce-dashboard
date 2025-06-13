@@ -171,12 +171,66 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount: number
+          created_at: string | null
+          customer_email: string
+          customer_name: string
+          id: string
+          package_id: string | null
+          package_name: string
+          payment_status: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          customer_email: string
+          customer_name: string
+          id?: string
+          package_id?: string | null
+          package_name: string
+          payment_status?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          package_id?: string | null
+          package_name?: string
+          payment_status?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "iptv_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_all_published_feedback: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      reset_product_sales: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
     }
     Enums: {
       feedback_status: "pending" | "approved" | "rejected"
