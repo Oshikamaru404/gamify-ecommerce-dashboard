@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
         {/* Top Section - Icon (Red Background) */}
-        <div className="h-48 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative">
+        <div className="h-48 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
           {/* Icon Background Circle */}
           <div className="w-20 h-20 bg-red-400/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
             {pkg.icon ? (
