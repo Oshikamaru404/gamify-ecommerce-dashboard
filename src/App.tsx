@@ -37,7 +37,14 @@ import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import { StoreProvider } from '@/contexts/StoreContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
@@ -47,7 +54,7 @@ function App() {
           <LanguageProvider>
             <BrowserRouter>
               <Routes>
-                {/* Public Routes - Home is now the default */}
+                {/* Public Routes - Home is the default page */}
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:slug" element={<ProductDetail />} />
