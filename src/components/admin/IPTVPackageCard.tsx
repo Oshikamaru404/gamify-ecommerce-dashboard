@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor, Shield } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor } from 'lucide-react';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
 type IPTVPackageCardProps = {
@@ -143,7 +143,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         <img 
           src={pkg.icon_url} 
           alt={pkg.name}
-          className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+          className="w-20 h-20 rounded-lg object-cover border border-gray-200"
           onError={(e) => {
             // If image fails to load, hide it and show fallback
             e.currentTarget.style.display = 'none';
@@ -162,7 +162,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
     if (pkg.icon) {
       return (
         <div 
-          className="w-12 h-12 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-2xl"
+          className="w-20 h-20 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-4xl"
           style={{ display: iconDisplay }}
         >
           {pkg.icon}
@@ -178,7 +178,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
     
     return (
       <div 
-        className="w-12 h-12 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-2xl"
+        className="w-20 h-20 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-4xl"
         style={{ display: iconDisplay }}
       >
         {defaultIcon}
@@ -190,7 +190,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
     <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-red-500">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className="flex items-start gap-4 flex-1 min-w-0">
             <div className="flex-shrink-0 relative">
               {renderIcon()}
               {renderFallbackIcon()}
@@ -239,14 +239,6 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         {pkg.description && (
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{pkg.description}</p>
         )}
-        
-        {/* 30-Day Guarantee Badge */}
-        <div className="mb-3">
-          <Badge className="bg-green-100 text-green-700 flex items-center gap-1 w-fit">
-            <Shield size={12} />
-            30-Day Money Back Guarantee
-          </Badge>
-        </div>
         
         {renderPricing()}
 
