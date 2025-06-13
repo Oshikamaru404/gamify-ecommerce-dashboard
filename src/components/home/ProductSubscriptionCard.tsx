@@ -54,15 +54,15 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
       )}
 
       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-        {/* Top Section - Icon (Red Background) */}
-        <div className="h-48 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
-          {/* Icon Background Circle */}
-          <div className="w-20 h-20 bg-red-400/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+        {/* Top Section - Icon (Red Background) - Much Larger */}
+        <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
+          {/* Icon Background Circle - Much Larger */}
+          <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
             {pkg.icon_url ? (
               <img 
                 src={pkg.icon_url} 
                 alt={pkg.name}
-                className="w-12 h-12 rounded-lg object-cover shadow-lg"
+                className="w-24 h-24 rounded-2xl object-cover shadow-xl"
                 onError={(e) => {
                   // Fallback to emoji if image fails to load
                   e.currentTarget.style.display = 'none';
@@ -73,14 +73,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             ) : null}
             {pkg.icon && (
               <div 
-                className="text-4xl text-white drop-shadow-lg"
+                className="text-8xl text-white drop-shadow-lg"
                 style={{ display: pkg.icon_url ? 'none' : 'block' }}
               >
                 {pkg.icon}
               </div>
             )}
             {!pkg.icon && !pkg.icon_url && (
-              <div className="w-8 h-8 bg-white/20 rounded-lg"></div>
+              <div className="w-16 h-16 bg-white/20 rounded-lg"></div>
             )}
           </div>
         </div>
