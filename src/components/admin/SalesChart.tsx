@@ -11,26 +11,55 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-
-type TimeRange = 'day' | 'week' | 'month' | 'year';
-
-type SalesData = {
-  name: string;
-  sales: number;
-};
+import { salesData } from '@/lib/mockData';
+import { format, subDays, parseISO } from 'date-fns';
+import { TimeRange } from '@/lib/types';
 
 type SalesChartProps = {
-  data?: SalesData[];
   className?: string;
   title?: string;
 };
 
 const SalesChart: React.FC<SalesChartProps> = ({ 
-  data = [],
   className, 
   title = "Sales Overview" 
 }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
+  
+  const getFilteredData = () => {
+    const today = new Date();
+    let daysToSubtract: number;
+    
+    switch (timeRange) {
+      case 'day':
+        daysToSubtract = 1;
+        break;
+      case 'week':
+        daysToSubtract = 7;
+        break;
+      case 'month':
+        daysToSubtract = 30;
+        break;
+      case 'year':
+        daysToSubtract = 365;
+        break;
+      default:
+        daysToSubtract = 7;
+    }
+    
+    const startDate = subDays(today, daysToSubtract);
+    return salesData.filter(item => {
+      const itemDate = parseISO(item.date);
+      return itemDate >= startDate;
+    });
+  };
+
+  const data = getFilteredData();
+
+  const formatDate = (dateStr: string) => {
+    const date = parseISO(dateStr);
+    return format(date, 'MMM dd');
+  };
 
   return (
     <Card className={className}>
@@ -65,7 +94,8 @@ const SalesChart: React.FC<SalesChartProps> = ({
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
               <XAxis 
-                dataKey="name" 
+                dataKey="date" 
+                tickFormatter={formatDate} 
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 12 }}
@@ -77,11 +107,12 @@ const SalesChart: React.FC<SalesChartProps> = ({
                 tick={{ fontSize: 12 }}
               />
               <Tooltip 
-                formatter={(value) => [`$${value}`, 'Sales']}
+                formatter={(value) => [`$${value}`, 'Revenue']}
+                labelFormatter={formatDate}
               />
               <Area 
                 type="monotone" 
-                dataKey="sales" 
+                dataKey="revenue" 
                 stroke="hsl(var(--primary))" 
                 fillOpacity={1} 
                 fill="url(#colorRevenue)" 

@@ -1,289 +1,172 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
-} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell 
-} from 'recharts';
-import { 
+  Package, 
   TrendingUp, 
   Users, 
-  Package, 
   DollarSign, 
-  ShoppingCart, 
-  Calendar,
-  Trash2,
-  RefreshCw
+  Tv, 
+  Monitor, 
+  GamepadIcon, 
+  Crown,
+  Star,
+  Activity,
+  MessageSquare,
+  Mail
 } from 'lucide-react';
-import { useDashboardMetrics, usePackagesByCategory } from '@/hooks/useDashboardMetrics';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
-import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import FeedbackManagement from '@/components/admin/FeedbackManagement';
 
-// Simple order type for the recent orders table
-type SimpleOrder = {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  createdAt: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
-  total: number;
-};
-
-// Sample orders data for the table
-const recentOrders: SimpleOrder[] = [
-  {
-    id: 'IPTV-2024-001',
-    customerName: 'Ahmed Hassan',
-    customerEmail: 'ahmed.hassan@gmail.com',
-    createdAt: '2024-06-10T14:30:00Z',
-    status: 'delivered',
-    paymentStatus: 'paid',
-    total: 15.99
-  },
-  {
-    id: 'IPTV-2024-002', 
-    customerName: 'Sophie Martin',
-    customerEmail: 'sophie.martin@hotmail.fr',
-    createdAt: '2024-06-11T09:15:00Z',
-    status: 'processing',
-    paymentStatus: 'paid',
-    total: 29.99
-  },
-  {
-    id: 'IPTV-2024-003',
-    customerName: 'Mohamed Benali',
-    customerEmail: 'm.benali@yahoo.com',
-    createdAt: '2024-06-11T11:45:00Z',
-    status: 'shipped',
-    paymentStatus: 'paid',
-    total: 49.99
-  }
-];
+// Define metric interface for the dashboard
+interface DashboardMetric {
+  label: string;
+  value: number;
+  change: number;
+  trend: 'up' | 'down';
+}
 
 const Dashboard = () => {
-  const { t } = useLanguage();
-  const { toast } = useToast();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
-  
-  const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics();
-  const { data: packagesByCategory, isLoading: packagesLoading } = usePackagesByCategory();
+  const { data: packages = [] } = useIPTVPackages();
+  const { data: metrics = [] } = useDashboardMetrics();
 
-  // Sample data for charts
-  const salesData = [
-    { name: 'Jan', sales: 4000 },
-    { name: 'Feb', sales: 3000 },
-    { name: 'Mar', sales: 5000 },
-    { name: 'Apr', sales: 4500 },
-    { name: 'May', sales: 6000 },
-    { name: 'Jun', sales: 5500 },
+  // Fetch real feedback data
+  const { data: feedbacks = [] } = useQuery({
+    queryKey: ['feedbacks'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('feedbacks')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching feedbacks:', error);
+        return [];
+      }
+      return data;
+    },
+  });
+
+  // Fetch real newsletter subscriptions
+  const { data: newsletterSubscriptions = [] } = useQuery({
+    queryKey: ['newsletter-subscriptions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('newsletter_subscriptions')
+        .select('*')
+        .order('subscribed_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching newsletter subscriptions:', error);
+        return [];
+      }
+      return data;
+    },
+  });
+
+  // Calculate package statistics based on categories
+  const packageStats = {
+    total: packages.length,
+    active: packages.filter(p => p.status === 'active').length,
+    featured: packages.filter(p => p.status === 'featured').length,
+    inactive: packages.filter(p => p.status === 'inactive').length,
+    subscription: packages.filter(p => p.category === 'subscription').length,
+    panelIptv: packages.filter(p => p.category === 'panel-iptv').length,
+    player: packages.filter(p => p.category === 'player').length,
+    activationPlayer: packages.filter(p => p.category === 'activation-player').length,
+  };
+
+  // Real revenue metrics (all 0 since no real orders exist)
+  const revenueMetrics = {
+    totalRevenue: 0, // No real orders yet
+    avgPackagePrice: packages.length > 0 
+      ? packages.reduce((sum, pkg) => sum + (pkg.price_1_month || 0), 0) / packages.length 
+      : 0,
+  };
+
+  // Feedback statistics
+  const feedbackStats = {
+    total: feedbacks.length,
+    pending: feedbacks.filter(f => f.status === 'pending').length,
+    approved: feedbacks.filter(f => f.status === 'approved').length,
+  };
+
+  // Newsletter statistics
+  const newsletterStats = {
+    total: newsletterSubscriptions.length,
+  };
+
+  // Create metric objects for the dashboard (real data)
+  const dashboardMetrics: DashboardMetric[] = [
+    {
+      label: 'Total Packages',
+      value: packageStats.total,
+      change: 0, // No change since no historical data
+      trend: 'up' as const
+    },
+    {
+      label: 'Active Packages',
+      value: packageStats.active,
+      change: 0,
+      trend: 'up' as const
+    },
+    {
+      label: 'Featured Packages',
+      value: packageStats.featured,
+      change: 0,
+      trend: 'up' as const
+    },
+    {
+      label: 'Total Revenue',
+      value: revenueMetrics.totalRevenue,
+      change: 0,
+      trend: 'up' as const
+    }
   ];
-
-  const packageCategoryData = packagesByCategory ? Object.entries(packagesByCategory).map(([category, count]) => ({
-    name: category,
-    value: count,
-    color: category === 'subscription' ? '#ef4444' : 
-           category === 'panel-iptv' ? '#3b82f6' :
-           category === 'player' ? '#10b981' :
-           category === 'activation-player' ? '#f59e0b' : '#6b7280'
-  })) : [];
-
-  const handleDeleteAllFeedback = async () => {
-    setIsDeleting(true);
-    try {
-      const { data, error } = await supabase.rpc('delete_all_published_feedback');
-      
-      if (error) {
-        console.error('Error deleting feedback:', error);
-        toast({
-          title: t.error,
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        console.log(`Deleted ${data} feedback entries`);
-        toast({
-          title: t.success,
-          description: t.feedbackDeleted,
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting feedback:', error);
-      toast({
-        title: t.error,
-        description: 'An unexpected error occurred',
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleResetSales = async () => {
-    setIsResetting(true);
-    try {
-      const { data, error } = await supabase.rpc('reset_product_sales');
-      
-      if (error) {
-        console.error('Error resetting sales:', error);
-        toast({
-          title: t.error,
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        console.log(`Reset ${data} sales metrics`);
-        toast({
-          title: t.success,
-          description: t.salesReset,
-        });
-      }
-    } catch (error) {
-      console.error('Error resetting sales:', error);
-      toast({
-        title: t.error,
-        description: 'An unexpected error occurred',
-        variant: "destructive",
-      });
-    } finally {
-      setIsResetting(false);
-    }
-  };
-
-  if (metricsLoading || packagesLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">{t.loading}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t.adminDashboard}</h1>
-          <p className="text-muted-foreground">
-            Welcome to your IPTV administration dashboard
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-2">Overview of your IPTV service management</p>
         </div>
-        
-        <div className="flex gap-2">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="text-red-600 hover:bg-red-50">
-                <Trash2 className="w-4 h-4 mr-2" />
-                {t.deleteAllFeedback}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.deleteAllFeedback}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.deleteAllFeedbackConfirm}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={handleDeleteAllFeedback}
-                  disabled={isDeleting}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  {isDeleting ? t.loading : t.confirm}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="text-orange-600 hover:bg-orange-50">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                {t.resetSales}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.resetSales}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.resetSalesConfirm}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={handleResetSales}
-                  disabled={isResetting}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  {isResetting ? t.loading : t.confirm}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <Badge className="bg-green-100 text-green-700 flex items-center gap-1">
+          <Activity size={12} />
+          System Online
+        </Badge>
       </div>
 
-      {/* Metrics Cards */}
+      {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Revenue"
-          value="€12,345"
-          change={12}
-          trend="up"
-          icon={DollarSign}
-        />
-        <MetricCard
-          title="Active Subscriptions"
-          value="1,234"
-          change={5}
-          trend="up"
-          icon={Users}
-        />
-        <MetricCard
-          title="IPTV Packages"
-          value="24"
-          change={8}
-          trend="up"
-          icon={Package}
-        />
-        <MetricCard
-          title="Orders This Month"
-          value="89"
-          change={-3}
-          trend="down"
-          icon={ShoppingCart}
-        />
+        {dashboardMetrics.map((metric, index) => (
+          <Card key={index}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">{metric.label}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {metric.label.includes('Revenue') ? `$${metric.value.toFixed(2)}` : metric.value}
+                  </p>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <TrendingUp size={16} className="mr-1" />
+                  {metric.change}%
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Charts Section */}
+      {/* Package Categories Overview */}
       <div className="grid gap-6 md:grid-cols-2">
-        <SalesChart data={salesData} />
-
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -292,45 +175,313 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={packageCategoryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {packageCategoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Tv className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium">Subscription Packages</span>
+                </div>
+                <Badge className="bg-blue-100 text-blue-700">
+                  {packageStats.subscription}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Monitor className="h-4 w-4 text-green-600" />
+                  <span className="font-medium">Panel IPTV Packages</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">
+                  {packageStats.panelIptv}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <GamepadIcon className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium">Player Packages</span>
+                </div>
+                <Badge className="bg-purple-100 text-purple-700">
+                  {packageStats.player}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-orange-600" />
+                  <span className="font-medium">Activation Player</span>
+                </div>
+                <Badge className="bg-orange-100 text-orange-700">
+                  {packageStats.activationPlayer}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Package Status Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Active Packages</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full" 
+                      style={{ width: `${packageStats.total > 0 ? (packageStats.active / packageStats.total) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm text-gray-600">{packageStats.active}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Featured Packages</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-yellow-600 h-2 rounded-full" 
+                      style={{ width: `${packageStats.total > 0 ? (packageStats.featured / packageStats.total) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm text-gray-600">{packageStats.featured}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Inactive Packages</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gray-600 h-2 rounded-full" 
+                      style={{ width: `${packageStats.total > 0 ? (packageStats.inactive / packageStats.total) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm text-gray-600">{packageStats.inactive}</span>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Orders Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      {/* Customer Feedback Management */}
+      <FeedbackManagement />
+
+      {/* Customer Feedback and Newsletter Section */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Recent IPTV Orders
+              <MessageSquare className="h-5 w-5" />
+              Customer Feedback
             </CardTitle>
-            <Badge variant="secondary">
-              {recentOrders.length} orders
-            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium">Total Feedback</span>
+                </div>
+                <Badge className="bg-blue-100 text-blue-700">
+                  {feedbackStats.total}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-yellow-600" />
+                  <span className="font-medium">Pending Reviews</span>
+                </div>
+                <Badge className="bg-yellow-100 text-yellow-700">
+                  {feedbackStats.pending}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-green-600" />
+                  <span className="font-medium">Approved</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">
+                  {feedbackStats.approved}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Newsletter Subscriptions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-green-600" />
+                  <span className="font-medium">Total Subscribers</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">
+                  {newsletterStats.total}
+                </Badge>
+              </div>
+              
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-600">
+                  {newsletterStats.total > 0 
+                    ? `${newsletterStats.total} people subscribed to your newsletter`
+                    : 'No newsletter subscriptions yet'
+                  }
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts and Tables */}
+      <Tabs defaultValue="analytics" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="orders">Recent Orders</TabsTrigger>
+          <TabsTrigger value="feedback">Feedback Reviews</TabsTrigger>
+          <TabsTrigger value="subscribers">Email Subscribers</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="analytics" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-7">
+            <Card className="col-span-4">
+              <CardHeader>
+                <CardTitle>Sales Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <SalesChart />
+              </CardContent>
+            </Card>
+            <Card className="col-span-3">
+              <CardHeader>
+                <CardTitle>Quick Stats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Total Revenue</span>
+                    <span className="text-2xl font-bold text-green-600">
+                      ${revenueMetrics.totalRevenue.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Package Categories</span>
+                    <span className="text-lg font-semibold">4</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Featured Rate</span>
+                    <span className="text-lg font-semibold">
+                      {packageStats.total > 0 ? Math.round((packageStats.featured / packageStats.total) * 100) : 0}%
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardHeader>
-        <CardContent>
-          <RecentOrdersTable orders={recentOrders} />
-        </CardContent>
-      </Card>
+        </TabsContent>
+        
+        <TabsContent value="orders">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h3>
+                <p className="text-gray-600">When customers place orders, they will appear here.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="feedback">
+          <Card>
+            <CardHeader>
+              <CardTitle>Customer Feedback Reviews</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {feedbacks.length > 0 ? (
+                <div className="space-y-4">
+                  {feedbacks.slice(0, 5).map((feedback) => (
+                    <div key={feedback.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{feedback.name}</p>
+                        <p className="text-sm text-gray-600">{feedback.comment}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(feedback.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge className={
+                        feedback.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }>
+                        {feedback.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Feedback Yet</h3>
+                  <p className="text-gray-600">Customer feedback will appear here when submitted.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="subscribers">
+          <Card>
+            <CardHeader>
+              <CardTitle>Newsletter Subscribers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {newsletterSubscriptions.length > 0 ? (
+                <div className="space-y-4">
+                  {newsletterSubscriptions.slice(0, 10).map((subscription) => (
+                    <div key={subscription.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{subscription.email}</p>
+                        <p className="text-xs text-gray-500">
+                          Subscribed: {new Date(subscription.subscribed_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-700">
+                        Active
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Subscribers Yet</h3>
+                  <p className="text-gray-600">Newsletter subscribers will appear here when they sign up.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
