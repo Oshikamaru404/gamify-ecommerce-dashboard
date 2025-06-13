@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -29,20 +30,26 @@ import {
 import { 
   Search, 
   FileText,
-  ShoppingCart 
+  ShoppingCart,
+  Edit,
+  Eye 
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-// Define order interface
+// Define order interface with correct database column names
 interface Order {
   id: string;
   customer_name: string;
   customer_email: string;
+  customer_whatsapp: string | null;
   package_name: string;
+  package_category: string;
+  duration_months: number;
   amount: number;
   status: string;
   payment_status: string;
+  order_type: string;
   created_at: string;
 }
 
@@ -54,6 +61,7 @@ const Orders = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
@@ -84,6 +92,66 @@ const Orders = () => {
       setLoading(false);
     }
   };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ));
+
+      toast({
+        title: 'Success',
+        description: 'Order status updated successfully',
+      });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update order status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const updatePaymentStatus = async (orderId: string, newPaymentStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: newPaymentStatus })
+        .eq('id', orderId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, payment_status: newPaymentStatus } : order
+      ));
+
+      toast({
+        title: 'Success',
+        description: 'Payment status updated successfully',
+      });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update payment status',
+        variant: 'destructive',
+      });
+    }
+  };
   
   // Filter orders based on search term and filters
   const filteredOrders = orders.filter((order) => {
@@ -96,8 +164,9 @@ const Orders = () => {
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     const matchesPayment = paymentFilter === 'all' || order.payment_status === paymentFilter;
+    const matchesCategory = categoryFilter === 'all' || order.package_category === categoryFilter;
     
-    return matchesSearch && matchesStatus && matchesPayment;
+    return matchesSearch && matchesStatus && matchesPayment && matchesCategory;
   });
 
   // Calculate pagination
@@ -137,12 +206,27 @@ const Orders = () => {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  const getCategoryBadge = (category: string) => {
+    switch (category) {
+      case 'subscription':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Subscription</Badge>;
+      case 'player':
+        return <Badge variant="outline" className="bg-green-50 text-green-700">Player</Badge>;
+      case 'reseller':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700">Reseller</Badge>;
+      default:
+        return <Badge variant="outline">{category}</Badge>;
+    }
+  };
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -154,6 +238,7 @@ const Orders = () => {
     setSearchTerm('');
     setStatusFilter('all');
     setPaymentFilter('all');
+    setCategoryFilter('all');
     setCurrentPage(1);
   };
 
@@ -177,7 +262,7 @@ const Orders = () => {
       <Card className="overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle>IPTV Order Management</CardTitle>
+            <CardTitle>IPTV Order Management ({filteredOrders.length} orders)</CardTitle>
             <Button variant="default" size="sm" className="bg-red-600 hover:bg-red-700">
               <FileText className="mr-2 h-4 w-4" />
               Export Orders
@@ -201,6 +286,18 @@ const Orders = () => {
             </div>
             
             <div className="flex flex-wrap gap-4">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="subscription">Subscription</SelectItem>
+                  <SelectItem value="player">Player</SelectItem>
+                  <SelectItem value="reseller">Reseller</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
@@ -232,41 +329,98 @@ const Orders = () => {
           
           {filteredOrders.length > 0 ? (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Package</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Payment</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{order.customer_name}</div>
-                          <div className="text-xs text-muted-foreground">{order.customer_email}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{order.package_name}</div>
-                      </TableCell>
-                      <TableCell>{formatDate(order.created_at)}</TableCell>
-                      <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
-                      <TableCell>{getPaymentStatusBadge(order.payment_status)}</TableCell>
-                      <TableCell className="text-right">€{order.amount.toFixed(2)}</TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Package</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {currentOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.id.slice(0, 8)}...</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{order.customer_name}</div>
+                            <div className="text-xs text-muted-foreground">{order.customer_email}</div>
+                            {order.customer_whatsapp && (
+                              <div className="text-xs text-green-600">📱 {order.customer_whatsapp}</div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">{order.package_name}</div>
+                          <div className="text-xs text-muted-foreground">{order.order_type}</div>
+                        </TableCell>
+                        <TableCell>{getCategoryBadge(order.package_category)}</TableCell>
+                        <TableCell>
+                          <div className="font-medium">{order.duration_months} {order.duration_months === 1 ? 'month' : 'months'}</div>
+                        </TableCell>
+                        <TableCell>{formatDate(order.created_at)}</TableCell>
+                        <TableCell>
+                          <Select 
+                            value={order.status} 
+                            onValueChange={(value) => updateOrderStatus(order.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue>
+                                {getOrderStatusBadge(order.status)}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="processing">Processing</SelectItem>
+                              <SelectItem value="shipped">Shipped</SelectItem>
+                              <SelectItem value="delivered">Delivered</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Select 
+                            value={order.payment_status} 
+                            onValueChange={(value) => updatePaymentStatus(order.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue>
+                                {getPaymentStatusBadge(order.payment_status)}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="paid">Paid</SelectItem>
+                              <SelectItem value="failed">Failed</SelectItem>
+                              <SelectItem value="refunded">Refunded</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">€{order.amount.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-              
               {totalPages > 1 && (
                 <div className="mt-6 flex justify-center">
                   <Pagination>

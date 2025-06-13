@@ -177,7 +177,11 @@ export type Database = {
           created_at: string | null
           customer_email: string
           customer_name: string
+          customer_whatsapp: string | null
+          duration_months: number
           id: string
+          order_type: string
+          package_category: string
           package_id: string | null
           package_name: string
           payment_status: string
@@ -189,7 +193,11 @@ export type Database = {
           created_at?: string | null
           customer_email: string
           customer_name: string
+          customer_whatsapp?: string | null
+          duration_months: number
           id?: string
+          order_type?: string
+          package_category: string
           package_id?: string | null
           package_name: string
           payment_status?: string
@@ -201,7 +209,11 @@ export type Database = {
           created_at?: string | null
           customer_email?: string
           customer_name?: string
+          customer_whatsapp?: string | null
+          duration_months?: number
           id?: string
+          order_type?: string
+          package_category?: string
           package_id?: string | null
           package_name?: string
           payment_status?: string
