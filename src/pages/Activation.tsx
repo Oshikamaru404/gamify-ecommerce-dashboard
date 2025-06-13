@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,10 +21,13 @@ import {
 import StoreLayout from '@/components/store/StoreLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import CheckoutForm from '@/components/CheckoutForm';
 
 const Activation = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   console.log('Activation page - packages:', packages);
 
@@ -35,10 +38,25 @@ const Activation = () => {
 
   console.log('Activation page - filtered activation packages:', activationPackages);
 
-  const handlePurchase = (packageItem: any, duration: number, price: number) => {
-    const message = `Hello, I'm interested in ${packageItem.name} - ${duration} Month(s) - $${price.toFixed(2)}`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+  const handleBuyNow = (packageItem: any, duration: number, price: number) => {
+    setSelectedPackage({
+      id: packageItem.id,
+      name: packageItem.name,
+      category: packageItem.category,
+      price: price,
+      duration: duration
+    });
+    setShowCheckout(true);
+  };
+
+  const handleCloseCheckout = () => {
+    setShowCheckout(false);
+    setSelectedPackage(null);
+  };
+
+  const handleOrderSuccess = () => {
+    // Optional: Add any success handling here
+    console.log('Order submitted successfully');
   };
 
   const getDurationPrice = (pkg: any, months: number) => {
@@ -212,7 +230,7 @@ const Activation = () => {
                                 <div className="font-bold text-xl text-green-700">${price.toFixed(2)}</div>
                                 <Button
                                   size="default"
-                                  onClick={() => handlePurchase(pkg, months, price)}
+                                  onClick={() => handleBuyNow(pkg, months, price)}
                                   className="bg-green-600 hover:bg-green-700 text-white mt-2"
                                 >
                                   <MessageCircle className="mr-1 h-4 w-4" />
@@ -272,6 +290,15 @@ const Activation = () => {
             </div>
           </div>
         </section>
+
+        {/* Checkout Form Modal */}
+        {showCheckout && selectedPackage && (
+          <CheckoutForm
+            packageData={selectedPackage}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
+          />
+        )}
       </div>
     </StoreLayout>
   );
