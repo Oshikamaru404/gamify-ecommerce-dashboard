@@ -79,7 +79,7 @@ const AdminLayout = () => {
       >
         <div className="mb-6 flex items-center justify-center py-2">
           <Link to="/admin" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">GamsGo Admin</span>
+            <span className="text-xl font-bold text-primary">IPTV Admin</span>
           </Link>
         </div>
 

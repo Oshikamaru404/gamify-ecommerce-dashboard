@@ -3,8 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MessageCircle } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const StoreFooter: React.FC = () => {
+  const { t } = useLanguage();
+  
   const handleTryNow = () => {
     const message = "Bonjour, je souhaite essayer vos services BWIVOX IPTV. Pouvez-vous m'aider?";
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
@@ -26,7 +29,7 @@ const StoreFooter: React.FC = () => {
               className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
             >
               <MessageCircle className="mr-2" size={16} />
-              Try Now
+              {t.tryNow}
             </Button>
           </div>
           <div>

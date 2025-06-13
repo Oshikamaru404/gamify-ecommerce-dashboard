@@ -14,7 +14,8 @@ import { Language, getLanguageName, getLanguageFlag } from '@/lib/translations';
 const LanguageSelector: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
 
-  const languages: Language[] = ['fr', 'en', 'es', 'ar', 'de'];
+  // Ordered languages: English, French, Spanish, German, Italian, Arabic
+  const languages: Language[] = ['en', 'fr', 'es', 'de', 'it', 'ar'];
 
   return (
     <DropdownMenu>
