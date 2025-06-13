@@ -1,145 +1,175 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  CheckCircle, 
-  Star, 
-  ArrowRight, 
-  MessageCircle
-} from 'lucide-react';
+import { Check, Star, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
 interface ProductSubscriptionCardProps {
-  package: any;
+  package: IPTVPackage;
   featured?: boolean;
-  onBuyNow?: (packageData: any) => void;
 }
 
 const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({ 
   package: pkg, 
-  featured = false,
-  onBuyNow 
+  featured = false 
 }) => {
-  const getDurationPrice = (months: number) => {
-    switch (months) {
-      case 1: return pkg.price_1_month;
-      case 3: return pkg.price_3_months;
-      case 6: return pkg.price_6_months;
-      case 12: return pkg.price_12_months;
-      default: return null;
-    }
+  // Generate a URL-friendly slug from the package name
+  const generateSlug = (name: string) => {
+    return name.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .replace(/--+/g, '-')
+      .trim();
   };
 
-  const handleBuyNow = (duration: number, price: number) => {
-    if (onBuyNow) {
-      onBuyNow({
-        id: pkg.id,
-        name: pkg.name,
-        category: pkg.category,
-        price: price,
-        duration: duration
-      });
+  const productSlug = generateSlug(pkg.name);
+
+  // Determine the base price for display (prefer 1-month, fallback to others)
+  const displayPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits;
+
+  const handleGetStarted = () => {
+    // For subscription packages, navigate to product detail page
+    if (pkg.category === 'subscription' || pkg.category === 'activation-player') {
+      // The Link component will handle navigation
     } else {
-      // Fallback to WhatsApp
-      const message = `Hello, I'm interested in ${pkg.name} - ${duration} Month(s) - $${price.toFixed(2)}`;
+      // For other categories, use WhatsApp contact
+      const message = `Hello, I'm interested in ${pkg.name}`;
       const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
   };
 
   return (
-    <Card className={`relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 ${
-      featured ? 'ring-2 ring-yellow-400' : ''
-    }`}>
+    <div className="relative h-full">
       {featured && (
-        <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-yellow-500 text-yellow-900 px-4 py-2 rounded-bl-lg font-semibold flex items-center z-10">
-          <Star className="mr-1 h-4 w-4" />
-          Popular
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+          <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center">
+            <Star className="w-4 h-4 mr-1 fill-current" />
+            Most Popular
+          </Badge>
         </div>
       )}
-      
-      <CardHeader className="text-center pb-2">
-        <div className="text-4xl mb-4">{pkg.icon || '📺'}</div>
-        <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
-        <p className="text-gray-600 mt-2">
-          {pkg.description || 'Premium IPTV service with advanced features'}
-        </p>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
-        {/* Features */}
-        {pkg.features && pkg.features.length > 0 ? (
-          <div className="space-y-3">
-            {pkg.features.slice(0, 4).map((feature: string, index: number) => (
-              <div key={index} className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-gray-700">{feature}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-              <span className="text-sm text-gray-700">HD/4K streaming quality</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-              <span className="text-sm text-gray-700">Multi-device support</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-              <span className="text-sm text-gray-700">24/7 customer support</span>
-            </div>
-          </div>
-        )}
 
-        {/* Pricing Options */}
-        <div className="space-y-3">
-          {[1, 3, 6, 12].map((months) => {
-            const price = getDurationPrice(months);
-            if (!price || price <= 0) return null;
-            
-            return (
+      <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
+        {/* Top Section - Icon (Red Background) - Much Larger */}
+        <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
+          {/* Icon Background Circle - Much Larger */}
+          <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+            {pkg.icon_url ? (
+              <img 
+                src={pkg.icon_url} 
+                alt={pkg.name}
+                className="w-24 h-24 rounded-2xl object-cover shadow-xl"
+                onError={(e) => {
+                  // Fallback to emoji if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'block';
+                }}
+              />
+            ) : null}
+            {pkg.icon && (
               <div 
-                key={months} 
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="text-8xl text-white drop-shadow-lg"
+                style={{ display: pkg.icon_url ? 'none' : 'block' }}
               >
-                <div>
-                  <span className="font-semibold">
-                    {months === 1 ? '1 Month' : `${months} Months`}
-                  </span>
-                  {months > 1 && (
-                    <div className="text-sm text-gray-600">
-                      ${(price / months).toFixed(2)}/month
-                    </div>
-                  )}
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-lg">${price.toFixed(2)}</div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleBuyNow(months, price)}
-                    className="bg-red-600 hover:bg-red-700 text-white mt-1"
-                  >
-                    Buy Now
-                  </Button>
-                </div>
+                {pkg.icon}
               </div>
-            );
-          })}
+            )}
+            {!pkg.icon && !pkg.icon_url && (
+              <div className="w-16 h-16 bg-white/20 rounded-lg"></div>
+            )}
+          </div>
         </div>
 
-        <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
-          <Link to={`/product/${pkg.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}`}>
-            View Details
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
+        {/* Bottom Section - Content (White Background) */}
+        <div className="flex-1 bg-white p-6 flex flex-col">
+          {/* Package Title */}
+          <h3 className="text-lg font-bold text-gray-900 mb-2 text-center leading-tight">
+            {pkg.name}
+          </h3>
+          
+          {/* Price Display */}
+          <div className="text-center mb-4">
+            <div className="flex items-baseline justify-center">
+              <span className="text-sm text-gray-500 mr-1">€</span>
+              <span className="text-2xl font-bold text-red-600">
+                {displayPrice?.toFixed(2)}
+              </span>
+              <span className="text-sm text-gray-500 ml-1">
+                {pkg.price_1_month ? '/ mois' : ''}
+              </span>
+            </div>
+            {pkg.price_1_month && pkg.price_12_months && (
+              <div className="text-xs text-green-600 font-medium mt-1">
+                Save €{((pkg.price_1_month * 12) - pkg.price_12_months).toFixed(2)} yearly
+              </div>
+            )}
+          </div>
+
+          {/* Package Description */}
+          {pkg.description && (
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+          )}
+
+          {/* Features List */}
+          <div className="space-y-2 mb-6 flex-grow">
+            {pkg.features && pkg.features.length > 0 ? (
+              pkg.features.slice(0, 4).map((feature, index) => (
+                <div key={index} className="flex items-start">
+                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  </div>
+                  <span className="text-gray-700 text-xs leading-relaxed">{feature}</span>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  </div>
+                  <span className="text-gray-700 text-xs leading-relaxed">4K Premium Technology</span>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  </div>
+                  <span className="text-gray-700 text-xs leading-relaxed">8000+ Channels</span>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  </div>
+                  <span className="text-gray-700 text-xs leading-relaxed">VOD Library</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Call to Action Button */}
+          <div className="mt-auto">
+            {(pkg.category === 'subscription' || pkg.category === 'activation-player') ? (
+              <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
+                <Link to={`/product/${productSlug}`}>
+                  Get Started Now
+                </Link>
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleGetStarted}
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl"
+              >
+                Get Started Now
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
