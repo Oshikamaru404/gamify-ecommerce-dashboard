@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -36,6 +35,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import OrderDetailModal from '@/components/admin/OrderDetailModal';
 
 // Define order interface with correct database column names
 interface Order {
@@ -63,6 +63,8 @@ const Orders = () => {
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -151,6 +153,16 @@ const Orders = () => {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
   };
   
   // Filter orders based on search term and filters
@@ -407,7 +419,11 @@ const Orders = () => {
                         <TableCell className="text-right font-medium">€{order.amount.toFixed(2)}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewOrder(order)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button variant="outline" size="sm">
@@ -501,6 +517,13 @@ const Orders = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Order Detail Modal */}
+      <OrderDetailModal
+        order={selectedOrder}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };
