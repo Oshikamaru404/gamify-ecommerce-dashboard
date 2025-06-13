@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { IPTVPackage, useCreateIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
+import ImageUploader from './ImageUploader';
 
 type PackageDialogProps = {
   open: boolean;
@@ -172,16 +174,12 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="icon_url">Icon Image URL</Label>
-            <Input
-              id="icon_url"
-              value={formData.icon_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, icon_url: e.target.value }))}
-              placeholder="https://example.com/icon.png"
-            />
-            <p className="text-sm text-gray-500 mt-1">Optional: Image URL that will be used instead of emoji if provided</p>
-          </div>
+          {/* Image Upload Section */}
+          <ImageUploader
+            currentImageUrl={formData.icon_url}
+            onImageUrlChange={(url) => setFormData(prev => ({ ...prev, icon_url: url }))}
+            label="Package Image"
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div>

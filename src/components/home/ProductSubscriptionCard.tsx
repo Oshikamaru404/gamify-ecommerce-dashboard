@@ -46,19 +46,23 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
           {/* Icon Background Circle - Much Larger */}
           <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+            {/* Image URL takes priority over emoji */}
             {pkg.icon_url ? (
               <img 
                 src={pkg.icon_url} 
                 alt={pkg.name}
                 className="w-24 h-24 rounded-2xl object-cover shadow-xl"
                 onError={(e) => {
-                  // Fallback to emoji if image fails to load
+                  console.error('Failed to load image:', pkg.icon_url);
+                  // Hide the image and show fallback
                   e.currentTarget.style.display = 'none';
                   const fallback = e.currentTarget.nextElementSibling as HTMLElement;
                   if (fallback) fallback.style.display = 'block';
                 }}
               />
             ) : null}
+            
+            {/* Emoji fallback - show if no image URL or if image fails to load */}
             {pkg.icon && (
               <div 
                 className="text-8xl text-white drop-shadow-lg"
@@ -67,8 +71,12 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
                 {pkg.icon}
               </div>
             )}
+            
+            {/* Default fallback if neither image nor emoji */}
             {!pkg.icon && !pkg.icon_url && (
-              <div className="w-16 h-16 bg-white/20 rounded-lg"></div>
+              <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center">
+                <span className="text-white text-2xl">📺</span>
+              </div>
             )}
           </div>
         </div>
@@ -88,7 +96,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
                 {displayPrice?.toFixed(2)}
               </span>
               <span className="text-sm text-gray-500 ml-1">
-                {pkg.price_1_month ? '/ mois' : ''}
+                {pkg.price_1_month ? '/ mois' : pkg.price_10_credits ? '/ 10 credits' : ''}
               </span>
             </div>
             {pkg.price_1_month && pkg.price_12_months && (
@@ -138,10 +146,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             )}
           </div>
 
-          {/* View Details Button - Only navigation to product details */}
+          {/* View Details Button - Fixed route path */}
           <div className="mt-auto">
             <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-              <Link to={`/product/${productSlug}`}>
+              <Link to={`/products/${productSlug}`}>
                 View Details
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
