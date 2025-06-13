@@ -539,7 +539,11 @@ export const translations = {
     feedbackDeleted: 'تم حذف جميع التعليقات المعتمدة بنجاح.',
     salesReset: 'تم إعادة تعيين مبيعات المنتجات إلى الصفر بنجاح.',
   },
-};
+} as const;
+
+// Type definitions
+export type Language = keyof typeof translations;
+export type Translations = typeof translations[Language];
 
 export const languageNames = {
   en: 'English',
@@ -552,3 +556,8 @@ export const languageNames = {
 
 // Ordered list for language selector (English, French, Spanish, German, Italian, Arabic)
 export const orderedLanguages = ['en', 'fr', 'es', 'de', 'it', 'ar'] as const;
+
+// Helper function to get translations for a specific language
+export const getTranslation = (language: Language): Translations => {
+  return translations[language];
+};
