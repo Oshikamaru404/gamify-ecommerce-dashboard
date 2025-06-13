@@ -85,6 +85,11 @@ const StoreFooter: React.FC = () => {
                   Refund Policy
                 </Link>
               </li>
+              <li>
+                <Link to="/privacy-policy" className="text-gray-600 hover:text-red-600 transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

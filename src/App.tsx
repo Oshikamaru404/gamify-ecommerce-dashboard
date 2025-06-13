@@ -19,6 +19,7 @@ import HowToBuy from '@/pages/HowToBuy';
 import Support from '@/pages/Support';
 import Blog from '@/pages/Blog';
 import RefundPolicy from '@/pages/RefundPolicy';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import NotFound from '@/pages/NotFound';
 import FeedbackSubmission from '@/pages/FeedbackSubmission';
 
@@ -69,6 +70,7 @@ function App() {
                 <Route path="/support" element={<Support />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/feedback" element={<FeedbackSubmission />} />
 
                 {/* Admin Routes */}
