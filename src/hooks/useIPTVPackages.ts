@@ -86,9 +86,16 @@ export const useUpdateIPTVPackage = () => {
     mutationFn: async ({ id, ...packageData }: Partial<IPTVPackage> & { id: string }) => {
       console.log('Updating IPTV package:', id, packageData);
       
+      // Remove undefined values to avoid database errors
+      const cleanData = Object.fromEntries(
+        Object.entries(packageData).filter(([_, value]) => value !== undefined)
+      );
+      
+      console.log('Clean update data:', cleanData);
+      
       const { data, error } = await supabase
         .from('iptv_packages')
-        .update(packageData)
+        .update(cleanData)
         .eq('id', id)
         .select()
         .single();

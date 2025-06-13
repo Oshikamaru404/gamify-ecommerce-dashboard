@@ -137,33 +137,63 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
     }
   };
 
+  const renderIcon = () => {
+    if (pkg.icon_url) {
+      return (
+        <img 
+          src={pkg.icon_url} 
+          alt={pkg.name}
+          className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+          onError={(e) => {
+            // If image fails to load, hide it and show fallback
+            e.currentTarget.style.display = 'none';
+            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+            if (fallback) fallback.style.display = 'flex';
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
+  const renderFallbackIcon = () => {
+    const iconDisplay = pkg.icon_url ? 'none' : 'flex';
+    
+    if (pkg.icon) {
+      return (
+        <div 
+          className="w-12 h-12 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-2xl"
+          style={{ display: iconDisplay }}
+        >
+          {pkg.icon}
+        </div>
+      );
+    }
+    
+    // Default icon based on category
+    const defaultIcon = pkg.category === 'subscription' ? '📺' : 
+                       pkg.category === 'panel-iptv' ? '🖥️' :
+                       pkg.category === 'player' ? '🎮' :
+                       pkg.category === 'activation-player' ? '👑' : '📦';
+    
+    return (
+      <div 
+        className="w-12 h-12 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-2xl"
+        style={{ display: iconDisplay }}
+      >
+        {defaultIcon}
+      </div>
+    );
+  };
+
   return (
     <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-red-500">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="flex-shrink-0">
-              {pkg.icon_url ? (
-                <img 
-                  src={pkg.icon_url} 
-                  alt={pkg.name}
-                  className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                  onError={(e) => {
-                    // Fallback to emoji if image fails to load
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'block';
-                  }}
-                />
-              ) : null}
-              {pkg.icon && (
-                <span 
-                  className="text-2xl block" 
-                  style={{ display: pkg.icon_url ? 'none' : 'block' }}
-                >
-                  {pkg.icon}
-                </span>
-              )}
+            <div className="flex-shrink-0 relative">
+              {renderIcon()}
+              {renderFallbackIcon()}
             </div>
             <div className="flex-1 min-w-0">
               <CardTitle className="text-lg text-gray-900 break-words leading-tight">
