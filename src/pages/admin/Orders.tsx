@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -32,85 +31,71 @@ import {
   FileText,
   ShoppingCart 
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-// Real IPTV orders data
-const iptvOrders = [
-  {
-    id: 'IPTV-2024-001',
-    customerName: 'Ahmed Hassan',
-    customerEmail: 'ahmed.hassan@gmail.com',
-    packageName: 'PROMAX 4K IPTV ⚡',
-    credits: 25,
-    amount: 15.99,
-    status: 'delivered',
-    paymentStatus: 'paid',
-    createdAt: '2024-06-10T14:30:00Z'
-  },
-  {
-    id: 'IPTV-2024-002',
-    customerName: 'Sophie Martin',
-    customerEmail: 'sophie.martin@hotmail.fr',
-    packageName: 'TIVIONE 4K IPTV 📺',
-    credits: 50,
-    amount: 29.99,
-    status: 'processing',
-    paymentStatus: 'paid',
-    createdAt: '2024-06-11T09:15:00Z'
-  },
-  {
-    id: 'IPTV-2024-003',
-    customerName: 'Mohamed Benali',
-    customerEmail: 'm.benali@yahoo.com',
-    packageName: 'STRONG 8K IPTV 🚀',
-    credits: 100,
-    amount: 49.99,
-    status: 'shipped',
-    paymentStatus: 'paid',
-    createdAt: '2024-06-11T11:45:00Z'
-  },
-  {
-    id: 'IPTV-2024-004',
-    customerName: 'Elena Rodriguez',
-    customerEmail: 'elena.rodriguez@gmail.com',
-    packageName: 'B1G 4K IPTV 🎬',
-    credits: 10,
-    amount: 9.99,
-    status: 'pending',
-    paymentStatus: 'pending',
-    createdAt: '2024-06-11T16:20:00Z'
-  },
-  {
-    id: 'IPTV-2024-005',
-    customerName: 'Jean-Pierre Dubois',
-    customerEmail: 'jp.dubois@orange.fr',
-    packageName: 'TREX 8K IPTV 🦖',
-    credits: 25,
-    amount: 19.99,
-    status: 'delivered',
-    paymentStatus: 'paid',
-    createdAt: '2024-06-09T13:10:00Z'
-  }
-];
+// Define order interface
+interface Order {
+  id: string;
+  customer_name: string;
+  customer_email: string;
+  package_name: string;
+  amount: number;
+  status: string;
+  payment_status: string;
+  created_at: string;
+}
 
 const ORDERS_PER_PAGE = 10;
 
 const Orders = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch orders',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Filter orders based on search term and filters
-  const filteredOrders = iptvOrders.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchesSearch = 
       searchTerm === '' || 
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.packageName.toLowerCase().includes(searchTerm.toLowerCase());
+      order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.package_name.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    const matchesPayment = paymentFilter === 'all' || order.paymentStatus === paymentFilter;
+    const matchesPayment = paymentFilter === 'all' || order.payment_status === paymentFilter;
     
     return matchesSearch && matchesStatus && matchesPayment;
   });
@@ -171,6 +156,14 @@ const Orders = () => {
     setPaymentFilter('all');
     setCurrentPage(1);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
@@ -192,6 +185,7 @@ const Orders = () => {
           </div>
         </CardHeader>
         <CardContent className="p-6">
+          
           <div className="mb-6 flex flex-col gap-4 lg:flex-row">
             <div className="flex-1">
               <div className="relative">
@@ -244,7 +238,6 @@ const Orders = () => {
                     <TableHead>Order ID</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Package</TableHead>
-                    <TableHead>Credits</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Payment</TableHead>
@@ -257,25 +250,23 @@ const Orders = () => {
                       <TableCell className="font-medium">{order.id}</TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{order.customerName}</div>
-                          <div className="text-xs text-muted-foreground">{order.customerEmail}</div>
+                          <div className="font-medium">{order.customer_name}</div>
+                          <div className="text-xs text-muted-foreground">{order.customer_email}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">{order.packageName}</div>
+                        <div className="font-medium">{order.package_name}</div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{order.credits} Credits</Badge>
-                      </TableCell>
-                      <TableCell>{formatDate(order.createdAt)}</TableCell>
+                      <TableCell>{formatDate(order.created_at)}</TableCell>
                       <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
-                      <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
+                      <TableCell>{getPaymentStatusBadge(order.payment_status)}</TableCell>
                       <TableCell className="text-right">€{order.amount.toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
 
+              
               {totalPages > 1 && (
                 <div className="mt-6 flex justify-center">
                   <Pagination>

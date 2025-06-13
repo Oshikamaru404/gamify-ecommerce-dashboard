@@ -1,131 +1,92 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Settings, Menu, X, LogOut, Edit3 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  LayoutDashboard, 
+  ShoppingCart, 
+  Package, 
+  Settings, 
+  LogOut,
+  FileText
+} from 'lucide-react';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-
-  const sidebarItems = [
-    {
-      icon: <LayoutDashboard size={20} />,
-      label: 'Dashboard',
-      path: '/admin',
-    },
-    {
-      icon: <ShoppingCart size={20} />,
-      label: 'Orders',
-      path: '/admin/orders',
-    },
-    {
-      icon: <Package size={20} />,
-      label: 'Products',
-      path: '/admin/products',
-    },
-    {
-      icon: <Edit3 size={20} />,
-      label: 'Content Editor',
-      path: '/admin/content',
-    },
-    {
-      icon: <Settings size={20} />,
-      label: 'Settings',
-      path: '/admin/settings',
-    },
-  ];
-
-  const isPathActive = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === path;
-    }
-    return location.pathname.startsWith(path);
-  };
+  const { adminUser, logout } = useAdminAuth();
+  const { toast } = useToast();
 
   const handleLogout = () => {
-    // In a real application, this would handle logout logic
-    navigate('/');
+    logout();
+    toast({
+      title: 'Logged Out',
+      description: 'You have been successfully logged out.',
+    });
+    navigate('/admin/login');
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const navigation = [
+    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+    { name: 'Products', href: '/admin/products', icon: Package },
+    { name: 'Content', href: '/admin/content', icon: FileText },
+    { name: 'Settings', href: '/admin/settings', icon: Settings },
+  ];
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Mobile Sidebar Toggle */}
-      <div className="absolute left-4 top-4 z-50 block md:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="h-10 w-10 rounded-full bg-background"
-        >
-          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-        </Button>
-      </div>
-
-      {/* Sidebar */}
-      <div
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-y-auto border-r bg-sidebar px-4 pt-16 transition-transform md:relative md:translate-x-0 md:pt-4",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="mb-6 flex items-center justify-center py-2">
-          <Link to="/admin" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">IPTV Admin</span>
-          </Link>
-        </div>
-
-        <div className="flex flex-1 flex-col gap-1">
-          {sidebarItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "admin-sidebar-item",
-                isPathActive(item.path) && "active"
-              )}
+    <AdminProtectedRoute>
+      <div className="flex h-screen bg-gray-100">
+        {/* Sidebar */}
+        <div className="w-64 bg-white shadow-lg">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-red-600">BWIVOX Admin</h1>
+            <p className="text-sm text-gray-600 mt-1">Welcome, {adminUser?.username}</p>
+          </div>
+          
+          <nav className="mt-6">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center px-6 py-3 text-sm font-medium ${
+                    isActive
+                      ? 'bg-red-50 text-red-600 border-r-2 border-red-600'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+          
+          <div className="absolute bottom-0 w-64 p-6">
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center"
             >
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          ))}
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
 
-        <div className="mb-4 mt-auto border-t pt-4">
-          <Link to="/" className="admin-sidebar-item">
-            <span>View Store</span>
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="admin-sidebar-item w-full text-left"
-          >
-            <LogOut size={20} />
-            <span>Logout</span>
-          </button>
+        {/* Main content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-y-auto p-6">
+            <Outlet />
+          </main>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <Outlet />
-      </div>
-
-      {/* Backdrop for mobile */}
-      {sidebarOpen && isMobile && (
-        <div
-          className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-    </div>
+    </AdminProtectedRoute>
   );
 };
 
