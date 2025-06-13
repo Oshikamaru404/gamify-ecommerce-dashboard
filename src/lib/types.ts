@@ -1,3 +1,4 @@
+
 export type Platform = 'pc' | 'playstation' | 'xbox' | 'nintendo' | 'mobile' | 'iptv';
 
 export type Product = {
@@ -25,30 +26,22 @@ export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | '
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 export type PaymentMethod = 'cod' | 'credit_card' | 'paypal';
 
+// Updated Order type to match the database structure
 export type Order = {
   id: string;
-  customerId: string;
   customerName: string;
   customerEmail: string;
-  customerPhone: string;
-  items: CartItem[];
-  shippingAddress: {
-    address: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
+  customerPhone?: string;
+  customerWhatsapp?: string;
+  packageName: string;
+  packageCategory: string;
+  durationMonths: number;
+  orderType: string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
-  paymentMethod: PaymentMethod;
-  subtotal: number;
-  tax: number;
-  shipping: number;
   total: number;
-  notes?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 };
 
 export type Metric = {

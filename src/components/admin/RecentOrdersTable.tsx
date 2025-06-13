@@ -75,12 +75,12 @@ const RecentOrdersTable: React.FC<RecentOrdersTableProps> = ({ orders, className
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.id}>
-              <TableCell className="font-medium">{order.id}</TableCell>
+              <TableCell className="font-medium">{order.id.slice(0, 8)}...</TableCell>
               <TableCell>{order.customerName}</TableCell>
               <TableCell>{formatDate(order.createdAt)}</TableCell>
               <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
               <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
-              <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+              <TableCell className="text-right">€{order.total.toFixed(2)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
