@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,19 +15,15 @@ import {
   Clock,
   CheckCircle,
   Star,
-  ArrowRight,
-  MessageCircle
+  ArrowRight
 } from 'lucide-react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import CheckoutForm from '@/components/CheckoutForm';
 
 const Activation = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
-  const [selectedPackage, setSelectedPackage] = useState<any>(null);
-  const [showCheckout, setShowCheckout] = useState(false);
 
   console.log('Activation page - packages:', packages);
 
@@ -38,25 +34,12 @@ const Activation = () => {
 
   console.log('Activation page - filtered activation packages:', activationPackages);
 
-  const handleBuyNow = (packageItem: any, duration: number, price: number) => {
-    setSelectedPackage({
-      id: packageItem.id,
-      name: packageItem.name,
-      category: packageItem.category,
-      price: price,
-      duration: duration
-    });
-    setShowCheckout(true);
-  };
-
-  const handleCloseCheckout = () => {
-    setShowCheckout(false);
-    setSelectedPackage(null);
-  };
-
-  const handleOrderSuccess = () => {
-    // Optional: Add any success handling here
-    console.log('Order submitted successfully');
+  const generateSlug = (name: string) => {
+    return name.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .replace(/--+/g, '-')
+      .trim();
   };
 
   const getDurationPrice = (pkg: any, months: number) => {
@@ -159,98 +142,82 @@ const Activation = () => {
 
             {activationPackages.length > 0 ? (
               <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
-                {activationPackages.map((pkg, index) => (
-                  <Card key={pkg.id} className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
-                    {pkg.status === 'featured' && (
-                      <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-yellow-500 text-yellow-900 px-4 py-2 rounded-bl-lg font-semibold flex items-center">
-                        <Star className="mr-1 h-4 w-4" />
-                        Popular
-                      </div>
-                    )}
-                    
-                    <CardHeader className="text-center pb-2">
-                      <div className="text-4xl mb-4">{pkg.icon || '🚀'}</div>
-                      <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
-                      <p className="text-gray-600 mt-2">
-                        {pkg.description || 'Professional device activation with premium support'}
-                      </p>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-6">
-                      {/* Features */}
-                      {pkg.features && pkg.features.length > 0 ? (
-                        <div className="space-y-3">
-                          {pkg.features.slice(0, 4).map((feature: string, featureIndex: number) => (
-                            <div key={featureIndex} className="flex items-start gap-3">
-                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                              <span className="text-sm text-gray-700">{feature}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="flex items-start gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                            <span className="text-sm text-gray-700">Professional device setup</span>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                            <span className="text-sm text-gray-700">Multi-platform compatibility</span>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                            <span className="text-sm text-gray-700">24/7 technical support</span>
-                          </div>
+                {activationPackages.map((pkg, index) => {
+                  const productSlug = generateSlug(pkg.name);
+                  
+                  return (
+                    <Card key={pkg.id} className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      {pkg.status === 'featured' && (
+                        <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-yellow-500 text-yellow-900 px-4 py-2 rounded-bl-lg font-semibold flex items-center">
+                          <Star className="mr-1 h-4 w-4" />
+                          Popular
                         </div>
                       )}
-
-                      {/* 12 Month Pricing Only */}
-                      <div className="space-y-3">
-                        {(() => {
-                          const months = 12;
-                          const price = getDurationPrice(pkg, months);
-                          
-                          return (
-                            <div className="flex items-center justify-between p-4 border-2 border-green-500 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
-                              <div>
-                                <span className="font-semibold text-lg">
-                                  12 Months Plan
-                                </span>
-                                <Badge className="ml-2 bg-green-600 text-white">
-                                  Best Value
-                                </Badge>
-                                <div className="text-sm text-gray-600">
-                                  ${(price / months).toFixed(2)}/month
-                                </div>
-                                <div className="text-xs text-green-700 font-medium">
-                                  Annual subscription - Maximum savings!
-                                </div>
+                      
+                      <CardHeader className="text-center pb-2">
+                        <div className="text-4xl mb-4">{pkg.icon || '🚀'}</div>
+                        <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
+                        <p className="text-gray-600 mt-2">
+                          {pkg.description || 'Professional device activation with premium support'}
+                        </p>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-6">
+                        {/* Features */}
+                        {pkg.features && pkg.features.length > 0 ? (
+                          <div className="space-y-3">
+                            {pkg.features.slice(0, 4).map((feature: string, featureIndex: number) => (
+                              <div key={featureIndex} className="flex items-start gap-3">
+                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{feature}</span>
                               </div>
-                              <div className="text-right">
-                                <div className="font-bold text-xl text-green-700">${price.toFixed(2)}</div>
-                                <Button
-                                  size="default"
-                                  onClick={() => handleBuyNow(pkg, months, price)}
-                                  className="bg-green-600 hover:bg-green-700 text-white mt-2"
-                                >
-                                  <MessageCircle className="mr-1 h-4 w-4" />
-                                  Buy Now
-                                </Button>
-                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                              <span className="text-sm text-gray-700">Professional device setup</span>
                             </div>
-                          );
-                        })()}
-                      </div>
+                            <div className="flex items-start gap-3">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                              <span className="text-sm text-gray-700">Multi-platform compatibility</span>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                              <span className="text-sm text-gray-700">24/7 technical support</span>
+                            </div>
+                          </div>
+                        )}
 
-                      <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
-                        <Link to={`/product/${pkg.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}`}>
-                          View Details
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                        {/* Pricing Info */}
+                        <div className="bg-green-50 p-4 rounded-lg border-2 border-green-500">
+                          <div className="text-center">
+                            <div className="text-lg font-semibold text-green-700 mb-1">
+                              12 Months Plan
+                            </div>
+                            <Badge className="bg-green-600 text-white mb-2">
+                              Best Value
+                            </Badge>
+                            <div className="text-2xl font-bold text-green-700">
+                              ${getDurationPrice(pkg, 12).toFixed(2)}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              ${(getDurationPrice(pkg, 12) / 12).toFixed(2)}/month
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
+                          <Link to={`/product/${productSlug}`}>
+                            View Details & Purchase
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
@@ -290,15 +257,6 @@ const Activation = () => {
             </div>
           </div>
         </section>
-
-        {/* Checkout Form Modal */}
-        {showCheckout && selectedPackage && (
-          <CheckoutForm
-            packageData={selectedPackage}
-            onClose={handleCloseCheckout}
-            onSuccess={handleOrderSuccess}
-          />
-        )}
       </div>
     </StoreLayout>
   );

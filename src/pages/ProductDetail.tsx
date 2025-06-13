@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Check, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Star, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import StoreLayout from '@/components/store/StoreLayout';
+import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
@@ -12,6 +13,7 @@ const ProductDetail = () => {
   const { productId } = useParams();
   const { t } = useLanguage();
   const [selectedDuration, setSelectedDuration] = useState(1);
+  const [showCheckout, setShowCheckout] = useState(false);
   const { data: packages, isLoading } = useIPTVPackages();
 
   console.log('ProductDetail - productId:', productId);
@@ -175,9 +177,16 @@ const ProductDetail = () => {
   const selectedDurationData = durations.find(d => d.months === validSelectedDuration) || durations[0];
 
   const handlePurchase = () => {
-    const message = `Hello, I'm interested in ${product.name} - ${selectedDurationData.months} Month(s) - $${selectedDurationData.price?.toFixed(2)}`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    setShowCheckout(true);
+  };
+
+  const handleCloseCheckout = () => {
+    setShowCheckout(false);
+  };
+
+  const handleOrderSuccess = () => {
+    console.log('Order submitted successfully');
+    setShowCheckout(false);
   };
 
   return (
@@ -287,16 +296,30 @@ const ProductDetail = () => {
 
                 <Button 
                   onClick={handlePurchase}
-                  className="w-full mt-6 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4"
+                  className="w-full mt-6 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white h-14 text-lg font-semibold lg:h-16 lg:text-xl"
                   size="lg"
                 >
-                  <MessageCircle className="mr-2" size={20} />
                   Buy Now
                 </Button>
               </Card>
             </div>
           </div>
         </div>
+
+        {/* Checkout Form Modal */}
+        {showCheckout && (
+          <CheckoutForm
+            packageData={{
+              id: product.id,
+              name: product.name,
+              category: product.category,
+              price: selectedDurationData.price!,
+              duration: selectedDurationData.months
+            }}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
+          />
+        )}
       </div>
     </StoreLayout>
   );
