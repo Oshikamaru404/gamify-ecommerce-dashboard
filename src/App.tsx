@@ -1,87 +1,92 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
 
-// Language Provider
-import { LanguageProvider } from "@/contexts/LanguageContext";
-import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
+// Public Pages
+import Index from '@/pages/Index';
+import Home from '@/pages/Home';
+import Products from '@/pages/Products';
+import ProductDetail from '@/pages/ProductDetail';
+import Cart from '@/pages/Cart';
+import Checkout from '@/pages/Checkout';
+import Subscription from '@/pages/Subscription';
+import Activation from '@/pages/Activation';
+import Reseller from '@/pages/Reseller';
+import IPTVPanel from '@/pages/IPTVPanel';
+import PlayerPanel from '@/pages/PlayerPanel';
+import HowToBuy from '@/pages/HowToBuy';
+import Support from '@/pages/Support';
+import Blog from '@/pages/Blog';
+import RefundPolicy from '@/pages/RefundPolicy';
+import NotFound from '@/pages/NotFound';
+import FeedbackSubmission from '@/pages/FeedbackSubmission';
 
-// IPTV Service Routes
-import Home from "./pages/Home";
-import Subscription from "./pages/Subscription";
-import Activation from "./pages/Activation";
-import Reseller from "./pages/Reseller";
-import IPTVPanel from "./pages/IPTVPanel";
-import PlayerPanel from "./pages/PlayerPanel";
-import Support from "./pages/Support";
-import HowToBuy from "./pages/HowToBuy";
-import Blog from "./pages/Blog";
-import ProductDetail from "./pages/ProductDetail";
-import RefundPolicy from "./pages/RefundPolicy";
-import FeedbackSubmission from "./pages/FeedbackSubmission";
+// Admin Pages
+import AdminLogin from '@/pages/admin/AdminLogin';
+import AdminLayout from '@/layouts/AdminLayout';
+import Dashboard from '@/pages/admin/Dashboard';
+import Orders from '@/pages/admin/Orders';
+import ManageProducts from '@/pages/admin/ManageProducts';
+import EditProduct from '@/pages/admin/EditProduct';
+import Content from '@/pages/admin/Content';
+import Settings from '@/pages/admin/Settings';
 
-// Admin Routes
-import AdminLayout from "./layouts/AdminLayout";
-import AdminLogin from "./pages/admin/AdminLogin";
-import Dashboard from "./pages/admin/Dashboard";
-import Orders from "./pages/admin/Orders";
-import ManageProducts from "./pages/admin/ManageProducts";
-import EditProduct from "./pages/admin/EditProduct";
-import Settings from "./pages/admin/Settings";
-import ContentEditor from "./components/admin/ContentEditor";
-
-import NotFound from "./pages/NotFound";
+// Contexts
+import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
+import { StoreProvider } from '@/contexts/StoreContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AdminAuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* IPTV Service Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/subscription" element={<Subscription />} />
-              <Route path="/product/:productId" element={<ProductDetail />} />
-              <Route path="/activation" element={<Activation />} />
-              <Route path="/reseller" element={<Reseller />} />
-              <Route path="/iptv-panel" element={<IPTVPanel />} />
-              <Route path="/player-panel" element={<PlayerPanel />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/how-to-buy" element={<HowToBuy />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/feedback" element={<FeedbackSubmission />} />
-              
-              {/* Admin Authentication */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="orders" element={<Orders />} />
-                <Route path="products" element={<ManageProducts />} />
-                <Route path="products/new" element={<EditProduct />} />
-                <Route path="products/edit/:id" element={<EditProduct />} />
-                <Route path="content" element={<ContentEditor />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <StoreProvider>
+          <LanguageProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/:slug" element={<ProductDetail />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/subscription" element={<Subscription />} />
+                <Route path="/activation" element={<Activation />} />
+                <Route path="/reseller" element={<Reseller />} />
+                <Route path="/iptv-panel" element={<IPTVPanel />} />
+                <Route path="/player-panel" element={<PlayerPanel />} />
+                <Route path="/how-to-buy" element={<HowToBuy />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/feedback" element={<FeedbackSubmission />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="orders" element={<Orders />} />
+                  <Route path="products" element={<ManageProducts />} />
+                  <Route path="products/edit/:id" element={<EditProduct />} />
+                  <Route path="content" element={<Content />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
+
+                {/* 404 Page */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            <Toaster />
+          </LanguageProvider>
+        </StoreProvider>
       </AdminAuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;

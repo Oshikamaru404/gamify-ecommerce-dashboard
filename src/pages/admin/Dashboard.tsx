@@ -11,18 +11,21 @@ import {
   Users, 
   TrendingUp, 
   Database,
-  RefreshCw 
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { useRecentOrders } from '@/hooks/useRecentOrders';
 import { seedOrders } from '@/lib/seedOrders';
 import { useToast } from '@/hooks/use-toast';
 import { Metric } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
   const { data: dashboardData, isLoading: metricsLoading, refetch: refetchMetrics } = useDashboardMetrics();
   const { data: recentOrders, isLoading: ordersLoading, refetch: refetchOrders } = useRecentOrders();
   const [seeding, setSeeding] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const { toast } = useToast();
 
   // Transform dashboard data into metrics format
@@ -88,6 +91,53 @@ const Dashboard = () => {
     }
   };
 
+  const handleResetOrders = async () => {
+    if (!confirm('Are you sure you want to delete ALL orders and reset sales data to zero? This action cannot be undone!')) {
+      return;
+    }
+
+    setResetting(true);
+    try {
+      // Delete all orders
+      const { error: ordersError } = await supabase
+        .from('orders')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all orders
+
+      if (ordersError) {
+        throw ordersError;
+      }
+
+      // Reset dashboard metrics to zero
+      const { error: metricsError } = await supabase
+        .from('dashboard_metrics')
+        .update({ metric_value: 0 })
+        .in('metric_name', ['total_revenue', 'total_orders', 'active_subscriptions', 'new_customers']);
+
+      if (metricsError) {
+        throw metricsError;
+      }
+
+      toast({
+        title: 'Success',
+        description: 'All orders deleted and sales data reset to zero',
+      });
+
+      // Refresh the data
+      refetchMetrics();
+      refetchOrders();
+    } catch (error) {
+      console.error('Error resetting orders:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reset orders and sales data',
+        variant: 'destructive',
+      });
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const handleRefresh = () => {
     refetchMetrics();
     refetchOrders();
@@ -111,6 +161,15 @@ const Dashboard = () => {
           >
             <Database className="h-4 w-4" />
             {seeding ? 'Seeding...' : 'Seed Sample Orders'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleResetOrders}
+            disabled={resetting}
+            className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+            {resetting ? 'Resetting...' : 'Reset All Orders'}
           </Button>
           <Button
             variant="outline"
