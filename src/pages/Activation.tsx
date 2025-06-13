@@ -43,22 +43,9 @@ const Activation = () => {
 
   const getDurationPrice = (pkg: any, months: number) => {
     switch (months) {
-      case 1: return pkg.price_1_month || 49.99;
-      case 3: return pkg.price_3_months || (pkg.price_1_month || 49.99) * 3 * 0.9;
-      case 6: return pkg.price_6_months || (pkg.price_1_month || 49.99) * 6 * 0.85;
       case 12: return pkg.price_12_months || (pkg.price_1_month || 49.99) * 12 * 0.75;
       default: return 49.99;
     }
-  };
-
-  const getDiscount = (pkg: any, months: number) => {
-    if (months === 1) return 0;
-    
-    const monthlyPrice = pkg.price_1_month || 49.99;
-    const totalPrice = getDurationPrice(pkg, months);
-    const regularTotal = monthlyPrice * months;
-    
-    return Math.round((1 - (totalPrice / regularTotal)) * 100);
   };
 
   const deviceTypes = [
@@ -199,33 +186,34 @@ const Activation = () => {
                         </div>
                       )}
 
-                      {/* Pricing Options */}
+                      {/* 12 Month Pricing Only */}
                       <div className="space-y-3">
-                        {[1, 3, 6, 12].map((months) => {
+                        {(() => {
+                          const months = 12;
                           const price = getDurationPrice(pkg, months);
-                          const discount = getDiscount(pkg, months);
                           
                           return (
-                            <div key={months} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center justify-between p-4 border-2 border-green-500 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
                               <div>
-                                <span className="font-semibold">
-                                  {months} Month{months > 1 ? 's' : ''}
+                                <span className="font-semibold text-lg">
+                                  12 Months Plan
                                 </span>
-                                {discount > 0 && (
-                                  <Badge className="ml-2 bg-green-100 text-green-700 text-xs">
-                                    -{discount}% OFF
-                                  </Badge>
-                                )}
+                                <Badge className="ml-2 bg-green-600 text-white">
+                                  Best Value
+                                </Badge>
                                 <div className="text-sm text-gray-600">
                                   ${(price / months).toFixed(2)}/month
                                 </div>
+                                <div className="text-xs text-green-700 font-medium">
+                                  Annual subscription - Maximum savings!
+                                </div>
                               </div>
                               <div className="text-right">
-                                <div className="font-bold text-lg">${price.toFixed(2)}</div>
+                                <div className="font-bold text-xl text-green-700">${price.toFixed(2)}</div>
                                 <Button
-                                  size="sm"
+                                  size="default"
                                   onClick={() => handlePurchase(pkg, months, price)}
-                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                  className="bg-green-600 hover:bg-green-700 text-white mt-2"
                                 >
                                   <MessageCircle className="mr-1 h-4 w-4" />
                                   Buy Now
@@ -233,7 +221,7 @@ const Activation = () => {
                               </div>
                             </div>
                           );
-                        })}
+                        })()}
                       </div>
 
                       <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
