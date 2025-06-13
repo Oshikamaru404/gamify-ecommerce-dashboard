@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
 import FeedbackManagement from '@/components/admin/FeedbackManagement';
+import AdminUtilities from '@/components/admin/AdminUtilities';
 
 // Define metric interface for the dashboard
 interface DashboardMetric {
@@ -164,6 +165,9 @@ const Dashboard = () => {
           </Card>
         ))}
       </div>
+
+      {/* Admin Utilities */}
+      <AdminUtilities />
 
       {/* Package Categories Overview */}
       <div className="grid gap-6 md:grid-cols-2">
