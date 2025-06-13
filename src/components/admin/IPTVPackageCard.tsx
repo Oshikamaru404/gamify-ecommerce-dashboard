@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -142,7 +141,27 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            {pkg.icon && <span className="text-2xl">{pkg.icon}</span>}
+            {pkg.icon_url ? (
+              <img 
+                src={pkg.icon_url} 
+                alt={pkg.name}
+                className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                onError={(e) => {
+                  // Fallback to emoji if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'block';
+                }}
+              />
+            ) : null}
+            {pkg.icon && (
+              <span 
+                className="text-2xl" 
+                style={{ display: pkg.icon_url ? 'none' : 'block' }}
+              >
+                {pkg.icon}
+              </span>
+            )}
             <div>
               <CardTitle className="text-lg text-gray-900">{pkg.name}</CardTitle>
               <div className="flex gap-2 mt-1">

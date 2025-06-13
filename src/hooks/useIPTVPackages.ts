@@ -9,6 +9,7 @@ export type IPTVPackage = {
   category: 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'activation-player';
   description: string | null;
   icon: string | null;
+  icon_url: string | null;
   features: string[] | null;
   price_10_credits: number | null;
   price_25_credits: number | null;

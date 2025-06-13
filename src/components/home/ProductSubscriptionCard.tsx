@@ -58,9 +58,28 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         <div className="h-48 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
           {/* Icon Background Circle */}
           <div className="w-20 h-20 bg-red-400/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-            {pkg.icon ? (
-              <div className="text-4xl text-white drop-shadow-lg">{pkg.icon}</div>
-            ) : (
+            {pkg.icon_url ? (
+              <img 
+                src={pkg.icon_url} 
+                alt={pkg.name}
+                className="w-12 h-12 rounded-lg object-cover shadow-lg"
+                onError={(e) => {
+                  // Fallback to emoji if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'block';
+                }}
+              />
+            ) : null}
+            {pkg.icon && (
+              <div 
+                className="text-4xl text-white drop-shadow-lg"
+                style={{ display: pkg.icon_url ? 'none' : 'block' }}
+              >
+                {pkg.icon}
+              </div>
+            )}
+            {!pkg.icon && !pkg.icon_url && (
               <div className="w-8 h-8 bg-white/20 rounded-lg"></div>
             )}
           </div>
