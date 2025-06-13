@@ -30,7 +30,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       
       // Vérifier si l'utilisateur a déjà une préférence sauvegardée
       const storedLanguage = localStorage.getItem(STORAGE_KEY);
-      if (storedLanguage && ['fr', 'en', 'es', 'ar', 'de', 'it'].includes(storedLanguage)) {
+      if (storedLanguage && ['fr', 'en', 'es', 'ar', 'de'].includes(storedLanguage)) {
         console.log(`💾 Langue sauvegardée trouvée: ${storedLanguage}`);
         setLanguageState(storedLanguage as Language);
         setIsLoading(false);
