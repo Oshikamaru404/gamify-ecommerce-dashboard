@@ -14,20 +14,79 @@ export const useDashboardMetrics = () => {
   return useQuery({
     queryKey: ['dashboard-metrics'],
     queryFn: async () => {
-      console.log('Fetching dashboard metrics from database...');
+      console.log('Calculating dashboard metrics from actual order data...');
       
-      const { data, error } = await supabase
-        .from('dashboard_metrics')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Fetch all orders to calculate metrics
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select('*');
       
       if (error) {
-        console.error('Error fetching dashboard metrics:', error);
+        console.error('Error fetching orders for metrics:', error);
         throw error;
       }
       
-      console.log('Successfully fetched dashboard metrics:', data);
-      return data as DashboardMetric[];
+      // Calculate metrics based on actual order data
+      const paidOrders = orders.filter(order => order.payment_status === 'paid');
+      const refundedOrders = orders.filter(order => order.payment_status === 'refunded');
+      
+      // Calculate total revenue (paid orders minus refunded orders)
+      const totalRevenue = paidOrders.reduce((sum, order) => sum + Number(order.amount), 0) - 
+                          refundedOrders.reduce((sum, order) => sum + Number(order.amount), 0);
+      
+      // Calculate total orders (only count paid orders)
+      const totalOrders = paidOrders.length;
+      
+      // Calculate active subscriptions (subscription category orders that are paid)
+      const activeSubscriptions = paidOrders.filter(order => 
+        order.package_category === 'subscription'
+      ).length;
+      
+      // Calculate new customers (unique customers from paid orders in last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const recentPaidOrders = paidOrders.filter(order => 
+        new Date(order.created_at || '') >= thirtyDaysAgo
+      );
+      
+      const uniqueCustomers = new Set(recentPaidOrders.map(order => order.customer_email));
+      const newCustomers = uniqueCustomers.size;
+      
+      // Return calculated metrics in the expected format
+      const calculatedMetrics: DashboardMetric[] = [
+        {
+          id: '1',
+          metric_name: 'total_revenue',
+          metric_value: totalRevenue,
+          metric_date: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          metric_name: 'total_orders',
+          metric_value: totalOrders,
+          metric_date: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        },
+        {
+          id: '3',
+          metric_name: 'active_subscriptions',
+          metric_value: activeSubscriptions,
+          metric_date: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        },
+        {
+          id: '4',
+          metric_name: 'new_customers',
+          metric_value: newCustomers,
+          metric_date: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      console.log('Successfully calculated dashboard metrics:', calculatedMetrics);
+      return calculatedMetrics;
     },
   });
 };

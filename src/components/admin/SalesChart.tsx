@@ -11,9 +11,10 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-import { salesData } from '@/lib/mockData';
-import { format, subDays, parseISO } from 'date-fns';
+import { format, subDays, parseISO, startOfDay } from 'date-fns';
 import { TimeRange } from '@/lib/types';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 type SalesChartProps = {
   className?: string;
@@ -26,40 +27,102 @@ const SalesChart: React.FC<SalesChartProps> = ({
 }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
   
-  const getFilteredData = () => {
-    const today = new Date();
-    let daysToSubtract: number;
-    
-    switch (timeRange) {
-      case 'day':
-        daysToSubtract = 1;
-        break;
-      case 'week':
-        daysToSubtract = 7;
-        break;
-      case 'month':
-        daysToSubtract = 30;
-        break;
-      case 'year':
-        daysToSubtract = 365;
-        break;
-      default:
-        daysToSubtract = 7;
-    }
-    
-    const startDate = subDays(today, daysToSubtract);
-    return salesData.filter(item => {
-      const itemDate = parseISO(item.date);
-      return itemDate >= startDate;
-    });
-  };
-
-  const data = getFilteredData();
+  const { data: salesData = [], isLoading } = useQuery({
+    queryKey: ['sales-chart-data', timeRange],
+    queryFn: async () => {
+      console.log('Fetching sales data for chart...');
+      
+      const today = new Date();
+      let daysToSubtract: number;
+      
+      switch (timeRange) {
+        case 'day':
+          daysToSubtract = 1;
+          break;
+        case 'week':
+          daysToSubtract = 7;
+          break;
+        case 'month':
+          daysToSubtract = 30;
+          break;
+        case 'year':
+          daysToSubtract = 365;
+          break;
+        default:
+          daysToSubtract = 7;
+      }
+      
+      const startDate = subDays(today, daysToSubtract);
+      
+      // Fetch orders within the date range
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select('*')
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching orders for chart:', error);
+        throw error;
+      }
+      
+      // Group orders by date and calculate revenue
+      const dailySales = new Map<string, { revenue: number; orders: number }>();
+      
+      // Initialize all dates with zero values
+      for (let i = 0; i <= daysToSubtract; i++) {
+        const date = subDays(today, daysToSubtract - i);
+        const dateKey = format(startOfDay(date), 'yyyy-MM-dd');
+        dailySales.set(dateKey, { revenue: 0, orders: 0 });
+      }
+      
+      // Process orders and calculate daily metrics
+      orders.forEach(order => {
+        const orderDate = format(startOfDay(new Date(order.created_at || '')), 'yyyy-MM-dd');
+        const existing = dailySales.get(orderDate) || { revenue: 0, orders: 0 };
+        
+        if (order.payment_status === 'paid') {
+          existing.revenue += Number(order.amount);
+          existing.orders += 1;
+        } else if (order.payment_status === 'refunded') {
+          existing.revenue -= Number(order.amount);
+          existing.orders -= 1;
+        }
+        
+        dailySales.set(orderDate, existing);
+      });
+      
+      // Convert to chart data format
+      const chartData = Array.from(dailySales.entries()).map(([date, data]) => ({
+        date,
+        revenue: data.revenue,
+        orders: data.orders
+      }));
+      
+      console.log('Sales chart data calculated:', chartData);
+      return chartData;
+    },
+  });
 
   const formatDate = (dateStr: string) => {
     const date = parseISO(dateStr);
     return format(date, 'MMM dd');
   };
+
+  if (isLoading) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle className="text-base font-normal">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className={className}>
@@ -78,7 +141,7 @@ const SalesChart: React.FC<SalesChartProps> = ({
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={data}
+              data={salesData}
               margin={{
                 top: 10,
                 right: 30,
@@ -101,13 +164,13 @@ const SalesChart: React.FC<SalesChartProps> = ({
                 tick={{ fontSize: 12 }}
               />
               <YAxis 
-                tickFormatter={(value) => `$${value}`} 
+                tickFormatter={(value) => `€${value}`} 
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 12 }}
               />
               <Tooltip 
-                formatter={(value) => [`$${value}`, 'Revenue']}
+                formatter={(value) => [`€${value}`, 'Revenue']}
                 labelFormatter={formatDate}
               />
               <Area 

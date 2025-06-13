@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import OrderDetailModal from '@/components/admin/OrderDetailModal';
 
 // Define order interface with correct database column names
@@ -66,6 +67,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     fetchOrders();
@@ -111,6 +113,10 @@ const Orders = () => {
         order.id === orderId ? { ...order, status: newStatus } : order
       ));
 
+      // Invalidate dashboard metrics to refresh them
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-chart-data'] });
+
       toast({
         title: 'Success',
         description: 'Order status updated successfully',
@@ -141,9 +147,13 @@ const Orders = () => {
         order.id === orderId ? { ...order, payment_status: newPaymentStatus } : order
       ));
 
+      // Invalidate dashboard metrics to refresh them with new payment status
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-chart-data'] });
+
       toast({
         title: 'Success',
-        description: 'Payment status updated successfully',
+        description: `Payment status updated to ${newPaymentStatus}. Dashboard metrics will reflect this change.`,
       });
     } catch (error) {
       console.error('Error updating payment status:', error);
@@ -267,7 +277,7 @@ const Orders = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">BWIVOX IPTV Orders</h1>
         <p className="text-muted-foreground">
-          Manage your IPTV customer orders and track their status.
+          Manage your IPTV customer orders and track their status. Changes to payment status will automatically update dashboard metrics.
         </p>
       </div>
       
