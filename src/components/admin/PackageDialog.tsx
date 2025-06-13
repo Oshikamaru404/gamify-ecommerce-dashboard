@@ -29,6 +29,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     category: 'subscription' as 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'activation-player',
     description: '',
     icon: '',
+    icon_url: '',
     features: [] as string[],
     // Credit-based pricing
     price_10_credits: '',
@@ -53,6 +54,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         category: pkg.category || 'subscription',
         description: pkg.description || '',
         icon: pkg.icon || '',
+        icon_url: pkg.icon_url || '',
         features: pkg.features || [],
         price_10_credits: pkg.price_10_credits?.toString() || '',
         price_25_credits: pkg.price_25_credits?.toString() || '',
@@ -71,6 +73,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         category: 'subscription',
         description: '',
         icon: '',
+        icon_url: '',
         features: [],
         price_10_credits: '',
         price_25_credits: '',
@@ -109,6 +112,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
       category: formData.category,
       description: formData.description || null,
       icon: formData.icon || null,
+      icon_url: formData.icon_url || null,
       features: formData.features.length > 0 ? formData.features : null,
       // Credit-based pricing
       price_10_credits: formData.price_10_credits ? parseFloat(formData.price_10_credits) : null,
@@ -164,6 +168,17 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
                 placeholder="🚀"
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="icon_url">Icon Image URL</Label>
+            <Input
+              id="icon_url"
+              value={formData.icon_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, icon_url: e.target.value }))}
+              placeholder="https://example.com/icon.png"
+            />
+            <p className="text-sm text-gray-500 mt-1">Optional: Image URL that will be used instead of emoji if provided</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

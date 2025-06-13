@@ -8,6 +8,7 @@ const defaultSubscriptions = [
     category: 'subscription' as const,
     description: "Premium 8K Ultra HD IPTV service with anti-freeze technology",
     icon: "🚀",
+    icon_url: null,
     features: [
       "8K Ultra HD Quality",
       "5000+ Live Channels", 
@@ -31,6 +32,7 @@ const defaultSubscriptions = [
     category: 'subscription' as const,
     description: "Powerful IPTV solution with 8K/4K streaming capabilities",
     icon: "🦖",
+    icon_url: null,
     features: [
       "8K/4K Streaming",
       "4000+ Channels",
@@ -54,6 +56,7 @@ const defaultSubscriptions = [
     category: 'subscription' as const,
     description: "Professional 4K IPTV service with premium technology",
     icon: "⚡",
+    icon_url: null,
     features: [
       "4K Premium Technology",
       "8000+ Channels",
@@ -77,6 +80,7 @@ const defaultSubscriptions = [
     category: 'subscription' as const,
     description: "Full 4K streaming with extensive VOD library",
     icon: "📺",
+    icon_url: null,
     features: [
       "Full 4K Streaming",
       "6000+ Channels",
@@ -100,6 +104,7 @@ const defaultSubscriptions = [
     category: 'subscription' as const,
     description: "Big entertainment platform with extensive content library",
     icon: "🎬",
+    icon_url: null,
     features: [
       "Big Entertainment",
       "9000+ Channels",
