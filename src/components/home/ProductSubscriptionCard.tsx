@@ -53,9 +53,9 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         </div>
       )}
 
-      <div className="flex flex-col h-full overflow-hidden rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+      <div className="flex flex-col h-full overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
         {/* Top Section - Icon (Red Background) */}
-        <div className="h-48 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative">
+        <div className="h-48 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-t-2xl">
           {/* Icon Background Circle */}
           <div className="w-20 h-20 bg-red-400/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
             {pkg.icon ? (
@@ -67,7 +67,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         </div>
 
         {/* Bottom Section - Content (White Background) */}
-        <div className="flex-1 bg-white p-6 flex flex-col">
+        <div className="flex-1 bg-white p-6 flex flex-col rounded-b-2xl">
           {/* Package Title */}
           <h3 className="text-lg font-bold text-gray-900 mb-2 text-center leading-tight">
             {pkg.name}
