@@ -1,3 +1,4 @@
+
 import { Platform, Product, Order, Metric, SalesData } from './types';
 
 // Mock IPTV Products
@@ -71,154 +72,84 @@ export const products: Product[] = [
   }
 ];
 
-// Real IPTV orders data
+// Updated IPTV orders data to match new Order type
 export const orders: Order[] = [
   {
     id: 'IPTV-2024-001',
-    customerId: 'CUST-001',
     customerName: 'Ahmed Hassan',
     customerEmail: 'ahmed.hassan@gmail.com',
     customerPhone: '+33 6 12 34 56 78',
-    items: [
-      {
-        productId: '1',
-        quantity: 1,
-        product: products[0]
-      }
-    ],
-    shippingAddress: {
-      address: '15 Rue de la Paix',
-      city: 'Paris',
-      state: 'Île-de-France',
-      postalCode: '75001',
-      country: 'France'
-    },
+    customerWhatsapp: '+33 6 12 34 56 78',
+    packageName: 'PROMAX 4K IPTV ⚡',
+    packageCategory: 'subscription',
+    durationMonths: 1,
+    orderType: 'activation',
     status: 'delivered',
     paymentStatus: 'paid',
-    paymentMethod: 'cod',
-    subtotal: 15.99,
-    tax: 3.20,
-    shipping: 0,
     total: 19.19,
     createdAt: '2024-06-10T14:30:00Z',
     updatedAt: '2024-06-10T14:35:00Z'
   },
   {
     id: 'IPTV-2024-002',
-    customerId: 'CUST-002',
     customerName: 'Sophie Martin',
     customerEmail: 'sophie.martin@hotmail.fr',
     customerPhone: '+33 7 23 45 67 89',
-    items: [
-      {
-        productId: '2',
-        quantity: 1,
-        product: products[1]
-      }
-    ],
-    shippingAddress: {
-      address: '42 Avenue des Champs',
-      city: 'Lyon',
-      state: 'Auvergne-Rhône-Alpes',
-      postalCode: '69001',
-      country: 'France'
-    },
+    customerWhatsapp: '+33 7 23 45 67 89',
+    packageName: 'TIVIONE 4K IPTV 📺',
+    packageCategory: 'subscription',
+    durationMonths: 1,
+    orderType: 'activation',
     status: 'processing',
     paymentStatus: 'paid',
-    paymentMethod: 'cod',
-    subtotal: 19.99,
-    tax: 4.00,
-    shipping: 0,
     total: 23.99,
     createdAt: '2024-06-11T09:15:00Z',
     updatedAt: '2024-06-11T09:20:00Z'
   },
   {
     id: 'IPTV-2024-003',
-    customerId: 'CUST-003',
     customerName: 'Mohamed Benali',
     customerEmail: 'm.benali@yahoo.com',
     customerPhone: '+33 6 34 56 78 90',
-    items: [
-      {
-        productId: '3',
-        quantity: 1,
-        product: products[2]
-      }
-    ],
-    shippingAddress: {
-      address: '8 Boulevard Voltaire',
-      city: 'Marseille',
-      state: 'Provence-Alpes-Côte d\'Azur',
-      postalCode: '13001',
-      country: 'France'
-    },
+    customerWhatsapp: '+33 6 34 56 78 90',
+    packageName: 'STRONG 8K IPTV 🚀',
+    packageCategory: 'subscription',
+    durationMonths: 1,
+    orderType: 'activation',
     status: 'shipped',
     paymentStatus: 'paid',
-    paymentMethod: 'cod',
-    subtotal: 29.99,
-    tax: 6.00,
-    shipping: 0,
     total: 35.99,
     createdAt: '2024-06-11T11:45:00Z',
     updatedAt: '2024-06-11T16:30:00Z'
   },
   {
     id: 'IPTV-2024-004',
-    customerId: 'CUST-004',
     customerName: 'Elena Rodriguez',
     customerEmail: 'elena.rodriguez@gmail.com',
     customerPhone: '+34 6 12 34 56 78',
-    items: [
-      {
-        productId: '4',
-        quantity: 1,
-        product: products[3]
-      }
-    ],
-    shippingAddress: {
-      address: 'Calle Mayor 123',
-      city: 'Madrid',
-      state: 'Madrid',
-      postalCode: '28001',
-      country: 'Spain'
-    },
+    customerWhatsapp: '+34 6 12 34 56 78',
+    packageName: 'B1G 4K IPTV 🎬',
+    packageCategory: 'subscription',
+    durationMonths: 1,
+    orderType: 'activation',
     status: 'pending',
     paymentStatus: 'pending',
-    paymentMethod: 'cod',
-    subtotal: 19.99,
-    tax: 4.20,
-    shipping: 2.99,
     total: 27.18,
     createdAt: '2024-06-11T16:20:00Z',
     updatedAt: '2024-06-11T16:20:00Z'
   },
   {
     id: 'IPTV-2024-005',
-    customerId: 'CUST-005',
     customerName: 'Jean-Pierre Dubois',
     customerEmail: 'jp.dubois@orange.fr',
     customerPhone: '+33 6 45 67 89 01',
-    items: [
-      {
-        productId: '5',
-        quantity: 1,
-        product: products[4]
-      }
-    ],
-    shippingAddress: {
-      address: '25 Rue Saint-Antoine',
-      city: 'Toulouse',
-      state: 'Occitanie',
-      postalCode: '31000',
-      country: 'France'
-    },
+    customerWhatsapp: '+33 6 45 67 89 01',
+    packageName: 'TREX 8K IPTV 🦖',
+    packageCategory: 'subscription',
+    durationMonths: 1,
+    orderType: 'activation',
     status: 'delivered',
     paymentStatus: 'paid',
-    paymentMethod: 'cod',
-    subtotal: 34.99,
-    tax: 7.00,
-    shipping: 0,
     total: 41.99,
     createdAt: '2024-06-09T13:10:00Z',
     updatedAt: '2024-06-09T15:40:00Z'
