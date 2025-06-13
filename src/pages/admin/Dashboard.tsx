@@ -15,12 +15,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -41,19 +35,29 @@ import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
 import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { translations } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Simple order type for the recent orders table
+type SimpleOrder = {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  createdAt: string;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  total: number;
+};
+
 // Sample orders data for the table
-const recentOrders = [
+const recentOrders: SimpleOrder[] = [
   {
     id: 'IPTV-2024-001',
     customerName: 'Ahmed Hassan',
     customerEmail: 'ahmed.hassan@gmail.com',
     createdAt: '2024-06-10T14:30:00Z',
-    status: 'delivered' as const,
-    paymentStatus: 'paid' as const,
+    status: 'delivered',
+    paymentStatus: 'paid',
     total: 15.99
   },
   {
@@ -61,8 +65,8 @@ const recentOrders = [
     customerName: 'Sophie Martin',
     customerEmail: 'sophie.martin@hotmail.fr',
     createdAt: '2024-06-11T09:15:00Z',
-    status: 'processing' as const,
-    paymentStatus: 'paid' as const,
+    status: 'processing',
+    paymentStatus: 'paid',
     total: 29.99
   },
   {
@@ -70,15 +74,14 @@ const recentOrders = [
     customerName: 'Mohamed Benali',
     customerEmail: 'm.benali@yahoo.com',
     createdAt: '2024-06-11T11:45:00Z',
-    status: 'shipped' as const,
-    paymentStatus: 'paid' as const,
+    status: 'shipped',
+    paymentStatus: 'paid',
     total: 49.99
   }
 ];
 
 const Dashboard = () => {
-  const { language } = useLanguage();
-  const t = translations[language];
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -279,17 +282,7 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Sales Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SalesChart data={salesData} />
-          </CardContent>
-        </Card>
+        <SalesChart data={salesData} />
 
         <Card>
           <CardHeader>
@@ -315,7 +308,6 @@ const Dashboard = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>

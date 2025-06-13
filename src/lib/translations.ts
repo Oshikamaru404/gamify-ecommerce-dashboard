@@ -1,4 +1,3 @@
-
 export const translations = {
   en: {
     // Navigation
@@ -88,6 +87,24 @@ export const translations = {
     resetSalesConfirm: 'Are you sure you want to reset all product sales to zero? This action cannot be undone.',
     feedbackDeleted: 'All approved feedback has been deleted successfully.',
     salesReset: 'Product sales have been reset to zero successfully.',
+
+    // Missing translations for Home page
+    ourSubscriptions: 'Our Subscriptions',
+    subscriptionsTitle: 'Choose from our premium IPTV subscription packages',
+    ultraHd4k: 'Ultra HD 4K',
+    instantActivation: 'Instant Activation',
+    backToHome: 'Back to Home',
+    whyChooseSubtitle: 'Experience the difference with our premium service',
+    premiumQuality: 'Premium Quality',
+    premiumQualityDesc: 'Ultra HD 4K streaming with crystal clear picture quality',
+    guaranteedReliability: 'Guaranteed Reliability',
+    guaranteedReliabilityDesc: '99.9% uptime with robust server infrastructure',
+    fastActivation: 'Fast Activation',
+    fastActivationDesc: 'Get started in minutes with instant activation',
+
+    // Missing translations for IPTV Panel page
+    panelManagement: 'Panel Management',
+    manageYourIptv: 'Manage your IPTV service efficiently',
   },
   
   fr: {
@@ -178,6 +195,24 @@ export const translations = {
     resetSalesConfirm: 'Êtes-vous sûr de vouloir réinitialiser toutes les ventes de produits à zéro? Cette action ne peut pas être annulée.',
     feedbackDeleted: 'Tous les commentaires approuvés ont été supprimés avec succès.',
     salesReset: 'Les ventes de produits ont été réinitialisées à zéro avec succès.',
+
+    // Missing translations for Home page
+    ourSubscriptions: 'Nos Abonnements',
+    subscriptionsTitle: 'Choisissez parmi nos packages d\'abonnement IPTV premium',
+    ultraHd4k: 'Ultra HD 4K',
+    instantActivation: 'Activation Instantanée',
+    backToHome: 'Retour à l\'Accueil',
+    whyChooseSubtitle: 'Découvrez la différence avec notre service premium',
+    premiumQuality: 'Qualité Premium',
+    premiumQualityDesc: 'Streaming Ultra HD 4K avec une qualité d\'image cristalline',
+    guaranteedReliability: 'Fiabilité Garantie',
+    guaranteedReliabilityDesc: '99,9% de disponibilité avec une infrastructure serveur robuste',
+    fastActivation: 'Activation Rapide',
+    fastActivationDesc: 'Commencez en quelques minutes avec une activation instantanée',
+
+    // Missing translations for IPTV Panel page
+    panelManagement: 'Gestion du Panel',
+    manageYourIptv: 'Gérez efficacement votre service IPTV',
   },
   
   es: {
@@ -268,6 +303,24 @@ export const translations = {
     resetSalesConfirm: '¿Estás seguro de que quieres restablecer todas las ventas de productos a cero? Esta acción no se puede deshacer.',
     feedbackDeleted: 'Todos los comentarios aprobados han sido eliminados exitosamente.',
     salesReset: 'Las ventas de productos han sido restablecidas a cero exitosamente.',
+
+    // Missing translations for Home page
+    ourSubscriptions: 'Nuestras Suscripciones',
+    subscriptionsTitle: 'Elige entre nuestros paquetes de suscripción IPTV premium',
+    ultraHd4k: 'Ultra HD 4K',
+    instantActivation: 'Activación Instantánea',
+    backToHome: 'Volver al Inicio',
+    whyChooseSubtitle: 'Experimenta la diferencia con nuestro servicio premium',
+    premiumQuality: 'Calidad Premium',
+    premiumQualityDesc: 'Streaming Ultra HD 4K con calidad de imagen cristalina',
+    guaranteedReliability: 'Confiabilidad Garantizada',
+    guaranteedReliabilityDesc: '99.9% de tiempo de actividad con infraestructura de servidor robusta',
+    fastActivation: 'Activación Rápida',
+    fastActivationDesc: 'Comienza en minutos con activación instantánea',
+
+    // Missing translations for IPTV Panel page
+    panelManagement: 'Gestión del Panel',
+    manageYourIptv: 'Gestiona tu servicio IPTV de manera eficiente',
   },
   
   de: {
@@ -358,6 +411,24 @@ export const translations = {
     resetSalesConfirm: 'Sind Sie sicher, dass Sie alle Produktverkäufe auf null zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
     feedbackDeleted: 'Alle genehmigten Feedbacks wurden erfolgreich gelöscht.',
     salesReset: 'Produktverkäufe wurden erfolgreich auf null zurückgesetzt.',
+
+    // Missing translations for Home page
+    ourSubscriptions: 'Unsere Abonnements',
+    subscriptionsTitle: 'Wählen Sie aus unseren Premium-IPTV-Abonnementpaketen',
+    ultraHd4k: 'Ultra HD 4K',
+    instantActivation: 'Sofortige Aktivierung',
+    backToHome: 'Zurück zur Startseite',
+    whyChooseSubtitle: 'Erleben Sie den Unterschied mit unserem Premium-Service',
+    premiumQuality: 'Premium-Qualität',
+    premiumQualityDesc: 'Ultra HD 4K-Streaming mit kristallklarer Bildqualität',
+    guaranteedReliability: 'Garantierte Zuverlässigkeit',
+    guaranteedReliabilityDesc: '99,9% Betriebszeit mit robuster Serverinfrastruktur',
+    fastActivation: 'Schnelle Aktivierung',
+    fastActivationDesc: 'Starten Sie in Minuten mit sofortiger Aktivierung',
+
+    // Missing translations for IPTV Panel page
+    panelManagement: 'Panel-Verwaltung',
+    manageYourIptv: 'Verwalten Sie Ihren IPTV-Service effizient',
   },
   
   it: {
@@ -448,6 +519,24 @@ export const translations = {
     resetSalesConfirm: 'Sei sicuro di voler reimpostare tutte le vendite dei prodotti a zero? Questa azione non può essere annullata.',
     feedbackDeleted: 'Tutti i feedback approvati sono stati eliminati con successo.',
     salesReset: 'Le vendite dei prodotti sono state reimpostate a zero con successo.',
+
+    // Missing translations for Home page
+    ourSubscriptions: 'I Nostri Abbonamenti',
+    subscriptionsTitle: 'Scegli tra i nostri pacchetti di abbonamento IPTV premium',
+    ultraHd4k: 'Ultra HD 4K',
+    instantActivation: 'Attivazione Istantanea',
+    backToHome: 'Torna alla Home',
+    whyChooseSubtitle: 'Vivi la differenza con il nostro servizio premium',
+    premiumQuality: 'Qualità Premium',
+    premiumQualityDesc: 'Streaming Ultra HD 4K con qualità dell\'immagine cristallina',
+    guaranteedReliability: 'Affidabilità Garantita',
+    guaranteedReliabilityDesc: '99,9% di uptime con infrastruttura server robusta',
+    fastActivation: 'Attivazione Veloce',
+    fastActivationDesc: 'Inizia in pochi minuti con attivazione istantanea',
+
+    // Missing translations for IPTV Panel page
+    panelManagement: 'Gestione Panel',
+    manageYourIptv: 'Gestisci il tuo servizio IPTV in modo efficiente',
   },
   
   ar: {
@@ -538,6 +627,24 @@ export const translations = {
     resetSalesConfirm: 'هل أنت متأكد من رغبتك في إعادة تعيين جميع مبيعات المنتجات إلى الصفر؟ لا يمكن التراجع عن هذا الإجراء.',
     feedbackDeleted: 'تم حذف جميع التعليقات المعتمدة بنجاح.',
     salesReset: 'تم إعادة تعيين مبيعات المنتجات إلى الصفر بنجاح.',
+
+    // Missing translations for Home page
+    ourSubscriptions: 'اشتراكاتنا',
+    subscriptionsTitle: 'اختر من بين باقات اشتراك IPTV المتميزة لدينا',
+    ultraHd4k: 'الترا اتش دي 4K',
+    instantActivation: 'التفعيل الفوري',
+    backToHome: 'العودة للرئيسية',
+    whyChooseSubtitle: 'اختبر الفرق مع خدمتنا المتميزة',
+    premiumQuality: 'جودة مميزة',
+    premiumQualityDesc: 'بث الترا اتش دي 4K بجودة صورة واضحة',
+    guaranteedReliability: 'موثوقية مضمونة',
+    guaranteedReliabilityDesc: '99.9% وقت تشغيل مع بنية خادم قوية',
+    fastActivation: 'تفعيل سريع',
+    fastActivationDesc: 'ابدأ في دقائق مع التفعيل الفوري',
+
+    // Missing translations for IPTV Panel page
+    panelManagement: 'إدارة اللوحة',
+    manageYourIptv: 'إدارة خدمة IPTV الخاصة بك بكفاءة',
   },
 };
 
@@ -552,3 +659,12 @@ export const languageNames = {
 
 // Ordered list for language selector (English, French, Spanish, German, Italian, Arabic)
 export const orderedLanguages = ['en', 'fr', 'es', 'de', 'it', 'ar'] as const;
+
+// Type definitions
+export type Language = typeof orderedLanguages[number];
+export type Translations = typeof translations.en;
+
+// Helper function to get translations for a specific language
+export const getTranslation = (language: Language): Translations => {
+  return translations[language] || translations.en;
+};

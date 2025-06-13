@@ -9,12 +9,24 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Order, OrderStatus, PaymentStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+
+type SimpleOrder = {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  createdAt: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  total: number;
+};
+
 type RecentOrdersTableProps = {
-  orders: Order[];
+  orders: SimpleOrder[];
   className?: string;
 };
 
