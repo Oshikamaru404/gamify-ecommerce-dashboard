@@ -5,7 +5,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 
 // Public Pages
-import Index from '@/pages/Index';
 import Home from '@/pages/Home';
 import Products from '@/pages/Products';
 import ProductDetail from '@/pages/ProductDetail';
@@ -48,9 +47,8 @@ function App() {
           <LanguageProvider>
             <BrowserRouter>
               <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/home" element={<Home />} />
+                {/* Public Routes - Home is now the default */}
+                <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:slug" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />
