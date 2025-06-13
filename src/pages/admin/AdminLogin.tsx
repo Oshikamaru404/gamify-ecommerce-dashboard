@@ -109,13 +109,7 @@ const AdminLogin = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Demo Credentials:</strong><br />
-              Username: admin<br />
-              Password: admin123
-            </p>
-          </div>
+         
         </CardContent>
       </Card>
     </div>
