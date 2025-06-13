@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -146,6 +145,9 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{pkg ? 'Edit Package' : 'Create New Package'}</DialogTitle>
+          <DialogDescription>
+            {pkg ? 'Update the package details below.' : 'Fill in the details to create a new package.'}
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">

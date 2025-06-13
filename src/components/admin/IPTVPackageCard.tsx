@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor, Shield } from 'lucide-react';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 
 type IPTVPackageCardProps = {
@@ -139,69 +140,83 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   return (
     <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-red-500">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            {pkg.icon_url ? (
-              <img 
-                src={pkg.icon_url} 
-                alt={pkg.name}
-                className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                onError={(e) => {
-                  // Fallback to emoji if image fails to load
-                  e.currentTarget.style.display = 'none';
-                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = 'block';
-                }}
-              />
-            ) : null}
-            {pkg.icon && (
-              <span 
-                className="text-2xl" 
-                style={{ display: pkg.icon_url ? 'none' : 'block' }}
-              >
-                {pkg.icon}
-              </span>
-            )}
-            <div>
-              <CardTitle className="text-lg text-gray-900">{pkg.name}</CardTitle>
-              <div className="flex gap-2 mt-1">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="flex-shrink-0">
+              {pkg.icon_url ? (
+                <img 
+                  src={pkg.icon_url} 
+                  alt={pkg.name}
+                  className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                  onError={(e) => {
+                    // Fallback to emoji if image fails to load
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              {pkg.icon && (
+                <span 
+                  className="text-2xl block" 
+                  style={{ display: pkg.icon_url ? 'none' : 'block' }}
+                >
+                  {pkg.icon}
+                </span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg text-gray-900 break-words leading-tight">
+                {pkg.name}
+              </CardTitle>
+              <div className="flex flex-wrap gap-2 mt-2">
                 {getCategoryBadge(pkg.category)}
                 {getStatusBadge(pkg.status)}
               </div>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="hover:bg-red-50">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(pkg)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Package
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => onToggleFeatured(pkg.id, pkg.status !== 'featured')}
-              >
-                <Star className="mr-2 h-4 w-4" />
-                {pkg.status === 'featured' ? 'Remove Featured' : 'Mark as Featured'}
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="text-destructive focus:text-destructive"
-                onClick={() => onDelete(pkg.id)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Package
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex-shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="hover:bg-red-50 h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onEdit(pkg)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Package
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => onToggleFeatured(pkg.id, pkg.status !== 'featured')}
+                >
+                  <Star className="mr-2 h-4 w-4" />
+                  {pkg.status === 'featured' ? 'Remove Featured' : 'Mark as Featured'}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => onDelete(pkg.id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Package
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         {pkg.description && (
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{pkg.description}</p>
         )}
+        
+        {/* 30-Day Guarantee Badge */}
+        <div className="mb-3">
+          <Badge className="bg-green-100 text-green-700 flex items-center gap-1 w-fit">
+            <Shield size={12} />
+            30-Day Money Back Guarantee
+          </Badge>
+        </div>
         
         {renderPricing()}
 

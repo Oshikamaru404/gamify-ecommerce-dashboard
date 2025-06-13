@@ -22,6 +22,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
+import FeedbackManagement from '@/components/admin/FeedbackManagement';
 
 // Define metric interface for the dashboard
 interface DashboardMetric {
@@ -269,6 +270,9 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Customer Feedback Management */}
+      <FeedbackManagement />
 
       {/* Customer Feedback and Newsletter Section */}
       <div className="grid gap-6 md:grid-cols-2">
