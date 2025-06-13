@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import MetricCard from '@/components/admin/MetricCard';
@@ -14,13 +14,49 @@ import {
   RefreshCw 
 } from 'lucide-react';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
+import { useRecentOrders } from '@/hooks/useRecentOrders';
 import { seedOrders } from '@/lib/seedOrders';
 import { useToast } from '@/hooks/use-toast';
+import { Metric } from '@/lib/types';
 
 const Dashboard = () => {
-  const { metrics, loading, refetch } = useDashboardMetrics();
+  const { data: dashboardData, isLoading: metricsLoading, refetch: refetchMetrics } = useDashboardMetrics();
+  const { data: recentOrders, isLoading: ordersLoading, refetch: refetchOrders } = useRecentOrders();
   const [seeding, setSeeding] = useState(false);
   const { toast } = useToast();
+
+  // Transform dashboard data into metrics format
+  const getMetricValue = (metricName: string) => {
+    const metric = dashboardData?.find(m => m.metric_name === metricName);
+    return metric ? Number(metric.metric_value) : 0;
+  };
+
+  const metrics: Metric[] = [
+    {
+      label: 'Total Revenue',
+      value: getMetricValue('total_revenue'),
+      change: 12.5,
+      trend: 'up' as const
+    },
+    {
+      label: 'Total Orders',
+      value: getMetricValue('total_orders'),
+      change: 5.2,
+      trend: 'up' as const
+    },
+    {
+      label: 'Active Subscriptions',
+      value: getMetricValue('active_subscriptions'),
+      change: 8.1,
+      trend: 'up' as const
+    },
+    {
+      label: 'New Customers',
+      value: getMetricValue('new_customers'),
+      change: 15.3,
+      trend: 'up' as const
+    }
+  ];
 
   const handleSeedOrders = async () => {
     setSeeding(true);
@@ -31,8 +67,9 @@ const Dashboard = () => {
           title: 'Success',
           description: `Successfully seeded ${count} sample orders`,
         });
-        // Refresh the page data
-        refetch();
+        // Refresh the data
+        refetchMetrics();
+        refetchOrders();
       } else {
         toast({
           title: 'Info',
@@ -49,6 +86,11 @@ const Dashboard = () => {
     } finally {
       setSeeding(false);
     }
+  };
+
+  const handleRefresh = () => {
+    refetchMetrics();
+    refetchOrders();
   };
 
   return (
@@ -72,11 +114,11 @@ const Dashboard = () => {
           </Button>
           <Button
             variant="outline"
-            onClick={() => refetch()}
-            disabled={loading}
+            onClick={handleRefresh}
+            disabled={metricsLoading || ordersLoading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${metricsLoading || ordersLoading ? 'animate-spin' : ''}`} />
             Refresh Data
           </Button>
         </div>
@@ -84,34 +126,12 @@ const Dashboard = () => {
 
       {/* Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Revenue"
-          value={`€${metrics?.totalRevenue.toFixed(2) || '0.00'}`}
-          change="+12.5%"
-          icon={DollarSign}
-          loading={loading}
-        />
-        <MetricCard
-          title="Total Orders"
-          value={metrics?.totalOrders.toString() || '0'}
-          change="+5.2%"
-          icon={ShoppingCart}
-          loading={loading}
-        />
-        <MetricCard
-          title="Active Subscriptions"
-          value={metrics?.activeSubscriptions.toString() || '0'}
-          change="+8.1%"
-          icon={Users}
-          loading={loading}
-        />
-        <MetricCard
-          title="New Customers"
-          value={metrics?.newCustomers.toString() || '0'}
-          change="+15.3%"
-          icon={TrendingUp}
-          loading={loading}
-        />
+        {metrics.map((metric, index) => (
+          <MetricCard
+            key={metric.label}
+            metric={metric}
+          />
+        ))}
       </div>
 
       {/* Charts and Tables */}
@@ -130,7 +150,7 @@ const Dashboard = () => {
             <CardTitle>Recent Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <RecentOrdersTable />
+            <RecentOrdersTable orders={recentOrders || []} />
           </CardContent>
         </Card>
       </div>
