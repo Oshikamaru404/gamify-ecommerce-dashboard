@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, MessageCircle, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CryptomusCheckout from './CryptomusCheckout';
 
 interface CheckoutFormProps {
   packageData: {
@@ -27,6 +28,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     customerWhatsapp: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCryptoCheckout, setShowCryptoCheckout] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,10 +86,27 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   };
 
   const handleWhatsAppFallback = () => {
-    const message = `Hello, I'm interested in ${packageData.name} - ${packageData.duration} Month(s) - $${packageData.price.toFixed(2)}`;
+    const message = `Hello, I'm interested in ${packageData.name} - ${packageData.duration} Month(s) - €${packageData.price.toFixed(2)}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+
+  const handleCryptoPayment = () => {
+    setShowCryptoCheckout(true);
+  };
+
+  if (showCryptoCheckout) {
+    return (
+      <CryptomusCheckout
+        packageData={packageData}
+        onClose={() => {
+          setShowCryptoCheckout(false);
+          onClose();
+        }}
+        onSuccess={onSuccess}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -118,65 +137,78 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
               </div>
               <div className="flex justify-between font-semibold text-lg border-t pt-2 mt-2">
                 <span>Total:</span>
-                <span className="text-green-700">${packageData.price.toFixed(2)}</span>
+                <span className="text-green-700">€{packageData.price.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
-          {/* Checkout Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="customerName">Full Name *</Label>
-              <Input
-                id="customerName"
-                name="customerName"
-                type="text"
-                value={formData.customerName}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
-                required
-                className="h-10"
-              />
-            </div>
+          {/* Payment Options */}
+          <div className="space-y-3">
+            <h3 className="font-semibold text-gray-900">Choose Payment Method</h3>
+            
+            {/* Crypto Payment Button */}
+            <Button
+              onClick={handleCryptoPayment}
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white h-12 text-base"
+            >
+              <CreditCard className="mr-2 h-5 w-5" />
+              Pay with Cryptocurrency
+            </Button>
 
-            <div className="space-y-2">
-              <Label htmlFor="customerEmail">Email Address *</Label>
-              <Input
-                id="customerEmail"
-                name="customerEmail"
-                type="email"
-                value={formData.customerEmail}
-                onChange={handleInputChange}
-                placeholder="Enter your email address"
-                required
-                className="h-10"
-              />
-            </div>
+            <div className="text-center text-sm text-gray-500">or</div>
 
-            <div className="space-y-2">
-              <Label htmlFor="customerWhatsapp">WhatsApp Number (Optional)</Label>
-              <Input
-                id="customerWhatsapp"
-                name="customerWhatsapp"
-                type="tel"
-                value={formData.customerWhatsapp}
-                onChange={handleInputChange}
-                placeholder="Enter your WhatsApp number"
-                className="h-10"
-              />
-            </div>
+            {/* Traditional Order Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="customerName">Full Name *</Label>
+                <Input
+                  id="customerName"
+                  name="customerName"
+                  type="text"
+                  value={formData.customerName}
+                  onChange={handleInputChange}
+                  placeholder="Enter your full name"
+                  required
+                  className="h-10"
+                />
+              </div>
 
-            <div className="space-y-3 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="customerEmail">Email Address *</Label>
+                <Input
+                  id="customerEmail"
+                  name="customerEmail"
+                  type="email"
+                  value={formData.customerEmail}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email address"
+                  required
+                  className="h-10"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="customerWhatsapp">WhatsApp Number (Optional)</Label>
+                <Input
+                  id="customerWhatsapp"
+                  name="customerWhatsapp"
+                  type="tel"
+                  value={formData.customerWhatsapp}
+                  onChange={handleInputChange}
+                  placeholder="Enter your WhatsApp number"
+                  className="h-10"
+                />
+              </div>
+
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-green-600 hover:bg-green-700 text-white h-10"
+                variant="outline"
+                className="w-full h-10"
               >
                 <CreditCard className="mr-2 h-4 w-4" />
-                {isSubmitting ? 'Submitting Order...' : 'Submit Order'}
+                {isSubmitting ? 'Submitting Order...' : 'Submit Order (Traditional)'}
               </Button>
-
-              <div className="text-center text-sm text-gray-500">or</div>
 
               <Button
                 type="button"
@@ -187,12 +219,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Continue with WhatsApp
               </Button>
-            </div>
-          </form>
+            </form>
+          </div>
 
           <div className="text-xs text-gray-500 text-center pt-2">
             By submitting this order, you agree to our terms of service. 
-            We will contact you for payment and delivery details.
+            Choose crypto payment for instant processing or traditional order for manual verification.
           </div>
         </CardContent>
       </Card>
