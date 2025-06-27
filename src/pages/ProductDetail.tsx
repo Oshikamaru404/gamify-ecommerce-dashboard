@@ -1,184 +1,32 @@
 
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Check } from 'lucide-react';
+import { ArrowLeft, Star, Check, ShoppingCart, Shield, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import StoreLayout from '@/components/store/StoreLayout';
 import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const ProductDetail = () => {
-  const { productId } = useParams();
+  const { slug } = useParams<{ slug: string }>();
   const { t } = useLanguage();
-  const [selectedDuration, setSelectedDuration] = useState(1);
-  const [showCheckout, setShowCheckout] = useState(false);
   const { data: packages, isLoading } = useIPTVPackages();
+  const [selectedDuration, setSelectedDuration] = useState<number>(1);
+  const [showCheckout, setShowCheckout] = useState(false);
 
-  console.log('ProductDetail - productId:', productId);
-  console.log('ProductDetail - packages:', packages);
-
-  if (isLoading) {
-    return (
-      <StoreLayout>
-        <div className="container py-16 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product details...</p>
-        </div>
-      </StoreLayout>
-    );
-  }
-
-  // Find the package by matching the productId with the package name (converted to slug format)
-  const product = packages?.find(pkg => {
-    const slug = pkg.name.toLowerCase()
+  // Find package by slug
+  const generateSlug = (name: string) => {
+    return name.toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .trim();
-    console.log('ProductDetail - comparing slug:', slug, 'with productId:', productId);
-    return slug === productId;
-  });
-
-  console.log('ProductDetail - product found:', product);
-
-  if (!product) {
-    return (
-      <StoreLayout>
-        <div className="container py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-          <p className="text-gray-600 mb-4">Product ID: {productId}</p>
-          <p className="text-gray-600 mb-4">Available packages: {packages?.map(p => p.name).join(', ')}</p>
-          <Button asChild>
-            <Link to="/subscription">Back to Subscriptions</Link>
-          </Button>
-        </div>
-      </StoreLayout>
-    );
-  }
-
-  // Detailed logging for pricing data debugging
-  console.log('ProductDetail - detailed pricing analysis:', {
-    price_1_month: {
-      value: product.price_1_month,
-      type: typeof product.price_1_month,
-      isNull: product.price_1_month === null,
-      isUndefined: product.price_1_month === undefined,
-      truthyCheck: !!product.price_1_month
-    },
-    price_3_months: {
-      value: product.price_3_months,
-      type: typeof product.price_3_months,
-      isNull: product.price_3_months === null,
-      isUndefined: product.price_3_months === undefined,
-      truthyCheck: !!product.price_3_months
-    },
-    price_6_months: {
-      value: product.price_6_months,
-      type: typeof product.price_6_months,
-      isNull: product.price_6_months === null,
-      isUndefined: product.price_6_months === undefined,
-      truthyCheck: !!product.price_6_months
-    },
-    price_12_months: {
-      value: product.price_12_months,
-      type: typeof product.price_12_months,
-      isNull: product.price_12_months === null,
-      isUndefined: product.price_12_months === undefined,
-      truthyCheck: !!product.price_12_months
-    }
-  });
-
-  // Build duration options based on available pricing in the database
-  const durations = [];
-  
-  // Only add duration options if the pricing exists in the database and is greater than 0
-  if (product.price_1_month !== null && product.price_1_month !== undefined && product.price_1_month > 0) {
-    console.log('Adding 1 month duration:', product.price_1_month);
-    durations.push({
-      months: 1,
-      price: product.price_1_month,
-      label: '1 Month',
-      discount: 0
-    });
-  }
-  
-  if (product.price_3_months !== null && product.price_3_months !== undefined && product.price_3_months > 0) {
-    console.log('Adding 3 months duration:', product.price_3_months);
-    const monthlyEquivalent = product.price_1_month ? product.price_1_month * 3 : 0;
-    durations.push({
-      months: 3,
-      price: product.price_3_months,
-      label: '3 Months',
-      discount: monthlyEquivalent > 0 
-        ? Math.round((1 - (product.price_3_months / monthlyEquivalent)) * 100)
-        : 0
-    });
-  }
-  
-  if (product.price_6_months !== null && product.price_6_months !== undefined && product.price_6_months > 0) {
-    console.log('Adding 6 months duration:', product.price_6_months);
-    const monthlyEquivalent = product.price_1_month ? product.price_1_month * 6 : 0;
-    durations.push({
-      months: 6,
-      price: product.price_6_months,
-      label: '6 Months',
-      discount: monthlyEquivalent > 0 
-        ? Math.round((1 - (product.price_6_months / monthlyEquivalent)) * 100)
-        : 0
-    });
-  }
-  
-  if (product.price_12_months !== null && product.price_12_months !== undefined && product.price_12_months > 0) {
-    console.log('Adding 12 months duration:', product.price_12_months);
-    const monthlyEquivalent = product.price_1_month ? product.price_1_month * 12 : 0;
-    durations.push({
-      months: 12,
-      price: product.price_12_months,
-      label: '12 Months',
-      discount: monthlyEquivalent > 0 
-        ? Math.round((1 - (product.price_12_months / monthlyEquivalent)) * 100)
-        : 0
-    });
-  }
-
-  console.log('ProductDetail - durations built:', durations);
-  console.log('ProductDetail - total durations found:', durations.length);
-
-  // If no pricing is available in the database, show a message
-  if (durations.length === 0) {
-    return (
-      <StoreLayout>
-        <div className="container py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Pricing Not Available</h1>
-          <p className="text-gray-600 mb-4">Pricing for this package is not yet configured in the admin dashboard.</p>
-          <p className="text-gray-600 mb-4">Product: {product.name}</p>
-          <p className="text-gray-600 mb-4">Category: {product.category}</p>
-          <p className="text-gray-600 mb-4">Debug - Available pricing fields:</p>
-          <pre className="text-xs text-left bg-gray-100 p-4 rounded mb-4">
-            {JSON.stringify({
-              price_1_month: product.price_1_month,
-              price_3_months: product.price_3_months,
-              price_6_months: product.price_6_months,
-              price_12_months: product.price_12_months,
-            }, null, 2)}
-          </pre>
-          <Button asChild>
-            <Link to="/activation">Back to Activation</Link>
-          </Button>
-        </div>
-      </StoreLayout>
-    );
-  }
-
-  // Set the default selected duration to the first available option
-  const validSelectedDuration = durations.find(d => d.months === selectedDuration) ? selectedDuration : durations[0].months;
-  const selectedDurationData = durations.find(d => d.months === validSelectedDuration) || durations[0];
-
-  const handlePurchase = () => {
-    setShowCheckout(true);
   };
+
+  const currentPackage = packages?.find(pkg => generateSlug(pkg.name) === slug);
 
   const handleCloseCheckout = () => {
     setShowCheckout(false);
@@ -186,140 +34,280 @@ const ProductDetail = () => {
 
   const handleOrderSuccess = () => {
     console.log('Order submitted successfully');
-    setShowCheckout(false);
   };
+
+  const getPriceForDuration = (duration: number) => {
+    if (!currentPackage) return 0;
+    
+    switch (duration) {
+      case 1: return currentPackage.price_1_month || 0;
+      case 3: return currentPackage.price_3_months || 0;
+      case 6: return currentPackage.price_6_months || 0;
+      case 12: return currentPackage.price_12_months || 0;
+      default: return 0;
+    }
+  };
+
+  const getMonthlyPrice = (duration: number) => {
+    const totalPrice = getPriceForDuration(duration);
+    return totalPrice / duration;
+  };
+
+  const getSavings = (duration: number) => {
+    if (!currentPackage?.price_1_month || duration === 1) return 0;
+    const monthlyPrice = currentPackage.price_1_month;
+    const totalRegular = monthlyPrice * duration;
+    const totalDiscounted = getPriceForDuration(duration);
+    return totalRegular - totalDiscounted;
+  };
+
+  const availableDurations = [
+    { months: 1, label: '1 Month', badge: null },
+    { months: 3, label: '3 Months', badge: '10% Off' },
+    { months: 6, label: '6 Months', badge: '20% Off' },
+    { months: 12, label: '12 Months', badge: 'Best Value' }
+  ].filter(duration => getPriceForDuration(duration.months) > 0);
+
+  if (isLoading) {
+    return (
+      <StoreLayout>
+        <div className="container py-16 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading package details...</p>
+        </div>
+      </StoreLayout>
+    );
+  }
+
+  if (!currentPackage) {
+    return (
+      <StoreLayout>
+        <div className="container py-16 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Package Not Found</h1>
+          <p className="text-gray-600 mb-8">The package you're looking for doesn't exist.</p>
+          <Button asChild>
+            <Link to="/subscription">Browse All Packages</Link>
+          </Button>
+        </div>
+      </StoreLayout>
+    );
+  }
+
+  const selectedPrice = getPriceForDuration(selectedDuration);
+  const monthlyPrice = getMonthlyPrice(selectedDuration);
+  const savings = getSavings(selectedDuration);
 
   return (
     <StoreLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
-          <div className="container py-12">
+        <div className="container py-8">
+          {/* Back Navigation */}
+          <div className="mb-8">
             <Link 
-              to={product.category === 'activation-player' ? '/activation' : '/subscription'}
-              className="inline-flex items-center text-white/80 hover:text-white transition-colors duration-200 group mb-6"
+              to="/subscription" 
+              className="inline-flex items-center text-red-600 hover:text-red-700 transition-colors duration-200 group"
             >
               <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
-              Back to {product.category === 'activation-player' ? 'Activation' : 'Subscriptions'}
+              Back to Packages
             </Link>
-            
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
-                <p className="text-xl text-white/90 mb-6">
-                  {product.description || `Premium ${product.category} service with advanced features`}
-                </p>
-                
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center">
-                    <Star className="text-yellow-300 mr-2" size={20} />
-                    <span>Premium Quality</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="text-green-300 mr-2" size={20} />
-                    <span>24/7 Support</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
 
-        <div className="container py-16">
-          <div className="grid lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2">
-              <Card className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Features</h2>
-                <div className="grid gap-4">
-                  {product.features && product.features.length > 0 ? (
-                    product.features.map((feature: string, index: number) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <Check className="text-green-600" size={20} />
-                        <span className="text-lg">{feature}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Check className="text-green-600" size={20} />
-                      <span className="text-lg">Premium {product.category} features included</span>
-                    </div>
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Package Details */}
+            <div className="space-y-6">
+              <Card className="overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white text-center py-12">
+                  <div className="text-6xl mb-4">
+                    {currentPackage.icon_url ? (
+                      <img 
+                        src={currentPackage.icon_url} 
+                        alt={currentPackage.name}
+                        className="w-20 h-20 mx-auto rounded-lg object-cover"
+                      />
+                    ) : (
+                      <span>{currentPackage.icon || '📺'}</span>
+                    )}
+                  </div>
+                  <CardTitle className="text-3xl font-bold">{currentPackage.name}</CardTitle>
+                  {currentPackage.status === 'featured' && (
+                    <Badge className="bg-yellow-500 text-yellow-900 mt-2">
+                      <Star className="mr-1 h-4 w-4" />
+                      Most Popular
+                    </Badge>
                   )}
-                </div>
+                </CardHeader>
+                <CardContent className="p-8">
+                  <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                    {currentPackage.description || 'Premium IPTV subscription with unlimited access to channels and content.'}
+                  </p>
+
+                  {/* Features */}
+                  <div className="space-y-3">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Features Included:</h3>
+                    {currentPackage.features && currentPackage.features.length > 0 ? (
+                      currentPackage.features.map((feature, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700">{feature}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-green-600 mt-0.5" />
+                          <span className="text-gray-700">8000+ Live TV Channels</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-green-600 mt-0.5" />
+                          <span className="text-gray-700">Ultra HD 4K Quality</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-green-600 mt-0.5" />
+                          <span className="text-gray-700">VOD Library</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-green-600 mt-0.5" />
+                          <span className="text-gray-700">24/7 Support</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* 30-Day Warranty Disclaimer */}
+                  <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-blue-900 mb-1">30-Day Warranty</h4>
+                        <p className="text-sm text-blue-800">
+                          We guarantee service quality for 30 days from activation. If you experience any issues during this period, 
+                          contact our support team for immediate assistance or a full refund.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
             </div>
 
-            <div>
-              <Card className="p-8 sticky top-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Choose Your Plan</h3>
-                
-                <div className="space-y-3 mb-6">
-                  {durations.map((duration) => (
-                    <button
+            {/* Pricing & Purchase */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-2xl text-gray-900">Choose Your Plan</CardTitle>
+                  <p className="text-gray-600">Select the duration that works best for you</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {availableDurations.map((duration) => (
+                    <div
                       key={duration.months}
-                      onClick={() => setSelectedDuration(duration.months)}
-                      className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                        validSelectedDuration === duration.months
+                      className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        selectedDuration === duration.months
                           ? 'border-red-500 bg-red-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-gray-200 hover:border-red-300'
                       }`}
+                      onClick={() => setSelectedDuration(duration.months)}
                     >
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold">{duration.label}</span>
-                        {duration.discount > 0 && (
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">
-                            -{duration.discount}%
-                          </span>
-                        )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-4 h-4 rounded-full border-2 ${
+                              selectedDuration === duration.months
+                                ? 'border-red-500 bg-red-500'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {selectedDuration === duration.months && (
+                              <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{duration.label}</h4>
+                            <p className="text-sm text-gray-600">
+                              €{getMonthlyPrice(duration.months).toFixed(2)}/month
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-lg text-gray-900">
+                            €{getPriceForDuration(duration.months).toFixed(2)}
+                          </div>
+                          {duration.badge && (
+                            <Badge className="bg-green-100 text-green-700 text-xs">
+                              {duration.badge}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        ${duration.price?.toFixed(2)} total
-                      </div>
-                      {duration.months > 1 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          ${(duration.price! / duration.months).toFixed(2)}/month
+                      {getSavings(duration.months) > 0 && (
+                        <div className="mt-2 text-sm text-green-600 font-medium">
+                          Save €{getSavings(duration.months).toFixed(2)} compared to monthly billing
                         </div>
                       )}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="border-t pt-6">
-                  <div className="flex justify-between items-center text-xl font-bold">
-                    <span>Total:</span>
-                    <span className="text-red-600">${selectedDurationData.price?.toFixed(2)}</span>
-                  </div>
-                  {selectedDurationData.discount > 0 && (
-                    <div className="text-sm text-green-600 mt-1">
-                      Save {selectedDurationData.discount}% compared to monthly
                     </div>
-                  )}
-                </div>
+                  ))}
+                </CardContent>
+              </Card>
 
-                <Button 
-                  onClick={handlePurchase}
-                  className="w-full mt-6 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white h-14 text-lg font-semibold lg:h-16 lg:text-xl"
-                  size="lg"
-                >
-                  Buy Now
-                </Button>
+              {/* Purchase Summary */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Package:</span>
+                      <span className="font-semibold">{currentPackage.name}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Duration:</span>
+                      <span className="font-semibold">{selectedDuration} Month{selectedDuration > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Monthly Rate:</span>
+                      <span className="font-semibold">€{monthlyPrice.toFixed(2)}</span>
+                    </div>
+                    {savings > 0 && (
+                      <div className="flex justify-between items-center text-green-600">
+                        <span>You Save:</span>
+                        <span className="font-semibold">€{savings.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <hr />
+                    <div className="flex justify-between items-center text-xl font-bold">
+                      <span>Total:</span>
+                      <span className="text-red-600">€{selectedPrice.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <Button 
+                    className="w-full mt-6 bg-red-600 hover:bg-red-700 text-white py-3 text-lg"
+                    onClick={() => setShowCheckout(true)}
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Purchase Now
+                  </Button>
+
+                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
+                    <Clock className="h-4 w-4" />
+                    <span>Instant activation after payment</span>
+                  </div>
+                </CardContent>
               </Card>
             </div>
           </div>
-        </div>
 
-        {/* Checkout Form Modal */}
-        {showCheckout && (
-          <CheckoutForm
-            packageData={{
-              id: product.id,
-              name: product.name,
-              category: product.category,
-              price: selectedDurationData.price!,
-              duration: selectedDurationData.months
-            }}
-            onClose={handleCloseCheckout}
-            onSuccess={handleOrderSuccess}
-          />
-        )}
+          {/* Checkout Form Modal */}
+          {showCheckout && (
+            <CheckoutForm
+              packageData={{
+                ...currentPackage,
+                selectedDuration,
+                selectedPrice
+              }}
+              onClose={handleCloseCheckout}
+              onSuccess={handleOrderSuccess}
+            />
+          )}
+        </div>
       </div>
     </StoreLayout>
   );

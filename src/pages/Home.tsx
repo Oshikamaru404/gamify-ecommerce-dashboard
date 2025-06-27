@@ -7,7 +7,7 @@ import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import FeedbackCards from '@/components/home/FeedbackCards';
 import NewsletterSubscription from '@/components/home/NewsletterSubscription';
 import CheckoutForm from '@/components/CheckoutForm';
-import { Zap, Star, Check, MessageCircle, MessageSquarePlus } from 'lucide-react';
+import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
@@ -62,6 +62,15 @@ const Home = () => {
             <p className="text-2xl mb-8 max-w-4xl mx-auto">
               {t.heroSubtitle}
             </p>
+            
+            {/* 30-Day Warranty Badge */}
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-3">
+                <Shield className="h-5 w-5 text-green-300" />
+                <span className="text-white font-semibold">30-Day Money Back Guarantee</span>
+              </div>
+            </div>
+
             <Button 
               onClick={handleFreeTrial}
               size="lg"
@@ -79,6 +88,21 @@ const Home = () => {
             <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
               {t.subscriptionsTitle}
             </h2>
+            
+            {/* 30-Day Warranty Section */}
+            <div className="mb-12 text-center">
+              <div className="max-w-3xl mx-auto p-6 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <Shield className="h-6 w-6 text-blue-600" />
+                  <h3 className="text-xl font-semibold text-blue-900">30-Day Service Warranty</h3>
+                </div>
+                <p className="text-blue-800">
+                  All our subscription packages come with a 30-day warranty. Experience any issues? 
+                  Contact our support team for immediate assistance or receive a full refund within the warranty period.
+                </p>
+              </div>
+            </div>
+
             {subscriptionPackages.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {subscriptionPackages.map((pkg) => (

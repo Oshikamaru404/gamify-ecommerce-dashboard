@@ -15,7 +15,8 @@ import {
   Clock,
   CheckCircle,
   Star,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -40,13 +41,6 @@ const Activation = () => {
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .trim();
-  };
-
-  const getDurationPrice = (pkg: any, months: number) => {
-    switch (months) {
-      case 12: return pkg.price_12_months || (pkg.price_1_month || 49.99) * 12 * 0.75;
-      default: return 49.99;
-    }
   };
 
   const deviceTypes = [
@@ -80,6 +74,16 @@ const Activation = () => {
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
           <div className="container py-20">
+            <div className="flex items-center mb-8">
+              <Link 
+                to="/" 
+                className="inline-flex items-center text-white/80 hover:text-white transition-colors duration-200 group"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                Back to Home
+              </Link>
+            </div>
+            
             <div className="text-center max-w-4xl mx-auto">
               <Crown className="h-16 w-16 mx-auto mb-6 text-yellow-300" />
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -87,7 +91,7 @@ const Activation = () => {
               </h1>
               <p className="text-xl text-white/90 mb-8 leading-relaxed">
                 Professional activation service for your streaming devices. Get your IPTV up and running 
-                with our premium activation packages designed for all major platforms.
+                with our premium 12-month activation packages designed for all major platforms.
               </p>
               <div className="flex flex-wrap justify-center gap-6 text-lg">
                 <div className="flex items-center">
@@ -100,7 +104,7 @@ const Activation = () => {
                 </div>
                 <div className="flex items-center">
                   <CheckCircle className="mr-2 h-6 w-6 text-green-300" />
-                  <span>24/7 Technical Support</span>
+                  <span>12-Month Guarantee</span>
                 </div>
               </div>
             </div>
@@ -127,16 +131,16 @@ const Activation = () => {
           </div>
         </section>
 
-        {/* Activation Packages */}
+        {/* 12-Month Activation Packages */}
         <section className="py-16 bg-gray-50">
           <div className="container">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Activation Packages
+                12-Month Activation Packages
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Choose the perfect activation package for your streaming setup. 
-                All packages include professional device configuration and ongoing support.
+                Our premium activation packages come with a full year of service, professional setup, 
+                and comprehensive support. Perfect for long-term streaming needs.
               </p>
             </div>
 
@@ -144,6 +148,8 @@ const Activation = () => {
               <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
                 {activationPackages.map((pkg, index) => {
                   const productSlug = generateSlug(pkg.name);
+                  // Only show 12-month price for activation packages
+                  const price12Months = pkg.price_12_months || 199.99;
                   
                   return (
                     <Card key={pkg.id} className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -155,10 +161,20 @@ const Activation = () => {
                       )}
                       
                       <CardHeader className="text-center pb-2">
-                        <div className="text-4xl mb-4">{pkg.icon || '🚀'}</div>
+                        <div className="text-4xl mb-4">
+                          {pkg.icon_url ? (
+                            <img 
+                              src={pkg.icon_url} 
+                              alt={pkg.name}
+                              className="w-16 h-16 mx-auto rounded-lg object-cover"
+                            />
+                          ) : (
+                            <span>{pkg.icon || '🚀'}</span>
+                          )}
+                        </div>
                         <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
                         <p className="text-gray-600 mt-2">
-                          {pkg.description || 'Professional device activation with premium support'}
+                          {pkg.description || 'Professional 12-month device activation with premium support'}
                         </p>
                       </CardHeader>
                       
@@ -177,7 +193,11 @@ const Activation = () => {
                           <div className="space-y-3">
                             <div className="flex items-start gap-3">
                               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                              <span className="text-sm text-gray-700">Professional device setup</span>
+                              <span className="text-sm text-gray-700">Professional device setup & configuration</span>
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                              <span className="text-sm text-gray-700">12-month activation guarantee</span>
                             </div>
                             <div className="flex items-start gap-3">
                               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
@@ -185,31 +205,32 @@ const Activation = () => {
                             </div>
                             <div className="flex items-start gap-3">
                               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                              <span className="text-sm text-gray-700">24/7 technical support</span>
+                              <span className="text-sm text-gray-700">Priority technical support</span>
                             </div>
                           </div>
                         )}
 
-                        {/* Pricing Info */}
-                        <div className="bg-green-50 p-4 rounded-lg border-2 border-green-500">
+                        {/* 12-Month Pricing */}
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500">
                           <div className="text-center">
-                            <div className="text-lg font-semibold text-green-700 mb-1">
+                            <Badge className="bg-green-600 text-white mb-3">
+                              <Crown className="mr-1 h-4 w-4" />
                               12 Months Plan
-                            </div>
-                            <Badge className="bg-green-600 text-white mb-2">
-                              Best Value
                             </Badge>
-                            <div className="text-2xl font-bold text-green-700">
-                              ${getDurationPrice(pkg, 12).toFixed(2)}
+                            <div className="text-3xl font-bold text-green-700 mb-2">
+                              €{price12Months.toFixed(2)}
                             </div>
-                            <div className="text-sm text-gray-600">
-                              ${(getDurationPrice(pkg, 12) / 12).toFixed(2)}/month
+                            <div className="text-sm text-gray-600 mb-2">
+                              €{(price12Months / 12).toFixed(2)}/month
+                            </div>
+                            <div className="text-xs text-green-600 font-medium">
+                              Full year activation + support included
                             </div>
                           </div>
                         </div>
 
                         <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
-                          <Link to={`/product/${productSlug}`}>
+                          <Link to={`/products/${productSlug}`}>
                             View Details & Purchase
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
@@ -226,11 +247,11 @@ const Activation = () => {
                   No Activation Packages Available
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Activation packages are currently being configured. Please check back soon.
+                  12-month activation packages are currently being configured. Please check back soon.
                 </p>
                 <Button asChild variant="outline">
                   <Link to="/subscription">
-                    Browse Other Packages
+                    Browse Subscription Packages
                   </Link>
                 </Button>
               </div>
@@ -242,7 +263,7 @@ const Activation = () => {
         <section className="py-16 bg-white">
           <div className="container">
             <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-              Why Choose Our Activation Service?
+              Why Choose Our 12-Month Activation Service?
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature, index) => (

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Star, Check, Zap } from 'lucide-react';
+import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import StoreLayout from '@/components/store/StoreLayout';
 import CheckoutForm from '@/components/CheckoutForm';
@@ -62,9 +62,17 @@ const Subscription = () => {
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
                 {t.ourSubscriptions}
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-8">
                 {t.subscriptionsTitle}
               </p>
+              
+              {/* 30-Day Warranty Badge */}
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-3">
+                  <Shield className="h-5 w-5 text-green-300" />
+                  <span className="text-white font-semibold">30-Day Money Back Guarantee</span>
+                </div>
+              </div>
               
               <div className="flex items-center justify-center mt-8 space-x-8">
                 <div className="flex items-center">
@@ -78,6 +86,39 @@ const Subscription = () => {
                 <div className="flex items-center">
                   <Zap className="text-blue-300 mr-2" size={24} />
                   <span className="text-lg">{t.instantActivation}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 30-Day Warranty Section */}
+        <div className="bg-white py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="p-8 bg-blue-50 border border-blue-200 rounded-2xl">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <Shield className="h-8 w-8 text-blue-600" />
+                  <h2 className="text-2xl font-bold text-blue-900">30-Day Service Warranty</h2>
+                </div>
+                <p className="text-lg text-blue-800 leading-relaxed">
+                  We stand behind our service quality. All subscription packages include a comprehensive 30-day warranty. 
+                  If you experience any technical issues or are not satisfied with our service during this period, 
+                  contact our support team for immediate resolution or receive a full refund - no questions asked.
+                </p>
+                <div className="mt-6 grid md:grid-cols-3 gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <span className="text-blue-800">Full refund guarantee</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <span className="text-blue-800">24/7 technical support</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <span className="text-blue-800">No questions asked policy</span>
+                  </div>
                 </div>
               </div>
             </div>
