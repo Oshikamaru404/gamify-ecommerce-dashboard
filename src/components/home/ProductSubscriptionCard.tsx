@@ -44,6 +44,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
         {/* Top Section - Icon (Red Background) - Much Larger */}
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
+          {/* 30-Day Warranty Badge */}
+          <div className="absolute top-4 right-4 z-10">
+            <Badge className="bg-white/90 text-blue-600 px-3 py-1 rounded-full text-xs font-semibold shadow-md flex items-center">
+              <Shield className="w-3 h-3 mr-1" />
+              30-Day Warranty
+            </Badge>
+          </div>
+
           {/* Icon Background Circle - Much Larger */}
           <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
             {/* Image URL takes priority over emoji */}
