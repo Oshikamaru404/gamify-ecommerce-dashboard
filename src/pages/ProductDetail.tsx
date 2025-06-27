@@ -97,6 +97,15 @@ const ProductDetail = () => {
   const monthlyPrice = getMonthlyPrice(selectedDuration);
   const savings = getSavings(selectedDuration);
 
+  // Create the package data object for checkout
+  const checkoutPackageData = {
+    id: currentPackage.id,
+    name: currentPackage.name,
+    category: currentPackage.category,
+    price: selectedPrice,
+    duration: selectedDuration
+  };
+
   return (
     <StoreLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -298,11 +307,7 @@ const ProductDetail = () => {
           {/* Checkout Form Modal */}
           {showCheckout && (
             <CheckoutForm
-              packageData={{
-                ...currentPackage,
-                selectedDuration,
-                selectedPrice
-              }}
+              packageData={checkoutPackageData}
               onClose={handleCloseCheckout}
               onSuccess={handleOrderSuccess}
             />
