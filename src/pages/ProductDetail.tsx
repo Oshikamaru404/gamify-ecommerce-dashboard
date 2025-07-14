@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, Check, ShoppingCart, Shield, Clock } from 'lucide-react';
@@ -16,16 +17,55 @@ const ProductDetail = () => {
   const [selectedDuration, setSelectedDuration] = useState<number>(1);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Find package by slug
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
+  // Enhanced slug generation to handle category-specific packages
+  const generateSlug = (name: string, category: string) => {
+    const baseSlug = name.toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .trim();
+    
+    // For activation-player packages, add category suffix to make slug unique
+    if (category === 'activation-player') {
+      return `${baseSlug}-activation`;
+    }
+    return baseSlug;
   };
 
-  const currentPackage = packages?.find(pkg => generateSlug(pkg.name) === slug);
+  // Find package by enhanced slug matching
+  const findPackageBySlug = (slug: string, packages: any[]) => {
+    // First try exact match
+    let foundPackage = packages.find(pkg => generateSlug(pkg.name, pkg.category) === slug);
+    
+    // If not found and slug ends with '-activation', try to find activation-player package
+    if (!foundPackage && slug.endsWith('-activation')) {
+      const baseName = slug.replace('-activation', '');
+      foundPackage = packages.find(pkg => 
+        pkg.category === 'activation-player' && 
+        generateSlug(pkg.name, 'activation-player') === slug
+      );
+    }
+    
+    // If still not found, try base slug match for backward compatibility
+    if (!foundPackage) {
+      const baseSlug = slug.replace('-activation', '');
+      foundPackage = packages.find(pkg => {
+        const pkgBaseSlug = pkg.name.toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^\w-]/g, '')
+          .replace(/--+/g, '-')
+          .trim();
+        return pkgBaseSlug === baseSlug;
+      });
+    }
+    
+    return foundPackage;
+  };
+
+  const currentPackage = packages ? findPackageBySlug(slug!, packages) : null;
+
+  console.log('ProductDetail - Current slug:', slug);
+  console.log('ProductDetail - Found package:', currentPackage);
 
   // Auto-select 12-month plan for ALL activation-player packages
   useEffect(() => {
@@ -111,9 +151,12 @@ const ProductDetail = () => {
         <div className="container py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Package Not Found</h1>
           <p className="text-gray-600 mb-8">The package you're looking for doesn't exist.</p>
-          <Button asChild>
-            <Link to="/subscription">Browse All Packages</Link>
-          </Button>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Slug: {slug}</p>
+            <Button asChild>
+              <Link to="/subscription">Browse All Packages</Link>
+            </Button>
+          </div>
         </div>
       </StoreLayout>
     );
@@ -139,11 +182,11 @@ const ProductDetail = () => {
           {/* Back Navigation */}
           <div className="mb-8">
             <Link 
-              to="/subscription" 
+              to={currentPackage.category === 'activation-player' ? '/activation' : '/subscription'}
               className="inline-flex items-center text-red-600 hover:text-red-700 transition-colors duration-200 group"
             >
               <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
-              Back to Packages
+              {currentPackage.category === 'activation-player' ? 'Back to Activation' : 'Back to Packages'}
             </Link>
           </div>
 
@@ -158,9 +201,18 @@ const ProductDetail = () => {
                         src={currentPackage.icon_url} 
                         alt={currentPackage.name}
                         className="w-20 h-20 mx-auto rounded-lg object-cover"
+                        onError={(e) => {
+                          console.log('Image failed to load:', currentPackage.icon_url);
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.setAttribute('style', 'display: block');
+                        }}
                       />
-                    ) : (
+                    ) : null}
+                    {!currentPackage.icon_url && (
                       <span>{currentPackage.icon || '📺'}</span>
+                    )}
+                    {currentPackage.icon_url && (
+                      <span style={{ display: 'none' }}>{currentPackage.icon || '📺'}</span>
                     )}
                   </div>
                   <CardTitle className="text-3xl font-bold">{currentPackage.name}</CardTitle>
@@ -298,11 +350,6 @@ const ProductDetail = () => {
                           {duration.badge && (
                             <Badge className="bg-green-100 text-green-700 text-xs">
                               {duration.badge}
-                            </Badge>
-                          )}
-                          {currentPackage.category === 'activation-player' && (
-                            <Badge className="bg-blue-100 text-blue-700 text-xs mt-1">
-                              Auto-Selected
                             </Badge>
                           )}
                         </div>

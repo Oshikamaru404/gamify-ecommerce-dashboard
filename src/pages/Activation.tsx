@@ -40,12 +40,19 @@ const Activation = () => {
 
   console.log('Activation page - filtered activation packages:', activationPackages);
 
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
+  // Enhanced slug generation to match ProductDetail page
+  const generateSlug = (name: string, category: string) => {
+    const baseSlug = name.toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .trim();
+    
+    // For activation-player packages, add category suffix to make slug unique
+    if (category === 'activation-player') {
+      return `${baseSlug}-activation`;
+    }
+    return baseSlug;
   };
 
   const deviceTypes = [
@@ -157,8 +164,10 @@ const Activation = () => {
             {activationPackages.length > 0 ? (
               <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
                 {activationPackages.map((pkg, index) => {
-                  const productSlug = generateSlug(pkg.name);
+                  const productSlug = generateSlug(pkg.name, pkg.category);
                   const price12Months = pkg.price_12_months || 199.99;
+                  
+                  console.log('Activation page - generating slug for:', pkg.name, 'category:', pkg.category, 'slug:', productSlug);
                   
                   return (
                     <Card key={pkg.id} className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -176,9 +185,18 @@ const Activation = () => {
                               src={pkg.icon_url} 
                               alt={pkg.name}
                               className="w-16 h-16 mx-auto rounded-lg object-cover"
+                              onError={(e) => {
+                                console.log('Activation page - Image failed to load:', pkg.icon_url);
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.nextElementSibling?.setAttribute('style', 'display: block');
+                              }}
                             />
-                          ) : (
+                          ) : null}
+                          {!pkg.icon_url && (
                             <span>{pkg.icon || '🚀'}</span>
+                          )}
+                          {pkg.icon_url && (
+                            <span style={{ display: 'none' }}>{pkg.icon || '🚀'}</span>
                           )}
                         </div>
                         <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
