@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from './contexts/LanguageContext';
 import { StoreProvider } from './contexts/StoreContext';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import { useScrollToTop } from './hooks/useScrollToTop';
 
 // Import pages
 import Index from "./pages/Index";
@@ -42,6 +43,12 @@ import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
 
+// Component to handle scroll to top on route change
+const ScrollToTopWrapper = () => {
+  useScrollToTop();
+  return null;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -52,6 +59,7 @@ function App() {
               <Toaster />
               <Sonner />
               <BrowserRouter>
+                <ScrollToTopWrapper />
                 <Routes>
                   {/* Public routes - Index is now the main home page */}
                   <Route path="/" element={<Home />} />

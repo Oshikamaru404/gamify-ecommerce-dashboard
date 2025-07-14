@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,11 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 const Activation = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   console.log('Activation page - packages:', packages);
 
@@ -142,13 +147,18 @@ const Activation = () => {
                 Our premium activation packages come with a full year of service, professional setup, 
                 and comprehensive support. Perfect for long-term streaming needs.
               </p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-md mx-auto mt-6">
+                <p className="text-green-800 font-medium">
+                  ✅ All packages automatically include 12-month activation
+                </p>
+              </div>
             </div>
 
             {activationPackages.length > 0 ? (
               <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
                 {activationPackages.map((pkg, index) => {
                   const productSlug = generateSlug(pkg.name);
-                  // Only show 12-month price for activation packages
+                  // Auto-select 12-month price for activation packages
                   const price12Months = pkg.price_12_months || 199.99;
                   
                   return (
@@ -210,8 +220,13 @@ const Activation = () => {
                           </div>
                         )}
 
-                        {/* 12-Month Pricing */}
-                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500">
+                        {/* Auto-Selected 12-Month Pricing */}
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500 relative">
+                          <div className="absolute top-2 right-2">
+                            <Badge className="bg-green-600 text-white text-xs">
+                              AUTO-SELECTED
+                            </Badge>
+                          </div>
                           <div className="text-center">
                             <Badge className="bg-green-600 text-white mb-3">
                               <Crown className="mr-1 h-4 w-4" />
@@ -224,14 +239,14 @@ const Activation = () => {
                               €{(price12Months / 12).toFixed(2)}/month
                             </div>
                             <div className="text-xs text-green-600 font-medium">
-                              Full year activation + support included
+                              ✅ Full year activation + support included
                             </div>
                           </div>
                         </div>
 
                         <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
-                          <Link to={`/products/${productSlug}`}>
-                            View Details & Purchase
+                          <Link to={`/products/${productSlug}?plan=12months`}>
+                            Purchase 12-Month Package
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
                         </Button>

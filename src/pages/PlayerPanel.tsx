@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,11 @@ const PlayerPanel = () => {
   const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Filter only player packages
   const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
@@ -30,10 +36,6 @@ const PlayerPanel = () => {
     switch (credits) {
       case 1: return '12 Months';
       case 2: return 'Lifetime';
-      case 10: return '10 Months';
-      case 25: return '25 Months';
-      case 50: return '50 Months';
-      case 100: return '100 Months';
       default: return `${credits} Credits`;
     }
   };
@@ -90,7 +92,7 @@ const PlayerPanel = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
               <h3 className="text-lg font-bold text-blue-900 mb-3">Player Credit System</h3>
               <div className="text-blue-800 space-y-1">
-                <p className="font-medium">💡 Special Player Credit Mapping:</p>
+                <p className="font-medium">💡 Special Player Credit Options:</p>
                 <div className="text-sm space-y-1 mt-2">
                   <p>• 1 Credit = 12 Months</p>
                   <p>• 2 Credits = Lifetime</p>
@@ -157,17 +159,15 @@ const PlayerPanel = () => {
 
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t.manageSubscriptions}</h3>
                     
-                    {/* Credit Options Display with Player-specific mapping */}
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+                    {/* Only show 1 Credit and 2 Credits options */}
+                    <div className="grid gap-6 md:grid-cols-2 mb-8">
                       {[
-                        { credits: 10, price: player.price_10_credits },
-                        { credits: 25, price: player.price_25_credits },
-                        { credits: 50, price: player.price_50_credits },
-                        { credits: 100, price: player.price_100_credits },
+                        { credits: 1, price: player.price_10_credits ? 30 : null }, // 1 Credit = 12 Months
+                        { credits: 2, price: player.price_25_credits ? 60 : null }, // 2 Credits = Lifetime
                       ].filter(option => option.price).map((option, idx) => (
                         <Card key={idx} className="p-6 border-2 border-gray-100 text-center">
                           <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
-                          <div className="text-sm text-gray-600 mb-2">Credits</div>
+                          <div className="text-sm text-gray-600 mb-2">Credit{option.credits > 1 ? 's' : ''}</div>
                           
                           {/* Player Credit-Duration Mapping */}
                           <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
@@ -181,7 +181,7 @@ const PlayerPanel = () => {
                           
                           <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
                           <div className="text-sm text-gray-500 mb-4">
-                            ${(option.price! / option.credits).toFixed(1)} per credit
+                            ${(option.price! / option.credits).toFixed(0)} per credit
                           </div>
                           <Button 
                             onClick={() => handleQuickCheckout(player, option.credits, option.price!)}
