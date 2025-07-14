@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, Check, ShoppingCart, Shield, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +26,17 @@ const ProductDetail = () => {
   };
 
   const currentPackage = packages?.find(pkg => generateSlug(pkg.name) === slug);
+
+  // Auto-select 12-month plan for activation-player packages
+  useEffect(() => {
+    if (currentPackage) {
+      if (currentPackage.category === 'activation-player' && currentPackage.price_12_months) {
+        setSelectedDuration(12);
+      } else {
+        setSelectedDuration(1);
+      }
+    }
+  }, [currentPackage]);
 
   const handleCloseCheckout = () => {
     setShowCheckout(false);

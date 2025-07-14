@@ -158,7 +158,6 @@ const Activation = () => {
               <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
                 {activationPackages.map((pkg, index) => {
                   const productSlug = generateSlug(pkg.name);
-                  // Auto-select 12-month price for activation packages
                   const price12Months = pkg.price_12_months || 199.99;
                   
                   return (
@@ -220,13 +219,8 @@ const Activation = () => {
                           </div>
                         )}
 
-                        {/* Auto-Selected 12-Month Pricing */}
-                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500 relative">
-                          <div className="absolute top-2 right-2">
-                            <Badge className="bg-green-600 text-white text-xs">
-                              AUTO-SELECTED
-                            </Badge>
-                          </div>
+                        {/* 12-Month Pricing */}
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500">
                           <div className="text-center">
                             <Badge className="bg-green-600 text-white mb-3">
                               <Crown className="mr-1 h-4 w-4" />
@@ -245,7 +239,7 @@ const Activation = () => {
                         </div>
 
                         <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
-                          <Link to={`/products/${productSlug}?plan=12months`}>
+                          <Link to={`/products/${productSlug}`}>
                             Purchase 12-Month Package
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
