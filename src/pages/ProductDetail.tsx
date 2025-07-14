@@ -27,12 +27,15 @@ const ProductDetail = () => {
 
   const currentPackage = packages?.find(pkg => generateSlug(pkg.name) === slug);
 
-  // Auto-select 12-month plan for activation-player packages
+  // Auto-select 12-month plan for ALL activation-player packages
   useEffect(() => {
     if (currentPackage) {
-      if (currentPackage.category === 'activation-player' && currentPackage.price_12_months) {
+      if (currentPackage.category === 'activation-player') {
+        // Always auto-select 12 months for activation-player packages
         setSelectedDuration(12);
+        console.log(`Auto-selected 12-month plan for activation package: ${currentPackage.name}`);
       } else {
+        // For other categories, default to 1 month
         setSelectedDuration(1);
       }
     }
@@ -71,12 +74,25 @@ const ProductDetail = () => {
     return totalRegular - totalDiscounted;
   };
 
-  const availableDurations = [
-    { months: 1, label: '1 Month', badge: null },
-    { months: 3, label: '3 Months', badge: '10% Off' },
-    { months: 6, label: '6 Months', badge: '20% Off' },
-    { months: 12, label: '12 Months', badge: 'Best Value' }
-  ].filter(duration => getPriceForDuration(duration.months) > 0);
+  // Filter available durations based on package category
+  const getAvailableDurations = () => {
+    if (currentPackage?.category === 'activation-player') {
+      // For activation-player packages, only show 12-month option
+      return [
+        { months: 12, label: '12 Months', badge: 'Best Value' }
+      ].filter(duration => getPriceForDuration(duration.months) > 0);
+    }
+    
+    // For other categories, show all available durations
+    return [
+      { months: 1, label: '1 Month', badge: null },
+      { months: 3, label: '3 Months', badge: '10% Off' },
+      { months: 6, label: '6 Months', badge: '20% Off' },
+      { months: 12, label: '12 Months', badge: 'Best Value' }
+    ].filter(duration => getPriceForDuration(duration.months) > 0);
+  };
+
+  const availableDurations = getAvailableDurations();
 
   if (isLoading) {
     return (
@@ -154,6 +170,13 @@ const ProductDetail = () => {
                       Most Popular
                     </Badge>
                   )}
+                  {/* Special badge for activation-player packages */}
+                  {currentPackage.category === 'activation-player' && (
+                    <Badge className="bg-green-500 text-white mt-2">
+                      <Shield className="mr-1 h-4 w-4" />
+                      12-Month Activation Service
+                    </Badge>
+                  )}
                 </CardHeader>
                 <CardContent className="p-8">
                   <p className="text-gray-700 text-lg leading-relaxed mb-6">
@@ -174,15 +197,27 @@ const ProductDetail = () => {
                       <>
                         <div className="flex items-start gap-3">
                           <Check className="h-5 w-5 text-green-600 mt-0.5" />
-                          <span className="text-gray-700">8000+ Live TV Channels</span>
+                          <span className="text-gray-700">
+                            {currentPackage.category === 'activation-player' 
+                              ? 'Professional device activation & setup' 
+                              : '8000+ Live TV Channels'}
+                          </span>
                         </div>
                         <div className="flex items-start gap-3">
                           <Check className="h-5 w-5 text-green-600 mt-0.5" />
-                          <span className="text-gray-700">Ultra HD 4K Quality</span>
+                          <span className="text-gray-700">
+                            {currentPackage.category === 'activation-player' 
+                              ? '12-month service guarantee' 
+                              : 'Ultra HD 4K Quality'}
+                          </span>
                         </div>
                         <div className="flex items-start gap-3">
                           <Check className="h-5 w-5 text-green-600 mt-0.5" />
-                          <span className="text-gray-700">VOD Library</span>
+                          <span className="text-gray-700">
+                            {currentPackage.category === 'activation-player' 
+                              ? 'Multi-platform compatibility' 
+                              : 'VOD Library'}
+                          </span>
                         </div>
                         <div className="flex items-start gap-3">
                           <Check className="h-5 w-5 text-green-600 mt-0.5" />
@@ -197,10 +232,13 @@ const ProductDetail = () => {
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <h4 className="font-semibold text-blue-900 mb-1">30-Day Warranty</h4>
+                        <h4 className="font-semibold text-blue-900 mb-1">
+                          {currentPackage.category === 'activation-player' ? '12-Month Service Guarantee' : '30-Day Warranty'}
+                        </h4>
                         <p className="text-sm text-blue-800">
-                          We guarantee service quality for 30 days from activation. If you experience any issues during this period, 
-                          contact our support team for immediate assistance or a full refund.
+                          {currentPackage.category === 'activation-player' 
+                            ? 'We guarantee full activation service for 12 months from purchase. Professional setup and ongoing support included.'
+                            : 'We guarantee service quality for 30 days from activation. If you experience any issues during this period, contact our support team for immediate assistance or a full refund.'}
                         </p>
                       </div>
                     </div>
@@ -213,8 +251,14 @@ const ProductDetail = () => {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-2xl text-gray-900">Choose Your Plan</CardTitle>
-                  <p className="text-gray-600">Select the duration that works best for you</p>
+                  <CardTitle className="text-2xl text-gray-900">
+                    {currentPackage.category === 'activation-player' ? 'Activation Service Plan' : 'Choose Your Plan'}
+                  </CardTitle>
+                  <p className="text-gray-600">
+                    {currentPackage.category === 'activation-player' 
+                      ? 'Professional 12-month activation service'
+                      : 'Select the duration that works best for you'}
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {availableDurations.map((duration) => (
@@ -224,8 +268,8 @@ const ProductDetail = () => {
                         selectedDuration === duration.months
                           ? 'border-red-500 bg-red-50'
                           : 'border-gray-200 hover:border-red-300'
-                      }`}
-                      onClick={() => setSelectedDuration(duration.months)}
+                      } ${currentPackage.category === 'activation-player' ? 'cursor-default' : ''}`}
+                      onClick={() => currentPackage.category !== 'activation-player' && setSelectedDuration(duration.months)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -254,6 +298,11 @@ const ProductDetail = () => {
                           {duration.badge && (
                             <Badge className="bg-green-100 text-green-700 text-xs">
                               {duration.badge}
+                            </Badge>
+                          )}
+                          {currentPackage.category === 'activation-player' && (
+                            <Badge className="bg-blue-100 text-blue-700 text-xs mt-1">
+                              Auto-Selected
                             </Badge>
                           )}
                         </div>
@@ -302,12 +351,16 @@ const ProductDetail = () => {
                     onClick={() => setShowCheckout(true)}
                   >
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    Purchase Now
+                    {currentPackage.category === 'activation-player' ? 'Purchase Activation Service' : 'Purchase Now'}
                   </Button>
 
                   <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
                     <Clock className="h-4 w-4" />
-                    <span>Instant activation after payment</span>
+                    <span>
+                      {currentPackage.category === 'activation-player' 
+                        ? 'Professional setup within 24 hours' 
+                        : 'Instant activation after payment'}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
