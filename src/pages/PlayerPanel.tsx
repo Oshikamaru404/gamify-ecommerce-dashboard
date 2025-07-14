@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
@@ -24,6 +23,19 @@ const PlayerPanel = () => {
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .trim();
+  };
+
+  // Player-specific credit-to-month mapping
+  const getPlayerCreditMapping = (credits: number) => {
+    switch (credits) {
+      case 1: return '12 Months';
+      case 2: return 'Lifetime';
+      case 10: return '10 Months';
+      case 25: return '25 Months';
+      case 50: return '50 Months';
+      case 100: return '100 Months';
+      default: return `${credits} Credits`;
+    }
   };
 
   const handleQuickCheckout = (player: any, credits: number, price: number) => {
@@ -74,11 +86,17 @@ const PlayerPanel = () => {
               {t.playerPanelSubtitle}
             </p>
             
-            {/* Credits Disclaimer */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-8">
-              <p className="text-blue-800 font-medium">
-                💡 Each credit is equivalent to 1 month of service activation
-              </p>
+            {/* Player Credits Disclaimer */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
+              <h3 className="text-lg font-bold text-blue-900 mb-3">Player Credit System</h3>
+              <div className="text-blue-800 space-y-1">
+                <p className="font-medium">💡 Special Player Credit Mapping:</p>
+                <div className="text-sm space-y-1 mt-2">
+                  <p>• 1 Credit = 12 Months</p>
+                  <p>• 2 Credits = Lifetime</p>
+                  <p className="text-xs text-blue-600 mt-2">Base Price: $30</p>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -139,7 +157,7 @@ const PlayerPanel = () => {
 
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t.manageSubscriptions}</h3>
                     
-                    {/* Credit Options Display */}
+                    {/* Credit Options Display with Player-specific mapping */}
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
                       {[
                         { credits: 10, price: player.price_10_credits },
@@ -150,10 +168,20 @@ const PlayerPanel = () => {
                         <Card key={idx} className="p-6 border-2 border-gray-100 text-center">
                           <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
                           <div className="text-sm text-gray-600 mb-2">Credits</div>
-                          <div className="text-xs text-blue-600 mb-4">({option.credits} months)</div>
-                          <div className="text-2xl font-bold text-gray-900 mb-4">{t.currency}{option.price}</div>
+                          
+                          {/* Player Credit-Duration Mapping */}
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                            <div className="text-sm font-medium text-green-900 mb-1">
+                              {option.credits} Credit{option.credits > 1 ? 's' : ''} = {getPlayerCreditMapping(option.credits)}
+                            </div>
+                            <div className="text-xs text-green-700">
+                              Player Special System
+                            </div>
+                          </div>
+                          
+                          <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
                           <div className="text-sm text-gray-500 mb-4">
-                            {t.currency}{(option.price! / option.credits).toFixed(1)} {t.perMonth}
+                            ${(option.price! / option.credits).toFixed(1)} per credit
                           </div>
                           <Button 
                             onClick={() => handleQuickCheckout(player, option.credits, option.price!)}
@@ -190,7 +218,7 @@ const PlayerPanel = () => {
           <div className="text-center mt-16 space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
               <p className="text-blue-800 font-medium">
-                💡 Remember: 1 credit = 1 month of service
+                💡 Player System: 1 Credit = 12 Months | 2 Credits = Lifetime
               </p>
             </div>
             
