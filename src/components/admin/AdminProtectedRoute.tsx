@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 interface AdminProtectedRouteProps {
@@ -9,6 +9,11 @@ interface AdminProtectedRouteProps {
 
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
   const { adminUser, isLoading } = useAdminAuth();
+  const location = useLocation();
+
+  console.log('AdminProtectedRoute - User:', adminUser);
+  console.log('AdminProtectedRoute - Loading:', isLoading);
+  console.log('AdminProtectedRoute - Location:', location.pathname);
 
   if (isLoading) {
     return (

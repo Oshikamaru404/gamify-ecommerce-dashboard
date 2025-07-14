@@ -33,13 +33,13 @@ import NotFound from "./pages/NotFound";
 
 // Admin pages
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
 import ManageProducts from "./pages/admin/ManageProducts";
 import EditProduct from "./pages/admin/EditProduct";
 import Settings from "./pages/admin/Settings";
 import Content from "./pages/admin/Content";
-import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -61,7 +61,7 @@ function App() {
               <BrowserRouter>
                 <ScrollToTopWrapper />
                 <Routes>
-                  {/* Public routes - Index is now the main home page */}
+                  {/* Public routes */}
                   <Route path="/" element={<Home />} />
                   <Route path="/landing" element={<Index />} />
                   <Route path="/home" element={<Home />} />
@@ -83,39 +83,19 @@ function App() {
                   <Route path="/iptv-panel" element={<IPTVPanel />} />
                   <Route path="/player-panel" element={<PlayerPanel />} />
                   
-                  {/* Admin routes */}
-                  <Route path="/admin" element={<AdminLogin />} />
+                  {/* Admin login route */}
                   <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin/dashboard" element={
-                    <AdminProtectedRoute>
-                      <Dashboard />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/orders" element={
-                    <AdminProtectedRoute>
-                      <Orders />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/products" element={
-                    <AdminProtectedRoute>
-                      <ManageProducts />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/products/:id/edit" element={
-                    <AdminProtectedRoute>
-                      <EditProduct />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/settings" element={
-                    <AdminProtectedRoute>
-                      <Settings />
-                    </AdminProtectedRoute>
-                  } />
-                  <Route path="/admin/content" element={
-                    <AdminProtectedRoute>
-                      <Content />
-                    </AdminProtectedRoute>
-                  } />
+                  
+                  {/* Admin routes with layout */}
+                  <Route path="/admin/*" element={<AdminLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="orders" element={<Orders />} />
+                    <Route path="products" element={<ManageProducts />} />
+                    <Route path="products/:id/edit" element={<EditProduct />} />
+                    <Route path="content" element={<Content />} />
+                    <Route path="settings" element={<Settings />} />
+                  </Route>
                   
                   {/* 404 page */}
                   <Route path="*" element={<NotFound />} />

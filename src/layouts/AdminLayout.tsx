@@ -41,15 +41,16 @@ const AdminLayout = () => {
     <AdminProtectedRoute>
       <div className="flex h-screen bg-gray-100">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-lg">
+        <div className="w-64 bg-white shadow-lg flex flex-col">
           <div className="p-6">
             <h1 className="text-2xl font-bold text-red-600">BWIVOX Admin</h1>
             <p className="text-sm text-gray-600 mt-1">Welcome, {adminUser?.username}</p>
           </div>
           
-          <nav className="mt-6">
+          <nav className="mt-6 flex-1">
             {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
+              const isActive = location.pathname === item.href || 
+                (item.href === '/admin' && location.pathname === '/admin/dashboard');
               return (
                 <Link
                   key={item.name}
@@ -67,7 +68,7 @@ const AdminLayout = () => {
             })}
           </nav>
           
-          <div className="absolute bottom-0 w-64 p-6">
+          <div className="p-6 mt-auto">
             <Button
               variant="outline"
               onClick={handleLogout}
