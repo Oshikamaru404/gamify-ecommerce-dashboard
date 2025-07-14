@@ -359,7 +359,7 @@ const ProductDetail = () => {
                 </CardContent>
               </Card>
 
-              {/* Purchase Summary - Exactly like VU Player Pro */}
+              {/* Purchase Summary */}
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
