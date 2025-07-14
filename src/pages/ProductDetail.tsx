@@ -232,7 +232,11 @@ const ProductDetail = () => {
                 </CardHeader>
                 <CardContent className="p-8">
                   <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                    {currentPackage.description || 'Premium IPTV subscription with unlimited access to channels and content.'}
+                    {currentPackage.description || 
+                      (currentPackage.category === 'activation-player' 
+                        ? 'Professional 12-month device activation service with comprehensive setup and ongoing support.'
+                        : 'Premium IPTV subscription with unlimited access to channels and content.')
+                    }
                   </p>
 
                   {/* Features */}
@@ -279,7 +283,7 @@ const ProductDetail = () => {
                     )}
                   </div>
 
-                  {/* 30-Day Warranty Disclaimer */}
+                  {/* 12-Month Service Guarantee */}
                   <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
@@ -316,11 +320,11 @@ const ProductDetail = () => {
                   {availableDurations.map((duration) => (
                     <div
                       key={duration.months}
-                      className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                      className={`relative p-4 border-2 rounded-lg transition-all duration-200 ${
                         selectedDuration === duration.months
                           ? 'border-red-500 bg-red-50'
-                          : 'border-gray-200 hover:border-red-300'
-                      } ${currentPackage.category === 'activation-player' ? 'cursor-default' : ''}`}
+                          : 'border-gray-200'
+                      } ${currentPackage.category === 'activation-player' ? 'cursor-default' : 'cursor-pointer hover:border-red-300'}`}
                       onClick={() => currentPackage.category !== 'activation-player' && setSelectedDuration(duration.months)}
                     >
                       <div className="flex items-center justify-between">
@@ -364,7 +368,7 @@ const ProductDetail = () => {
                 </CardContent>
               </Card>
 
-              {/* Purchase Summary */}
+              {/* Purchase Summary - Exactly like VU Player Pro */}
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
