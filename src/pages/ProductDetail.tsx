@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, Check, ShoppingCart, Shield, Clock } from 'lucide-react';
@@ -114,16 +113,8 @@ const ProductDetail = () => {
     return totalRegular - totalDiscounted;
   };
 
-  // Filter available durations based on package category
+  // Show all available durations for all packages (including activation-player)
   const getAvailableDurations = () => {
-    if (currentPackage?.category === 'activation-player') {
-      // For activation-player packages, only show 12-month option
-      return [
-        { months: 12, label: '12 Months', badge: 'Best Value' }
-      ].filter(duration => getPriceForDuration(duration.months) > 0);
-    }
-    
-    // For other categories, show all available durations
     return [
       { months: 1, label: '1 Month', badge: null },
       { months: 3, label: '3 Months', badge: '10% Off' },
@@ -320,12 +311,12 @@ const ProductDetail = () => {
                   {availableDurations.map((duration) => (
                     <div
                       key={duration.months}
-                      className={`relative p-4 border-2 rounded-lg transition-all duration-200 ${
+                      className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
                         selectedDuration === duration.months
                           ? 'border-red-500 bg-red-50'
-                          : 'border-gray-200'
-                      } ${currentPackage.category === 'activation-player' ? 'cursor-default' : 'cursor-pointer hover:border-red-300'}`}
-                      onClick={() => currentPackage.category !== 'activation-player' && setSelectedDuration(duration.months)}
+                          : 'border-gray-200 hover:border-red-300'
+                      }`}
+                      onClick={() => setSelectedDuration(duration.months)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
