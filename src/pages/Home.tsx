@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import FeedbackCards from '@/components/home/FeedbackCards';
 import NewsletterSubscription from '@/components/home/NewsletterSubscription';
+import ActivationSection from '@/components/home/ActivationSection';
 import CheckoutForm from '@/components/CheckoutForm';
 import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -121,6 +122,9 @@ const Home = () => {
             )}
           </div>
         </section>
+
+        {/* Activation Section - Exact clone from Activation page */}
+        <ActivationSection />
 
         {/* Customer Feedback Section */}
         <section className="py-20 bg-white">

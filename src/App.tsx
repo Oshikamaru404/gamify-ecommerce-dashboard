@@ -53,8 +53,9 @@ function App() {
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
+                  {/* Public routes - Index is now the main home page */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/landing" element={<Index />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:slug" element={<ProductDetail />} />
