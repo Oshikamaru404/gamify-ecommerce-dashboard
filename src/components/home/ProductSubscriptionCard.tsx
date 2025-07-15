@@ -42,42 +42,31 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
       )}
 
       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-        {/* Top Section - Icon (Red Background) - Much Larger */}
+        {/* Top Section - Icon (Red Background) */}
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
-          {/* Icon Background Circle - Much Larger */}
-          <div className="w-16 h-16 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-            {/* Image URL takes priority over emoji */}
-            {pkg.icon_url ? (
+          <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+            {/* Priority: Use uploaded image URL first */}
+            {pkg.icon_url && (
               <img 
                 src={pkg.icon_url} 
                 alt={pkg.name}
                 className="w-24 h-24 rounded-2xl object-cover shadow-xl"
                 onError={(e) => {
-                  console.error('Failed to load image:', pkg.icon_url);
-                  // Hide the image and show fallback
+                  // If image fails to load, hide it and show fallback
                   e.currentTarget.style.display = 'none';
-                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = 'block';
+                  const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                  if (fallbackContainer) fallbackContainer.style.display = 'flex';
                 }}
               />
-            ) : null}
-            
-            {/* Emoji fallback - show if no image URL or if image fails to load */}
-            {pkg.icon && (
-              <div 
-                className="text-4xl text-white drop-shadow-lg"
-                style={{ display: pkg.icon_url ? 'none' : 'block' }}
-              >
-                {pkg.icon}
-              </div>
             )}
             
-            {/* Default fallback if neither image nor emoji */}
-            {!pkg.icon && !pkg.icon_url && (
-              <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center">
-                <span className="text-white text-2xl">📺</span>
-              </div>
-            )}
+            {/* Fallback: Use emoji if no image URL or if image fails to load */}
+            <div 
+              className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-4xl text-white drop-shadow-lg"
+              style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+            >
+              {pkg.icon || '📺'}
+            </div>
           </div>
         </div>
 

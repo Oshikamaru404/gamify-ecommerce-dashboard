@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, Server, Settings, BarChart3 } from 'lucide-react';
 import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const IPTVPanel = () => {
   const { t } = useLanguage();
+  const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
@@ -49,63 +51,25 @@ const IPTVPanel = () => {
     }
   };
 
-  const packages = [
-    {
-      name: "STRONG 8K IPTV",
-      icon: "🚀",
-      description: t.premiumQualityDesc,
-      creditOptions: [
-        { credits: 10, price: 89 },
-        { credits: 25, price: 199 },
-        { credits: 50, price: 349 },
-        { credits: 100, price: 599 }
-      ]
-    },
-    {
-      name: "TREX 8K IPTV",
-      icon: "🦖", 
-      description: t.guaranteedReliabilityDesc,
-      creditOptions: [
-        { credits: 10, price: 79 },
-        { credits: 25, price: 179 },
-        { credits: 50, price: 319 },
-        { credits: 100, price: 549 }
-      ]
-    },
-    {
-      name: "PROMAX 4K IPTV",
-      icon: "⚡",
-      description: t.fastActivationDesc,
-      creditOptions: [
-        { credits: 10, price: 119 },
-        { credits: 25, price: 269 },
-        { credits: 50, price: 479 },
-        { credits: 100, price: 819 }
-      ]
-    },
-    {
-      name: "TIVIONE 4K IPTV",
-      icon: "📺",
-      description: t.premiumQualityDesc,
-      creditOptions: [
-        { credits: 10, price: 99 },
-        { credits: 25, price: 219 },
-        { credits: 50, price: 389 },
-        { credits: 100, price: 669 }
-      ]
-    },
-    {
-      name: "B1G 4K IPTV",
-      icon: "🎬",
-      description: t.guaranteedReliabilityDesc,
-      creditOptions: [
-        { credits: 10, price: 109 },
-        { credits: 25, price: 249 },
-        { credits: 50, price: 439 },
-        { credits: 100, price: 759 }
-      ]
-    }
-  ];
+  // Filter panel-iptv packages from database
+  const panelIptvPackages = packages?.filter(pkg => 
+    pkg.category === 'panel-iptv' && pkg.status !== 'inactive'
+  ) || [];
+
+  if (isLoading) {
+    return (
+      <StoreLayout>
+        <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+          <div className="container py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
+              <p className="mt-4 text-lg text-gray-600">Loading packages...</p>
+            </div>
+          </div>
+        </div>
+      </StoreLayout>
+    );
+  }
 
   return (
     <StoreLayout>
@@ -155,63 +119,98 @@ const IPTVPanel = () => {
           </div>
 
           <section className="space-y-16">
-            {packages.map((pkg, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
-                  <div className="flex items-center gap-4">
-                    <div className="text-4xl h-16 w-16 flex items-center justify-center">{pkg.icon}</div>
-                    <div>
-                      <h2 className="text-3xl font-bold">{pkg.name}</h2>
-                      <p className="text-red-100 text-lg">{pkg.description}</p>
+            {panelIptvPackages.length > 0 ? (
+              panelIptvPackages.map((pkg, index) => (
+                <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 flex items-center justify-center">
+                        {/* Priority: Use uploaded image URL first */}
+                        {pkg.icon_url ? (
+                          <img 
+                            src={pkg.icon_url} 
+                            alt={pkg.name}
+                            className="w-14 h-14 rounded-lg object-cover shadow-lg"
+                            onError={(e) => {
+                              // If image fails to load, hide it and show fallback
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        
+                        {/* Fallback: Use emoji or default icon */}
+                        <div 
+                          className="w-14 h-14 rounded-lg bg-red-400/30 flex items-center justify-center text-3xl backdrop-blur-sm"
+                          style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                        >
+                          {pkg.icon || '🖥️'}
+                        </div>
+                      </div>
+                      <div>
+                        <h2 className="text-3xl font-bold">{pkg.name}</h2>
+                        <p className="text-red-100 text-lg">{pkg.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t.manageSubscriptions}</h3>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                      {[
+                        { credits: 10, price: pkg.price_10_credits },
+                        { credits: 25, price: pkg.price_25_credits },
+                        { credits: 50, price: pkg.price_50_credits },
+                        { credits: 100, price: pkg.price_100_credits }
+                      ].filter(option => option.price).map((option, idx) => (
+                        <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
+                            <div className="text-sm text-gray-600 mb-2">Credits</div>
+                            
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                              <div className="text-sm font-medium text-blue-900 mb-1">
+                                {option.credits} Credit{option.credits > 1 ? 's' : ''} = {getCreditMonthMapping(option.credits)}
+                              </div>
+                              <div className="text-xs text-blue-700">
+                                1 Credit = 1 Month
+                              </div>
+                            </div>
+                            
+                            <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
+                            <div className="text-sm text-gray-500 mb-6">
+                              ${(option.price! / option.credits).toFixed(1)} per credit
+                            </div>
+                            <div className="space-y-2">
+                              <Button 
+                                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                                onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}
+                              >
+                                Quick Order
+                              </Button>
+                              <Button 
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => handleContactWhatsApp(pkg.name, option.credits, option.price!)}
+                              >
+                                <MessageCircle className="mr-2" size={16} />
+                                WhatsApp
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
                     </div>
                   </div>
                 </div>
-                
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t.manageSubscriptions}</h3>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    {pkg.creditOptions.map((option, idx) => (
-                      <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
-                        <div className="text-center">
-                          <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
-                          <div className="text-sm text-gray-600 mb-2">Credits</div>
-                          
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <div className="text-sm font-medium text-blue-900 mb-1">
-                              {option.credits} Credit{option.credits > 1 ? 's' : ''} = {getCreditMonthMapping(option.credits)}
-                            </div>
-                            <div className="text-xs text-blue-700">
-                              1 Credit = 1 Month
-                            </div>
-                          </div>
-                          
-                          <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
-                          <div className="text-sm text-gray-500 mb-6">
-                            ${(option.price / option.credits).toFixed(1)} per credit
-                          </div>
-                          <div className="space-y-2">
-                            <Button 
-                              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-                              onClick={() => handleBuyNow(pkg.name, option.credits, option.price)}
-                            >
-                              Quick Order
-                            </Button>
-                            <Button 
-                              variant="outline"
-                              className="w-full"
-                              onClick={() => handleContactWhatsApp(pkg.name, option.credits, option.price)}
-                            >
-                              <MessageCircle className="mr-2" size={16} />
-                              WhatsApp
-                            </Button>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-16">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No Panel IPTV Packages Available</h3>
+                <p className="text-gray-600">Panel IPTV packages are currently being updated. Please check back later.</p>
               </div>
-            ))}
+            )}
           </section>
 
           <div className="text-center mt-16 space-y-4">
