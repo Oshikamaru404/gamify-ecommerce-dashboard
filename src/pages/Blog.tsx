@@ -13,22 +13,19 @@ const Blog = () => {
   // Function to estimate reading time
   const estimateReadingTime = (content: string) => {
     const wordsPerMinute = 200;
-    const words = content.trim().split(/\s+/).length;
+    // Strip HTML tags for word count
+    const textContent = content.replace(/<[^>]*>/g, '');
+    const words = textContent.trim().split(/\s+/).length;
     return Math.ceil(words / wordsPerMinute);
   };
 
-  // Function to format article content with proper styling
-  const formatContent = (content: string) => {
-    return content.split('\n').map((paragraph, index) => {
-      if (paragraph.trim()) {
-        return (
-          <p key={index} className="mb-4 text-gray-700 leading-relaxed">
-            {paragraph}
-          </p>
-        );
-      }
-      return null;
-    });
+  // Function to create excerpt from rich text content
+  const createExcerpt = (content: string, maxLength: number = 150) => {
+    // Strip HTML tags
+    const textContent = content.replace(/<[^>]*>/g, '');
+    return textContent.length > maxLength 
+      ? textContent.substring(0, maxLength) + '...' 
+      : textContent;
   };
 
   if (isLoading) {
@@ -138,11 +135,12 @@ const Blog = () => {
                 </div>
               </header>
 
-              {/* Article content */}
+              {/* Article content - now renders rich text HTML */}
               <div className="prose prose-lg max-w-none">
-                <div className="text-lg leading-relaxed">
-                  {formatContent(selectedArticle.content)}
-                </div>
+                <div 
+                  className="text-lg leading-relaxed rich-text-content"
+                  dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
+                />
               </div>
 
               {/* Article footer */}
@@ -203,11 +201,9 @@ const Blog = () => {
                       {article.title}
                     </h3>
                     
-                    {article.excerpt && (
-                      <p className="text-gray-600 mb-4 line-clamp-3">
-                        {article.excerpt}
-                      </p>
-                    )}
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {article.excerpt || createExcerpt(article.content)}
+                    </p>
                     
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <div className="flex items-center gap-1">

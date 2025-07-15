@@ -1,4 +1,6 @@
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,147 +8,191 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 0 72% 51%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 72% 51%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 72% 51%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 9% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
 
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
   * {
-    @apply border-border selection:bg-red-500/10 selection:text-red-500;
+    @apply border-border;
   }
-  
   body {
-    @apply bg-white text-foreground antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  .game-card {
-    @apply relative overflow-hidden rounded-lg transition-all duration-300;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-  }
-  
-  .game-card:hover img {
-    @apply scale-110;
-  }
-  
-  .perspective {
-    perspective: 2000px;
-  }
-  
-  .admin-sidebar-item {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground;
-  }
-  
-  .admin-sidebar-item.active {
-    @apply bg-accent text-foreground;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.8s ease-out;
-  }
-
-  .glass-card {
-    @apply bg-gradient-to-br from-[#ff3333]/80 to-[#ff6666]/90 backdrop-blur-xl border border-[#ff7777]/20 shadow-[0_8px_32px_rgba(255,77,77,0.15)] hover:shadow-[0_8px_32px_rgba(255,77,77,0.3)] transition-all duration-500;
-  }
-
-  .gradient-text {
-    @apply bg-gradient-to-r from-[#ff3333] via-[#ff6666] to-[#ff9999] bg-clip-text text-transparent;
-  }
-
-  .neo-gradient {
-    @apply bg-gradient-to-br from-[#ff3333] to-[#cc2222];
-  }
-
-  .card-shine {
-    @apply before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-1000;
-  }
-
-  /* Blog-specific utilities */
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .prose {
-    @apply text-gray-700 leading-relaxed;
-  }
-
-  .prose p {
-    @apply mb-4;
-  }
-
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-    @apply font-bold text-gray-900 mt-8 mb-4;
-  }
-
-  .prose h1 { @apply text-3xl; }
-  .prose h2 { @apply text-2xl; }
-  .prose h3 { @apply text-xl; }
-
-  .prose ul, .prose ol {
-    @apply ml-6 mb-4;
-  }
-
-  .prose li {
-    @apply mb-2;
-  }
-
-  .prose blockquote {
-    @apply border-l-4 border-red-500 pl-4 italic my-6 text-gray-600;
-  }
-
-  .prose code {
-    @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono;
-  }
-
-  .prose pre {
-    @apply bg-gray-100 p-4 rounded-lg overflow-x-auto my-6;
-  }
+/* Rich text content styling */
+.rich-text-content {
+  @apply text-gray-800 leading-relaxed;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.rich-text-content h1 {
+  @apply text-3xl font-bold mb-4 text-gray-900;
 }
-@keyframes fadeOut {
-  from {
-    opacity: 1;
+
+.rich-text-content h2 {
+  @apply text-2xl font-bold mb-3 text-gray-900;
+}
+
+.rich-text-content h3 {
+  @apply text-xl font-semibold mb-3 text-gray-900;
+}
+
+.rich-text-content h4 {
+  @apply text-lg font-semibold mb-2 text-gray-900;
+}
+
+.rich-text-content h5 {
+  @apply text-base font-semibold mb-2 text-gray-900;
+}
+
+.rich-text-content h6 {
+  @apply text-sm font-semibold mb-2 text-gray-900;
+}
+
+.rich-text-content p {
+  @apply mb-4 text-gray-700;
+}
+
+.rich-text-content ul {
+  @apply mb-4 ml-6 list-disc;
+}
+
+.rich-text-content ol {
+  @apply mb-4 ml-6 list-decimal;
+}
+
+.rich-text-content li {
+  @apply mb-2 text-gray-700;
+}
+
+.rich-text-content blockquote {
+  @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4;
+}
+
+.rich-text-content a {
+  @apply text-red-600 hover:text-red-800 underline;
+}
+
+.rich-text-content strong {
+  @apply font-bold;
+}
+
+.rich-text-content em {
+  @apply italic;
+}
+
+.rich-text-content code {
+  @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-gray-800;
+}
+
+.rich-text-content pre {
+  @apply bg-gray-100 p-4 rounded overflow-x-auto mb-4;
+}
+
+.rich-text-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.rich-text-content img {
+  @apply max-w-full h-auto rounded-lg shadow-md mb-4;
+}
+
+.rich-text-content table {
+  @apply w-full border-collapse border border-gray-300 mb-4;
+}
+
+.rich-text-content th,
+.rich-text-content td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.rich-text-content th {
+  @apply bg-gray-100 font-semibold;
+}
+
+/* Quill editor custom styles */
+.ql-toolbar {
+  @apply border-gray-300 rounded-t-md;
+}
+
+.ql-container {
+  @apply border-gray-300 rounded-b-md;
+}
+
+.ql-editor {
+  @apply min-h-[200px] text-gray-700;
+}
+
+.ql-editor.ql-blank::before {
+  @apply text-gray-400 italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .rich-text-content {
+    @apply text-base;
   }
-  to {
-    opacity: 0;
+  
+  .rich-text-content h1 {
+    @apply text-2xl;
+  }
+  
+  .rich-text-content h2 {
+    @apply text-xl;
+  }
+  
+  .rich-text-content h3 {
+    @apply text-lg;
   }
 }
