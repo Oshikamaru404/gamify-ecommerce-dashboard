@@ -109,8 +109,9 @@ const SalesChart: React.FC<SalesChartProps> = ({
     return format(date, 'MMM dd');
   };
 
-  // Calculate if overall trend is positive or negative
-  const isPositiveTrend = salesData.length > 0 && salesData[salesData.length - 1]?.revenue >= 0;
+  // Calculate if overall trend is positive or negative based on total revenue
+  const totalRevenue = salesData.reduce((sum, day) => sum + day.revenue, 0);
+  const isPositiveTrend = totalRevenue >= 0;
   const strokeColor = isPositiveTrend ? '#10B981' : '#EF4444'; // Green for positive, red for negative
   const gradientId = isPositiveTrend ? 'colorRevenuePositive' : 'colorRevenueNegative';
 
