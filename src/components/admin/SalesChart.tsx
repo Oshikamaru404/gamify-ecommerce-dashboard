@@ -109,6 +109,11 @@ const SalesChart: React.FC<SalesChartProps> = ({
     return format(date, 'MMM dd');
   };
 
+  // Calculate if overall trend is positive or negative
+  const isPositiveTrend = salesData.length > 0 && salesData[salesData.length - 1]?.revenue >= 0;
+  const strokeColor = isPositiveTrend ? '#10B981' : '#EF4444'; // Green for positive, red for negative
+  const gradientId = isPositiveTrend ? 'colorRevenuePositive' : 'colorRevenueNegative';
+
   if (isLoading) {
     return (
       <Card className={className}>
@@ -150,9 +155,13 @@ const SalesChart: React.FC<SalesChartProps> = ({
               }}
             >
               <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                <linearGradient id="colorRevenuePositive" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorRevenueNegative" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -176,9 +185,9 @@ const SalesChart: React.FC<SalesChartProps> = ({
               <Area 
                 type="monotone" 
                 dataKey="revenue" 
-                stroke="hsl(var(--primary))" 
+                stroke={strokeColor}
                 fillOpacity={1} 
-                fill="url(#colorRevenue)" 
+                fill={`url(#${gradientId})`}
               />
             </AreaChart>
           </ResponsiveContainer>
