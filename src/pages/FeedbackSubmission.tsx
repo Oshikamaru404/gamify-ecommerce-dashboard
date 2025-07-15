@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Smile, Meh, Frown } from 'lucide-react';
@@ -18,24 +19,24 @@ const FeedbackSubmission = () => {
   const feedbackTypes = [{
     type: 'positive' as FeedbackType,
     label: 'Positive',
-    emoji: '🙂',
     icon: Smile,
     color: 'bg-green-500 hover:bg-green-600',
-    borderColor: 'border-green-500'
+    borderColor: 'border-green-500',
+    iconColor: 'text-green-500'
   }, {
     type: 'neutral' as FeedbackType,
     label: 'Neutral',
-    emoji: '😐',
     icon: Meh,
     color: 'bg-yellow-500 hover:bg-yellow-600',
-    borderColor: 'border-yellow-500'
+    borderColor: 'border-yellow-500',
+    iconColor: 'text-yellow-500'
   }, {
     type: 'negative' as FeedbackType,
     label: 'Negative',
-    emoji: '🙁',
     icon: Frown,
     color: 'bg-red-500 hover:bg-red-600',
-    borderColor: 'border-red-500'
+    borderColor: 'border-red-500',
+    iconColor: 'text-red-500'
   }];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,8 +87,7 @@ const FeedbackSubmission = () => {
                     const IconComponent = feedback.icon;
                     return <button key={feedback.type} type="button" onClick={() => setSelectedType(feedback.type)} className={`p-6 rounded-lg border-2 transition-all duration-200 ${selectedType === feedback.type ? `${feedback.borderColor} bg-white shadow-lg scale-105` : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
                           <div className="text-center">
-                            <div className="text-4xl mb-2">{feedback.emoji}</div>
-                            
+                            <IconComponent className={`w-12 h-12 mx-auto mb-2 ${feedback.iconColor}`} />
                             <div className="font-semibold text-gray-900">{feedback.label}</div>
                           </div>
                         </button>;
