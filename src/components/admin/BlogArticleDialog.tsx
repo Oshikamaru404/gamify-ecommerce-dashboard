@@ -208,14 +208,14 @@ const BlogArticleDialog: React.FC<BlogArticleDialogProps> = ({
               checked={formData.published}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, published: checked }))}
             />
-            <Label htmlFor="published">Published</Label>
+            <Label htmlFor="published" className="text-red-600 font-medium">Published</Label>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-red-600 hover:bg-red-700 text-white">
               {isSubmitting ? 'Saving...' : article ? 'Update' : 'Create'}
             </Button>
           </DialogFooter>

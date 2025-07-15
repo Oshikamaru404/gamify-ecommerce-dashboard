@@ -92,7 +92,7 @@ const BlogManagement = () => {
             Create, edit, and manage your blog articles.
           </p>
         </div>
-        <Button onClick={handleCreate} className="flex items-center gap-2">
+        <Button onClick={handleCreate} className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white">
           <Plus className="h-4 w-4" />
           New Article
         </Button>
@@ -167,7 +167,7 @@ const BlogManagement = () => {
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No blog articles found.</p>
-              <Button onClick={handleCreate} className="mt-4">
+              <Button onClick={handleCreate} className="mt-4 bg-red-600 hover:bg-red-700 text-white">
                 Create your first article
               </Button>
             </div>
