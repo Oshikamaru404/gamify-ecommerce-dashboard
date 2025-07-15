@@ -1,0 +1,187 @@
+
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { BlogArticle, CreateBlogArticleData, UpdateBlogArticleData } from '@/hooks/useBlogArticles';
+
+interface BlogArticleDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: CreateBlogArticleData | UpdateBlogArticleData) => void;
+  article?: BlogArticle;
+  isSubmitting?: boolean;
+}
+
+const BlogArticleDialog: React.FC<BlogArticleDialogProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  article,
+  isSubmitting = false,
+}) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    author: 'Équipe BWIVOX',
+    featured_image_url: '',
+    published: false,
+  });
+
+  useEffect(() => {
+    if (article) {
+      setFormData({
+        title: article.title,
+        slug: article.slug,
+        excerpt: article.excerpt || '',
+        content: article.content,
+        author: article.author,
+        featured_image_url: article.featured_image_url || '',
+        published: article.published,
+      });
+    } else {
+      setFormData({
+        title: '',
+        slug: '',
+        excerpt: '',
+        content: '',
+        author: 'Équipe BWIVOX',
+        featured_image_url: '',
+        published: false,
+      });
+    }
+  }, [article, isOpen]);
+
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
+  const handleTitleChange = (title: string) => {
+    setFormData(prev => ({
+      ...prev,
+      title,
+      slug: generateSlug(title),
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {article ? 'Edit Blog Article' : 'Create New Blog Article'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              placeholder="Enter article title"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="slug">Slug</Label>
+            <Input
+              id="slug"
+              value={formData.slug}
+              onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+              placeholder="article-slug"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="excerpt">Excerpt</Label>
+            <Textarea
+              id="excerpt"
+              value={formData.excerpt}
+              onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+              placeholder="Brief description of the article"
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="content">Content</Label>
+            <Textarea
+              id="content"
+              value={formData.content}
+              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+              placeholder="Full article content"
+              rows={10}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="author">Author</Label>
+            <Input
+              id="author"
+              value={formData.author}
+              onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
+              placeholder="Author name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="featured_image_url">Featured Image URL</Label>
+            <Input
+              id="featured_image_url"
+              value={formData.featured_image_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, featured_image_url: e.target.value }))}
+              placeholder="https://example.com/image.jpg"
+              type="url"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="published"
+              checked={formData.published}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, published: checked }))}
+            />
+            <Label htmlFor="published">Published</Label>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : article ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default BlogArticleDialog;

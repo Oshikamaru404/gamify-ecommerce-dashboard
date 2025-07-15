@@ -39,6 +39,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
 import ManageProducts from "./pages/admin/ManageProducts";
 import EditProduct from "./pages/admin/EditProduct";
+import BlogManagement from "./pages/admin/BlogManagement";
 import Settings from "./pages/admin/Settings";
 import Content from "./pages/admin/Content";
 
@@ -95,6 +96,7 @@ function App() {
                     <Route path="orders" element={<Orders />} />
                     <Route path="products" element={<ManageProducts />} />
                     <Route path="products/:id/edit" element={<EditProduct />} />
+                    <Route path="blog" element={<BlogManagement />} />
                     <Route path="content" element={<Content />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
