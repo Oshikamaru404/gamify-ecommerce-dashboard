@@ -151,10 +151,7 @@ const PlayerPanel = () => {
                               <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white" onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}>
                                 Quick Order
                               </Button>
-                              <Button variant="outline" className="w-full" onClick={() => handleContactWhatsApp(pkg.name, option.credits, option.price!)}>
-                                <MessageCircle className="w-4 h-4 mr-2" />
-                                WhatsApp
-                              </Button>
+                              
                             </div>
                           </div>
                         </Card>)}
