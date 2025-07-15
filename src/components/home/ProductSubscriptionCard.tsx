@@ -1,11 +1,12 @@
 
-import React from 'react';
-import { Card } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Star, Shield, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Star, Clock, CheckCircle2, ShoppingCart } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
+import CheckoutForm from '@/components/CheckoutForm';
 
 interface ProductSubscriptionCardProps {
   package: IPTVPackage;
@@ -16,156 +17,146 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   package: pkg, 
   featured = false 
 }) => {
-  // Generate a URL-friendly slug from the package name
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
+  const { t } = useLanguage();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  const handleQuickCheckout = (duration: number, price: number) => {
+    setSelectedPackage({
+      id: pkg.id,
+      name: `${pkg.name} - ${duration} Month${duration > 1 ? 's' : ''}`,
+      category: pkg.category,
+      price: price,
+      duration: duration
+    });
+    setIsCheckoutOpen(true);
   };
 
-  const productSlug = generateSlug(pkg.name);
+  const handleCheckoutSuccess = () => {
+    setIsCheckoutOpen(false);
+    setSelectedPackage(null);
+  };
 
-  // Determine the base price for display (prefer 1-month, fallback to others)
-  const displayPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits;
+  const handleCloseCheckout = () => {
+    setIsCheckoutOpen(false);
+    setSelectedPackage(null);
+  };
+
+  const monthlyOptions = [
+    { months: 1, price: pkg.price_1_month },
+    { months: 3, price: pkg.price_3_months },
+    { months: 6, price: pkg.price_6_months },
+    { months: 12, price: pkg.price_12_months },
+  ].filter(option => option.price);
+
+  const getBestValue = () => {
+    if (monthlyOptions.length === 0) return null;
+    
+    const monthlyRates = monthlyOptions.map(option => ({
+      months: option.months,
+      monthlyRate: option.price! / option.months
+    }));
+    
+    const bestValue = monthlyRates.reduce((best, current) => 
+      current.monthlyRate < best.monthlyRate ? current : best
+    );
+    
+    return bestValue.months;
+  };
+
+  const bestValueMonths = getBestValue();
 
   return (
-    <div className="relative h-full">
-      {featured && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-          <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center">
-            <Star className="w-4 h-4 mr-1 fill-current" />
-            Most Popular
-          </Badge>
-        </div>
-      )}
-
-      <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-        {/* Top Section - Icon (Red Background) - Much Larger */}
-        <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
-          {/* Icon Background Circle - Much Larger */}
-          <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-            {/* Image URL takes priority over emoji */}
-            {pkg.icon_url ? (
-              <img 
-                src={pkg.icon_url} 
-                alt={pkg.name}
-                className="w-24 h-24 rounded-2xl object-cover shadow-xl"
-                onError={(e) => {
-                  console.error('Failed to load image:', pkg.icon_url);
-                  // Hide the image and show fallback
-                  e.currentTarget.style.display = 'none';
-                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = 'block';
-                }}
-              />
-            ) : null}
-            
-            {/* Emoji fallback - show if no image URL or if image fails to load */}
-            {pkg.icon && (
-              <div 
-                className="text-8xl text-white drop-shadow-lg"
-                style={{ display: pkg.icon_url ? 'none' : 'block' }}
-              >
-                {pkg.icon}
-              </div>
-            )}
-            
-            {/* Default fallback if neither image nor emoji */}
-            {!pkg.icon && !pkg.icon_url && (
-              <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center">
-                <span className="text-white text-2xl">📺</span>
-              </div>
-            )}
+    <>
+      <Card className={`relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105 ${
+        featured ? 'border-2 border-red-500 shadow-lg' : 'border border-gray-200'
+      }`}>
+        {featured && (
+          <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-red-500 to-red-600 text-white text-center py-2 text-sm font-bold">
+            {t.mostPopular}
           </div>
-        </div>
-
-        {/* Bottom Section - Content (White Background) */}
-        <div className="flex-1 bg-white p-6 flex flex-col">
-          {/* Enhanced 30-Day Money Back Guarantee Badge */}
-          <div className="flex justify-center mb-4">
-            <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
-              <Shield className="w-4 h-4 mr-2" />
-              30-Day Money Back Guarantee
+        )}
+        
+        <CardHeader className={`text-center ${featured ? 'pt-12' : 'pt-6'} pb-2`}>
+          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg p-6 mb-4">
+            <div className="flex items-center gap-4">
+              <div className="text-6xl h-24 w-24 flex items-center justify-center">{pkg.icon || '📺'}</div>
+              <div className="text-left">
+                <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
+                <p className="text-red-100 text-sm">{pkg.description}</p>
+              </div>
             </div>
           </div>
-
-          {/* Package Title */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 text-center leading-tight">
-            {pkg.name}
-          </h3>
-          
-          {/* Price Display */}
-          <div className="text-center mb-4">
-            <div className="flex items-baseline justify-center">
-              <span className="text-sm text-gray-500 mr-1">€</span>
-              <span className="text-2xl font-bold text-red-600">
-                {displayPrice?.toFixed(2)}
-              </span>
-              <span className="text-sm text-gray-500 ml-1">
-                {pkg.price_1_month ? '/ mois' : pkg.price_10_credits ? '/ 10 credits' : ''}
-              </span>
+        </CardHeader>
+        
+        <CardContent className="p-6">
+          {pkg.features && pkg.features.length > 0 && (
+            <div className="mb-6">
+              <h4 className="font-semibold text-gray-900 mb-3">{t.features}:</h4>
+              <ul className="space-y-2">
+                {pkg.features.slice(0, 4).map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            {pkg.price_1_month && pkg.price_12_months && (
-              <div className="text-xs text-green-600 font-medium mt-1">
-                Save €{((pkg.price_1_month * 12) - pkg.price_12_months).toFixed(2)} yearly
-              </div>
-            )}
-          </div>
-
-          {/* Package Description */}
-          {pkg.description && (
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
           )}
-
-          {/* Features List */}
-          <div className="space-y-2 mb-6 flex-grow">
-            {pkg.features && pkg.features.length > 0 ? (
-              pkg.features.slice(0, 4).map((feature, index) => (
-                <div key={index} className="flex items-start">
-                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  </div>
-                  <span className="text-gray-700 text-xs leading-relaxed">{feature}</span>
+          
+          <div className="space-y-3">
+            {monthlyOptions.map((option, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="text-red-600" />
+                  <span className="font-medium text-gray-900">
+                    {option.months} Month{option.months > 1 ? 's' : ''}
+                  </span>
+                  {option.months === bestValueMonths && (
+                    <Badge variant="destructive" className="text-xs px-2 py-1">
+                      {t.bestValue}
+                    </Badge>
+                  )}
                 </div>
-              ))
-            ) : (
-              <>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  </div>
-                  <span className="text-gray-700 text-xs leading-relaxed">4K Premium Technology</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-gray-900">${option.price}</span>
+                  <Button 
+                    size="sm"
+                    onClick={() => handleQuickCheckout(option.months, option.price!)}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <ShoppingCart size={14} className="mr-1" />
+                    {t.buyNow}
+                  </Button>
                 </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  </div>
-                  <span className="text-gray-700 text-xs leading-relaxed">8000+ Channels</span>
-                </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  </div>
-                  <span className="text-gray-700 text-xs leading-relaxed">VOD Library</span>
-                </div>
-              </>
-            )}
+              </div>
+            ))}
           </div>
-
-          {/* View Details Button - Fixed route path */}
-          <div className="mt-auto">
-            <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-              <Link to={`/products/${productSlug}`}>
-                View Details
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+          
+          {monthlyOptions.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <p>{t.noPricingAvailable}</p>
+            </div>
+          )}
+          
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <Star size={16} className="text-yellow-500" />
+              <span>{t.premiumQuality}</span>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+
+      {/* Checkout Modal */}
+      {isCheckoutOpen && selectedPackage && (
+        <CheckoutForm
+          packageData={selectedPackage}
+          onClose={handleCloseCheckout}
+          onSuccess={handleCheckoutSuccess}
+        />
+      )}
+    </>
   );
 };
 

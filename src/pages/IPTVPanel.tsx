@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
@@ -158,7 +159,7 @@ const IPTVPanel = () => {
               <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
                   <div className="flex items-center gap-4">
-                    <div className="text-4xl">{pkg.icon}</div>
+                    <div className="text-6xl h-24 w-24 flex items-center justify-center">{pkg.icon}</div>
                     <div>
                       <h2 className="text-3xl font-bold">{pkg.name}</h2>
                       <p className="text-red-100 text-lg">{pkg.description}</p>
@@ -184,10 +185,7 @@ const IPTVPanel = () => {
                             </div>
                           </div>
                           
-                          <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
-                          <div className="text-sm text-gray-500 mb-6">
-                            ${(option.price / option.credits).toFixed(1)} per credit
-                          </div>
+                          <div className="text-2xl font-bold text-gray-900 mb-6">${option.price}</div>
                           <div className="space-y-2">
                             <Button 
                               className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
