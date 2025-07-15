@@ -7,16 +7,18 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCreateFeedback, FeedbackType } from '@/hooks/useFeedback';
 import StoreLayout from '@/components/store/StoreLayout';
+
 const FeedbackSubmission = () => {
   const [selectedType, setSelectedType] = useState<FeedbackType | null>(null);
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
   const navigate = useNavigate();
   const createFeedback = useCreateFeedback();
+
   const feedbackTypes = [{
     type: 'positive' as FeedbackType,
     label: 'Positive',
-    emoji: '😊',
+    emoji: '🙂',
     icon: Smile,
     color: 'bg-green-500 hover:bg-green-600',
     borderColor: 'border-green-500'
@@ -30,11 +32,12 @@ const FeedbackSubmission = () => {
   }, {
     type: 'negative' as FeedbackType,
     label: 'Negative',
-    emoji: '☹️',
+    emoji: '🙁',
     icon: Frown,
     color: 'bg-red-500 hover:bg-red-600',
     borderColor: 'border-red-500'
   }];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedType || !name.trim() || !comment.trim()) {
@@ -51,6 +54,7 @@ const FeedbackSubmission = () => {
       console.error('Error submitting feedback:', error);
     }
   };
+
   return <StoreLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
         <div className="container max-w-2xl">
@@ -118,4 +122,5 @@ const FeedbackSubmission = () => {
       </div>
     </StoreLayout>;
 };
+
 export default FeedbackSubmission;
