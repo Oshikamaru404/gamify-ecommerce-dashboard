@@ -1,18 +1,21 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Star } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+
 const StoreFooter: React.FC = () => {
-  const {
-    t
-  } = useLanguage();
+  const { t } = useLanguage();
+
   const handleTryNow = () => {
     const message = "Bonjour, je souhaite essayer vos services BWIVOX IPTV. Pouvez-vous m'aider?";
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
-  return <footer className="mt-auto border-t bg-gray-50">
+
+  return (
+    <footer className="mt-auto border-t bg-gray-50">
       <div className="container py-8 md:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
@@ -75,8 +78,7 @@ const StoreFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/full-reviews" className="text-gray-600 hover:text-red-600 transition-colors flex items-center mx-[25px]">
-                  <Star className="w-4 h-4 mr-1" />
+                <Link to="/full-reviews" className="text-gray-600 hover:text-red-600 transition-colors">
                   Full Reviews
                 </Link>
               </li>
@@ -97,6 +99,8 @@ const StoreFooter: React.FC = () => {
           <p>&copy; {new Date().getFullYear()} BWIVOX IPTV. Tous droits réservés.</p>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default StoreFooter;
