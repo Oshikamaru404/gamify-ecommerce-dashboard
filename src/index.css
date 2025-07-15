@@ -71,6 +71,15 @@
   }
 }
 
+/* Custom icon sizing */
+.w-16 {
+  width: 12rem;
+}
+
+.h-16 {
+  height: 8rem;
+}
+
 /* Enhanced Rich text content styling */
 .rich-text-content {
   @apply text-gray-800 leading-relaxed;

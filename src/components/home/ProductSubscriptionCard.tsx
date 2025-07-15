@@ -45,7 +45,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         {/* Top Section - Icon (Red Background) - Much Larger */}
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
           {/* Icon Background Circle - Much Larger */}
-          <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+          <div className="w-16 h-16 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
             {/* Image URL takes priority over emoji */}
             {pkg.icon_url ? (
               <img 
@@ -65,7 +65,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {/* Emoji fallback - show if no image URL or if image fails to load */}
             {pkg.icon && (
               <div 
-                className="text-8xl text-white drop-shadow-lg"
+                className="text-4xl text-white drop-shadow-lg"
                 style={{ display: pkg.icon_url ? 'none' : 'block' }}
               >
                 {pkg.icon}
