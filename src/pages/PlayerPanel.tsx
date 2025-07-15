@@ -73,9 +73,9 @@ const PlayerPanel = () => {
             </p>
             
             {/* Panel Player Credits Disclaimer */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
-              <h3 className="text-lg font-bold text-purple-900 mb-3">Panel Player Credit System</h3>
-              <div className="text-purple-800 space-y-1">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
+              <h3 className="text-lg font-bold text-red-900 mb-3">Panel Player Credit System</h3>
+              <div className="text-red-800 space-y-1">
                 <p className="font-medium">💡 Credit to Time Mapping:</p>
                 <div className="text-sm space-y-1 mt-2">
                   <p>• 1 Credit = 12 Months</p>
@@ -110,7 +110,7 @@ const PlayerPanel = () => {
             {playerPackages.length > 0 ? (
               playerPackages.map((pkg, index) => (
                 <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-8">
+                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 flex items-center justify-center">
                         {/* Priority: Use uploaded image URL first */}
@@ -130,7 +130,7 @@ const PlayerPanel = () => {
                         
                         {/* Fallback: Use emoji or default icon */}
                         <div 
-                          className="w-14 h-14 rounded-lg bg-purple-400/30 flex items-center justify-center text-3xl backdrop-blur-sm"
+                          className="w-14 h-14 rounded-lg bg-red-400/30 flex items-center justify-center text-3xl backdrop-blur-sm"
                           style={{ display: pkg.icon_url ? 'none' : 'flex' }}
                         >
                           {pkg.icon || '🎮'}
@@ -138,7 +138,7 @@ const PlayerPanel = () => {
                       </div>
                       <div>
                         <h2 className="text-3xl font-bold">{pkg.name}</h2>
-                        <p className="text-purple-100 text-lg">{pkg.description}</p>
+                        <p className="text-red-100 text-lg">{pkg.description}</p>
                       </div>
                     </div>
                   </div>
@@ -152,16 +152,27 @@ const PlayerPanel = () => {
                         { credits: 50, price: pkg.price_50_credits },
                         { credits: 100, price: pkg.price_100_credits }
                       ].filter(option => option.price).map((option, idx) => (
-                        <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-purple-200 transition-all duration-300 hover:shadow-lg">
+                        <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
                           <div className="text-center">
-                            <div className="text-3xl font-bold text-purple-600 mb-2">{option.credits}</div>
+                            <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
                             <div className="text-sm text-gray-600 mb-2">Credits</div>
                             
-                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-                              <div className="text-sm font-medium text-purple-900 mb-1">
+                            {/* Editable Features Section */}
+                            {pkg.features && pkg.features.length > 0 && (
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                {pkg.features.map((feature, featureIdx) => (
+                                  <div key={featureIdx} className="text-sm font-medium text-blue-900 mb-1">
+                                    {feature}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                              <div className="text-sm font-medium text-red-900 mb-1">
                                 {option.credits} Credits Available
                               </div>
-                              <div className="text-xs text-purple-700">
+                              <div className="text-xs text-red-700">
                                 1 Credit = 12 Months | 2 Credits = Lifetime
                               </div>
                             </div>
@@ -202,8 +213,8 @@ const PlayerPanel = () => {
           </section>
 
           <div className="text-center mt-16 space-y-4">
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
-              <p className="text-purple-800 font-medium">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
+              <p className="text-red-800 font-medium">
                 💡 Remember: 1 credit = 12 months, 2 credits = lifetime activation
               </p>
             </div>
