@@ -90,20 +90,40 @@ export const useUpdateSubscriptionPackage = () => {
       
       console.log('Clean update data:', cleanData);
       
+      // First check if the package exists
+      const { data: existingPackage, error: fetchError } = await supabase
+        .from('subscription_packages')
+        .select('id')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        console.error('Error checking if package exists:', fetchError);
+        throw new Error('Package not found or access denied');
+      }
+      
+      if (!existingPackage) {
+        throw new Error('Package not found');
+      }
+      
+      // Now perform the update
       const { data, error } = await supabase
         .from('subscription_packages')
         .update(cleanData)
         .eq('id', id)
-        .select()
-        .single();
+        .select();
       
       if (error) {
         console.error('Error updating subscription package:', error);
         throw error;
       }
       
-      console.log('Successfully updated subscription package:', data);
-      return data;
+      if (!data || data.length === 0) {
+        throw new Error('No package was updated. Please check your permissions.');
+      }
+      
+      console.log('Successfully updated subscription package:', data[0]);
+      return data[0];
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription-packages'] });
@@ -111,7 +131,8 @@ export const useUpdateSubscriptionPackage = () => {
     },
     onError: (error) => {
       console.error('Error updating subscription package:', error);
-      toast.error('Failed to update subscription package');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update subscription package';
+      toast.error(errorMessage);
     },
   });
 };
