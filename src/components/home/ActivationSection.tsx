@@ -107,7 +107,7 @@ const ActivationSection = () => {
             {deviceTypes.map((device, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <CardContent className="p-8">
-                  <device.icon className="h-12 w-12 text-red-600 mx-auto mb-4" />
+                  <device.icon className="h-16 w-16 text-red-600 mx-auto mb-4" />
                   <h4 className="text-xl font-semibold text-gray-900 mb-2">{device.name}</h4>
                   <p className="text-gray-600">{device.description}</p>
                 </CardContent>
@@ -147,12 +147,12 @@ const ActivationSection = () => {
                     )}
                     
                     <CardHeader className="text-center pb-2">
-                      <div className="text-4xl mb-4">
+                      <div className="h-16 w-16 mx-auto mb-4 flex items-center justify-center">
                         {pkg.icon_url ? (
                           <img 
                             src={pkg.icon_url} 
                             alt={pkg.name}
-                            className="w-16 h-16 mx-auto rounded-lg object-cover"
+                            className="w-16 h-16 rounded-lg object-cover"
                             onError={(e) => {
                               console.log('Home ActivationSection - Image failed to load:', pkg.icon_url);
                               e.currentTarget.style.display = 'none';
@@ -161,10 +161,10 @@ const ActivationSection = () => {
                           />
                         ) : null}
                         {!pkg.icon_url && (
-                          <span>{pkg.icon || '🚀'}</span>
+                          <span className="text-4xl">{pkg.icon || '🚀'}</span>
                         )}
                         {pkg.icon_url && (
-                          <span style={{ display: 'none' }}>{pkg.icon || '🚀'}</span>
+                          <span className="text-4xl" style={{ display: 'none' }}>{pkg.icon || '🚀'}</span>
                         )}
                       </div>
                       <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
@@ -264,7 +264,7 @@ const ActivationSection = () => {
             {features.map((feature, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-8">
-                  <feature.icon className="h-12 w-12 text-red-600 mx-auto mb-4" />
+                  <feature.icon className="h-16 w-16 text-red-600 mx-auto mb-4" />
                   <h4 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h4>
                   <p className="text-gray-600">{feature.description}</p>
                 </CardContent>

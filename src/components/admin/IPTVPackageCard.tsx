@@ -181,7 +181,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         <img 
           src={pkg.icon_url} 
           alt={pkg.name}
-          className="w-20 h-20 rounded-lg object-cover border border-gray-200"
+          className="w-16 h-16 rounded-lg object-cover border border-gray-200"
           onError={(e) => {
             // If image fails to load, hide it and show fallback
             e.currentTarget.style.display = 'none';
@@ -200,7 +200,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
     if (pkg.icon) {
       return (
         <div 
-          className="w-20 h-20 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-4xl"
+          className="w-16 h-16 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-4xl"
           style={{ display: iconDisplay }}
         >
           {pkg.icon}
@@ -216,7 +216,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
     
     return (
       <div 
-        className="w-20 h-20 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-4xl"
+        className="w-16 h-16 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-4xl"
         style={{ display: iconDisplay }}
       >
         {defaultIcon}
