@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, CreditCard, Crown } from 'lucide-react';
+import { Plus, Search, CreditCard, Crown, Settings } from 'lucide-react';
 import { useSubscriptionPackages, useDeleteSubscriptionPackage, useUpdateSubscriptionPackage, SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
 import SubscriptionPackageCard from '@/components/admin/SubscriptionPackageCard';
 import SubscriptionPackageDialog from '@/components/admin/SubscriptionPackageDialog';
@@ -66,7 +66,7 @@ const ManageSubscriptionPackages = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Manage Subscription Packages</h1>
-          <p className="text-gray-600 mt-2">Manage credit-based subscription packages with customizable month mappings</p>
+          <p className="text-gray-600 mt-2">Manage subscription packages with dynamic credit options</p>
         </div>
         <Button onClick={handleCreateNew} className="bg-red-600 hover:bg-red-700">
           <Plus className="mr-2 h-4 w-4" />
@@ -97,7 +97,7 @@ const ManageSubscriptionPackages = () => {
             <CardTitle>Subscription Packages</CardTitle>
           </div>
           <p className="text-sm text-gray-600">
-            Credit-based subscription packages with customizable month mappings for flexible billing
+            Credit-based subscription packages with flexible, configurable pricing options
           </p>
           <div className="flex items-center gap-4 text-sm">
             <Badge variant="outline" className="flex items-center gap-1">
@@ -108,8 +108,9 @@ const ManageSubscriptionPackages = () => {
               <Crown size={12} />
               Featured: {filteredPackages.filter(p => p.status === 'featured').length}
             </Badge>
-            <Badge className="bg-blue-100 text-blue-700">
-              Credit-based System
+            <Badge className="bg-green-100 text-green-700 flex items-center gap-1">
+              <Settings size={12} />
+              Dynamic Credit System
             </Badge>
           </div>
         </CardHeader>

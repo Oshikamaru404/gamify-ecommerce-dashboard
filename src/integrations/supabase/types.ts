@@ -274,6 +274,47 @@ export type Database = {
           },
         ]
       }
+      subscription_credit_options: {
+        Row: {
+          created_at: string | null
+          credits: number
+          id: string
+          months: number
+          package_id: string
+          price: number
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits: number
+          id?: string
+          months: number
+          package_id: string
+          price: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits?: number
+          id?: string
+          months?: number
+          package_id?: string
+          price?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_credit_options_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_packages: {
         Row: {
           created_at: string | null

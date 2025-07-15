@@ -3,8 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Star, DollarSign } from 'lucide-react';
+import { Edit, Trash2, Star, DollarSign, CreditCard } from 'lucide-react';
 import { SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
+import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
 
 interface SubscriptionPackageCardProps {
   package: SubscriptionPackage;
@@ -20,6 +21,7 @@ const SubscriptionPackageCard: React.FC<SubscriptionPackageCardProps> = ({
   onToggleFeatured,
 }) => {
   const isFeatured = pkg.status === 'featured';
+  const { data: creditOptions } = useSubscriptionCreditOptions(pkg.id);
   
   return (
     <Card className={`relative transition-all duration-200 hover:shadow-lg ${isFeatured ? 'border-2 border-yellow-400' : ''}`}>
@@ -80,30 +82,63 @@ const SubscriptionPackageCard: React.FC<SubscriptionPackageCardProps> = ({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Pricing Information */}
+        {/* Dynamic Credit Options */}
         <div className="bg-gray-50 rounded-lg p-4">
           <h4 className="font-semibold mb-2 flex items-center gap-2">
-            <DollarSign className="w-4 h-4" />
-            Credit-Based Pricing
+            <CreditCard className="w-4 h-4" />
+            Dynamic Credit Options
           </h4>
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="text-center">
-              <div className="font-medium text-gray-900">3 Credits</div>
-              <div className="text-green-600">${pkg.price_3_credits || 0}</div>
-              <div className="text-xs text-gray-500">{pkg.credits_3_months || 3} months</div>
+          {creditOptions && creditOptions.length > 0 ? (
+            <div className="grid gap-2">
+              {creditOptions.map((option) => (
+                <div key={option.id} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {option.credits} Credits
+                    </Badge>
+                    <span className="text-gray-600">{option.months} months</span>
+                  </div>
+                  <span className="font-medium text-green-600">${option.price}</span>
+                </div>
+              ))}
             </div>
-            <div className="text-center">
-              <div className="font-medium text-gray-900">6 Credits</div>
-              <div className="text-green-600">${pkg.price_6_credits || 0}</div>
-              <div className="text-xs text-gray-500">{pkg.credits_6_months || 6} months</div>
-            </div>
-            <div className="text-center">
-              <div className="font-medium text-gray-900">12 Credits</div>
-              <div className="text-green-600">${pkg.price_12_credits || 0}</div>
-              <div className="text-xs text-gray-500">{pkg.credits_12_months || 12} months</div>
+          ) : (
+            <div className="text-sm text-gray-500">No credit options configured</div>
+          )}
+        </div>
+
+        {/* Legacy Pricing (if still present) */}
+        {(pkg.price_3_credits || pkg.price_6_credits || pkg.price_12_credits) && (
+          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+            <h4 className="font-semibold mb-2 flex items-center gap-2 text-yellow-800">
+              <DollarSign className="w-4 h-4" />
+              Legacy Pricing (Deprecated)
+            </h4>
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              {pkg.price_3_credits && (
+                <div className="text-center">
+                  <div className="font-medium text-gray-900">3 Credits</div>
+                  <div className="text-green-600">${pkg.price_3_credits}</div>
+                  <div className="text-xs text-gray-500">{pkg.credits_3_months || 3} months</div>
+                </div>
+              )}
+              {pkg.price_6_credits && (
+                <div className="text-center">
+                  <div className="font-medium text-gray-900">6 Credits</div>
+                  <div className="text-green-600">${pkg.price_6_credits}</div>
+                  <div className="text-xs text-gray-500">{pkg.credits_6_months || 6} months</div>
+                </div>
+              )}
+              {pkg.price_12_credits && (
+                <div className="text-center">
+                  <div className="font-medium text-gray-900">12 Credits</div>
+                  <div className="text-green-600">${pkg.price_12_credits}</div>
+                  <div className="text-xs text-gray-500">{pkg.credits_12_months || 12} months</div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Features */}
         {pkg.features && pkg.features.length > 0 && (
