@@ -63,17 +63,7 @@ const PlayerPanel = () => {
             </p>
             
             {/* Panel Player Credits Disclaimer */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
-              <h3 className="text-lg font-bold text-purple-900 mb-3">Panel Player Credit System</h3>
-              <div className="text-purple-800 space-y-1">
-                <p className="font-medium">💡 Credit to Time Mapping:</p>
-                <div className="text-sm space-y-1 mt-2">
-                  <p>• 1 Credit = 12 Months</p>
-                  
-                  <p>• Purchase credits in bulk for better pricing</p>
-                </div>
-              </div>
-            </div>
+            
           </section>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
