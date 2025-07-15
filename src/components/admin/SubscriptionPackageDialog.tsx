@@ -89,6 +89,13 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
       features: formData.features.length > 0 ? formData.features : null,
       status: formData.status,
       sort_order: parseInt(formData.sort_order) || 0,
+      // Legacy fields for backward compatibility - these are no longer used in the new dynamic credit system
+      price_3_credits: null,
+      price_6_credits: null,
+      price_12_credits: null,
+      credits_3_months: null,
+      credits_6_months: null,
+      credits_12_months: null,
     };
     
     if (pkg) {
