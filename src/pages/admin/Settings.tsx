@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Card, 
@@ -29,7 +30,8 @@ import {
   CreditCard, 
   Save, 
   Mail, 
-  Truck
+  Palette,
+  Bot
 } from 'lucide-react';
 
 const generalSettingsSchema = z.object({
@@ -49,22 +51,33 @@ const paymentSettingsSchema = z.object({
   paymentInstructions: z.string().optional(),
 });
 
-const emailSettingsSchema = z.object({
+const emailAutomationSchema = z.object({
+  autoResponderEnabled: z.boolean().default(true),
+  autoResponderSubject: z.string().min(1, 'Auto responder subject is required'),
+  autoResponderMessage: z.string().min(1, 'Auto responder message is required'),
+  orderStatusUpdatesEnabled: z.boolean().default(true),
+  orderConfirmationTemplate: z.string().min(1, 'Order confirmation template is required'),
+  orderProcessingTemplate: z.string().min(1, 'Order processing template is required'),
+  orderShippedTemplate: z.string().min(1, 'Order shipped template is required'),
+  orderDeliveredTemplate: z.string().min(1, 'Order delivered template is required'),
+  orderCancelledTemplate: z.string().min(1, 'Order cancelled template is required'),
   emailHeader: z.string().min(1, 'Email header is required'),
   emailFooter: z.string().min(1, 'Email footer is required'),
-  orderConfirmationTemplate: z.string().min(1, 'Order confirmation template is required'),
 });
 
-const shippingSettingsSchema = z.object({
-  freeShippingMinimum: z.coerce.number().min(0, 'Minimum value must be a positive number'),
-  shippingFee: z.coerce.number().min(0, 'Shipping fee must be a positive number'),
-  shippingNotes: z.string().optional(),
+const dashboardColorSchema = z.object({
+  primaryColor: z.string().min(1, 'Primary color is required'),
+  secondaryColor: z.string().min(1, 'Secondary color is required'),
+  successColor: z.string().min(1, 'Success color is required'),
+  warningColor: z.string().min(1, 'Warning color is required'),
+  errorColor: z.string().min(1, 'Error color is required'),
+  backgroundGradient: z.string().min(1, 'Background gradient is required'),
 });
 
 type GeneralSettingsValues = z.infer<typeof generalSettingsSchema>;
 type PaymentSettingsValues = z.infer<typeof paymentSettingsSchema>;
-type EmailSettingsValues = z.infer<typeof emailSettingsSchema>;
-type ShippingSettingsValues = z.infer<typeof shippingSettingsSchema>;
+type EmailAutomationValues = z.infer<typeof emailAutomationSchema>;
+type DashboardColorValues = z.infer<typeof dashboardColorSchema>;
 
 const Settings = () => {
   const generalForm = useForm<GeneralSettingsValues>({
@@ -90,21 +103,32 @@ const Settings = () => {
     },
   });
   
-  const emailForm = useForm<EmailSettingsValues>({
-    resolver: zodResolver(emailSettingsSchema),
+  const emailAutomationForm = useForm<EmailAutomationValues>({
+    resolver: zodResolver(emailAutomationSchema),
     defaultValues: {
+      autoResponderEnabled: true,
+      autoResponderSubject: 'Thank you for your IPTV subscription inquiry!',
+      autoResponderMessage: 'Thank you for contacting BWIVOX IPTV. We have received your message and will respond within 24 hours.',
+      orderStatusUpdatesEnabled: true,
+      orderConfirmationTemplate: 'Your IPTV subscription order #{order_id} has been confirmed. Thank you for choosing BWIVOX!',
+      orderProcessingTemplate: 'Your IPTV subscription order #{order_id} is being processed. We will notify you once it\'s ready.',
+      orderShippedTemplate: 'Your IPTV subscription order #{order_id} has been activated and credentials have been sent to your email.',
+      orderDeliveredTemplate: 'Your IPTV subscription order #{order_id} has been delivered successfully. Enjoy your premium streaming!',
+      orderCancelledTemplate: 'Your IPTV subscription order #{order_id} has been cancelled. If you have any questions, please contact us.',
       emailHeader: 'BWIVOX IPTV - Premium Streaming Services',
       emailFooter: '© BWIVOX IPTV. All rights reserved.',
-      orderConfirmationTemplate: 'Thank you for your IPTV subscription order! Your order #{order_id} has been received and is being processed.',
     },
   });
   
-  const shippingForm = useForm<ShippingSettingsValues>({
-    resolver: zodResolver(shippingSettingsSchema),
+  const dashboardColorForm = useForm<DashboardColorValues>({
+    resolver: zodResolver(dashboardColorSchema),
     defaultValues: {
-      freeShippingMinimum: 100,
-      shippingFee: 4.99,
-      shippingNotes: 'IPTV subscriptions and player licenses are delivered instantly via email.',
+      primaryColor: '#ef4444',
+      secondaryColor: '#3b82f6',
+      successColor: '#10b981',
+      warningColor: '#f59e0b',
+      errorColor: '#ef4444',
+      backgroundGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     },
   });
   
@@ -118,14 +142,14 @@ const Settings = () => {
     toast.success('Payment settings saved successfully');
   };
   
-  const onEmailSubmit = (data: EmailSettingsValues) => {
-    console.log('Email settings:', data);
-    toast.success('Email settings saved successfully');
+  const onEmailAutomationSubmit = (data: EmailAutomationValues) => {
+    console.log('Email automation settings:', data);
+    toast.success('Email automation settings saved successfully');
   };
   
-  const onShippingSubmit = (data: ShippingSettingsValues) => {
-    console.log('Shipping settings:', data);
-    toast.success('Shipping settings saved successfully');
+  const onDashboardColorSubmit = (data: DashboardColorValues) => {
+    console.log('Dashboard color settings:', data);
+    toast.success('Dashboard color settings saved successfully');
   };
 
   return (
@@ -149,11 +173,11 @@ const Settings = () => {
           </TabsTrigger>
           <TabsTrigger value="email" className="flex gap-2">
             <Mail size={16} />
-            <span>Email</span>
+            <span>Email Automation</span>
           </TabsTrigger>
-          <TabsTrigger value="shipping" className="flex gap-2">
-            <Truck size={16} />
-            <span>Delivery</span>
+          <TabsTrigger value="dashboard" className="flex gap-2">
+            <Palette size={16} />
+            <span>Dashboard Colors</span>
           </TabsTrigger>
         </TabsList>
         
@@ -403,75 +427,255 @@ const Settings = () => {
         <TabsContent value="email">
           <Card>
             <CardHeader>
-              <CardTitle>Email Settings</CardTitle>
+              <CardTitle>Email Automation Settings</CardTitle>
               <CardDescription>
-                Configure your store's email templates.
+                Configure automatic email responses and order status updates.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...emailForm}>
-                <form id="email-form" onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-6">
-                  <FormField
-                    control={emailForm.control}
-                    name="emailHeader"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Header</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Displayed at the top of all emails
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
+              <Form {...emailAutomationForm}>
+                <form id="email-automation-form" onSubmit={emailAutomationForm.handleSubmit(onEmailAutomationSubmit)} className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Bot className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold">Auto Responder</h3>
+                    </div>
+                    
+                    <FormField
+                      control={emailAutomationForm.control}
+                      name="autoResponderEnabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <div className="pt-0.5">
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                            </div>
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base">Enable Auto Responder</FormLabel>
+                            <FormDescription>
+                              Automatically respond to customer inquiries
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {emailAutomationForm.watch('autoResponderEnabled') && (
+                      <div className="space-y-4 rounded-md border p-4">
+                        <FormField
+                          control={emailAutomationForm.control}
+                          name="autoResponderSubject"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Auto Responder Subject</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={emailAutomationForm.control}
+                          name="autoResponderMessage"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Auto Responder Message</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field} 
+                                  className="h-24" 
+                                  placeholder="Message sent automatically to customers"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     )}
-                  />
+                  </div>
                   
-                  <FormField
-                    control={emailForm.control}
-                    name="emailFooter"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Footer</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Displayed at the bottom of all emails
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Mail className="h-5 w-5 text-green-600" />
+                      <h3 className="text-lg font-semibold">Order Status Updates</h3>
+                    </div>
+                    
+                    <FormField
+                      control={emailAutomationForm.control}
+                      name="orderStatusUpdatesEnabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <div className="pt-0.5">
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                            </div>
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base">Enable Order Status Updates</FormLabel>
+                            <FormDescription>
+                              Automatically notify customers when order status changes
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {emailAutomationForm.watch('orderStatusUpdatesEnabled') && (
+                      <div className="space-y-4 rounded-md border p-4">
+                        <FormField
+                          control={emailAutomationForm.control}
+                          name="orderConfirmationTemplate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Order Confirmation Template</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field} 
+                                  className="h-20" 
+                                  placeholder="Template for order confirmation emails"
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Use {'{order_id}'}, {'{customer_name}'} for dynamic content
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={emailAutomationForm.control}
+                          name="orderProcessingTemplate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Order Processing Template</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field} 
+                                  className="h-20" 
+                                  placeholder="Template for order processing emails"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={emailAutomationForm.control}
+                          name="orderShippedTemplate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Order Shipped Template</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field} 
+                                  className="h-20" 
+                                  placeholder="Template for order shipped emails"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={emailAutomationForm.control}
+                          name="orderDeliveredTemplate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Order Delivered Template</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field} 
+                                  className="h-20" 
+                                  placeholder="Template for order delivered emails"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={emailAutomationForm.control}
+                          name="orderCancelledTemplate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Order Cancelled Template</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field} 
+                                  className="h-20" 
+                                  placeholder="Template for order cancelled emails"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     )}
-                  />
+                  </div>
                   
-                  <FormField
-                    control={emailForm.control}
-                    name="orderConfirmationTemplate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Order Confirmation Template</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            className="h-32" 
-                            placeholder="Enter the template for order confirmation emails"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Use placeholders like {'{order_id}'}, {'{customer_name}'} for dynamic content
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Email Header & Footer</h3>
+                    
+                    <FormField
+                      control={emailAutomationForm.control}
+                      name="emailHeader"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Header</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Displayed at the top of all emails
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={emailAutomationForm.control}
+                      name="emailFooter"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Footer</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Displayed at the bottom of all emails
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </form>
               </Form>
             </CardContent>
             <CardFooter className="border-t px-6 py-4">
               <Button 
                 type="submit"
-                form="email-form"
+                form="email-automation-form"
                 className="ml-auto"
               >
                 <Save size={16} className="mr-2" />
@@ -481,38 +685,40 @@ const Settings = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="shipping">
+        <TabsContent value="dashboard">
           <Card>
             <CardHeader>
-              <CardTitle>Shipping Settings</CardTitle>
+              <CardTitle>Dashboard Color Settings</CardTitle>
               <CardDescription>
-                Configure your store's shipping options.
+                Customize the colors used in your dashboard metrics and charts.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...shippingForm}>
-                <form id="shipping-form" onSubmit={shippingForm.handleSubmit(onShippingSubmit)} className="space-y-6">
+              <Form {...dashboardColorForm}>
+                <form id="dashboard-color-form" onSubmit={dashboardColorForm.handleSubmit(onDashboardColorSubmit)} className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FormField
-                      control={shippingForm.control}
-                      name="freeShippingMinimum"
+                      control={dashboardColorForm.control}
+                      name="primaryColor"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Free Shipping Minimum</FormLabel>
+                          <FormLabel>Primary Color</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                            <div className="flex items-center space-x-2">
                               <Input 
                                 {...field} 
-                                className="pl-7" 
-                                type="number" 
-                                step="0.01" 
-                                min="0" 
+                                type="color" 
+                                className="w-20 h-10 p-1 border-2"
+                              />
+                              <Input 
+                                {...field} 
+                                placeholder="#ef4444"
+                                className="flex-1"
                               />
                             </div>
                           </FormControl>
                           <FormDescription>
-                            Minimum order value for free shipping (0 for always free)
+                            Main color for important metrics
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -520,25 +726,111 @@ const Settings = () => {
                     />
                     
                     <FormField
-                      control={shippingForm.control}
-                      name="shippingFee"
+                      control={dashboardColorForm.control}
+                      name="secondaryColor"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Shipping Fee</FormLabel>
+                          <FormLabel>Secondary Color</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                            <div className="flex items-center space-x-2">
                               <Input 
                                 {...field} 
-                                className="pl-7" 
-                                type="number" 
-                                step="0.01" 
-                                min="0"
+                                type="color" 
+                                className="w-20 h-10 p-1 border-2"
+                              />
+                              <Input 
+                                {...field} 
+                                placeholder="#3b82f6"
+                                className="flex-1"
                               />
                             </div>
                           </FormControl>
                           <FormDescription>
-                            Standard shipping fee when free shipping doesn't apply
+                            Secondary color for charts and graphs
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={dashboardColorForm.control}
+                      name="successColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Success Color</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center space-x-2">
+                              <Input 
+                                {...field} 
+                                type="color" 
+                                className="w-20 h-10 p-1 border-2"
+                              />
+                              <Input 
+                                {...field} 
+                                placeholder="#10b981"
+                                className="flex-1"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Color for positive metrics and success indicators
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={dashboardColorForm.control}
+                      name="warningColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Warning Color</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center space-x-2">
+                              <Input 
+                                {...field} 
+                                type="color" 
+                                className="w-20 h-10 p-1 border-2"
+                              />
+                              <Input 
+                                {...field} 
+                                placeholder="#f59e0b"
+                                className="flex-1"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Color for warning indicators
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={dashboardColorForm.control}
+                      name="errorColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Error Color</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center space-x-2">
+                              <Input 
+                                {...field} 
+                                type="color" 
+                                className="w-20 h-10 p-1 border-2"
+                              />
+                              <Input 
+                                {...field} 
+                                placeholder="#ef4444"
+                                className="flex-1"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Color for error indicators and negative metrics
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -547,20 +839,19 @@ const Settings = () => {
                   </div>
                   
                   <FormField
-                    control={shippingForm.control}
-                    name="shippingNotes"
+                    control={dashboardColorForm.control}
+                    name="backgroundGradient"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Shipping Notes</FormLabel>
+                        <FormLabel>Background Gradient</FormLabel>
                         <FormControl>
-                          <Textarea 
+                          <Input 
                             {...field} 
-                            className="h-32" 
-                            placeholder="Enter additional shipping information"
+                            placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                           />
                         </FormControl>
                         <FormDescription>
-                          Additional shipping information displayed during checkout
+                          CSS gradient for dashboard metric cards background
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -572,7 +863,7 @@ const Settings = () => {
             <CardFooter className="border-t px-6 py-4">
               <Button 
                 type="submit"
-                form="shipping-form"
+                form="dashboard-color-form"
                 className="ml-auto"
               >
                 <Save size={16} className="mr-2" />
