@@ -10,11 +10,11 @@ const FeedbackCards = () => {
   const getFeedbackIcon = (type: FeedbackType) => {
     switch (type) {
       case 'positive':
-        return { icon: Smile, emoji: '😊', color: 'text-green-500' };
+        return { icon: Smile, color: 'text-green-500' };
       case 'neutral':
-        return { icon: Meh, emoji: '😐', color: 'text-yellow-500' };
+        return { icon: Meh, color: 'text-yellow-500' };
       case 'negative':
-        return { icon: Frown, emoji: '☹️', color: 'text-red-500' };
+        return { icon: Frown, color: 'text-red-500' };
     }
   };
 
@@ -58,14 +58,13 @@ const FeedbackCards = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {feedbacks.map((feedback) => {
-        const { icon: IconComponent, emoji, color } = getFeedbackIcon(feedback.feedback_type);
+        const { icon: IconComponent, color } = getFeedbackIcon(feedback.feedback_type);
         
         return (
           <Card key={feedback.id} className="hover:shadow-lg transition-shadow duration-300">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
-                <div className="text-2xl mr-3">{emoji}</div>
-                <IconComponent className={`w-6 h-6 ${color} mr-2`} />
+                <IconComponent className={`w-8 h-8 ${color} mr-3`} />
                 <span className="font-semibold text-gray-900 capitalize">
                   {feedback.feedback_type}
                 </span>
