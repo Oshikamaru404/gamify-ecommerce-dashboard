@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Play, Palette, Zap, CheckCircle2, ArrowRight, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -91,15 +92,15 @@ const PlayerPanel = () => {
             </p>
             
             {/* Panel Player Credits Disclaimer */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
-              <h3 className="text-lg font-bold text-purple-900 mb-3">Panel Player Credit System</h3>
-              <div className="text-purple-800 space-y-1">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto mb-8">
+              <h3 className="text-lg font-bold text-blue-900 mb-3">Panel Player Credit System</h3>
+              <div className="text-blue-800 space-y-1">
                 <p className="font-medium">💡 Panel Player Special System:</p>
                 <div className="text-sm space-y-1 mt-2">
                   <p>• 1 Credit = 12 Months</p>
                   <p>• 2 Credits = Lifetime Activation</p>
                   <p>• Advanced panel management features</p>
-                  <p className="text-xs text-purple-600 mt-2">Professional-grade activation system</p>
+                  <p className="text-xs text-blue-600 mt-2">Professional-grade activation system</p>
                 </div>
               </div>
             </div>
@@ -170,28 +171,31 @@ const PlayerPanel = () => {
                         { credits: 50, price: player.price_50_credits },
                         { credits: 100, price: player.price_100_credits },
                       ].filter(option => option.price).map((option, idx) => (
-                        <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-purple-200 transition-all duration-300 hover:shadow-lg">
+                        <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
                           <div className="text-center">
+                            {/* Panel Player Badge */}
+                            <Badge variant="red" className="mb-4 text-xs">
+                              Panel Player System
+                            </Badge>
+                            
                             <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
                             <div className="text-sm text-gray-600 mb-2">Credits</div>
                             
                             {/* Panel Player Credit-Duration Mapping */}
-                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-                              <div className="text-sm font-medium text-purple-900 mb-1">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                              <div className="text-sm font-medium text-blue-900 mb-1">
                                 {getPanelPlayerCreditMapping(option.credits)}
                               </div>
-                              <div className="text-xs text-purple-700">
-                                Panel Player System
+                              <div className="text-xs text-blue-700">
+                                1 Credit = 12 Months
                               </div>
                             </div>
                             
                             <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
-                            <div className="text-sm text-gray-500 mb-4">
-                              ${(option.price! / option.credits).toFixed(1)} per credit
-                            </div>
+                            
                             <Button 
                               onClick={() => handleQuickCheckout(player, option.credits, option.price!)}
-                              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                              className="w-full bg-red-600 hover:bg-red-700 text-white"
                             >
                               <ShoppingCart className="mr-2 h-4 w-4" />
                               Quick Buy
@@ -223,8 +227,8 @@ const PlayerPanel = () => {
           )}
 
           <div className="text-center mt-16 space-y-4">
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
-              <p className="text-purple-800 font-medium">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
+              <p className="text-blue-800 font-medium">
                 💡 Panel Player System: 1 Credit = 12 Months | 2 Credits = Lifetime Activation
               </p>
             </div>
