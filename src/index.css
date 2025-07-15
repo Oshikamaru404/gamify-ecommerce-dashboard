@@ -1,3 +1,4 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 
 @tailwind base;
@@ -77,6 +78,15 @@
 
 .h-16 {
   height: 8rem;
+}
+
+/* Custom icon sizing for player panel logos */
+.w-14 {
+  width: 9rem;
+}
+
+.h-14 {
+  height: 9rem;
 }
 
 /* Custom icon sizing for subscription IPTV packages on home page */

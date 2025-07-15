@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
@@ -6,21 +7,19 @@ import { MessageCircle, Monitor, Settings, BarChart3, Crown } from 'lucide-react
 import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+
 const PlayerPanel = () => {
-  const {
-    t
-  } = useLanguage();
-  const {
-    data: packages,
-    isLoading
-  } = useIPTVPackages();
+  const { t } = useLanguage();
+  const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+
   const handleContactWhatsApp = (packageName: string, credits: number, price: number) => {
     const message = `${t.contact}, ${packageName} - ${credits} credits for $${price}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+
   const handleBuyNow = (packageName: string, credits: number, price: number) => {
     setSelectedPackage({
       id: `player-${packageName.toLowerCase().replace(/\s+/g, '-')}`,
@@ -31,18 +30,22 @@ const PlayerPanel = () => {
     });
     setShowCheckout(true);
   };
+
   const handleCloseCheckout = () => {
     setShowCheckout(false);
     setSelectedPackage(null);
   };
+
   const handleOrderSuccess = () => {
     console.log('Order submitted successfully');
   };
 
   // Filter player packages from database
   const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
+
   if (isLoading) {
-    return <StoreLayout>
+    return (
+      <StoreLayout>
         <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
           <div className="container py-16">
             <div className="text-center">
@@ -51,19 +54,21 @@ const PlayerPanel = () => {
             </div>
           </div>
         </div>
-      </StoreLayout>;
+      </StoreLayout>
+    );
   }
-  return <StoreLayout>
+
+  return (
+    <StoreLayout>
       <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">
-            
+            <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-gray-900 md:text-6xl">
+              Player Panel Credits
+            </h1>
             <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-600">
               Purchase credits for streaming applications and player activation
             </p>
-            
-            {/* Panel Player Credits Disclaimer */}
-            
           </section>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
@@ -87,28 +92,38 @@ const PlayerPanel = () => {
           </div>
 
           <section className="space-y-16">
-            {playerPackages.length > 0 ? playerPackages.map((pkg, index) => <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-8">
+            {playerPackages.length > 0 ? (
+              playerPackages.map((pkg, index) => (
+                <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 flex items-center justify-center">
+                      <div className="w-14 h-14 flex items-center justify-center">
                         {/* Priority: Use uploaded image URL first */}
-                        {pkg.icon_url ? <img src={pkg.icon_url} alt={pkg.name} className="w-14 h-14 rounded-lg object-cover shadow-lg" onError={e => {
-                    // If image fails to load, hide it and show fallback
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }} /> : null}
+                        {pkg.icon_url ? (
+                          <img 
+                            src={pkg.icon_url} 
+                            alt={pkg.name} 
+                            className="w-14 h-14 rounded-lg object-cover shadow-lg" 
+                            onError={(e) => {
+                              // If image fails to load, hide it and show fallback
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
                         
                         {/* Fallback: Use emoji or default icon */}
-                        <div className="w-14 h-14 rounded-lg bg-purple-400/30 flex items-center justify-center text-3xl backdrop-blur-sm" style={{
-                    display: pkg.icon_url ? 'none' : 'flex'
-                  }}>
+                        <div 
+                          className="w-14 h-14 rounded-lg bg-red-400/30 flex items-center justify-center text-3xl backdrop-blur-sm" 
+                          style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                        >
                           {pkg.icon || '🎮'}
                         </div>
                       </div>
                       <div>
                         <h2 className="text-3xl font-bold">{pkg.name}</h2>
-                        <p className="text-purple-100 text-lg">{pkg.description}</p>
+                        <p className="text-red-100 text-lg">{pkg.description}</p>
                       </div>
                     </div>
                   </div>
@@ -116,56 +131,74 @@ const PlayerPanel = () => {
                   <div className="p-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Available Credit Options</h3>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                      {[{
-                  credits: 10,
-                  price: pkg.price_10_credits
-                }, {
-                  credits: 25,
-                  price: pkg.price_25_credits
-                }, {
-                  credits: 50,
-                  price: pkg.price_50_credits
-                }, {
-                  credits: 100,
-                  price: pkg.price_100_credits
-                }].filter(option => option.price).map((option, idx) => <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-purple-200 transition-all duration-300 hover:shadow-lg">
+                      {[
+                        { credits: 10, price: pkg.price_10_credits },
+                        { credits: 25, price: pkg.price_25_credits },
+                        { credits: 50, price: pkg.price_50_credits },
+                        { credits: 100, price: pkg.price_100_credits }
+                      ].filter(option => option.price).map((option, idx) => (
+                        <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
                           <div className="text-center">
-                            <div className="text-3xl font-bold text-purple-600 mb-2">{option.credits}</div>
+                            <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
                             <div className="text-sm text-gray-600 mb-2">Credits</div>
                             
-                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-                              <div className="text-sm font-medium text-purple-900 mb-1">
-                                {option.credits} Credits Available
+                            {/* Editable Features Section */}
+                            {pkg.features && pkg.features.length > 0 && (
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                {pkg.features.map((feature, featureIdx) => (
+                                  <div key={featureIdx} className="text-sm font-medium text-blue-900 mb-1">
+                                    {feature}
+                                  </div>
+                                ))}
                               </div>
-                              <div className="text-xs text-purple-700">
-                                1 Credit = 12 Months | 2 Credits = Lifetime
+                            )}
+                            
+                            {/* Standardized Features */}
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                              <div className="text-sm font-medium text-red-900 mb-1">
+                                • 1 Credit = 12 Months
+                              </div>
+                              <div className="text-sm font-medium text-red-900">
+                                • 2 Credits = Lifetime Activation
                               </div>
                             </div>
                             
                             <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
                             
                             <div className="space-y-2">
-                              <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white" onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}>
+                              <Button 
+                                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white" 
+                                onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}
+                              >
                                 Quick Order
                               </Button>
-                              <Button variant="outline" className="w-full" onClick={() => handleContactWhatsApp(pkg.name, option.credits, option.price!)}>
-                                
+                              <Button 
+                                variant="outline" 
+                                className="w-full" 
+                                onClick={() => handleContactWhatsApp(pkg.name, option.credits, option.price!)}
+                              >
+                                <MessageCircle className="w-4 h-4 mr-2" />
                                 WhatsApp
                               </Button>
                             </div>
                           </div>
-                        </Card>)}
+                        </Card>
+                      ))}
                     </div>
                   </div>
-                </div>) : <div className="text-center py-16">
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-16">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">No Player Packages Available</h3>
                 <p className="text-gray-600">Player packages are currently being updated. Please check back later.</p>
-              </div>}
+              </div>
+            )}
           </section>
 
           <div className="text-center mt-16 space-y-4">
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
-              <p className="text-purple-800 font-medium">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
+              <p className="text-red-800 font-medium">
                 💡 Remember: 1 credit = 12 months, 2 credits = lifetime activation
               </p>
             </div>
@@ -180,8 +213,16 @@ const PlayerPanel = () => {
         </div>
 
         {/* Checkout Form Modal */}
-        {showCheckout && selectedPackage && <CheckoutForm packageData={selectedPackage} onClose={handleCloseCheckout} onSuccess={handleOrderSuccess} />}
+        {showCheckout && selectedPackage && (
+          <CheckoutForm 
+            packageData={selectedPackage} 
+            onClose={handleCloseCheckout} 
+            onSuccess={handleOrderSuccess} 
+          />
+        )}
       </div>
-    </StoreLayout>;
+    </StoreLayout>
+  );
 };
+
 export default PlayerPanel;
