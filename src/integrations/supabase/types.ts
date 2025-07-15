@@ -274,6 +274,63 @@ export type Database = {
           },
         ]
       }
+      subscription_packages: {
+        Row: {
+          created_at: string | null
+          credits_12_months: number | null
+          credits_3_months: number | null
+          credits_6_months: number | null
+          description: string | null
+          features: string[] | null
+          icon: string | null
+          icon_url: string | null
+          id: string
+          name: string
+          price_12_credits: number | null
+          price_3_credits: number | null
+          price_6_credits: number | null
+          sort_order: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits_12_months?: number | null
+          credits_3_months?: number | null
+          credits_6_months?: number | null
+          description?: string | null
+          features?: string[] | null
+          icon?: string | null
+          icon_url?: string | null
+          id?: string
+          name: string
+          price_12_credits?: number | null
+          price_3_credits?: number | null
+          price_6_credits?: number | null
+          sort_order?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits_12_months?: number | null
+          credits_3_months?: number | null
+          credits_6_months?: number | null
+          description?: string | null
+          features?: string[] | null
+          icon?: string | null
+          icon_url?: string | null
+          id?: string
+          name?: string
+          price_12_credits?: number | null
+          price_3_credits?: number | null
+          price_6_credits?: number | null
+          sort_order?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
