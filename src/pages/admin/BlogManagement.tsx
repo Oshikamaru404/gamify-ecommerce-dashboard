@@ -126,7 +126,7 @@ const BlogManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={article.published ? 'default' : 'secondary'}>
+                      <Badge variant={article.published ? 'red' : 'secondary'}>
                         {article.published ? 'Published' : 'Draft'}
                       </Badge>
                     </TableCell>

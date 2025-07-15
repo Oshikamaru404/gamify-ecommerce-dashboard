@@ -76,67 +76,81 @@
   @apply text-gray-800 leading-relaxed;
   line-height: 1.7;
   font-size: 1.1rem;
+  text-align: left; /* Force left alignment by default */
 }
 
 .rich-text-content h1 {
   @apply text-3xl font-bold mb-6 mt-8 text-gray-900;
   line-height: 1.2;
+  text-align: inherit; /* Respect parent alignment */
 }
 
 .rich-text-content h2 {
   @apply text-2xl font-bold mb-5 mt-7 text-gray-900;
   line-height: 1.3;
+  text-align: inherit;
 }
 
 .rich-text-content h3 {
   @apply text-xl font-semibold mb-4 mt-6 text-gray-900;
   line-height: 1.4;
+  text-align: inherit;
 }
 
 .rich-text-content h4 {
   @apply text-lg font-semibold mb-3 mt-5 text-gray-900;
   line-height: 1.4;
+  text-align: inherit;
 }
 
 .rich-text-content h5 {
   @apply text-base font-semibold mb-3 mt-4 text-gray-900;
   line-height: 1.4;
+  text-align: inherit;
 }
 
 .rich-text-content h6 {
   @apply text-sm font-semibold mb-2 mt-4 text-gray-900;
   line-height: 1.4;
+  text-align: inherit;
 }
 
 .rich-text-content p {
   @apply mb-5 text-gray-700;
   line-height: 1.7;
+  text-align: inherit;
 }
 
 .rich-text-content ul {
   @apply mb-5 ml-6 list-disc;
+  text-align: inherit;
 }
 
 .rich-text-content ol {
   @apply mb-5 ml-6 list-decimal;
+  text-align: inherit;
 }
 
 .rich-text-content li {
   @apply mb-2 text-gray-700;
   line-height: 1.6;
+  text-align: inherit;
 }
 
 .rich-text-content li p {
   @apply mb-2;
+  text-align: inherit;
 }
 
 .rich-text-content blockquote {
   @apply border-l-4 border-red-500 pl-6 italic text-gray-600 mb-6 bg-gray-50 py-4;
   font-style: italic;
+  text-align: inherit;
 }
 
 .rich-text-content blockquote p {
   @apply mb-2;
+  text-align: inherit;
 }
 
 .rich-text-content a {
@@ -158,6 +172,7 @@
 
 .rich-text-content pre {
   @apply bg-gray-100 p-4 rounded-lg overflow-x-auto mb-6;
+  text-align: left; /* Code blocks should always be left-aligned */
 }
 
 .rich-text-content pre code {
@@ -186,17 +201,30 @@
   @apply text-gray-700;
 }
 
-/* Text alignment styles */
+/* Text alignment styles - these override the default left alignment */
 .rich-text-content .ql-align-center {
-  text-align: center;
+  text-align: center !important;
 }
 
 .rich-text-content .ql-align-right {
-  text-align: right;
+  text-align: right !important;
 }
 
 .rich-text-content .ql-align-justify {
-  text-align: justify;
+  text-align: justify !important;
+}
+
+/* Ensure children inherit the alignment */
+.rich-text-content .ql-align-center * {
+  text-align: center !important;
+}
+
+.rich-text-content .ql-align-right * {
+  text-align: right !important;
+}
+
+.rich-text-content .ql-align-justify * {
+  text-align: justify !important;
 }
 
 /* Font size styles */
