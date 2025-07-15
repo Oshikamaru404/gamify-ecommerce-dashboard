@@ -159,7 +159,7 @@ const IPTVPanel = () => {
               <div key={index} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
                   <div className="flex items-center gap-4">
-                    <div className="text-6xl h-24 w-24 flex items-center justify-center">{pkg.icon}</div>
+                    <div className="text-8xl h-24 w-24 flex items-center justify-center">{pkg.icon}</div>
                     <div>
                       <h2 className="text-3xl font-bold">{pkg.name}</h2>
                       <p className="text-red-100 text-lg">{pkg.description}</p>
