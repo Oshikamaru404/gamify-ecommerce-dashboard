@@ -23,7 +23,6 @@ import Reseller from "./pages/Reseller";
 import Blog from "./pages/Blog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
-import Reviews from "./pages/Reviews";
 import FullReviews from "./pages/FullReviews";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -77,7 +76,6 @@ function App() {
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
                   <Route path="/refund-policy" element={<RefundPolicy />} />
-                  <Route path="/reviews" element={<Reviews />} />
                   <Route path="/full-reviews" element={<FullReviews />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />

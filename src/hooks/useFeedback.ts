@@ -40,8 +40,7 @@ export const useApprovedFeedbacks = () => {
         .from('feedbacks')
         .select('*')
         .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(3);
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching approved feedbacks:', error);

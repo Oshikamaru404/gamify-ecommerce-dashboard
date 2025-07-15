@@ -81,12 +81,6 @@ const StoreFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/reviews" className="text-gray-600 hover:text-red-600 transition-colors flex items-center">
-                  <Star className="w-4 h-4 mr-1" />
-                  Customer Reviews
-                </Link>
-              </li>
-              <li>
                 <Link to="/full-reviews" className="text-gray-600 hover:text-red-600 transition-colors flex items-center">
                   <Star className="w-4 h-4 mr-1" />
                   Full Reviews
