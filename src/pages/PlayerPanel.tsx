@@ -143,9 +143,7 @@ const PlayerPanel = () => {
                             </div>
                             
                             <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
-                            <div className="text-sm text-gray-500 mb-6">
-                              ${(option.price! / option.credits).toFixed(1)} per credit
-                            </div>
+                            
                             <div className="space-y-2">
                               <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white" onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}>
                                 Quick Order
