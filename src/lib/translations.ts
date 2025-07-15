@@ -47,6 +47,9 @@ export interface Translations {
   perMonth: string;
   buyNow: string;
   viewMore: string;
+  mostPopular: string;
+  bestValue: string;
+  noPricingAvailable: string;
   
   // Activation page
   activationTitle: string;
@@ -148,6 +151,9 @@ const translations: Record<Language, Translations> = {
     perMonth: '/month',
     buyNow: 'Buy Now',
     viewMore: 'View More Details',
+    mostPopular: 'Most Popular',
+    bestValue: 'Best Value',
+    noPricingAvailable: 'No pricing available',
     
     // Activation page
     activationTitle: 'Activate Your Player',
@@ -247,6 +253,9 @@ const translations: Record<Language, Translations> = {
     perMonth: '/mois',
     buyNow: 'Acheter maintenant',
     viewMore: 'Voir plus de détails',
+    mostPopular: 'Le Plus Populaire',
+    bestValue: 'Meilleur Prix',
+    noPricingAvailable: 'Aucun prix disponible',
     
     // Activation page
     activationTitle: 'Activation de votre Player',
@@ -346,6 +355,9 @@ const translations: Record<Language, Translations> = {
     perMonth: '/mes',
     buyNow: 'Comprar Ahora',
     viewMore: 'Ver Más Detalles',
+    mostPopular: 'Más Popular',
+    bestValue: 'Mejor Precio',
+    noPricingAvailable: 'No hay precios disponibles',
     
     // Activation page
     activationTitle: 'Activa tu Player',
@@ -445,6 +457,9 @@ const translations: Record<Language, Translations> = {
     perMonth: '/Monat',
     buyNow: 'Jetzt Kaufen',
     viewMore: 'Mehr Details Anzeigen',
+    mostPopular: 'Beliebteste',
+    bestValue: 'Bester Wert',
+    noPricingAvailable: 'Keine Preise verfügbar',
     
     // Activation page
     activationTitle: 'Aktivieren Sie Ihren Player',
@@ -544,6 +559,9 @@ const translations: Record<Language, Translations> = {
     perMonth: '/mese',
     buyNow: 'Acquista Ora',
     viewMore: 'Visualizza Altri Dettagli',
+    mostPopular: 'Più Popolare',
+    bestValue: 'Miglior Prezzo',
+    noPricingAvailable: 'Nessun prezzo disponibile',
     
     // Activation page
     activationTitle: 'Attiva il Tuo Player',
@@ -643,6 +661,9 @@ const translations: Record<Language, Translations> = {
     perMonth: '/شهر',
     buyNow: 'اشتر الآن',
     viewMore: 'عرض المزيد من التفاصيل',
+    mostPopular: 'الأكثر شعبية',
+    bestValue: 'أفضل قيمة',
+    noPricingAvailable: 'لا توجد أسعار متاحة',
     
     // Activation page
     activationTitle: 'تفعيل المشغل الخاص بك',
