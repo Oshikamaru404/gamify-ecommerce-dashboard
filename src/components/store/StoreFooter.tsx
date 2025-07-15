@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const StoreFooter: React.FC = () => {
@@ -78,6 +78,18 @@ const StoreFooter: React.FC = () => {
               <li>
                 <Link to="/how-to-buy" className="text-gray-600 hover:text-red-600 transition-colors">
                   How to Buy
+                </Link>
+              </li>
+              <li>
+                <Link to="/reviews" className="text-gray-600 hover:text-red-600 transition-colors flex items-center">
+                  <Star className="w-4 h-4 mr-1" />
+                  Customer Reviews
+                </Link>
+              </li>
+              <li>
+                <Link to="/full-reviews" className="text-gray-600 hover:text-red-600 transition-colors flex items-center">
+                  <Star className="w-4 h-4 mr-1" />
+                  Full Reviews
                 </Link>
               </li>
               <li>

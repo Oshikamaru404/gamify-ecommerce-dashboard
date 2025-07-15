@@ -66,11 +66,11 @@ const Subscription = () => {
                 {t.subscriptionsTitle}
               </p>
               
-              {/* 30-Day Warranty Badge */}
+              {/* Enhanced 30-Day Money Back Guarantee Badge */}
               <div className="mb-8">
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-3">
-                  <Shield className="h-5 w-5 text-green-300" />
-                  <span className="text-white font-semibold">30-Day Money Back Guarantee</span>
+                <div className="inline-flex items-center gap-3 bg-white backdrop-blur-sm border-2 border-red-500 rounded-full px-8 py-4 shadow-xl transform hover:scale-105 transition-all duration-300">
+                  <Shield className="h-7 w-7 text-red-500" />
+                  <span className="text-red-600 font-bold text-xl">30-Day Money Back Guarantee</span>
                 </div>
               </div>
               

@@ -83,12 +83,12 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
         {/* Bottom Section - Content (White Background) */}
         <div className="flex-1 bg-white p-6 flex flex-col">
-          {/* 30-Day Warranty Badge - Centered at top */}
-          <div className="flex justify-center mb-3">
-            <Badge className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-semibold border border-blue-200 flex items-center">
-              <Shield className="w-3 h-3 mr-1" />
-              30-Day Warranty
-            </Badge>
+          {/* Enhanced 30-Day Money Back Guarantee Badge */}
+          <div className="flex justify-center mb-4">
+            <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
+              <Shield className="w-4 h-4 mr-2" />
+              30-Day Money Back Guarantee
+            </div>
           </div>
 
           {/* Package Title */}
