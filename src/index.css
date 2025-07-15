@@ -1,4 +1,3 @@
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 
 @tailwind base;
@@ -78,6 +77,20 @@
 
 .h-16 {
   height: 8rem;
+}
+
+/* Custom icon sizing for subscription IPTV packages on home page */
+.w-24 {
+  width: 12rem;
+}
+
+.h-24 {
+  height: 12rem;
+}
+
+/* Image and video sizing for subscription IPTV icons */
+img, video {
+  max-width: 150%;
 }
 
 /* Enhanced Rich text content styling */
