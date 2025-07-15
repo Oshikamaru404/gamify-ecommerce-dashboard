@@ -57,9 +57,7 @@ const PlayerPanel = () => {
       <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">
-            <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-gray-900 md:text-6xl">
-              Panel Player Credits
-            </h1>
+            
             <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-600">
               Purchase credits for streaming applications and player activation
             </p>
