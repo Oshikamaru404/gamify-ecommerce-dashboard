@@ -40,7 +40,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         return (
           <Badge className="bg-purple-100 text-purple-700 flex items-center gap-1">
             <GamepadIcon size={12} />
-            Player
+            Panel Player
           </Badge>
         );
       case 'activation-player':
@@ -73,8 +73,10 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
 
   const renderPricing = () => {
     // Both subscription and activation-player categories use monthly pricing
-    // Panel IPTV and player categories use credit-based pricing
+    // Panel IPTV uses credit-based pricing
+    // Panel Player uses special credit system (1 credit = 12 months, 2 credits = lifetime)
     const isMonthlyPricingCategory = pkg.category === 'subscription' || pkg.category === 'activation-player';
+    const isPanelPlayerCategory = pkg.category === 'player';
     
     if (isMonthlyPricingCategory) {
       // Show month-based pricing for subscription and activation-player packages
@@ -105,8 +107,44 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
           </div>
         </div>
       );
+    } else if (isPanelPlayerCategory) {
+      // Show panel player special pricing with disclaimer
+      return (
+        <div className="space-y-3">
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+            <h4 className="font-medium text-sm text-purple-900 mb-2">Panel Player System:</h4>
+            <div className="text-xs text-purple-700 space-y-1">
+              <p>• 1 Credit = 12 Months</p>
+              <p>• 2 Credits = Lifetime Activation</p>
+            </div>
+          </div>
+          <h4 className="font-medium text-sm text-gray-900">Available Credit Options:</h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {pkg.price_10_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">10 Credits:</span> ${pkg.price_10_credits}
+              </div>
+            )}
+            {pkg.price_25_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">25 Credits:</span> ${pkg.price_25_credits}
+              </div>
+            )}
+            {pkg.price_50_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">50 Credits:</span> ${pkg.price_50_credits}
+              </div>
+            )}
+            {pkg.price_100_credits && (
+              <div className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">100 Credits:</span> ${pkg.price_100_credits}
+              </div>
+            )}
+          </div>
+        </div>
+      );
     } else {
-      // Show credit-based pricing for panel-iptv and player packages
+      // Show credit-based pricing for panel-iptv packages
       return (
         <div className="space-y-2">
           <h4 className="font-medium text-sm text-gray-900">Credit-Based Pricing:</h4>

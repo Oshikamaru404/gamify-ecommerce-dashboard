@@ -29,7 +29,7 @@ const ManageProducts = () => {
   // Categorize packages exactly as they appear on the website
   // Subscription packages: month-based subscription system (category 'subscription')
   // Panel IPTV packages: credit-based system (category 'panel-iptv') 
-  // Player packages: for streaming applications (category 'player')
+  // Panel Player packages: for streaming applications (category 'player')
   // Activation packages: month-based subscription system for device activation (category 'activation-player')
   const packagesByCategory = {
     subscription: filteredPackages.filter(pkg => 
@@ -38,7 +38,7 @@ const ManageProducts = () => {
     panelIptv: filteredPackages.filter(pkg => 
       pkg.category === 'panel-iptv' && pkg.status !== 'inactive'
     ),
-    player: filteredPackages.filter(pkg => 
+    panelPlayer: filteredPackages.filter(pkg => 
       pkg.category === 'player' && pkg.status !== 'inactive'
     ),
     activationPlayer: filteredPackages.filter(pkg => 
@@ -74,7 +74,7 @@ const ManageProducts = () => {
     switch (category) {
       case 'subscription': return <Tv size={16} />;
       case 'panelIptv': return <Monitor size={16} />;
-      case 'player': return <GamepadIcon size={16} />;
+      case 'panelPlayer': return <GamepadIcon size={16} />;
       case 'activationPlayer': return <Crown size={16} />;
       default: return <Tv size={16} />;
     }
@@ -84,7 +84,7 @@ const ManageProducts = () => {
     switch (category) {
       case 'subscription': return 'Subscription Packages';
       case 'panelIptv': return 'Panel IPTV Packages';
-      case 'player': return 'Player Packages';
+      case 'panelPlayer': return 'Panel Player Packages';
       case 'activationPlayer': return 'Activation Player Packages';
       default: return 'All Packages';
     }
@@ -94,7 +94,7 @@ const ManageProducts = () => {
     switch (category) {
       case 'subscription': return 'Month-based subscription packages displayed on home page and subscription page';
       case 'panelIptv': return 'Credit-based IPTV panel packages for resellers and advanced users';
-      case 'player': return 'Player panel packages for streaming applications';
+      case 'panelPlayer': return 'Panel player packages for streaming applications (1 credit = 12 months, 2 credits = lifetime activation)';
       case 'activationPlayer': return 'Month-based subscription packages for device activation and player setup';
       default: return 'All packages in the system';
     }
@@ -153,9 +153,9 @@ const ManageProducts = () => {
             <Monitor size={16} />
             Panel IPTV
           </TabsTrigger>
-          <TabsTrigger value="player" className="flex items-center gap-2">
+          <TabsTrigger value="panelPlayer" className="flex items-center gap-2">
             <GamepadIcon size={16} />
-            Player
+            Panel Player
           </TabsTrigger>
           <TabsTrigger value="activationPlayer" className="flex items-center gap-2">
             <Crown size={16} />
@@ -197,9 +197,9 @@ const ManageProducts = () => {
                       Credit-based System
                     </Badge>
                   )}
-                  {category === 'player' && (
+                  {category === 'panelPlayer' && (
                     <Badge className="bg-purple-100 text-purple-700">
-                      Player System
+                      Panel Player System (1 credit = 12 months, 2 credits = lifetime)
                     </Badge>
                   )}
                 </div>

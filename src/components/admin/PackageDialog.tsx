@@ -139,8 +139,9 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
   };
 
   // Both subscription and activation-player categories use monthly pricing
-  // Panel IPTV and player categories use credit-based pricing
+  // Panel IPTV and panel player categories use credit-based pricing
   const isMonthlyPricingCategory = formData.category === 'subscription' || formData.category === 'activation-player';
+  const isPanelPlayerCategory = formData.category === 'player';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -195,7 +196,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
                   <SelectItem value="subscription">Subscription</SelectItem>
                   <SelectItem value="activation-player">Activation Player</SelectItem>
                   <SelectItem value="panel-iptv">Panel IPTV</SelectItem>
-                  <SelectItem value="player">Player</SelectItem>
+                  <SelectItem value="player">Panel Player</SelectItem>
                   <SelectItem value="reseller">Reseller</SelectItem>
                 </SelectContent>
               </Select>
@@ -231,14 +232,30 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
 
           <div>
             <Label>
-              {isMonthlyPricingCategory ? 'Monthly Subscription Pricing (USD)' : 'Credit-Based Pricing (USD)'}
+              {isMonthlyPricingCategory ? 'Monthly Subscription Pricing (USD)' : 
+               isPanelPlayerCategory ? 'Panel Player Credit Pricing (USD)' : 'Credit-Based Pricing (USD)'}
             </Label>
             <p className="text-sm text-gray-600 mb-2">
               {isMonthlyPricingCategory 
                 ? 'Set pricing for monthly subscription plans (used by Subscription and Activation Player packages)'
-                : 'Set pricing for credit-based system (used by Panel IPTV and Player packages)'
+                : isPanelPlayerCategory 
+                ? 'Set pricing for panel player credit system (1 credit = 12 months, 2 credits = lifetime activation)'
+                : 'Set pricing for credit-based system (used by Panel IPTV packages)'
               }
             </p>
+            
+            {/* Show special disclaimer for Panel Player */}
+            {isPanelPlayerCategory && (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                <h4 className="font-medium text-sm text-purple-900 mb-2">Panel Player System:</h4>
+                <div className="text-xs text-purple-700 space-y-1">
+                  <p>• 1 Credit = 12 Months</p>
+                  <p>• 2 Credits = Lifetime Activation</p>
+                  <p>• Set prices for 10, 25, 50, and 100 credit options</p>
+                </div>
+              </div>
+            )}
+            
             {isMonthlyPricingCategory ? (
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div>
