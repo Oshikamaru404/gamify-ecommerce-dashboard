@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, MessageCircle, CreditCard } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import CryptomusCheckout from './CryptomusCheckout';
+import { Badge } from '@/components/ui/badge';
+import { X, Package, CreditCard, User, Mail, Phone } from 'lucide-react';
+import { useCreateOrder } from '@/hooks/useRecentOrders';
+import { toast } from 'sonner';
 
 interface CheckoutFormProps {
   packageData: {
@@ -25,210 +25,162 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
-    customerWhatsapp: ''
+    customerWhatsapp: '',
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showCryptoCheckout, setShowCryptoCheckout] = useState(false);
-  const { toast } = useToast();
+
+  const createOrderMutation = useCreateOrder();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    
+    if (!formData.customerName || !formData.customerEmail) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
 
     try {
-      const { error } = await supabase
-        .from('orders')
-        .insert([
-          {
-            customer_name: formData.customerName,
-            customer_email: formData.customerEmail,
-            customer_whatsapp: formData.customerWhatsapp || null,
-            package_id: packageData.id,
-            package_name: packageData.name,
-            package_category: packageData.category,
-            duration_months: packageData.duration,
-            amount: packageData.price,
-            order_type: 'activation',
-            status: 'pending',
-            payment_status: 'pending'
-          }
-        ]);
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: 'Order Submitted Successfully!',
-        description: 'Your order has been submitted and is being processed. We will contact you soon.',
+      await createOrderMutation.mutateAsync({
+        package_name: packageData.name,
+        package_category: packageData.category,
+        customer_name: formData.customerName,
+        customer_email: formData.customerEmail,
+        customer_whatsapp: formData.customerWhatsapp,
+        amount: packageData.price,
+        duration_months: packageData.duration,
+        order_type: packageData.category.includes('panel') ? 'credits' : 'activation',
+        status: 'pending',
+        payment_status: 'pending',
       });
 
+      toast.success('Order submitted successfully! We will contact you shortly.');
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error submitting order:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to submit order. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error creating order:', error);
+      toast.error('Failed to submit order. Please try again.');
     }
   };
 
-  const handleWhatsAppFallback = () => {
-    const message = `Hello, I'm interested in ${packageData.name} - ${packageData.duration} Month(s) - €${packageData.price.toFixed(2)}`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const handleCryptoPayment = () => {
-    setShowCryptoCheckout(true);
-  };
-
-  if (showCryptoCheckout) {
-    return (
-      <CryptomusCheckout
-        packageData={packageData}
-        onClose={() => {
-          setShowCryptoCheckout(false);
-          onClose();
-        }}
-        onSuccess={onSuccess}
-      />
-    );
-  }
+  // Determine if this is a credit-based package
+  const isCreditBased = packageData.category.includes('panel') || packageData.category === 'player-panel' || packageData.category === 'iptv-panel';
+  const durationLabel = isCreditBased ? 'Credits' : 'Months';
+  const durationDescription = isCreditBased 
+    ? `${packageData.duration} credits for service management`
+    : `${packageData.duration} month${packageData.duration > 1 ? 's' : ''} subscription`;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-xl font-bold">Complete Your Order</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-8 w-8 p-0 hover:bg-gray-100"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-0">
-          {/* Order Summary */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-900 mb-2">Order Summary</h3>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span>Package:</span>
-                <span className="font-medium">{packageData.name}</span>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl font-bold">Quick Order</DialogTitle>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Package Summary */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="bg-[#8f35e5] rounded-lg p-2">
+                <Package className="h-5 w-5 text-white" />
               </div>
-              <div className="flex justify-between">
-                <span>Duration:</span>
-                <span className="font-medium">{packageData.duration} Months</span>
-              </div>
-              <div className="flex justify-between font-semibold text-lg border-t pt-2 mt-2">
-                <span>Total:</span>
-                <span className="text-green-700">€{packageData.price.toFixed(2)}</span>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{packageData.name}</h3>
+                <div className="flex items-center gap-2 mt-2">
+                  {/* Prominent Duration Badge */}
+                  <Badge className="bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] text-white px-3 py-1 text-sm font-bold">
+                    {packageData.duration} {durationLabel}
+                  </Badge>
+                  <span className="text-sm text-gray-600">{durationDescription}</span>
+                </div>
+                <div className="mt-2">
+                  <span className="text-2xl font-bold text-[#8f35e5]">${packageData.price}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Payment Options */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-gray-900">Choose Payment Method</h3>
-            
-            {/* Crypto Payment Button */}
-            <Button
-              onClick={handleCryptoPayment}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white h-12 text-base"
-            >
-              <CreditCard className="mr-2 h-5 w-5" />
-              Pay with Cryptocurrency
-            </Button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Customer Name */}
+            <div className="space-y-2">
+              <Label htmlFor="customerName" className="flex items-center gap-2">
+                <User className="h-4 w-4 text-[#8f35e5]" />
+                Full Name *
+              </Label>
+              <Input
+                id="customerName"
+                name="customerName"
+                type="text"
+                placeholder="Enter your full name"
+                value={formData.customerName}
+                onChange={handleInputChange}
+                required
+                className="border-gray-300 focus:border-[#8f35e5] focus:ring-[#8f35e5]"
+              />
+            </div>
 
-            <div className="text-center text-sm text-gray-500">or</div>
+            {/* Customer Email */}
+            <div className="space-y-2">
+              <Label htmlFor="customerEmail" className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-[#8f35e5]" />
+                Email Address *
+              </Label>
+              <Input
+                id="customerEmail"
+                name="customerEmail"
+                type="email"
+                placeholder="Enter your email address"
+                value={formData.customerEmail}
+                onChange={handleInputChange}
+                required
+                className="border-gray-300 focus:border-[#8f35e5] focus:ring-[#8f35e5]"
+              />
+            </div>
 
-            {/* Traditional Order Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="customerName">Full Name *</Label>
-                <Input
-                  id="customerName"
-                  name="customerName"
-                  type="text"
-                  value={formData.customerName}
-                  onChange={handleInputChange}
-                  placeholder="Enter your full name"
-                  required
-                  className="h-10"
-                />
-              </div>
+            {/* WhatsApp Number */}
+            <div className="space-y-2">
+              <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-[#8f35e5]" />
+                WhatsApp Number (Optional)
+              </Label>
+              <Input
+                id="customerWhatsapp"
+                name="customerWhatsapp"
+                type="tel"
+                placeholder="Enter your WhatsApp number"
+                value={formData.customerWhatsapp}
+                onChange={handleInputChange}
+                className="border-gray-300 focus:border-[#8f35e5] focus:ring-[#8f35e5]"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="customerEmail">Email Address *</Label>
-                <Input
-                  id="customerEmail"
-                  name="customerEmail"
-                  type="email"
-                  value={formData.customerEmail}
-                  onChange={handleInputChange}
-                  placeholder="Enter your email address"
-                  required
-                  className="h-10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="customerWhatsapp">WhatsApp Number (Optional)</Label>
-                <Input
-                  id="customerWhatsapp"
-                  name="customerWhatsapp"
-                  type="tel"
-                  value={formData.customerWhatsapp}
-                  onChange={handleInputChange}
-                  placeholder="Enter your WhatsApp number"
-                  className="h-10"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                variant="outline"
-                className="w-full h-10"
+            {/* Submit Button */}
+            <div className="pt-4">
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] hover:from-[#7c2fd4] hover:to-[#6b27be] text-white py-3 text-lg font-semibold"
+                disabled={createOrderMutation.isPending}
               >
-                <CreditCard className="mr-2 h-4 w-4" />
-                {isSubmitting ? 'Submitting Order...' : 'Submit Order (Traditional)'}
+                <CreditCard className="mr-2 h-5 w-5" />
+                {createOrderMutation.isPending ? 'Processing...' : 'Submit Order'}
               </Button>
+            </div>
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleWhatsAppFallback}
-                className="w-full h-10"
-              >
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Continue with WhatsApp
-              </Button>
-            </form>
-          </div>
-
-          <div className="text-xs text-gray-500 text-center pt-2">
-            By submitting this order, you agree to our terms of service. 
-            Choose crypto payment for instant processing or traditional order for manual verification.
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            <div className="text-center text-sm text-gray-500 pt-2">
+              We'll contact you within 24 hours to complete the payment and activation process.
+            </div>
+          </form>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

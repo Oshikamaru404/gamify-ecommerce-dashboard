@@ -1,26 +1,26 @@
+
 import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Monitor, Settings, BarChart3, Crown } from 'lucide-react';
+import { MessageCircle, Monitor, Settings, BarChart3, Crown, ArrowRight } from 'lucide-react';
 import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { Link } from 'react-router-dom';
+
 const PlayerPanel = () => {
-  const {
-    t
-  } = useLanguage();
-  const {
-    data: packages,
-    isLoading
-  } = useIPTVPackages();
+  const { t } = useLanguage();
+  const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+
   const handleContactWhatsApp = (packageName: string, credits: number, price: number) => {
     const message = `${t.contact}, ${packageName} - ${credits} credits for $${price}`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+
   const handleBuyNow = (packageName: string, credits: number, price: number) => {
     setSelectedPackage({
       id: `player-${packageName.toLowerCase().replace(/\s+/g, '-')}`,
@@ -31,29 +31,45 @@ const PlayerPanel = () => {
     });
     setShowCheckout(true);
   };
+
   const handleCloseCheckout = () => {
     setShowCheckout(false);
     setSelectedPackage(null);
   };
+
   const handleOrderSuccess = () => {
     console.log('Order submitted successfully');
   };
 
+  // Generate a URL-friendly slug from the package name
+  const generateSlug = (name: string) => {
+    return name.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .replace(/--+/g, '-')
+      .trim();
+  };
+
   // Filter player packages from database
   const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
+
   if (isLoading) {
-    return <StoreLayout>
+    return (
+      <StoreLayout>
         <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
           <div className="container py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8f35e5] mx-auto"></div>
               <p className="mt-4 text-lg text-gray-600">Loading packages...</p>
             </div>
           </div>
         </div>
-      </StoreLayout>;
+      </StoreLayout>
+    );
   }
-  return <StoreLayout>
+
+  return (
+    <StoreLayout>
       <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">
@@ -67,47 +83,54 @@ const PlayerPanel = () => {
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
             <Card className="p-8 text-center hover:shadow-xl transition-all">
-              <Monitor className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <Monitor className="h-16 w-16 text-[#8f35e5] mx-auto mb-4" />
               <h3 className="text-xl font-bold mb-3">Player Applications</h3>
               <p className="text-gray-600">Activate streaming apps and players with credit system</p>
             </Card>
             
             <Card className="p-8 text-center hover:shadow-xl transition-all">
-              <Settings className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <Settings className="h-16 w-16 text-[#8f35e5] mx-auto mb-4" />
               <h3 className="text-xl font-bold mb-3">Easy Management</h3>
               <p className="text-gray-600">Simple credit-based activation system</p>
             </Card>
             
             <Card className="p-8 text-center hover:shadow-xl transition-all">
-              <Crown className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <Crown className="h-16 w-16 text-[#8f35e5] mx-auto mb-4" />
               <h3 className="text-xl font-bold mb-3">Lifetime Options</h3>
               <p className="text-gray-600">2 credits = lifetime activation for supported apps</p>
             </Card>
           </div>
 
           <section className="space-y-16">
-            {playerPackages.length > 0 ? playerPackages.map((pkg, index) => <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-8">
+            {playerPackages.length > 0 ? (
+              playerPackages.map((pkg, index) => (
+                <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] text-white p-8">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 flex items-center justify-center">
-                        {/* Priority: Use uploaded image URL first */}
-                        {pkg.icon_url ? <img src={pkg.icon_url} alt={pkg.name} className="w-14 h-14 rounded-lg object-cover shadow-lg" onError={e => {
-                    // If image fails to load, hide it and show fallback
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }} /> : null}
+                        {pkg.icon_url ? (
+                          <img 
+                            src={pkg.icon_url} 
+                            alt={pkg.name} 
+                            className="w-14 h-14 rounded-lg object-cover shadow-lg" 
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
                         
-                        {/* Fallback: Use emoji or default icon */}
-                        <div className="w-14 h-14 rounded-lg bg-red-400/30 flex items-center justify-center text-3xl backdrop-blur-sm" style={{
-                    display: pkg.icon_url ? 'none' : 'flex'
-                  }}>
+                        <div 
+                          className="w-14 h-14 rounded-lg bg-white/20 flex items-center justify-center text-3xl backdrop-blur-sm" 
+                          style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                        >
                           {pkg.icon || '🎮'}
                         </div>
                       </div>
                       <div>
                         <h2 className="text-3xl font-bold">{pkg.name}</h2>
-                        <p className="text-red-100 text-lg">{pkg.description}</p>
+                        <p className="text-purple-100 text-lg">{pkg.description}</p>
                       </div>
                     </div>
                   </div>
@@ -115,32 +138,23 @@ const PlayerPanel = () => {
                   <div className="p-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Available Credit Options</h3>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                      {[{
-                  credits: 10,
-                  price: pkg.price_10_credits
-                }, {
-                  credits: 25,
-                  price: pkg.price_25_credits
-                }, {
-                  credits: 50,
-                  price: pkg.price_50_credits
-                }, {
-                  credits: 100,
-                  price: pkg.price_100_credits
-                }].filter(option => option.price).map((option, idx) => <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-red-200 transition-all duration-300 hover:shadow-lg">
+                      {[
+                        { credits: 10, price: pkg.price_10_credits },
+                        { credits: 25, price: pkg.price_25_credits },
+                        { credits: 50, price: pkg.price_50_credits },
+                        { credits: 100, price: pkg.price_100_credits }
+                      ].filter(option => option.price).map((option, idx) => (
+                        <Card key={idx} className="p-6 border-2 border-gray-100 hover:border-[#8f35e5]/30 transition-all duration-300 hover:shadow-lg">
                           <div className="text-center">
-                            <div className="text-3xl font-bold text-red-600 mb-2">{option.credits}</div>
+                            <div className="text-3xl font-bold text-[#8f35e5] mb-2">{option.credits}</div>
                             <div className="text-sm text-gray-600 mb-2">Credits</div>
                             
-                            {/* Editable Features Section */}
-                            {pkg.features && pkg.features.length > 0}
-                            
                             {/* Standardized Features */}
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                              <div className="text-sm font-medium text-red-900 mb-1">
+                            <div className="bg-[#8f35e5]/10 border border-[#8f35e5]/20 rounded-lg p-3 mb-4">
+                              <div className="text-sm font-medium text-[#8f35e5] mb-1">
                                 • 1 Credit = 12 Months
                               </div>
-                              <div className="text-sm font-medium text-red-900">
+                              <div className="text-sm font-medium text-[#8f35e5]">
                                 • 2 Credits = Lifetime Activation
                               </div>
                             </div>
@@ -148,29 +162,47 @@ const PlayerPanel = () => {
                             <div className="text-2xl font-bold text-gray-900 mb-4">${option.price}</div>
                             
                             <div className="space-y-2">
-                              <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white" onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}>
+                              <Button 
+                                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white" 
+                                onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}
+                              >
                                 Quick Order
                               </Button>
                               
+                              <Button 
+                                asChild
+                                variant="outline" 
+                                className="w-full border-[#8f35e5] text-[#8f35e5] hover:bg-[#8f35e5] hover:text-white"
+                              >
+                                <Link to={`/player/${generateSlug(pkg.name)}`}>
+                                  View Details
+                                  <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                              </Button>
                             </div>
                           </div>
-                        </Card>)}
+                        </Card>
+                      ))}
                     </div>
                   </div>
-                </div>) : <div className="text-center py-16">
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-16">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">No Player Packages Available</h3>
                 <p className="text-gray-600">Player packages are currently being updated. Please check back later.</p>
-              </div>}
+              </div>
+            )}
           </section>
 
           <div className="text-center mt-16 space-y-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
-              <p className="text-red-800 font-medium">
+            <div className="bg-[#8f35e5]/10 border border-[#8f35e5]/20 rounded-lg p-4 max-w-2xl mx-auto mb-4">
+              <p className="text-[#8f35e5] font-medium">
                 💡 Remember: 1 credit = 12 months, 2 credits = lifetime activation
               </p>
             </div>
             
-            <div className="bg-red-50 rounded-2xl p-8">
+            <div className="bg-[#8f35e5]/5 rounded-2xl p-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Need Help?</h3>
               <p className="text-lg text-gray-700 max-w-3xl mx-auto">
                 Contact our support team for assistance with credit purchases and app activation.
@@ -180,8 +212,16 @@ const PlayerPanel = () => {
         </div>
 
         {/* Checkout Form Modal */}
-        {showCheckout && selectedPackage && <CheckoutForm packageData={selectedPackage} onClose={handleCloseCheckout} onSuccess={handleOrderSuccess} />}
+        {showCheckout && selectedPackage && (
+          <CheckoutForm 
+            packageData={selectedPackage} 
+            onClose={handleCloseCheckout} 
+            onSuccess={handleOrderSuccess} 
+          />
+        )}
       </div>
-    </StoreLayout>;
+    </StoreLayout>
+  );
 };
+
 export default PlayerPanel;
