@@ -1,3 +1,4 @@
+
 export type Language = 'en' | 'fr' | 'es' | 'de' | 'it' | 'ar';
 
 export interface Translations {
@@ -88,6 +89,9 @@ export interface Translations {
   productFeatures: string;
   technicalSpecs: string;
   whatYouGet: string;
+  
+  // Footer
+  footerDescription: string;
   
   // Common
   backToHome: string;
@@ -190,6 +194,9 @@ const translations: Record<Language, Translations> = {
     technicalSpecs: 'Technical Specifications',
     whatYouGet: 'What You Get',
     
+    // Footer
+    footerDescription: 'Premium IPTV services with thousands of live channels, movies and series in 8K Ultra HD quality.',
+    
     // Common
     backToHome: 'Back to home',
     getStarted: 'Get Started',
@@ -288,6 +295,9 @@ const translations: Record<Language, Translations> = {
     productFeatures: 'Fonctionnalités du Produit',
     technicalSpecs: 'Spécifications Techniques',
     whatYouGet: 'Ce que vous obtenez',
+    
+    // Footer
+    footerDescription: 'Services IPTV premium avec des milliers de chaînes en direct, films et séries en qualité 8K Ultra HD.',
     
     // Common
     backToHome: 'Retour à l\'accueil',
@@ -388,6 +398,9 @@ const translations: Record<Language, Translations> = {
     technicalSpecs: 'Especificaciones Técnicas',
     whatYouGet: 'Lo que Obtienes',
     
+    // Footer
+    footerDescription: 'Servicios IPTV premium con miles de canales en vivo, películas y series en calidad 8K Ultra HD.',
+    
     // Common
     backToHome: 'Volver al inicio',
     getStarted: 'Empezar',
@@ -486,6 +499,9 @@ const translations: Record<Language, Translations> = {
     productFeatures: 'Produktfunktionen',
     technicalSpecs: 'Technische Spezifikationen',
     whatYouGet: 'Was Sie erhalten',
+    
+    // Footer
+    footerDescription: 'Premium-IPTV-Services mit Tausenden von Live-Kanälen, Filmen und Serien in 8K Ultra HD-Qualität.',
     
     // Common
     backToHome: 'Zurück zur Startseite',
@@ -586,6 +602,9 @@ const translations: Record<Language, Translations> = {
     technicalSpecs: 'Specifiche Tecniche',
     whatYouGet: 'Cosa Ottieni',
     
+    // Footer
+    footerDescription: 'Servizi IPTV premium con migliaia di canali in diretta, film e serie in qualità 8K Ultra HD.',
+    
     // Common
     backToHome: 'Torna alla home',
     getStarted: 'Inizia',
@@ -684,6 +703,9 @@ const translations: Record<Language, Translations> = {
     productFeatures: 'ميزات المنتج',
     technicalSpecs: 'المواصفات التقنية',
     whatYouGet: 'ما تحصل عليه',
+    
+    // Footer
+    footerDescription: 'خدمات IPTV مميزة مع آلاف القنوات المباشرة والأفلام والمسلسلات بجودة 8K Ultra HD.',
     
     // Common
     backToHome: 'العودة إلى الرئيسية',

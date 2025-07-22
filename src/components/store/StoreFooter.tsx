@@ -26,8 +26,7 @@ const StoreFooter: React.FC = () => {
           <div>
             <h3 className="mb-4 text-lg font-semibold text-red-600">BWIVOX IPTV</h3>
             <p className="text-sm text-gray-600 mb-6">
-              Services IPTV premium avec des milliers de chaînes en direct, 
-              films et séries en qualité 8K Ultra HD.
+              {t.footerDescription}
             </p>
             <Button onClick={handleTryNow} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white">
               <MessageCircle className="mr-2" size={16} />
