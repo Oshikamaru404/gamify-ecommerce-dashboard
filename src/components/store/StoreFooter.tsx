@@ -1,17 +1,22 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const StoreFooter: React.FC = () => {
   const { t } = useLanguage();
+  const [showBlogSubmenu, setShowBlogSubmenu] = useState(false);
 
   const handleTryNow = () => {
     const message = "Bonjour, je souhaite essayer vos services BWIVOX IPTV. Pouvez-vous m'aider?";
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const toggleBlogSubmenu = () => {
+    setShowBlogSubmenu(!showBlogSubmenu);
   };
 
   return (
@@ -63,19 +68,33 @@ const StoreFooter: React.FC = () => {
             <h3 className="mb-4 text-lg font-semibold text-gray-900">Information</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <div className="text-gray-700 font-medium mb-1">Blog</div>
-                <ul className="ml-4 space-y-1">
-                  <li>
-                    <Link to="/blog-iptv" className="text-gray-600 hover:text-red-600 transition-colors">
-                      Blog IPTV
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/blog-player" className="text-gray-600 hover:text-red-600 transition-colors">
-                      Blog Player
-                    </Link>
-                  </li>
-                </ul>
+                <div className="text-gray-700 font-medium mb-1">
+                  <button 
+                    onClick={toggleBlogSubmenu}
+                    className="flex items-center w-full text-left hover:text-red-600 transition-colors"
+                  >
+                    Blog
+                    {showBlogSubmenu ? (
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {showBlogSubmenu && (
+                  <ul className="ml-4 space-y-1 mt-2">
+                    <li>
+                      <Link to="/blog-iptv" className="text-gray-600 hover:text-red-600 transition-colors">
+                        Blog IPTV
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/blog-player" className="text-gray-600 hover:text-red-600 transition-colors">
+                        Blog Player
+                      </Link>
+                    </li>
+                  </ul>
+                )}
               </li>
               <li>
                 <Link to="/support" className="text-gray-600 hover:text-red-600 transition-colors">

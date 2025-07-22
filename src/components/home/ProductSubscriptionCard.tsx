@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,7 +49,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               <img 
                 src={pkg.icon_url} 
                 alt={pkg.name}
-                className="w-24 h-24 rounded-2xl object-cover border-2 border-red-300 shadow-lg shadow-red-200/50"
+                className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                 onError={(e) => {
                   // If image fails to load, hide it and show fallback
                   e.currentTarget.style.display = 'none';
