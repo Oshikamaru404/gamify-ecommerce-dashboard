@@ -110,7 +110,12 @@ const Activation = () => {
               Supported Devices
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {deviceTypes.map((device, index) => (
+              {[
+                { icon: Smartphone, name: 'Mobile Devices', description: 'iOS & Android' },
+                { icon: Tv, name: 'Smart TVs', description: 'Samsung, LG, Sony' },
+                { icon: Tablet, name: 'Tablets', description: 'iPad & Android Tablets' },
+                { icon: Monitor, name: 'Computers', description: 'Windows & Mac' }
+              ].map((device, index) => (
                 <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 hover:scale-105">
                   <CardContent className="p-8">
                     <device.icon className="h-12 w-12 text-red-600 mx-auto mb-4" />
@@ -160,7 +165,7 @@ const Activation = () => {
                       )}
 
                       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-                        {/* Top Section - Icon (Red Background) - Matching ProductSubscriptionCard exact size */}
+                        {/* Top Section - Icon (Red Background) - Exact same size as ProductSubscriptionCard */}
                         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
                           <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
                             {/* Priority: Use uploaded image URL first */}
@@ -303,7 +308,12 @@ const Activation = () => {
               Why Choose Our 12-Month Activation Service?
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => (
+              {[
+                { icon: Zap, title: 'Instant Activation', description: 'Activate your device in minutes' },
+                { icon: Shield, title: 'Secure Connection', description: 'Encrypted streaming protocols' },
+                { icon: Clock, title: 'Long-term Support', description: 'Extended device compatibility' },
+                { icon: CheckCircle, title: 'Quality Guarantee', description: 'Premium streaming experience' }
+              ].map((feature, index) => (
                 <Card key={index} className="text-center hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-8">
                     <feature.icon className="h-12 w-12 text-red-600 mx-auto mb-4" />
