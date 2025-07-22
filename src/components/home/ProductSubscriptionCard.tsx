@@ -50,7 +50,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               <img 
                 src={pkg.icon_url} 
                 alt={pkg.name}
-                className="w-24 h-24 rounded-2xl object-cover shadow-xl"
+                className="w-24 h-24 rounded-2xl object-cover border-2 border-red-300 shadow-lg shadow-red-200/50"
                 onError={(e) => {
                   // If image fails to load, hide it and show fallback
                   e.currentTarget.style.display = 'none';
