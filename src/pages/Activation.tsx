@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -184,7 +183,7 @@ const Activation = () => {
                             <img 
                               src={pkg.icon_url} 
                               alt={pkg.name}
-                              className="w-16 h-16 mx-auto rounded-lg object-cover border-6 border-red-500 shadow-xl shadow-red-300/60"
+                              className="w-16 h-16 mx-auto rounded-lg object-cover border-4 border-red-500 shadow-lg"
                               onError={(e) => {
                                 console.log('Activation page - Image failed to load:', pkg.icon_url);
                                 e.currentTarget.style.display = 'none';

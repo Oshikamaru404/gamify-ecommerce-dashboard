@@ -152,7 +152,7 @@ const ActivationSection = () => {
                           <img 
                             src={pkg.icon_url} 
                             alt={pkg.name}
-                            className="w-16 h-16 rounded-lg object-cover"
+                            className="w-16 h-16 rounded-lg object-cover border-4 border-red-500 shadow-lg"
                             onError={(e) => {
                               console.log('Home ActivationSection - Image failed to load:', pkg.icon_url);
                               e.currentTarget.style.display = 'none';
