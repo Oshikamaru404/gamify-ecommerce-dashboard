@@ -63,9 +63,19 @@ const StoreFooter: React.FC = () => {
             <h3 className="mb-4 text-lg font-semibold text-gray-900">Information</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/blog" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Blog
-                </Link>
+                <div className="text-gray-700 font-medium mb-1">Blog</div>
+                <ul className="ml-4 space-y-1">
+                  <li>
+                    <Link to="/blog-iptv" className="text-gray-600 hover:text-red-600 transition-colors">
+                      Blog IPTV
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/blog-player" className="text-gray-600 hover:text-red-600 transition-colors">
+                      Blog Player
+                    </Link>
+                  </li>
+                </ul>
               </li>
               <li>
                 <Link to="/support" className="text-gray-600 hover:text-red-600 transition-colors">
