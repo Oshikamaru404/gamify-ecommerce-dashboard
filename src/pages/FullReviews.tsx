@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Star, Shield, Check, ThumbsUp, MessageSquare, Calendar } from 'lucide-react';
+import { ArrowLeft, Star, Shield, Check, ThumbsUp, MessageSquare, Calendar, ThumbsDown, Minus } from 'lucide-react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { useApprovedFeedbacks } from '@/hooks/useFeedback';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,13 +13,13 @@ const FullReviews = () => {
   const getFeedbackIcon = (type: string) => {
     switch (type) {
       case 'positive':
-        return { emoji: '😊', color: 'text-green-600' };
+        return { icon: ThumbsUp, color: 'text-green-600' };
       case 'neutral':
-        return { emoji: '😐', color: 'text-yellow-600' };
+        return { icon: Minus, color: 'text-yellow-600' };
       case 'negative':
-        return { emoji: '☹️', color: 'text-red-600' };
+        return { icon: ThumbsDown, color: 'text-red-600' };
       default:
-        return { emoji: '😊', color: 'text-green-600' };
+        return { icon: ThumbsUp, color: 'text-green-600' };
     }
   };
 
@@ -174,7 +174,7 @@ const FullReviews = () => {
           ) : (
             <div className="space-y-8">
               {feedbacks.map((feedback) => {
-                const { emoji, color } = getFeedbackIcon(feedback.feedback_type);
+                const { icon: IconComponent, color } = getFeedbackIcon(feedback.feedback_type);
                 
                 return (
                   <div key={feedback.id} className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
@@ -194,7 +194,7 @@ const FullReviews = () => {
                             </div>
                             <span>•</span>
                             <span className={`flex items-center ${color}`}>
-                              <span className="mr-1">{emoji}</span>
+                              <IconComponent className="w-4 h-4 mr-1" />
                               {feedback.feedback_type.charAt(0).toUpperCase() + feedback.feedback_type.slice(1)}
                             </span>
                           </div>

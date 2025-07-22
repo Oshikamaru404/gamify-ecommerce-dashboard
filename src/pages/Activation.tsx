@@ -184,7 +184,7 @@ const Activation = () => {
                             <img 
                               src={pkg.icon_url} 
                               alt={pkg.name}
-                              className="w-16 h-16 mx-auto rounded-lg object-cover"
+                              className="w-16 h-16 mx-auto rounded-lg object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                               onError={(e) => {
                                 console.log('Activation page - Image failed to load:', pkg.icon_url);
                                 e.currentTarget.style.display = 'none';
