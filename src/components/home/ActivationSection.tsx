@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -148,37 +147,44 @@ const ActivationSection = () => {
                       </div>
                     )}
 
-                    <div className="aspect-square rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden flex flex-col">
+                    <div className="h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden flex flex-col">
                       {/* Top Section - Icon (Red Background) */}
-                      <div className="h-1/2 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative">
-                        <div className="w-40 h-40 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-                          {/* Priority: Use uploaded image URL first */}
-                          {pkg.icon_url && (
-                            <img 
-                              src={pkg.icon_url} 
-                              alt={pkg.name}
-                              className="w-32 h-32 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
-                              onError={(e) => {
-                                // If image fails to load, hide it and show fallback
-                                e.currentTarget.style.display = 'none';
-                                const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
-                                if (fallbackContainer) fallbackContainer.style.display = 'flex';
-                              }}
-                            />
-                          )}
-                          
-                          {/* Fallback: Use emoji if no image URL or if image fails to load */}
-                          <div 
-                            className="w-32 h-32 rounded-2xl bg-white/20 flex items-center justify-center text-5xl text-white drop-shadow-lg"
-                            style={{ display: pkg.icon_url ? 'none' : 'flex' }}
-                          >
-                            {pkg.icon || '🚀'}
-                          </div>
+                      <div className="bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative">
+                        {/* Aspect ratio wrapper to ensure square dimensions */}
+                        <div className="w-full">
+                          <AspectRatio ratio={1/1} className="w-full">
+                            <div className="flex items-center justify-center h-full">
+                              <div className="w-40 h-40 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+                                {/* Priority: Use uploaded image URL first */}
+                                {pkg.icon_url && (
+                                  <img 
+                                    src={pkg.icon_url} 
+                                    alt={pkg.name}
+                                    className="w-32 h-32 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
+                                    onError={(e) => {
+                                      // If image fails to load, hide it and show fallback
+                                      e.currentTarget.style.display = 'none';
+                                      const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                                      if (fallbackContainer) fallbackContainer.style.display = 'flex';
+                                    }}
+                                  />
+                                )}
+                                
+                                {/* Fallback: Use emoji if no image URL or if image fails to load */}
+                                <div 
+                                  className="w-32 h-32 rounded-2xl bg-white/20 flex items-center justify-center text-5xl text-white drop-shadow-lg"
+                                  style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                                >
+                                  {pkg.icon || '🚀'}
+                                </div>
+                              </div>
+                            </div>
+                          </AspectRatio>
                         </div>
                       </div>
 
                       {/* Bottom Section - Content (White Background) */}
-                      <div className="h-1/2 bg-white p-4 flex flex-col overflow-y-auto">
+                      <div className="flex-grow bg-white p-4 flex flex-col overflow-y-auto">
                         {/* Enhanced 30-Day Money Back Guarantee Badge */}
                         <div className="flex justify-center mb-2">
                           <div className="bg-white border-2 border-red-500 text-red-600 px-3 py-1 rounded-full text-xs font-bold shadow flex items-center transform hover:scale-105 transition-all duration-300">
