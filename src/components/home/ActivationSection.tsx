@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -148,39 +149,36 @@ const ActivationSection = () => {
                     )}
 
                     <div className="h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden flex flex-col">
-                      {/* Top Section - Icon (Red Background) */}
-                      <div className="bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative">
-                        {/* Aspect ratio wrapper to ensure square dimensions */}
-                        <div className="w-full">
-                          <AspectRatio ratio={1/1} className="w-full">
-                            <div className="flex items-center justify-center h-full">
-                              <div className="w-40 h-40 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-                                {/* Priority: Use uploaded image URL first */}
-                                {pkg.icon_url && (
-                                  <img 
-                                    src={pkg.icon_url} 
-                                    alt={pkg.name}
-                                    className="w-32 h-32 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
-                                    onError={(e) => {
-                                      // If image fails to load, hide it and show fallback
-                                      e.currentTarget.style.display = 'none';
-                                      const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
-                                      if (fallbackContainer) fallbackContainer.style.display = 'flex';
-                                    }}
-                                  />
-                                )}
-                                
-                                {/* Fallback: Use emoji if no image URL or if image fails to load */}
-                                <div 
-                                  className="w-32 h-32 rounded-2xl bg-white/20 flex items-center justify-center text-5xl text-white drop-shadow-lg"
-                                  style={{ display: pkg.icon_url ? 'none' : 'flex' }}
-                                >
-                                  {pkg.icon || '🚀'}
-                                </div>
+                      {/* Top Section - Icon (Red Background) - Made to be more similar to ProductSubscriptionCard */}
+                      <div className="bg-gradient-to-br from-red-500 to-red-600 h-40">
+                        <AspectRatio ratio={1/1} className="h-full">
+                          <div className="flex items-center justify-center h-full">
+                            <div className="w-24 h-24 bg-red-400/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                              {/* Priority: Use uploaded image URL first */}
+                              {pkg.icon_url && (
+                                <img 
+                                  src={pkg.icon_url} 
+                                  alt={pkg.name}
+                                  className="w-18 h-18 rounded-xl object-cover border-3 border-red-500 shadow-xl shadow-red-300/60"
+                                  onError={(e) => {
+                                    // If image fails to load, hide it and show fallback
+                                    e.currentTarget.style.display = 'none';
+                                    const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                                    if (fallbackContainer) fallbackContainer.style.display = 'flex';
+                                  }}
+                                />
+                              )}
+                              
+                              {/* Fallback: Use emoji if no image URL or if image fails to load */}
+                              <div 
+                                className="w-18 h-18 rounded-xl bg-white/20 flex items-center justify-center text-3xl text-white drop-shadow-lg"
+                                style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                              >
+                                {pkg.icon || '🚀'}
                               </div>
                             </div>
-                          </AspectRatio>
-                        </div>
+                          </div>
+                        </AspectRatio>
                       </div>
 
                       {/* Bottom Section - Content (White Background) */}
