@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -45,6 +44,27 @@ export const useBlogArticles = () => {
         .from('blog_articles')
         .select('*')
         .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return data as BlogArticle[];
+    },
+  });
+};
+
+// Hook to fetch published blog articles by category (public)
+export const useBlogArticlesByCategory = (category: 'iptv' | 'player') => {
+  return useQuery({
+    queryKey: ['blog-articles', category],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .select('*')
+        .eq('published', true)
+        .eq('category', category)
         .order('created_at', { ascending: false });
 
       if (error) {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,6 +74,14 @@ const BlogManagement = () => {
     });
   };
 
+  const getCategoryLabel = (category: string) => {
+    return category === 'iptv' ? 'Blog IPTV' : 'Blog Player';
+  };
+
+  const getCategoryBadgeVariant = (category: string) => {
+    return category === 'iptv' ? 'default' : 'secondary';
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -89,7 +96,7 @@ const BlogManagement = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Blog Management</h1>
           <p className="text-muted-foreground">
-            Create, edit, and manage your blog articles.
+            Create, edit, and manage your blog articles for both IPTV and Player categories.
           </p>
         </div>
         <Button onClick={handleCreate} className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white">
@@ -108,6 +115,7 @@ const BlogManagement = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Author</TableHead>
                   <TableHead>Created</TableHead>
@@ -124,6 +132,11 @@ const BlogManagement = () => {
                           {article.excerpt}
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getCategoryBadgeVariant((article as any).category)}>
+                        {getCategoryLabel((article as any).category || 'iptv')}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={article.published ? 'red' : 'secondary'}>

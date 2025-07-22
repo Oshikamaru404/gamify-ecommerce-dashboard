@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BlogArticle, CreateBlogArticleData, UpdateBlogArticleData } from '@/hooks/useBlogArticles';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -38,6 +39,7 @@ const BlogArticleDialog: React.FC<BlogArticleDialogProps> = ({
     content: '',
     author: 'Équipe BWIVOX',
     featured_image_url: '',
+    category: 'iptv' as 'iptv' | 'player',
     published: false,
   });
 
@@ -50,6 +52,7 @@ const BlogArticleDialog: React.FC<BlogArticleDialogProps> = ({
         content: article.content,
         author: article.author,
         featured_image_url: article.featured_image_url || '',
+        category: (article as any).category || 'iptv',
         published: article.published,
       });
     } else {
@@ -60,6 +63,7 @@ const BlogArticleDialog: React.FC<BlogArticleDialogProps> = ({
         content: '',
         author: 'Équipe BWIVOX',
         featured_image_url: '',
+        category: 'iptv',
         published: false,
       });
     }
@@ -133,15 +137,30 @@ const BlogArticleDialog: React.FC<BlogArticleDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-              placeholder="Enter article title"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                placeholder="Enter article title"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select value={formData.category} onValueChange={(value: 'iptv' | 'player') => setFormData(prev => ({ ...prev, category: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="iptv">Blog IPTV</SelectItem>
+                  <SelectItem value="player">Blog Player</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
