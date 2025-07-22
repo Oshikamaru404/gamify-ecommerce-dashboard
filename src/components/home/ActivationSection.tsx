@@ -18,6 +18,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const ActivationSection = () => {
   const { data: packages, isLoading } = useIPTVPackages();
@@ -147,37 +148,41 @@ const ActivationSection = () => {
                       </div>
                     )}
 
-                    <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-                      {/* Top Section - Icon (Red Background) - Styled similarly to ProductSubscriptionCard */}
-                      <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-t-2xl">
-                        <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-                          {/* Priority: Use uploaded image URL first */}
-                          {pkg.icon_url && (
-                            <img 
-                              src={pkg.icon_url} 
-                              alt={pkg.name}
-                              className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
-                              onError={(e) => {
-                                // If image fails to load, hide it and show fallback
-                                e.currentTarget.style.display = 'none';
-                                const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
-                                if (fallbackContainer) fallbackContainer.style.display = 'flex';
-                              }}
-                            />
-                          )}
-                          
-                          {/* Fallback: Use emoji if no image URL or if image fails to load */}
-                          <div 
-                            className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-4xl text-white drop-shadow-lg"
-                            style={{ display: pkg.icon_url ? 'none' : 'flex' }}
-                          >
-                            {pkg.icon || '🚀'}
+                    <div className="flex flex-col h-full rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
+                      {/* Top Section - Icon (Red Background) - Now using AspectRatio for square shape */}
+                      <div className="w-full">
+                        <AspectRatio ratio={1/1} className="bg-gradient-to-br from-red-500 to-red-600 rounded-t-3xl">
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+                              {/* Priority: Use uploaded image URL first */}
+                              {pkg.icon_url && (
+                                <img 
+                                  src={pkg.icon_url} 
+                                  alt={pkg.name}
+                                  className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
+                                  onError={(e) => {
+                                    // If image fails to load, hide it and show fallback
+                                    e.currentTarget.style.display = 'none';
+                                    const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                                    if (fallbackContainer) fallbackContainer.style.display = 'flex';
+                                  }}
+                                />
+                              )}
+                              
+                              {/* Fallback: Use emoji if no image URL or if image fails to load */}
+                              <div 
+                                className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-4xl text-white drop-shadow-lg"
+                                style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                              >
+                                {pkg.icon || '🚀'}
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        </AspectRatio>
                       </div>
 
                       {/* Bottom Section - Content (White Background) */}
-                      <div className="flex-1 bg-white p-6 flex flex-col">
+                      <div className="flex-1 bg-white p-6 flex flex-col rounded-b-3xl">
                         {/* Enhanced 30-Day Money Back Guarantee Badge */}
                         <div className="flex justify-center mb-4">
                           <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
