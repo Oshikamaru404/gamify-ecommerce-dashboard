@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -169,100 +170,137 @@ const Activation = () => {
                   console.log('Activation page - generating slug for:', pkg.name, 'category:', pkg.category, 'slug:', productSlug);
                   
                   return (
-                    <Card key={pkg.id} className="relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <div key={pkg.id} className="relative h-full">
                       {pkg.status === 'featured' && (
-                        <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-400 to-yellow-500 text-yellow-900 px-4 py-2 rounded-bl-lg font-semibold flex items-center">
-                          <Star className="mr-1 h-4 w-4" />
-                          Popular
+                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                          <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center">
+                            <Star className="w-4 h-4 mr-1 fill-current" />
+                            Most Popular
+                          </Badge>
                         </div>
                       )}
-                      
-                      <CardHeader className="text-center pb-2">
-                        <div className="text-4xl mb-4">
-                          {pkg.icon_url ? (
-                            <img 
-                              src={pkg.icon_url} 
-                              alt={pkg.name}
-                              className="w-16 h-16 mx-auto rounded-lg object-cover border-4 border-red-500 shadow-lg"
-                              onError={(e) => {
-                                console.log('Activation page - Image failed to load:', pkg.icon_url);
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.nextElementSibling?.setAttribute('style', 'display: block');
-                              }}
-                            />
-                          ) : null}
-                          {!pkg.icon_url && (
-                            <span>{pkg.icon || '🚀'}</span>
-                          )}
-                          {pkg.icon_url && (
-                            <span style={{ display: 'none' }}>{pkg.icon || '🚀'}</span>
-                          )}
+
+                      <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
+                        {/* Top Section - Icon (Red Background) */}
+                        <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
+                          <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+                            {/* Priority: Use uploaded image URL first */}
+                            {pkg.icon_url && (
+                              <img 
+                                src={pkg.icon_url} 
+                                alt={pkg.name}
+                                className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
+                                onError={(e) => {
+                                  // If image fails to load, hide it and show fallback
+                                  e.currentTarget.style.display = 'none';
+                                  const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                                  if (fallbackContainer) fallbackContainer.style.display = 'flex';
+                                }}
+                              />
+                            )}
+                            
+                            {/* Fallback: Use emoji if no image URL or if image fails to load */}
+                            <div 
+                              className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-4xl text-white drop-shadow-lg"
+                              style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                            >
+                              {pkg.icon || '🚀'}
+                            </div>
+                          </div>
                         </div>
-                        <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
-                        <p className="text-gray-600 mt-2">
-                          {pkg.description || 'Professional 12-month device activation with premium support'}
-                        </p>
-                      </CardHeader>
-                      
-                      <CardContent className="space-y-6">
-                        {/* Features */}
-                        {pkg.features && pkg.features.length > 0 ? (
-                          <div className="space-y-3">
-                            {pkg.features.slice(0, 4).map((feature: string, featureIndex: number) => (
-                              <div key={featureIndex} className="flex items-start gap-3">
-                                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{feature}</span>
+
+                        {/* Bottom Section - Content (White Background) */}
+                        <div className="flex-1 bg-white p-6 flex flex-col">
+                          {/* Enhanced 30-Day Money Back Guarantee Badge */}
+                          <div className="flex justify-center mb-4">
+                            <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
+                              <Shield className="w-4 h-4 mr-2" />
+                              30-Day Money Back Guarantee
+                            </div>
+                          </div>
+
+                          {/* Package Title */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-2 text-center leading-tight">
+                            {pkg.name}
+                          </h3>
+                          
+                          {/* Package Description */}
+                          {pkg.description && (
+                            <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+                          )}
+
+                          {/* Features */}
+                          {pkg.features && pkg.features.length > 0 ? (
+                            <div className="space-y-2 mb-6 flex-grow">
+                              {pkg.features.slice(0, 4).map((feature: string, featureIndex: number) => (
+                                <div key={featureIndex} className="flex items-start">
+                                  <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                  </div>
+                                  <span className="text-gray-700 text-xs leading-relaxed">{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-2 mb-6 flex-grow">
+                              <div className="flex items-start">
+                                <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                </div>
+                                <span className="text-gray-700 text-xs leading-relaxed">Professional device setup & configuration</span>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                              <span className="text-sm text-gray-700">Professional device setup & configuration</span>
+                              <div className="flex items-start">
+                                <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                </div>
+                                <span className="text-gray-700 text-xs leading-relaxed">12-month activation guarantee</span>
+                              </div>
+                              <div className="flex items-start">
+                                <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                </div>
+                                <span className="text-gray-700 text-xs leading-relaxed">Multi-platform compatibility</span>
+                              </div>
+                              <div className="flex items-start">
+                                <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                </div>
+                                <span className="text-gray-700 text-xs leading-relaxed">Priority technical support</span>
+                              </div>
                             </div>
-                            <div className="flex items-start gap-3">
-                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                              <span className="text-sm text-gray-700">12-month activation guarantee</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                              <span className="text-sm text-gray-700">Multi-platform compatibility</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                              <span className="text-sm text-gray-700">Priority technical support</span>
-                            </div>
-                          </div>
-                        )}
+                          )}
 
-                        {/* 12-Month Pricing */}
-                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500">
-                          <div className="text-center">
-                            <Badge className="bg-green-600 text-white mb-3">
-                              <Crown className="mr-1 h-4 w-4" />
-                              12 Months Plan
-                            </Badge>
-                            <div className="text-3xl font-bold text-green-700 mb-2">
-                              €{price12Months.toFixed(2)}
+                          {/* 12-Month Pricing */}
+                          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500 mb-4">
+                            <div className="text-center">
+                              <Badge className="bg-green-600 text-white mb-3">
+                                <Crown className="mr-1 h-4 w-4" />
+                                12 Months Plan
+                              </Badge>
+                              <div className="text-3xl font-bold text-green-700 mb-2">
+                                €{price12Months.toFixed(2)}
+                              </div>
+                              <div className="text-sm text-gray-600 mb-2">
+                                €{(price12Months / 12).toFixed(2)}/month
+                              </div>
+                              <div className="text-xs text-green-600 font-medium">
+                                ✅ Full year activation + support included
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600 mb-2">
-                              €{(price12Months / 12).toFixed(2)}/month
-                            </div>
-                            <div className="text-xs text-green-600 font-medium">
-                              ✅ Full year activation + support included
-                            </div>
+                          </div>
+
+                          {/* View Details Button */}
+                          <div className="mt-auto">
+                            <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
+                              <Link to={`/products/${productSlug}`}>
+                                Purchase 12-Month Package
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
                           </div>
                         </div>
-
-                        <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white">
-                          <Link to={`/products/${productSlug}`}>
-                            Purchase 12-Month Package
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
