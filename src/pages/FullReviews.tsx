@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Star, Shield, Check, ThumbsUp, MessageSquare, Calendar, ThumbsDown, Minus } from 'lucide-react';
+import { ArrowLeft, Star, Shield, Check, Smile, MessageSquare, Calendar, Frown, Meh } from 'lucide-react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { useApprovedFeedbacks } from '@/hooks/useFeedback';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,13 +13,13 @@ const FullReviews = () => {
   const getFeedbackIcon = (type: string) => {
     switch (type) {
       case 'positive':
-        return { icon: ThumbsUp, color: 'text-green-600' };
+        return { icon: Smile, color: 'text-green-600' };
       case 'neutral':
-        return { icon: Minus, color: 'text-yellow-600' };
+        return { icon: Meh, color: 'text-yellow-600' };
       case 'negative':
-        return { icon: ThumbsDown, color: 'text-red-600' };
+        return { icon: Frown, color: 'text-red-600' };
       default:
-        return { icon: ThumbsUp, color: 'text-green-600' };
+        return { icon: Smile, color: 'text-green-600' };
     }
   };
 
