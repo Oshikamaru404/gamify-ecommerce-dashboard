@@ -84,7 +84,7 @@ function App() {
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="orders" element={<Orders />} />
                     <Route path="products" element={<ManageProducts />} />
-                    <Route path="/blog" element={<BlogManagement />} />
+                    <Route path="blog" element={<BlogManagement />} />
                     <Route path="content" element={<Content />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
