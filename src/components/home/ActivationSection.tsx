@@ -18,7 +18,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const ActivationSection = () => {
   const { data: packages, isLoading } = useIPTVPackages();
@@ -132,7 +131,7 @@ const ActivationSection = () => {
           </div>
 
           {activationPackages.length > 0 ? (
-            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {activationPackages.map((pkg, index) => {
                 const productSlug = generateSlug(pkg.name, pkg.category);
                 const price12Months = pkg.price_12_months || 199.99;
@@ -148,41 +147,37 @@ const ActivationSection = () => {
                       </div>
                     )}
 
-                    <div className="flex flex-col h-full rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-                      {/* Top Section - Icon (Red Background) - Now using AspectRatio for square shape */}
-                      <div className="w-full">
-                        <AspectRatio ratio={1/1} className="bg-gradient-to-br from-red-500 to-red-600 rounded-t-3xl">
-                          <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-                              {/* Priority: Use uploaded image URL first */}
-                              {pkg.icon_url && (
-                                <img 
-                                  src={pkg.icon_url} 
-                                  alt={pkg.name}
-                                  className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
-                                  onError={(e) => {
-                                    // If image fails to load, hide it and show fallback
-                                    e.currentTarget.style.display = 'none';
-                                    const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
-                                    if (fallbackContainer) fallbackContainer.style.display = 'flex';
-                                  }}
-                                />
-                              )}
-                              
-                              {/* Fallback: Use emoji if no image URL or if image fails to load */}
-                              <div 
-                                className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-4xl text-white drop-shadow-lg"
-                                style={{ display: pkg.icon_url ? 'none' : 'flex' }}
-                              >
-                                {pkg.icon || '🚀'}
-                              </div>
-                            </div>
+                    <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
+                      {/* Top Section - Icon (Red Background) */}
+                      <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
+                        <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
+                          {/* Priority: Use uploaded image URL first */}
+                          {pkg.icon_url && (
+                            <img 
+                              src={pkg.icon_url} 
+                              alt={pkg.name}
+                              className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
+                              onError={(e) => {
+                                // If image fails to load, hide it and show fallback
+                                e.currentTarget.style.display = 'none';
+                                const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                                if (fallbackContainer) fallbackContainer.style.display = 'flex';
+                              }}
+                            />
+                          )}
+                          
+                          {/* Fallback: Use emoji if no image URL or if image fails to load */}
+                          <div 
+                            className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-4xl text-white drop-shadow-lg"
+                            style={{ display: pkg.icon_url ? 'none' : 'flex' }}
+                          >
+                            {pkg.icon || '🚀'}
                           </div>
-                        </AspectRatio>
+                        </div>
                       </div>
 
                       {/* Bottom Section - Content (White Background) */}
-                      <div className="flex-1 bg-white p-6 flex flex-col rounded-b-3xl">
+                      <div className="flex-1 bg-white p-6 flex flex-col">
                         {/* Enhanced 30-Day Money Back Guarantee Badge */}
                         <div className="flex justify-center mb-4">
                           <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
@@ -197,18 +192,18 @@ const ActivationSection = () => {
                         </h4>
                         
                         {/* 12-Month Pricing */}
-                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border-2 border-green-500 mb-4">
-                          <div className="text-center">
-                            <Badge className="bg-green-600 text-white">
-                              <Crown className="mr-1 h-3 w-3" />
-                              12 Months
-                            </Badge>
-                            <div className="text-xl font-bold text-green-700 mt-1">
-                              €{price12Months.toFixed(2)}
-                            </div>
-                            <div className="text-xs text-gray-600">
-                              €{(price12Months / 12).toFixed(2)}/month
-                            </div>
+                        <div className="text-center mb-4">
+                          <div className="flex items-baseline justify-center">
+                            <span className="text-sm text-gray-500 mr-1">€</span>
+                            <span className="text-2xl font-bold text-red-600">
+                              {price12Months.toFixed(2)}
+                            </span>
+                            <span className="text-sm text-gray-500 ml-1">
+                              / 12 months
+                            </span>
+                          </div>
+                          <div className="text-xs text-green-600 font-medium mt-1">
+                            €{(price12Months / 12).toFixed(2)}/month
                           </div>
                         </div>
 
@@ -222,18 +217,20 @@ const ActivationSection = () => {
                               <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
                                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                               </div>
-                              <span className="text-gray-700 text-sm leading-relaxed">{feature}</span>
+                              <span className="text-gray-700 text-xs leading-relaxed">{feature}</span>
                             </div>
                           ))}
                         </div>
 
                         {/* View Details Button */}
-                        <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl mt-auto">
-                          <Link to={`/products/${productSlug}`}>
-                            View Details
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </Button>
+                        <div className="mt-auto">
+                          <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
+                            <Link to={`/products/${productSlug}`}>
+                              View Details
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
