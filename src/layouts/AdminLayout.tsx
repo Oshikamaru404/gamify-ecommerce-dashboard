@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,8 @@ import {
   Settings, 
   LogOut,
   FileText,
-  BookOpen
+  BookOpen,
+  Palette
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute';
@@ -36,6 +36,7 @@ const AdminLayout = () => {
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Blog', href: '/admin/blog', icon: BookOpen },
     { name: 'Content', href: '/admin/content', icon: FileText },
+    { name: 'Style Editor', href: '/admin/style-editor', icon: Palette },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
