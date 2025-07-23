@@ -16,6 +16,9 @@ const ProductDetail = () => {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
+  console.log('ProductDetail - Current slug:', slug);
+  console.log('ProductDetail - All packages:', packages);
+
   // Enhanced slug generation to match all package types
   const generateSlug = (name: string, category: string) => {
     const baseSlug = name.toLowerCase()
@@ -36,23 +39,19 @@ const ProductDetail = () => {
   let packageCategory = '';
 
   if (packages) {
-    // Check activation-player packages first
-    const activationPackages = packages.filter(p => p.category === 'activation-player' && p.status !== 'inactive');
-    pkg = activationPackages.find(p => generateSlug(p.name, p.category) === slug);
-    if (pkg) packageCategory = 'activation-player';
-
-    // If not found, check subscription packages
-    if (!pkg) {
-      const subscriptionPackages = packages.filter(p => p.category === 'subscription' && p.status !== 'inactive');
-      pkg = subscriptionPackages.find(p => generateSlug(p.name, p.category) === slug);
-      if (pkg) packageCategory = 'subscription';
-    }
-
-    // If still not found, check other package types
-    if (!pkg) {
-      const otherPackages = packages.filter(p => p.status !== 'inactive' && !['activation-player', 'subscription'].includes(p.category));
-      pkg = otherPackages.find(p => generateSlug(p.name, p.category) === slug);
-      if (pkg) packageCategory = pkg.category;
+    // Check all package categories
+    for (const p of packages) {
+      if (p.status !== 'inactive') {
+        const generatedSlug = generateSlug(p.name, p.category);
+        console.log(`ProductDetail - Checking package: ${p.name}, category: ${p.category}, generated slug: ${generatedSlug}, target slug: ${slug}`);
+        
+        if (generatedSlug === slug) {
+          pkg = p;
+          packageCategory = p.category;
+          console.log('ProductDetail - Found matching package:', pkg);
+          break;
+        }
+      }
     }
   }
 
@@ -92,6 +91,7 @@ const ProductDetail = () => {
   }
 
   if (!pkg) {
+    console.log('ProductDetail - Package not found for slug:', slug);
     return (
       <StoreLayout>
         <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
@@ -112,9 +112,11 @@ const ProductDetail = () => {
 
   // Determine colors and styling based on package category
   const isActivationPackage = packageCategory === 'activation-player';
-  const primaryColor = isActivationPackage ? 'red' : 'red';
-  const gradientFrom = isActivationPackage ? 'from-red-600' : 'from-red-600';
-  const gradientTo = isActivationPackage ? 'to-red-700' : 'to-red-700';
+  const primaryColor = 'red';
+  const gradientFrom = 'from-red-600';
+  const gradientTo = 'to-red-700';
+
+  console.log('ProductDetail - Rendering package:', pkg.name, 'category:', packageCategory);
 
   return (
     <StoreLayout>

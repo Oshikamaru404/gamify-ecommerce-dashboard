@@ -13,6 +13,7 @@ import IPTVPanel from '@/pages/IPTVPanel';
 import PlayerPanel from '@/pages/PlayerPanel';
 import PlayerDetail from '@/pages/PlayerDetail';
 import IPTVDetail from '@/pages/IPTVDetail';
+import ProductDetail from '@/pages/ProductDetail';
 import Subscription from '@/pages/Subscription';
 import Activation from '@/pages/Activation';
 import BlogIPTV from '@/pages/BlogIPTV';
@@ -59,7 +60,8 @@ function App() {
                 <Route path="/iptv-panel" element={<IPTVPanel />} />
                 <Route path="/player-panel" element={<PlayerPanel />} />
                 
-                {/* Detail page routes */}
+                {/* Detail page routes - Updated to use ProductDetail for all product types */}
+                <Route path="/products/:slug" element={<ProductDetail />} />
                 <Route path="/player/:slug" element={<PlayerDetail />} />
                 <Route path="/iptv/:slug" element={<IPTVDetail />} />
                 
