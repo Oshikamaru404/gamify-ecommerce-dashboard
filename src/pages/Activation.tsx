@@ -143,14 +143,14 @@ const Activation = () => {
             </div>
 
             {activationPackages.length > 0 ? (
-              <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3 max-w-5xl mx-auto">
                 {activationPackages.map((pkg, index) => {
                   const productSlug = generateSlug(pkg.name, pkg.category);
                   const price12Months = pkg.price_12_months || 199.99;
                   console.log('Activation page - generating slug for:', pkg.name, 'category:', pkg.category, 'slug:', productSlug);
                   
                   return (
-                    <div key={pkg.id} className="relative h-full">
+                    <div key={pkg.id} className="relative h-full max-w-sm mx-auto">
                       {pkg.status === 'featured' && (
                         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                           <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center">
@@ -161,8 +161,8 @@ const Activation = () => {
                       )}
 
                       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-                        {/* Top Section - Icon (Red Background) - Matching ProductSubscriptionCard exact size */}
-                        <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
+                        {/* Top Section - Icon (Red Background) - Made more square */}
+                        <div className="h-56 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
                           <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
                             {/* Priority: Use uploaded image URL first */}
                             {pkg.icon_url && (
