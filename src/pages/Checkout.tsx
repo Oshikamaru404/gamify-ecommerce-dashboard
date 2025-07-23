@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
 import { useStore } from '@/contexts/StoreContext';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,13 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckCircle2, Package, Truck, CreditCard } from 'lucide-react';
+import { CheckCircle2, Package, Truck, CreditCard, Bitcoin } from 'lucide-react';
 import { toast } from 'sonner';
+import CryptomusCheckout from '@/components/CryptomusCheckout';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { state, clearCart } = useStore();
   const { cart, subtotal, tax, shipping, total } = state;
   
@@ -35,6 +37,27 @@ const Checkout = () => {
   
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCryptoCheckout, setShowCryptoCheckout] = useState(false);
+  
+  // Determine theme based on current route or referrer
+  const [theme, setTheme] = useState<'purple' | 'red'>('red');
+  
+  useEffect(() => {
+    // Check the current path or referrer to determine theme
+    const currentPath = location.pathname;
+    const referrer = location.state?.from || document.referrer;
+    
+    // Panel sections use purple theme
+    if (currentPath.includes('panel') || 
+        referrer.includes('panel') || 
+        referrer.includes('reseller') ||
+        location.state?.section === 'panel') {
+      setTheme('purple');
+    } else {
+      // Default to red for subscription, activation, home
+      setTheme('red');
+    }
+  }, [location]);
   
   if (cart.length === 0) {
     navigate('/cart');
@@ -93,6 +116,12 @@ const Checkout = () => {
       return;
     }
     
+    if (formState.paymentMethod === 'crypto') {
+      // Show crypto checkout
+      setShowCryptoCheckout(true);
+      return;
+    }
+    
     setIsSubmitting(true);
     
     // Simulate API call
@@ -103,6 +132,34 @@ const Checkout = () => {
       setIsSubmitting(false);
     }, 1500);
   };
+
+  const handleCryptoSuccess = () => {
+    setShowCryptoCheckout(false);
+    clearCart();
+    navigate('/');
+  };
+  
+  // Theme-based styling
+  const themeColors = {
+    purple: {
+      primary: 'bg-purple-600 hover:bg-purple-700',
+      primaryText: 'text-purple-600',
+      primaryBg: 'bg-purple-50',
+      gradient: 'from-purple-600 to-purple-700',
+      border: 'border-purple-200',
+      focus: 'focus:border-purple-500 focus:ring-purple-500'
+    },
+    red: {
+      primary: 'bg-red-600 hover:bg-red-700',
+      primaryText: 'text-red-600',
+      primaryBg: 'bg-red-50',
+      gradient: 'from-red-600 to-red-700',
+      border: 'border-red-200',
+      focus: 'focus:border-red-500 focus:ring-red-500'
+    }
+  };
+
+  const currentTheme = themeColors[theme];
   
   const renderStep1 = () => (
     <div className="space-y-4">
@@ -116,6 +173,7 @@ const Checkout = () => {
             value={formState.firstName}
             onChange={handleChange}
             required
+            className={currentTheme.focus}
           />
         </div>
         <div className="space-y-2">
@@ -126,6 +184,7 @@ const Checkout = () => {
             value={formState.lastName}
             onChange={handleChange}
             required
+            className={currentTheme.focus}
           />
         </div>
       </div>
@@ -138,6 +197,7 @@ const Checkout = () => {
           value={formState.email}
           onChange={handleChange}
           required
+          className={currentTheme.focus}
         />
       </div>
       <div className="space-y-2">
@@ -149,6 +209,7 @@ const Checkout = () => {
           value={formState.phone}
           onChange={handleChange}
           required
+          className={currentTheme.focus}
         />
       </div>
     </div>
@@ -165,6 +226,7 @@ const Checkout = () => {
           value={formState.address}
           onChange={handleChange}
           required
+          className={currentTheme.focus}
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -176,6 +238,7 @@ const Checkout = () => {
             value={formState.city}
             onChange={handleChange}
             required
+            className={currentTheme.focus}
           />
         </div>
         <div className="space-y-2">
@@ -186,6 +249,7 @@ const Checkout = () => {
             value={formState.state}
             onChange={handleChange}
             required
+            className={currentTheme.focus}
           />
         </div>
       </div>
@@ -198,6 +262,7 @@ const Checkout = () => {
             value={formState.postalCode}
             onChange={handleChange}
             required
+            className={currentTheme.focus}
           />
         </div>
         <div className="space-y-2">
@@ -236,6 +301,11 @@ const Checkout = () => {
           <Label htmlFor="cod" className="flex-1 cursor-pointer">Cash on Delivery</Label>
           <CreditCard size={20} className="text-muted-foreground" />
         </div>
+        <div className="flex items-center space-x-2 rounded-lg border p-4">
+          <RadioGroupItem value="crypto" id="crypto" />
+          <Label htmlFor="crypto" className="flex-1 cursor-pointer">Cryptocurrency Payment</Label>
+          <Bitcoin size={20} className={currentTheme.primaryText} />
+        </div>
       </RadioGroup>
       
       <div className="space-y-2">
@@ -256,15 +326,15 @@ const Checkout = () => {
     <div className="mb-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 1 ? `bg-gradient-to-r ${currentTheme.gradient} text-white` : 'bg-muted text-muted-foreground'}`}>
             1
           </div>
-          <div className={`mx-2 h-1 w-10 ${step >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+          <div className={`mx-2 h-1 w-10 ${step >= 2 ? `bg-gradient-to-r ${currentTheme.gradient}` : 'bg-muted'}`}></div>
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 2 ? `bg-gradient-to-r ${currentTheme.gradient} text-white` : 'bg-muted text-muted-foreground'}`}>
             2
           </div>
-          <div className={`mx-2 h-1 w-10 ${step >= 3 ? 'bg-primary' : 'bg-muted'}`}></div>
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+          <div className={`mx-2 h-1 w-10 ${step >= 3 ? `bg-gradient-to-r ${currentTheme.gradient}` : 'bg-muted'}`}></div>
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 3 ? `bg-gradient-to-r ${currentTheme.gradient} text-white` : 'bg-muted text-muted-foreground'}`}>
             3
           </div>
         </div>
@@ -276,6 +346,15 @@ const Checkout = () => {
       </div>
     </div>
   );
+
+  // Create package data for crypto checkout
+  const packageData = cart.length > 0 ? {
+    id: 'checkout_order',
+    name: `Order of ${cart.length} item(s)`,
+    category: 'mixed',
+    price: total,
+    duration: 1
+  } : null;
 
   return (
     <StoreLayout>
@@ -306,11 +385,11 @@ const Checkout = () => {
                     )}
                     
                     {step < 3 ? (
-                      <Button type="button" onClick={nextStep}>
+                      <Button type="button" onClick={nextStep} className={currentTheme.primary}>
                         Continue
                       </Button>
                     ) : (
-                      <Button type="submit" disabled={isSubmitting}>
+                      <Button type="submit" disabled={isSubmitting} className={currentTheme.primary}>
                         {isSubmitting ? 'Processing...' : 'Place Order'}
                       </Button>
                     )}
@@ -396,6 +475,15 @@ const Checkout = () => {
             </Card>
           </div>
         </div>
+        
+        {/* Crypto Checkout Modal */}
+        {showCryptoCheckout && packageData && (
+          <CryptomusCheckout
+            packageData={packageData}
+            onClose={() => setShowCryptoCheckout(false)}
+            onSuccess={handleCryptoSuccess}
+          />
+        )}
       </div>
     </StoreLayout>
   );
