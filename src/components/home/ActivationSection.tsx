@@ -128,16 +128,21 @@ const ActivationSection = () => {
               Our premium activation packages come with a full year of service, professional setup, 
               and comprehensive support. Perfect for long-term streaming needs.
             </p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-md mx-auto mt-6">
+              <p className="text-green-800 font-medium">
+                ✅ All packages automatically include 12-month activation
+              </p>
+            </div>
           </div>
 
           {activationPackages.length > 0 ? (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
               {activationPackages.map((pkg, index) => {
                 const productSlug = generateSlug(pkg.name, pkg.category);
                 const price12Months = pkg.price_12_months || 199.99;
                 
                 return (
-                  <div key={pkg.id} className="relative h-full max-w-sm mx-auto">
+                  <div key={pkg.id} className="relative h-full">
                     {pkg.status === 'featured' && (
                       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                         <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center">
@@ -148,8 +153,8 @@ const ActivationSection = () => {
                     )}
 
                     <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
-                      {/* Top Section - Icon (Red Background) - Made more square */}
-                      <div className="h-56 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
+                      {/* Top Section - Icon (Red Background) - Matching ProductSubscriptionCard exact size */}
+                      <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
                         <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
                           {/* Priority: Use uploaded image URL first */}
                           {pkg.icon_url && (
@@ -191,42 +196,74 @@ const ActivationSection = () => {
                           {pkg.name}
                         </h4>
                         
-                        {/* 12-Month Pricing */}
-                        <div className="text-center mb-4">
-                          <div className="flex items-baseline justify-center">
-                            <span className="text-sm text-gray-500 mr-1">€</span>
-                            <span className="text-2xl font-bold text-red-600">
-                              {price12Months.toFixed(2)}
-                            </span>
-                            <span className="text-sm text-gray-500 ml-1">
-                              / 12 months
-                            </span>
-                          </div>
-                          <div className="text-xs text-green-600 font-medium mt-1">
-                            €{(price12Months / 12).toFixed(2)}/month
-                          </div>
-                        </div>
+                        {/* Package Description */}
+                        {pkg.description && (
+                          <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+                        )}
 
-                        {/* Features List */}
-                        <div className="space-y-2 mb-6 flex-grow">
-                          {(pkg.features && pkg.features.length > 0 ? 
-                            pkg.features.slice(0, 3) : 
-                            ['Professional setup', '12-month guarantee', 'Technical support']
-                          ).map((feature: string, featureIndex: number) => (
-                            <div key={featureIndex} className="flex items-start">
+                        {/* Features */}
+                        {pkg.features && pkg.features.length > 0 ? (
+                          <div className="space-y-2 mb-6 flex-grow">
+                            {pkg.features.slice(0, 4).map((feature: string, featureIndex: number) => (
+                              <div key={featureIndex} className="flex items-start">
+                                <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                </div>
+                                <span className="text-gray-700 text-xs leading-relaxed">{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="space-y-2 mb-6 flex-grow">
+                            <div className="flex items-start">
                               <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
                                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                               </div>
-                              <span className="text-gray-700 text-xs leading-relaxed">{feature}</span>
+                              <span className="text-gray-700 text-xs leading-relaxed">Professional device setup & configuration</span>
                             </div>
-                          ))}
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              </div>
+                              <span className="text-gray-700 text-xs leading-relaxed">12-month activation guarantee</span>
+                            </div>
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              </div>
+                              <span className="text-gray-700 text-xs leading-relaxed">Multi-platform compatibility</span>
+                            </div>
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
+                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              </div>
+                              <span className="text-gray-700 text-xs leading-relaxed">Priority technical support</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 12-Month Pricing */}
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500 mb-4">
+                          <div className="text-center">
+                            <Badge className="bg-green-600 text-white mb-3">
+                              <Crown className="mr-1 h-4 w-4" />
+                              12 Months Plan
+                            </Badge>
+                            <div className="text-3xl font-bold text-green-700 mb-2">
+                              €{price12Months.toFixed(2)}
+                            </div>
+                            
+                            <div className="text-xs text-green-600 font-medium">
+                              ✅ Full year activation + support included
+                            </div>
+                          </div>
                         </div>
 
                         {/* View Details Button */}
                         <div className="mt-auto">
                           <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
                             <Link to={`/products/${productSlug}`}>
-                              View Details
+                              Purchase 12-Month Package
                               <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                           </Button>
