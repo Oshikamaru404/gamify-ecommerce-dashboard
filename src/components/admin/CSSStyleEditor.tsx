@@ -79,15 +79,16 @@ const CSSStyleEditor: React.FC = () => {
   const [styles, setStyles] = useState<StyleConfig>(defaultStyles);
   const [previewMode, setPreviewMode] = useState<'card' | 'box'>('card');
   const [selectedPreset, setSelectedPreset] = useState<string>('default');
+  const [isHovered, setIsHovered] = useState(false);
   const { toast } = useToast();
 
   const shadowPresets = {
-    none: 'shadow-none',
-    sm: 'shadow-sm',
-    md: 'shadow-md',
-    lg: 'shadow-lg',
-    xl: 'shadow-xl',
-    '2xl': 'shadow-2xl'
+    none: { class: 'shadow-none', css: 'none' },
+    sm: { class: 'shadow-sm', css: '0 1px 2px 0 rgb(0 0 0 / 0.05)' },
+    md: { class: 'shadow-md', css: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' },
+    lg: { class: 'shadow-lg', css: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' },
+    xl: { class: 'shadow-xl', css: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' },
+    '2xl': { class: 'shadow-2xl', css: '0 25px 50px -12px rgb(0 0 0 / 0.25)' }
   };
 
   const presets = {
@@ -124,15 +125,26 @@ const CSSStyleEditor: React.FC = () => {
     if (presets[presetName as keyof typeof presets]) {
       setStyles(presets[presetName as keyof typeof presets]);
       setSelectedPreset(presetName);
+      toast({
+        title: 'Preset Applied',
+        description: `${presetName.charAt(0).toUpperCase() + presetName.slice(1)} preset has been applied.`,
+      });
     }
   };
 
   const resetStyles = () => {
     setStyles(defaultStyles);
     setSelectedPreset('default');
+    toast({
+      title: 'Styles Reset',
+      description: 'All styles have been reset to default values.',
+    });
   };
 
   const generateCSS = () => {
+    const shadowCss = shadowPresets[styles.shadowSize as keyof typeof shadowPresets]?.css || 'none';
+    const hoverShadowCss = shadowPresets[styles.hoverShadow as keyof typeof shadowPresets]?.css || shadowCss;
+    
     const css = `
 .custom-card {
   width: ${styles.width};
@@ -142,16 +154,17 @@ const CSSStyleEditor: React.FC = () => {
   background-color: ${styles.backgroundColor}${Math.round(styles.backgroundOpacity * 2.55).toString(16).padStart(2, '0')};
   border-radius: ${styles.borderRadius};
   border: ${styles.borderWidth} ${styles.borderStyle} ${styles.borderColor};
-  box-shadow: var(--tw-${styles.shadowSize});
+  box-shadow: ${shadowCss};
   color: ${styles.textColor};
   font-size: ${styles.fontSize};
   font-weight: ${styles.fontWeight};
   transition: all ${styles.transition} ease-in-out;
+  cursor: pointer;
 }
 
 .custom-card:hover {
   transform: scale(${styles.hoverScale / 100});
-  box-shadow: var(--tw-${styles.hoverShadow});
+  box-shadow: ${hoverShadowCss};
 }
     `.trim();
     
@@ -159,27 +172,49 @@ const CSSStyleEditor: React.FC = () => {
   };
 
   const generateTailwindClasses = () => {
+    const paddingClass = styles.padding === '0.5rem' ? 'p-2' : 
+                        styles.padding === '1rem' ? 'p-4' : 
+                        styles.padding === '1.5rem' ? 'p-6' : 'p-8';
+    
+    const radiusClass = styles.borderRadius === '0' ? 'rounded-none' :
+                       styles.borderRadius === '0.25rem' ? 'rounded-sm' :
+                       styles.borderRadius === '0.5rem' ? 'rounded-lg' :
+                       styles.borderRadius === '0.75rem' ? 'rounded-xl' :
+                       styles.borderRadius === '1rem' ? 'rounded-2xl' :
+                       styles.borderRadius === '1.5rem' ? 'rounded-3xl' : 'rounded-xl';
+    
+    const shadowClass = shadowPresets[styles.shadowSize as keyof typeof shadowPresets]?.class || 'shadow-md';
+    const hoverShadowClass = shadowPresets[styles.hoverShadow as keyof typeof shadowPresets]?.class || 'shadow-lg';
+    
     const classes = [
-      styles.padding === '1rem' ? 'p-4' : styles.padding === '1.5rem' ? 'p-6' : 'p-8',
-      styles.borderRadius === '0.5rem' ? 'rounded-lg' : styles.borderRadius === '0.75rem' ? 'rounded-xl' : 'rounded-2xl',
-      shadowPresets[styles.shadowSize as keyof typeof shadowPresets] || 'shadow-md',
+      paddingClass,
+      radiusClass,
+      shadowClass,
       'bg-white',
       'border',
       'border-gray-200',
       'transition-all',
       'duration-200',
-      `hover:scale-${styles.hoverScale}`,
-      `hover:${shadowPresets[styles.hoverShadow as keyof typeof shadowPresets] || 'shadow-lg'}`
-    ];
+      'cursor-pointer',
+      `hover:scale-${styles.hoverScale === 105 ? '105' : '102'}`,
+      `hover:${hoverShadowClass}`
+    ].filter(Boolean);
     
     return classes.join(' ');
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: 'Copied to clipboard',
-      description: 'Style code has been copied to your clipboard.',
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: 'Copied to clipboard',
+        description: `${type} code has been copied to your clipboard.`,
+      });
+    }).catch(() => {
+      toast({
+        title: 'Copy failed',
+        description: 'Failed to copy to clipboard. Please try again.',
+        variant: 'destructive'
+      });
     });
   };
 
@@ -187,16 +222,44 @@ const CSSStyleEditor: React.FC = () => {
     const data = {
       css: generateCSS(),
       tailwind: generateTailwindClasses(),
-      config: styles
+      config: styles,
+      timestamp: new Date().toISOString()
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'card-styles.json';
+    a.download = `card-styles-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    
+    toast({
+      title: 'Styles Exported',
+      description: 'Style configuration has been downloaded as JSON.',
+    });
+  };
+
+  const getPreviewStyles = () => {
+    const shadowCss = shadowPresets[styles.shadowSize as keyof typeof shadowPresets]?.css || 'none';
+    const hoverShadowCss = shadowPresets[styles.hoverShadow as keyof typeof shadowPresets]?.css || shadowCss;
+    
+    return {
+      width: styles.width,
+      height: styles.height === 'auto' ? (previewMode === 'box' ? '120px' : 'auto') : styles.height,
+      padding: styles.padding,
+      margin: styles.margin,
+      backgroundColor: `${styles.backgroundColor}${Math.round(styles.backgroundOpacity * 2.55).toString(16).padStart(2, '0')}`,
+      borderRadius: styles.borderRadius,
+      border: styles.borderWidth === '0px' ? 'none' : `${styles.borderWidth} ${styles.borderStyle} ${styles.borderColor}`,
+      boxShadow: isHovered ? hoverShadowCss : shadowCss,
+      color: styles.textColor,
+      fontSize: styles.fontSize,
+      fontWeight: styles.fontWeight,
+      transform: isHovered ? `scale(${styles.hoverScale / 100})` : 'scale(1)',
+      transition: `all ${styles.transition} ease-in-out`,
+      cursor: 'pointer'
+    };
   };
 
   return (
@@ -398,11 +461,11 @@ const CSSStyleEditor: React.FC = () => {
 
           <div className="space-y-3">
             <div className="flex gap-2">
-              <Button onClick={() => copyToClipboard(generateTailwindClasses())} className="flex-1">
+              <Button onClick={() => copyToClipboard(generateTailwindClasses(), 'Tailwind')} className="flex-1">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Tailwind
               </Button>
-              <Button onClick={() => copyToClipboard(generateCSS())} variant="outline" className="flex-1">
+              <Button onClick={() => copyToClipboard(generateCSS(), 'CSS')} variant="outline" className="flex-1">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy CSS
               </Button>
@@ -443,28 +506,9 @@ const CSSStyleEditor: React.FC = () => {
           <div className="bg-gray-50 p-6 rounded-lg min-h-64">
             {previewMode === 'card' ? (
               <div
-                className="transition-all duration-200 cursor-pointer"
-                style={{
-                  width: styles.width,
-                  height: styles.height,
-                  padding: styles.padding,
-                  margin: styles.margin,
-                  backgroundColor: `${styles.backgroundColor}${Math.round(styles.backgroundOpacity * 2.55).toString(16).padStart(2, '0')}`,
-                  borderRadius: styles.borderRadius,
-                  border: `${styles.borderWidth} ${styles.borderStyle} ${styles.borderColor}`,
-                  boxShadow: `var(--tw-shadow-${styles.shadowSize})`,
-                  color: styles.textColor,
-                  fontSize: styles.fontSize,
-                  fontWeight: styles.fontWeight,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = `scale(${styles.hoverScale / 100})`;
-                  e.currentTarget.style.boxShadow = `var(--tw-shadow-${styles.hoverShadow})`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = `var(--tw-shadow-${styles.shadowSize})`;
-                }}
+                style={getPreviewStyles()}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
               >
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold">Sample Card</h3>
@@ -479,28 +523,10 @@ const CSSStyleEditor: React.FC = () => {
               </div>
             ) : (
               <div
-                className="transition-all duration-200 cursor-pointer flex items-center justify-center"
-                style={{
-                  width: styles.width,
-                  height: styles.height || '120px',
-                  padding: styles.padding,
-                  margin: styles.margin,
-                  backgroundColor: `${styles.backgroundColor}${Math.round(styles.backgroundOpacity * 2.55).toString(16).padStart(2, '0')}`,
-                  borderRadius: styles.borderRadius,
-                  border: `${styles.borderWidth} ${styles.borderStyle} ${styles.borderColor}`,
-                  boxShadow: `var(--tw-shadow-${styles.shadowSize})`,
-                  color: styles.textColor,
-                  fontSize: styles.fontSize,
-                  fontWeight: styles.fontWeight,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = `scale(${styles.hoverScale / 100})`;
-                  e.currentTarget.style.boxShadow = `var(--tw-shadow-${styles.hoverShadow})`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = `var(--tw-shadow-${styles.shadowSize})`;
-                }}
+                style={getPreviewStyles()}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="flex items-center justify-center"
               >
                 <div className="text-center">
                   <Square className="h-8 w-8 mx-auto mb-2" />
