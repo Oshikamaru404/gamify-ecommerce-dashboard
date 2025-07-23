@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
@@ -43,21 +42,70 @@ const Checkout = () => {
   const [theme, setTheme] = useState<'purple' | 'red'>('red');
   
   useEffect(() => {
-    // Check the current path or referrer to determine theme
-    const currentPath = location.pathname;
-    const referrer = location.state?.from || document.referrer;
+    console.log('Checkout theme detection - Current path:', location.pathname);
+    console.log('Checkout theme detection - Location state:', location.state);
+    console.log('Checkout theme detection - Referrer:', document.referrer);
+    console.log('Checkout theme detection - Cart items:', cart);
     
-    // Panel sections use purple theme
-    if (currentPath.includes('panel') || 
-        referrer.includes('panel') || 
-        referrer.includes('reseller') ||
-        location.state?.section === 'panel') {
+    // Check multiple sources to determine the originating section
+    const currentPath = location.pathname;
+    const locationState = location.state;
+    const referrer = document.referrer;
+    
+    // Priority 1: Check location state for explicit section
+    if (locationState?.section === 'panel' || locationState?.from?.includes('panel')) {
+      console.log('Theme detection: Purple from location state');
       setTheme('purple');
-    } else {
-      // Default to red for subscription, activation, home
-      setTheme('red');
+      return;
     }
-  }, [location]);
+    
+    // Priority 2: Check current path
+    if (currentPath.includes('panel') || currentPath.includes('iptv-panel') || currentPath.includes('player-panel')) {
+      console.log('Theme detection: Purple from current path');
+      setTheme('purple');
+      return;
+    }
+    
+    // Priority 3: Check referrer URL
+    if (referrer.includes('panel') || referrer.includes('reseller') || referrer.includes('iptv-panel') || referrer.includes('player-panel')) {
+      console.log('Theme detection: Purple from referrer');
+      setTheme('purple');
+      return;
+    }
+    
+    // Priority 4: Check cart items for panel-related products
+    const hasPanelProducts = cart.some(item => {
+      const productName = item.product.name.toLowerCase();
+      const productCategory = item.product.category?.toLowerCase() || '';
+      return productName.includes('panel') || 
+             productName.includes('reseller') || 
+             productCategory.includes('panel') ||
+             productCategory.includes('iptv') ||
+             item.product.type === 'iptv';
+    });
+    
+    if (hasPanelProducts) {
+      console.log('Theme detection: Purple from cart items');
+      setTheme('purple');
+      return;
+    }
+    
+    // Priority 5: Check browser history/session storage for recent navigation
+    try {
+      const recentSection = sessionStorage.getItem('recentSection');
+      if (recentSection === 'panel') {
+        console.log('Theme detection: Purple from session storage');
+        setTheme('purple');
+        return;
+      }
+    } catch (error) {
+      console.log('Session storage not available');
+    }
+    
+    // Default to red for subscription, activation, home
+    console.log('Theme detection: Default red');
+    setTheme('red');
+  }, [location, cart]);
   
   if (cart.length === 0) {
     navigate('/cart');
@@ -360,6 +408,11 @@ const Checkout = () => {
     <StoreLayout>
       <div className="container py-8">
         <h1 className="mb-6 text-3xl font-bold">Checkout</h1>
+        
+        {/* Debug info - remove in production */}
+        <div className="mb-4 p-2 bg-gray-100 rounded text-sm">
+          <strong>Theme: {theme}</strong> | Path: {location.pathname} | Referrer: {document.referrer.split('/').pop()}
+        </div>
         
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
