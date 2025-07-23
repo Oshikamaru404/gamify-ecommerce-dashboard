@@ -20,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
   const location = useLocation();
 
   const handleAddToCart = () => {
-    addToCart(product);
+    addToCart(product.id, 1);
     toast.success(`${product.name} added to cart`);
   };
 
@@ -45,7 +45,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
     }
     
     // Add to cart and navigate to checkout with section info
-    addToCart(product);
+    addToCart(product.id, 1);
     navigate('/checkout', { 
       state: { 
         section,

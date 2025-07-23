@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { CartItem, Product } from '@/lib/types';
 import { getProductById } from '@/lib/mockData';
@@ -20,7 +19,7 @@ type StoreAction =
 
 type StoreContextType = {
   state: StoreState;
-  addToCart: (productId: string, quantity: number) => void;
+  addToCart: (product: Product | string, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -141,7 +140,15 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(storeReducer, initialState);
 
-  const addToCart = (productId: string, quantity: number) => {
+  const addToCart = (product: Product | string, quantity: number = 1) => {
+    let productId: string;
+    
+    if (typeof product === 'string') {
+      productId = product;
+    } else {
+      productId = product.id;
+    }
+    
     dispatch({ type: 'ADD_TO_CART', payload: { productId, quantity } });
     toast.success('Item added to cart');
   };

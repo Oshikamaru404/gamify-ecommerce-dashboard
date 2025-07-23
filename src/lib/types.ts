@@ -1,4 +1,3 @@
-
 export type Platform = 'pc' | 'playstation' | 'xbox' | 'nintendo' | 'mobile' | 'iptv';
 
 export type Product = {
@@ -14,6 +13,9 @@ export type Product = {
   rating: number;
   stock: number;
   featured?: boolean;
+  type?: string;
+  category?: string;
+  duration?: number;
 };
 
 export type CartItem = {

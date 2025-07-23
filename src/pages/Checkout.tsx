@@ -77,11 +77,12 @@ const Checkout = () => {
     const hasPanelProducts = cart.some(item => {
       const productName = item.product.name.toLowerCase();
       const productCategory = item.product.category?.toLowerCase() || '';
+      const productType = item.product.type || '';
       return productName.includes('panel') || 
              productName.includes('reseller') || 
              productCategory.includes('panel') ||
              productCategory.includes('iptv') ||
-             item.product.type === 'iptv';
+             productType === 'iptv';
     });
     
     if (hasPanelProducts) {
