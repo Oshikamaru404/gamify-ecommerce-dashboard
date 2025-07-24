@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import PlanSelector from '@/components/PlanSelector';
 import StoreLayout from '@/components/store/StoreLayout';
