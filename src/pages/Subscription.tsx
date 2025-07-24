@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
@@ -16,6 +16,14 @@ const Subscription = () => {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const location = useLocation();
+
+  // Check if a package was selected from the product card
+  useEffect(() => {
+    if (location.state?.selectedPackage) {
+      setSelectedPackage(location.state.selectedPackage);
+    }
+  }, [location.state]);
 
   // Filter only subscription packages
   const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];

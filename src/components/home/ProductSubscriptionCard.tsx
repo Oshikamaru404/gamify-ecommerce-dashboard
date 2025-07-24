@@ -132,10 +132,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             )}
           </div>
 
-          {/* View Details Button - Fixed route path */}
+          {/* View Details Button - Link to subscription page for subscriptions */}
           <div className="mt-auto">
             <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-              <Link to={`/products/${productSlug}`}>
+              <Link to="/subscription" state={{ selectedPackage: pkg }}>
                 View Details
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

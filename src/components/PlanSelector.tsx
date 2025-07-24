@@ -200,20 +200,20 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
             </Card>
           </div>
         ) : (
-          // For regular packages, show radio group with improved styling to match activation
+          // For subscription packages, show radio group with GREEN styling
           <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
             <div className="space-y-4">
               {sortedOptions.map((option) => (
                 <div key={option.id} className="flex items-center space-x-2">
                   <RadioGroupItem value={option.id} id={option.id} />
                   <Label htmlFor={option.id} className="flex-1 cursor-pointer">
-                    <Card className="p-4 border-2 border-red-100 hover:border-red-600/30 transition-all duration-300">
+                    <Card className="p-4 border-2 border-green-100 hover:border-green-600/30 transition-all duration-300">
                       <div className="text-center">
                         <div className="flex justify-center mb-3">
-                          <Crown className="h-6 w-6 text-red-600" />
+                          <Crown className="h-6 w-6 text-green-600" />
                         </div>
                         <div className="mb-2">
-                          <Badge variant="red" className="text-2xl px-6 py-3 rounded-full shadow-lg">
+                          <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg">
                             ${option.price}
                           </Badge>
                         </div>
@@ -234,7 +234,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
         {selectedPlan && !isActivationPackage && (
           <div className="pt-4">
-            <Button onClick={handleOrderNow} className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-6">
+            <Button onClick={handleOrderNow} className="w-full bg-green-600 hover:bg-green-700 text-white text-lg py-6">
               <Check className="mr-2 h-5 w-5" />
               Order Now
             </Button>
