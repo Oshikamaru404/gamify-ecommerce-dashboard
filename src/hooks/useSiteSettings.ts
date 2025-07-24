@@ -29,6 +29,10 @@ export const useSiteSettings = () => {
       console.log('Successfully fetched site settings:', data);
       return data as SiteSetting[];
     },
+    staleTime: 0, // Always consider data stale
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnMount: true, // Always refetch on mount
   });
 };
 
@@ -69,7 +73,9 @@ export const useUpdateSiteSetting = () => {
       return data;
     },
     onSuccess: (data) => {
+      // Invalidate and refetch site settings immediately
       queryClient.invalidateQueries({ queryKey: ['site-settings'] });
+      queryClient.refetchQueries({ queryKey: ['site-settings'] });
       toast.success(`${data.setting_key} updated successfully`);
     },
     onError: (error) => {
