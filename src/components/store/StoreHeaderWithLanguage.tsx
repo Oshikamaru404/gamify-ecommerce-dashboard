@@ -6,12 +6,17 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const StoreHeaderWithLanguage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPanelDropdownOpen, setIsPanelDropdownOpen] = useState(false);
   const location = useLocation();
   const { t, isLoading } = useLanguage();
+  const { data: siteSettings } = useSiteSettings();
+
+  // Get WhatsApp number from site settings
+  const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
 
   const navigation = [
     { name: t.home, href: '/' },
@@ -28,7 +33,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
 
   const handleFreeTrial = () => {
     const message = "Bonjour, je souhaite bénéficier de l'essai gratuit BWIVOX IPTV. Pouvez-vous m'aider?";
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -12,8 +13,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateIPTVPackage, useUpdateIPTVPackage, IPTVPackage } from '@/hooks/useIPTVPackages';
-import { Globe, Plus, X } from 'lucide-react';
+import { Globe, Plus, X, Upload, Image } from 'lucide-react';
 import { toast } from 'sonner';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 const supportedLanguages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -58,6 +60,7 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
 }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [newFeature, setNewFeature] = useState('');
+  const [showImageUploader, setShowImageUploader] = useState(false);
   const createPackage = useCreateIPTVPackage();
   const updatePackage = useUpdateIPTVPackage();
 
@@ -219,6 +222,12 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
   const updateCurrentLanguageDescription = (value: string) => {
     const currentDescriptions = form.getValues('description');
     form.setValue('description', { ...currentDescriptions, [selectedLanguage]: value });
+  };
+
+  const handleImageUpload = (imageUrl: string) => {
+    form.setValue('icon_url', imageUrl);
+    setShowImageUploader(false);
+    toast.success('Image uploaded successfully');
   };
 
   return (
@@ -505,53 +514,87 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
               )}
             </div>
 
-            {/* Icon and Sort Order */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="icon"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Icon</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="e.g., Tv" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+            {/* Icon and Logo Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Icon & Logo</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="icon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Icon</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., Tv" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="icon_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Icon URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://example.com/icon.png" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="sort_order"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sort Order</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Logo Upload Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowImageUploader(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload Logo
+                  </Button>
+                  {form.watch('icon_url') && (
+                    <div className="flex items-center gap-2">
+                      <Image className="h-4 w-4" />
+                      <span className="text-sm text-gray-600">Logo uploaded</span>
+                    </div>
+                  )}
+                </div>
+                
+                {form.watch('icon_url') && (
+                  <div className="mt-2">
+                    <img 
+                      src={form.watch('icon_url')} 
+                      alt="Package logo" 
+                      className="h-16 w-16 object-contain rounded border"
+                    />
+                  </div>
                 )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="icon_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Icon URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://example.com/icon.png" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="sort_order"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sort Order</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              </div>
             </div>
 
             <div className="flex justify-end gap-4">
@@ -564,6 +607,21 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
             </div>
           </form>
         </Form>
+
+        {/* Image Uploader Dialog */}
+        {showImageUploader && (
+          <Dialog open={showImageUploader} onOpenChange={setShowImageUploader}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Upload Package Logo</DialogTitle>
+              </DialogHeader>
+              <ImageUploader
+                onImageUpload={handleImageUpload}
+                onCancel={() => setShowImageUploader(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </DialogContent>
     </Dialog>
   );
