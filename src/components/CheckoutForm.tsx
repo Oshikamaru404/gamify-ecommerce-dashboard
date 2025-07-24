@@ -6,10 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { X, Package, CreditCard, User, Mail, Phone, Bitcoin } from 'lucide-react';
+import { X, Package, CreditCard, User, Mail, Phone, Bitcoin, Loader2 } from 'lucide-react';
 import { useCreateOrder } from '@/hooks/useCreateOrder';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import CryptomusCheckout from '@/components/CryptomusCheckout';
 
 interface CheckoutFormProps {
   packageData: {
@@ -30,17 +30,17 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     customerWhatsapp: '',
     paymentMethod: 'cod' as 'cod' | 'crypto',
   });
-  const [showCryptoCheckout, setShowCryptoCheckout] = useState(false);
+  const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
   const createOrderMutation = useCreateOrder();
 
-  // Theme detection based on package category
-  const theme = packageData.category.includes('panel') || 
-                packageData.category.includes('iptv') || 
-                packageData.category.includes('player') ||
+  // Fixed theme detection logic
+  const theme = packageData.category === 'panel' || 
+                packageData.category === 'iptv-panel' || 
+                packageData.category === 'player-panel' ||
                 packageData.name.toLowerCase().includes('panel') ||
-                packageData.name.toLowerCase().includes('iptv') ||
-                packageData.name.toLowerCase().includes('player')
+                packageData.name.toLowerCase().includes('iptv panel') ||
+                packageData.name.toLowerCase().includes('player panel')
                 ? 'purple' : 'red';
 
   // Theme-based styling
@@ -74,12 +74,69 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     setFormData(prev => ({ ...prev, paymentMethod: value as 'cod' | 'crypto' }));
   };
 
-  const handleCryptoPayment = () => {
+  const handleCryptoPayment = async () => {
     if (!formData.customerName || !formData.customerEmail) {
       toast.error('Please fill in your name and email to proceed with crypto payment');
       return;
     }
-    setShowCryptoCheckout(true);
+
+    setIsProcessingCrypto(true);
+
+    try {
+      // Create the order in our database first
+      const orderData = await createOrderMutation.mutateAsync({
+        package_name: packageData.name,
+        package_category: packageData.category,
+        customer_name: formData.customerName,
+        customer_email: formData.customerEmail,
+        customer_whatsapp: formData.customerWhatsapp,
+        amount: packageData.price,
+        duration_months: packageData.duration,
+        order_type: packageData.category.includes('panel') ? 'credits' : 'activation',
+        status: 'pending',
+        payment_status: 'pending',
+      });
+
+      // Create Cryptomus invoice through edge function
+      const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke(
+        'create-cryptomus-invoice',
+        {
+          body: {
+            packageData,
+            customerInfo: formData,
+            orderId: orderData.id
+          }
+        }
+      );
+
+      if (invoiceError) {
+        throw invoiceError;
+      }
+
+      if (invoiceData.result?.url) {
+        // Update order with payment UUID
+        await supabase
+          .from('orders')
+          .update({ 
+            payment_status: 'processing',
+            customer_whatsapp: formData.customerWhatsapp ? 
+              `${formData.customerWhatsapp}|cryptomus:${invoiceData.result.uuid}` : 
+              `cryptomus:${invoiceData.result.uuid}`
+          })
+          .eq('id', orderData.id);
+
+        // Redirect to Cryptomus payment page
+        window.location.href = invoiceData.result.url;
+      } else {
+        throw new Error('Failed to create payment invoice');
+      }
+
+    } catch (error) {
+      console.error('Error creating crypto payment:', error);
+      toast.error('Failed to create payment. Please try again.');
+    } finally {
+      setIsProcessingCrypto(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,7 +148,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     }
 
     if (formData.paymentMethod === 'crypto') {
-      setShowCryptoCheckout(true);
+      await handleCryptoPayment();
       return;
     }
 
@@ -118,12 +175,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     }
   };
 
-  const handleCryptoSuccess = () => {
-    setShowCryptoCheckout(false);
-    onSuccess();
-    onClose();
-  };
-
   // Determine if this is a credit-based package
   const isCreditBased = packageData.category.includes('panel') || packageData.category === 'player-panel' || packageData.category === 'iptv-panel';
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
@@ -132,176 +183,158 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     : `${packageData.duration} month${packageData.duration > 1 ? 's' : ''} subscription`;
 
   return (
-    <>
-      <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-2xl font-bold">Quick Order</DialogTitle>
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DialogHeader>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl font-bold">Quick Order</DialogTitle>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogHeader>
 
-          <div className="space-y-6">
-            {/* Package Summary */}
-            <div className={`${currentTheme.accent} rounded-lg p-4`}>
-              <div className="flex items-start gap-3">
-                <div className={`${currentTheme.primaryBg} rounded-lg p-2`}>
-                  <Package className="h-5 w-5 text-white" />
+        <div className="space-y-6">
+          {/* Package Summary */}
+          <div className={`${currentTheme.accent} rounded-lg p-4`}>
+            <div className="flex items-start gap-3">
+              <div className={`${currentTheme.primaryBg} rounded-lg p-2`}>
+                <Package className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{packageData.name}</h3>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge className={`${currentTheme.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
+                    {packageData.duration} {durationLabel}
+                  </Badge>
+                  <span className="text-sm text-gray-600">{durationDescription}</span>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{packageData.name}</h3>
-                  <div className="flex items-center gap-2 mt-2">
-                    {/* Prominent Duration Badge */}
-                    <Badge className={`${currentTheme.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
-                      {packageData.duration} {durationLabel}
-                    </Badge>
-                    <span className="text-sm text-gray-600">{durationDescription}</span>
-                  </div>
-                  <div className="mt-2">
-                    <span className={`text-2xl font-bold ${currentTheme.primaryText}`}>${packageData.price}</span>
-                  </div>
+                <div className="mt-2">
+                  <span className={`text-2xl font-bold ${currentTheme.primaryText}`}>${packageData.price}</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Prominent Crypto Payment Button */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Customer Name */}
+            <div className="space-y-2">
+              <Label htmlFor="customerName" className="flex items-center gap-2">
+                <User className={`h-4 w-4 ${currentTheme.primaryText}`} />
+                Full Name *
+              </Label>
+              <Input
+                id="customerName"
+                name="customerName"
+                type="text"
+                placeholder="Enter your full name"
+                value={formData.customerName}
+                onChange={handleInputChange}
+                required
+                className={`border-gray-300 ${currentTheme.focus}`}
+              />
+            </div>
+
+            {/* Customer Email */}
+            <div className="space-y-2">
+              <Label htmlFor="customerEmail" className="flex items-center gap-2">
+                <Mail className={`h-4 w-4 ${currentTheme.primaryText}`} />
+                Email Address *
+              </Label>
+              <Input
+                id="customerEmail"
+                name="customerEmail"
+                type="email"
+                placeholder="Enter your email address"
+                value={formData.customerEmail}
+                onChange={handleInputChange}
+                required
+                className={`border-gray-300 ${currentTheme.focus}`}
+              />
+            </div>
+
+            {/* WhatsApp Number */}
+            <div className="space-y-2">
+              <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
+                <Phone className={`h-4 w-4 ${currentTheme.primaryText}`} />
+                WhatsApp Number (Optional)
+              </Label>
+              <Input
+                id="customerWhatsapp"
+                name="customerWhatsapp"
+                type="tel"
+                placeholder="Enter your WhatsApp number"
+                value={formData.customerWhatsapp}
+                onChange={handleInputChange}
+                className={`border-gray-300 ${currentTheme.focus}`}
+              />
+            </div>
+
+            {/* Payment Method */}
             <div className="space-y-3">
-              <div className="text-center">
-                <p className="text-sm text-gray-600 mb-3">Quick & Secure Crypto Payment</p>
-                <Button
-                  type="button"
-                  onClick={handleCryptoPayment}
-                  className={`w-full ${currentTheme.cryptoButton} text-white py-4 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105`}
-                  size="lg"
-                >
-                  <Bitcoin className="mr-3 h-6 w-6" />
-                  Pay with Cryptomus
-                  <span className="ml-2 text-sm opacity-90">Direct API</span>
-                </Button>
-                <p className="text-xs text-gray-500 mt-2">
-                  Instant payment with Bitcoin, Ethereum, USDT & more
-                </p>
-              </div>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+              <Label className="text-base font-semibold">Payment Method</Label>
+              <RadioGroup
+                value={formData.paymentMethod}
+                onValueChange={handlePaymentMethodChange}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
+                  <RadioGroupItem value="cod" id="cod" />
+                  <Label htmlFor="cod" className="flex-1 cursor-pointer font-medium">
+                    Cash on Delivery
+                  </Label>
+                  <CreditCard className="h-5 w-5 text-gray-500" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">or</span>
+                <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
+                  <RadioGroupItem value="crypto" id="crypto" />
+                  <Label htmlFor="crypto" className="flex-1 cursor-pointer font-medium">
+                    Cryptocurrency Payment
+                  </Label>
+                  <Bitcoin className={`h-5 w-5 ${currentTheme.primaryText}`} />
                 </div>
-              </div>
+              </RadioGroup>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Customer Name */}
-              <div className="space-y-2">
-                <Label htmlFor="customerName" className="flex items-center gap-2">
-                  <User className={`h-4 w-4 ${currentTheme.primaryText}`} />
-                  Full Name *
-                </Label>
-                <Input
-                  id="customerName"
-                  name="customerName"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={formData.customerName}
-                  onChange={handleInputChange}
-                  required
-                  className={`border-gray-300 ${currentTheme.focus}`}
-                />
-              </div>
-
-              {/* Customer Email */}
-              <div className="space-y-2">
-                <Label htmlFor="customerEmail" className="flex items-center gap-2">
-                  <Mail className={`h-4 w-4 ${currentTheme.primaryText}`} />
-                  Email Address *
-                </Label>
-                <Input
-                  id="customerEmail"
-                  name="customerEmail"
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={formData.customerEmail}
-                  onChange={handleInputChange}
-                  required
-                  className={`border-gray-300 ${currentTheme.focus}`}
-                />
-              </div>
-
-              {/* WhatsApp Number */}
-              <div className="space-y-2">
-                <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
-                  <Phone className={`h-4 w-4 ${currentTheme.primaryText}`} />
-                  WhatsApp Number (Optional)
-                </Label>
-                <Input
-                  id="customerWhatsapp"
-                  name="customerWhatsapp"
-                  type="tel"
-                  placeholder="Enter your WhatsApp number"
-                  value={formData.customerWhatsapp}
-                  onChange={handleInputChange}
-                  className={`border-gray-300 ${currentTheme.focus}`}
-                />
-              </div>
-
-              {/* Alternative Payment Method */}
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">Alternative Payment Method</Label>
-                <RadioGroup
-                  value={formData.paymentMethod}
-                  onValueChange={handlePaymentMethodChange}
-                  className="space-y-2"
-                >
-                  <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
-                    <RadioGroupItem value="cod" id="cod" />
-                    <Label htmlFor="cod" className="flex-1 cursor-pointer font-medium">
-                      Cash on Delivery
-                    </Label>
-                    <CreditCard className="h-5 w-5 text-gray-500" />
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Submit Button for COD */}
-              {formData.paymentMethod === 'cod' && (
-                <div className="pt-4">
-                  <Button 
-                    type="submit" 
-                    className={`w-full ${currentTheme.primary} text-white py-3 text-lg font-semibold`}
-                    disabled={createOrderMutation.isPending}
-                  >
+            {/* Submit Button */}
+            <div className="pt-4">
+              <Button 
+                type="submit" 
+                className={`w-full ${currentTheme.primary} text-white py-3 text-lg font-semibold`}
+                disabled={createOrderMutation.isPending || isProcessingCrypto}
+              >
+                {formData.paymentMethod === 'crypto' ? (
+                  <>
+                    {isProcessingCrypto ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Creating Payment...
+                      </>
+                    ) : (
+                      <>
+                        <Bitcoin className="mr-2 h-5 w-5" />
+                        Pay with Crypto
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
                     <CreditCard className="mr-2 h-5 w-5" />
                     {createOrderMutation.isPending ? 'Processing...' : 'Submit Order'}
-                  </Button>
-                </div>
-              )}
+                  </>
+                )}
+              </Button>
+            </div>
 
-              <div className="text-center text-sm text-gray-500 pt-2">
-                {formData.paymentMethod === 'crypto' 
-                  ? 'Crypto payments are processed instantly through our secure API.'
-                  : 'We\'ll contact you within 24 hours to complete the payment and activation process.'
-                }
-              </div>
-            </form>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Crypto Checkout Modal */}
-      {showCryptoCheckout && (
-        <CryptomusCheckout
-          packageData={packageData}
-          onClose={() => setShowCryptoCheckout(false)}
-          onSuccess={handleCryptoSuccess}
-        />
-      )}
-    </>
+            <div className="text-center text-sm text-gray-500 pt-2">
+              {formData.paymentMethod === 'crypto' 
+                ? 'Crypto payments are processed instantly through our secure API.'
+                : 'We\'ll contact you within 24 hours to complete the payment and activation process.'
+              }
+            </div>
+          </form>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
