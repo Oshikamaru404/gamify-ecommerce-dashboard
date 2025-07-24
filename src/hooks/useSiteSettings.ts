@@ -41,7 +41,7 @@ export const useUpdateSiteSetting = () => {
   
   return useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      console.log('Updating site setting using upsert function:', key, 'with value:', value);
+      console.log('Updating site setting directly via table update:', key, 'with value:', value);
       
       // Validate input
       if (!key || typeof key !== 'string' || key.trim() === '') {
@@ -52,19 +52,29 @@ export const useUpdateSiteSetting = () => {
         throw new Error('Setting value is required and must be a string');
       }
       
-      // Use the new upsert function instead of direct table operations
+      // Use direct table update with upsert
       const { data, error } = await supabase
-        .rpc('upsert_site_setting', {
-          p_setting_key: key.trim(),
-          p_setting_value: value.trim()
-        });
+        .from('site_settings')
+        .upsert(
+          {
+            setting_key: key.trim(),
+            setting_value: value.trim(),
+            updated_at: new Date().toISOString()
+          },
+          {
+            onConflict: 'setting_key',
+            ignoreDuplicates: false
+          }
+        )
+        .select()
+        .single();
       
       if (error) {
-        console.error('Error updating site setting via RPC:', error);
+        console.error('Error updating site setting via table:', error);
         throw error;
       }
       
-      console.log('Successfully updated site setting via RPC:', data);
+      console.log('Successfully updated site setting via table:', data);
       return data;
     },
     onSuccess: (data) => {
