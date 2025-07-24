@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { X, Package, CreditCard, User, Mail, Phone, Bitcoin, Loader2 } from 'lucide-react';
+import { X, Package, User, Mail, Phone, Bitcoin, Loader2 } from 'lucide-react';
 import { useCreateOrder } from '@/hooks/useCreateOrder';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -28,7 +27,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     customerName: '',
     customerEmail: '',
     customerWhatsapp: '',
-    paymentMethod: 'cod' as 'cod' | 'crypto',
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
@@ -70,13 +68,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePaymentMethodChange = (value: string) => {
-    setFormData(prev => ({ ...prev, paymentMethod: value as 'cod' | 'crypto' }));
-  };
-
   const handleCryptoPayment = async () => {
-    if (!formData.customerName || !formData.customerEmail) {
-      toast.error('Please fill in your name and email to proceed with crypto payment');
+    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -119,9 +113,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
           .from('orders')
           .update({ 
             payment_status: 'processing',
-            customer_whatsapp: formData.customerWhatsapp ? 
-              `${formData.customerWhatsapp}|cryptomus:${invoiceData.result.uuid}` : 
-              `cryptomus:${invoiceData.result.uuid}`
+            customer_whatsapp: `${formData.customerWhatsapp}|cryptomus:${invoiceData.result.uuid}`
           })
           .eq('id', orderData.id);
 
@@ -141,38 +133,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.customerName || !formData.customerEmail) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    if (formData.paymentMethod === 'crypto') {
-      await handleCryptoPayment();
-      return;
-    }
-
-    try {
-      await createOrderMutation.mutateAsync({
-        package_name: packageData.name,
-        package_category: packageData.category,
-        customer_name: formData.customerName,
-        customer_email: formData.customerEmail,
-        customer_whatsapp: formData.customerWhatsapp,
-        amount: packageData.price,
-        duration_months: packageData.duration,
-        order_type: packageData.category.includes('panel') ? 'credits' : 'activation',
-        status: 'pending',
-        payment_status: 'pending',
-      });
-
-      toast.success('Order submitted successfully! We will contact you shortly.');
-      onSuccess();
-      onClose();
-    } catch (error) {
-      console.error('Error creating order:', error);
-      toast.error('Failed to submit order. Please try again.');
-    }
+    await handleCryptoPayment();
   };
 
   // Determine if this is a credit-based package
@@ -187,7 +148,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold">Quick Order</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Crypto Payment</DialogTitle>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
@@ -253,11 +214,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
               />
             </div>
 
-            {/* WhatsApp Number */}
+            {/* WhatsApp Number - Now Required */}
             <div className="space-y-2">
               <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
                 <Phone className={`h-4 w-4 ${currentTheme.primaryText}`} />
-                WhatsApp Number (Optional)
+                WhatsApp Number *
               </Label>
               <Input
                 id="customerWhatsapp"
@@ -266,70 +227,34 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 placeholder="Enter your WhatsApp number"
                 value={formData.customerWhatsapp}
                 onChange={handleInputChange}
+                required
                 className={`border-gray-300 ${currentTheme.focus}`}
               />
             </div>
 
-            {/* Payment Method */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold">Payment Method</Label>
-              <RadioGroup
-                value={formData.paymentMethod}
-                onValueChange={handlePaymentMethodChange}
-                className="space-y-2"
-              >
-                <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
-                  <RadioGroupItem value="cod" id="cod" />
-                  <Label htmlFor="cod" className="flex-1 cursor-pointer font-medium">
-                    Cash on Delivery
-                  </Label>
-                  <CreditCard className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
-                  <RadioGroupItem value="crypto" id="crypto" />
-                  <Label htmlFor="crypto" className="flex-1 cursor-pointer font-medium">
-                    Cryptocurrency Payment
-                  </Label>
-                  <Bitcoin className={`h-5 w-5 ${currentTheme.primaryText}`} />
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Submit Button */}
+            {/* Crypto Payment Button */}
             <div className="pt-4">
               <Button 
                 type="submit" 
-                className={`w-full ${currentTheme.primary} text-white py-3 text-lg font-semibold`}
-                disabled={createOrderMutation.isPending || isProcessingCrypto}
+                className={`w-full ${currentTheme.cryptoButton} text-white py-4 text-lg font-semibold shadow-lg transform transition-all duration-200 hover:scale-105`}
+                disabled={isProcessingCrypto}
               >
-                {formData.paymentMethod === 'crypto' ? (
+                {isProcessingCrypto ? (
                   <>
-                    {isProcessingCrypto ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Creating Payment...
-                      </>
-                    ) : (
-                      <>
-                        <Bitcoin className="mr-2 h-5 w-5" />
-                        Pay with Crypto
-                      </>
-                    )}
+                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                    Creating Payment...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-5 w-5" />
-                    {createOrderMutation.isPending ? 'Processing...' : 'Submit Order'}
+                    <Bitcoin className="mr-2 h-6 w-6" />
+                    Pay with Cryptocurrency
                   </>
                 )}
               </Button>
             </div>
 
             <div className="text-center text-sm text-gray-500 pt-2">
-              {formData.paymentMethod === 'crypto' 
-                ? 'Crypto payments are processed instantly through our secure API.'
-                : 'We\'ll contact you within 24 hours to complete the payment and activation process.'
-              }
+              Crypto payments are processed instantly through our secure API. You'll be redirected to complete your payment.
             </div>
           </form>
         </div>

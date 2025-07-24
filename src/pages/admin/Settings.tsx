@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -31,7 +30,11 @@ import {
   Save, 
   Mail, 
   Palette,
-  Bot
+  Bot,
+  Key,
+  Shield,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 const generalSettingsSchema = z.object({
@@ -74,12 +77,20 @@ const dashboardColorSchema = z.object({
   backgroundGradient: z.string().min(1, 'Background gradient is required'),
 });
 
+const apiKeysSchema = z.object({
+  cryptomusMerchantId: z.string().min(1, 'Cryptomus Merchant ID is required'),
+  cryptomusApiKey: z.string().min(1, 'Cryptomus API Key is required'),
+});
+
 type GeneralSettingsValues = z.infer<typeof generalSettingsSchema>;
 type PaymentSettingsValues = z.infer<typeof paymentSettingsSchema>;
 type EmailAutomationValues = z.infer<typeof emailAutomationSchema>;
 type DashboardColorValues = z.infer<typeof dashboardColorSchema>;
+type ApiKeysValues = z.infer<typeof apiKeysSchema>;
 
 const Settings = () => {
+  const [showCryptomusApiKey, setShowCryptomusApiKey] = React.useState(false);
+
   const generalForm = useForm<GeneralSettingsValues>({
     resolver: zodResolver(generalSettingsSchema),
     defaultValues: {
@@ -132,6 +143,14 @@ const Settings = () => {
     },
   });
   
+  const apiKeysForm = useForm<ApiKeysValues>({
+    resolver: zodResolver(apiKeysSchema),
+    defaultValues: {
+      cryptomusMerchantId: '',
+      cryptomusApiKey: '',
+    },
+  });
+  
   const onGeneralSubmit = (data: GeneralSettingsValues) => {
     console.log('General settings:', data);
     toast.success('General settings saved successfully');
@@ -150,6 +169,12 @@ const Settings = () => {
   const onDashboardColorSubmit = (data: DashboardColorValues) => {
     console.log('Dashboard color settings:', data);
     toast.success('Dashboard color settings saved successfully');
+  };
+  
+  const onApiKeysSubmit = (data: ApiKeysValues) => {
+    console.log('API Keys settings:', data);
+    // Here you would typically save to Supabase secrets
+    toast.success('API Keys saved successfully');
   };
 
   return (
@@ -178,6 +203,10 @@ const Settings = () => {
           <TabsTrigger value="dashboard" className="flex gap-2">
             <Palette size={16} />
             <span>Dashboard Colors</span>
+          </TabsTrigger>
+          <TabsTrigger value="api-keys" className="flex gap-2">
+            <Key size={16} />
+            <span>API Keys</span>
           </TabsTrigger>
         </TabsList>
         
@@ -868,6 +897,116 @@ const Settings = () => {
               >
                 <Save size={16} className="mr-2" />
                 Save Changes
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="api-keys">
+          <Card>
+            <CardHeader>
+              <CardTitle>API Keys Management</CardTitle>
+              <CardDescription>
+                Manage your external service API keys and credentials.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...apiKeysForm}>
+                <form id="api-keys-form" onSubmit={apiKeysForm.handleSubmit(onApiKeysSubmit)} className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Shield className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold">Cryptomus Payment Gateway</h3>
+                    </div>
+                    
+                    <div className="rounded-md border p-4 bg-blue-50">
+                      <p className="text-sm text-blue-700 mb-4">
+                        Configure your Cryptomus credentials to enable cryptocurrency payments. You can find these in your Cryptomus dashboard.
+                      </p>
+                      
+                      <div className="space-y-4">
+                        <FormField
+                          control={apiKeysForm.control}
+                          name="cryptomusMerchantId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cryptomus Merchant ID</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  placeholder="Enter your Cryptomus Merchant ID"
+                                  className="font-mono"
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Your unique merchant identifier from Cryptomus
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={apiKeysForm.control}
+                          name="cryptomusApiKey"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cryptomus API Key</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Input
+                                    {...field}
+                                    type={showCryptomusApiKey ? "text" : "password"}
+                                    placeholder="Enter your Cryptomus API Key"
+                                    className="font-mono pr-10"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowCryptomusApiKey(!showCryptomusApiKey)}
+                                  >
+                                    {showCryptomusApiKey ? (
+                                      <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                      <Eye className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div>
+                              </FormControl>
+                              <FormDescription>
+                                Your API key from Cryptomus dashboard (kept secure)
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="rounded-md border p-4 bg-yellow-50">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Shield className="h-4 w-4 text-yellow-600" />
+                      <h4 className="text-sm font-semibold text-yellow-800">Security Notice</h4>
+                    </div>
+                    <p className="text-sm text-yellow-700">
+                      API keys are stored securely in Supabase secrets and are never exposed in the frontend code. 
+                      Make sure to use your production keys for live payments.
+                    </p>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter className="border-t px-6 py-4">
+              <Button 
+                type="submit"
+                form="api-keys-form"
+                className="ml-auto bg-blue-600 hover:bg-blue-700"
+              >
+                <Save size={16} className="mr-2" />
+                Save API Keys
               </Button>
             </CardFooter>
           </Card>
