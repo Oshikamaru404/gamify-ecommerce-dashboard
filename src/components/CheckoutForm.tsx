@@ -124,6 +124,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     ? `${packageData.duration} credits for service management`
     : `${packageData.duration} months subscription`;
 
+  console.log('CheckoutForm - Package data received:', packageData);
+  console.log('CheckoutForm - Icon URL:', packageData.icon_url);
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -147,6 +150,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                     alt={packageData.name}
                     className="h-16 w-16 rounded-lg object-cover border-2 border-red-400 shadow-lg"
                     onError={(e) => {
+                      console.error('Failed to load package image:', packageData.icon_url);
                       e.currentTarget.style.display = 'none';
                       const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
                       if (fallbackContainer) fallbackContainer.style.display = 'flex';

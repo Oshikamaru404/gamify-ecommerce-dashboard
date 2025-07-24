@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
@@ -58,7 +57,14 @@ const ProductDetail = () => {
 
   const handlePlanSelect = (plan: any) => {
     console.log('ProductDetail - Plan selected:', plan);
-    setSelectedPlan(plan);
+    // Ensure the plan includes the icon_url from the original package
+    const enrichedPlan = {
+      ...plan,
+      icon_url: pkg?.icon_url,
+      icon: pkg?.icon
+    };
+    console.log('ProductDetail - Enriched plan with icon data:', enrichedPlan);
+    setSelectedPlan(enrichedPlan);
     setShowCheckout(true);
   };
 
