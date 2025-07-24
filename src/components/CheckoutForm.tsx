@@ -32,38 +32,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Fixed theme detection logic with safe category access
-  const category = packageData.category || '';
-  const theme = category === 'panel' || 
-                category === 'iptv-panel' || 
-                category === 'player-panel' ||
-                category === 'activation-player' ||
-                packageData.name.toLowerCase().includes('panel') ||
-                packageData.name.toLowerCase().includes('iptv panel') ||
-                packageData.name.toLowerCase().includes('player panel')
-                ? 'purple' : 'red';
-
-  // Theme-based styling
+  // Use red theme for all checkout forms
   const themeColors = {
-    purple: {
-      primary: 'bg-[#8f35e5] hover:bg-[#7c2fd4]',
-      primaryText: 'text-[#8f35e5]',
-      primaryBg: 'bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4]',
-      focus: 'focus:border-[#8f35e5] focus:ring-[#8f35e5]',
-      accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
-      cryptoButton: 'bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] hover:from-[#7c2fd4] hover:to-[#6b27be]'
-    },
-    red: {
-      primary: 'bg-red-600 hover:bg-red-700',
-      primaryText: 'text-red-600',
-      primaryBg: 'bg-gradient-to-r from-red-600 to-red-700',
-      focus: 'focus:border-red-500 focus:ring-red-500',
-      accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
-      cryptoButton: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'
-    }
+    primary: 'bg-red-600 hover:bg-red-700',
+    primaryText: 'text-red-600',
+    primaryBg: 'bg-gradient-to-r from-red-600 to-red-700',
+    focus: 'focus:border-red-500 focus:ring-red-500',
+    accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
+    cryptoButton: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'
   };
-
-  const currentTheme = themeColors[theme];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -82,13 +59,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
       // Create the order in our database first
       const orderData = await createOrderMutation.mutateAsync({
         package_name: packageData.name,
-        package_category: category,
+        package_category: packageData.category || '',
         customer_name: formData.customerName,
         customer_email: formData.customerEmail,
         customer_whatsapp: formData.customerWhatsapp,
         amount: packageData.price,
         duration_months: packageData.duration,
-        order_type: category.includes('panel') ? 'credits' : 'activation',
+        order_type: (packageData.category || '').includes('panel') ? 'credits' : 'activation',
         status: 'pending',
         payment_status: 'pending',
       });
@@ -141,6 +118,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   const createOrderMutation = useCreateOrder();
 
   // Determine if this is a credit-based package
+  const category = packageData.category || '';
   const isCreditBased = category.includes('panel') || category === 'player-panel' || category === 'iptv-panel';
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
   const durationDescription = isCreditBased 
@@ -161,14 +139,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
         <div className="space-y-6">
           {/* Package Summary */}
-          <div className={`${currentTheme.accent} rounded-lg p-4`}>
+          <div className={`${themeColors.accent} rounded-lg p-4`}>
             <div className="flex items-start gap-3">
-              <div className={`${currentTheme.primaryBg} rounded-lg p-2`}>
+              <div className={`${themeColors.primaryBg} rounded-lg p-2`}>
                 {packageData.icon_url ? (
                   <img 
                     src={packageData.icon_url} 
                     alt={packageData.name}
-                    className="h-5 w-5 rounded object-cover"
+                    className="h-8 w-8 rounded object-cover"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
@@ -177,7 +155,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                   />
                 ) : null}
                 <div 
-                  className="h-5 w-5 flex items-center justify-center text-white text-sm"
+                  className="h-8 w-8 flex items-center justify-center text-white text-lg"
                   style={{ display: packageData.icon_url ? 'none' : 'flex' }}
                 >
                   {packageData.icon || '📺'}
@@ -186,13 +164,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">{packageData.name}</h3>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge className={`${currentTheme.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
-                    {packageData.duration} {durationLabel}
+                  <Badge className={`${themeColors.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
+                    {packageData.duration} {durationLabel} {isCreditBased ? '' : 'Subscription'}
                   </Badge>
-                  <span className="text-sm text-gray-600">{durationDescription}</span>
                 </div>
                 <div className="mt-2">
-                  <span className={`text-2xl font-bold ${currentTheme.primaryText}`}>${packageData.price}</span>
+                  <span className={`text-2xl font-bold ${themeColors.primaryText}`}>${packageData.price}</span>
                 </div>
               </div>
             </div>
@@ -202,7 +179,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
             {/* Customer Name */}
             <div className="space-y-2">
               <Label htmlFor="customerName" className="flex items-center gap-2">
-                <User className={`h-4 w-4 ${currentTheme.primaryText}`} />
+                <User className={`h-4 w-4 ${themeColors.primaryText}`} />
                 Full Name *
               </Label>
               <Input
@@ -213,14 +190,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 value={formData.customerName}
                 onChange={handleInputChange}
                 required
-                className={`border-gray-300 ${currentTheme.focus}`}
+                className={`border-gray-300 ${themeColors.focus}`}
               />
             </div>
 
             {/* Customer Email */}
             <div className="space-y-2">
               <Label htmlFor="customerEmail" className="flex items-center gap-2">
-                <Mail className={`h-4 w-4 ${currentTheme.primaryText}`} />
+                <Mail className={`h-4 w-4 ${themeColors.primaryText}`} />
                 Email Address *
               </Label>
               <Input
@@ -231,14 +208,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 value={formData.customerEmail}
                 onChange={handleInputChange}
                 required
-                className={`border-gray-300 ${currentTheme.focus}`}
+                className={`border-gray-300 ${themeColors.focus}`}
               />
             </div>
 
             {/* WhatsApp Number - Now Required */}
             <div className="space-y-2">
               <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
-                <Phone className={`h-4 w-4 ${currentTheme.primaryText}`} />
+                <Phone className={`h-4 w-4 ${themeColors.primaryText}`} />
                 WhatsApp Number *
               </Label>
               <Input
@@ -249,7 +226,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 value={formData.customerWhatsapp}
                 onChange={handleInputChange}
                 required
-                className={`border-gray-300 ${currentTheme.focus}`}
+                className={`border-gray-300 ${themeColors.focus}`}
               />
             </div>
 
@@ -257,7 +234,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
             <div className="pt-4">
               <Button 
                 type="submit" 
-                className={`w-full ${currentTheme.cryptoButton} text-white py-4 text-lg font-semibold shadow-lg transform transition-all duration-200 hover:scale-105`}
+                className={`w-full ${themeColors.cryptoButton} text-white py-4 text-lg font-semibold shadow-lg transform transition-all duration-200 hover:scale-105`}
                 disabled={isProcessingCrypto}
               >
                 {isProcessingCrypto ? (

@@ -42,8 +42,8 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
   const yearlySavings = calculateYearlySavings();
 
-  // Determine the link path - subscription packages go directly to subscription page with package selection
-  const linkPath = pkg.category === 'subscription' ? '/subscription' : `/products/${productSlug}`;
+  // All packages now go to their product detail page
+  const linkPath = `/products/${productSlug}`;
 
   return (
     <div className="relative h-full">
