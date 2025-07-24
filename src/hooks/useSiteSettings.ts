@@ -57,23 +57,13 @@ export const useUpdateSiteSetting = () => {
         throw error;
       }
       
-      // The RLS policies will handle authentication, so we can proceed directly
-      console.log('Attempting upsert operation...');
+      // Use the secure function instead of direct table operations
+      console.log('Calling upsert_site_setting function...');
       const { data, error } = await supabase
-        .from('site_settings')
-        .upsert(
-          {
-            setting_key: key.trim(),
-            setting_value: value.trim(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            onConflict: 'setting_key',
-            ignoreDuplicates: false
-          }
-        )
-        .select()
-        .single();
+        .rpc('upsert_site_setting', {
+          p_setting_key: key.trim(),
+          p_setting_value: value.trim()
+        });
       
       if (error) {
         console.error('=== MUTATION ERROR ===');

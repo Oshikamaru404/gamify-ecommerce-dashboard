@@ -57,6 +57,38 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       
       // Simple hardcoded admin credentials for demo
       if (username === 'admin' && password === 'admin123') {
+        // Create a temporary admin user record in the database
+        const { data: existingUser, error: checkError } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('username', 'admin')
+          .maybeSingle();
+
+        if (checkError) {
+          console.error('Error checking existing admin user:', checkError);
+        }
+
+        // If no admin user exists, create one
+        if (!existingUser) {
+          console.log('Creating admin user record...');
+          const { error: createError } = await supabase
+            .from('admin_users')
+            .insert([
+              {
+                username: 'admin',
+                role: 'admin',
+                user_id: null // We'll use a special case in the function
+              }
+            ])
+            .select()
+            .single();
+
+          if (createError) {
+            console.error('Error creating admin user:', createError);
+            // Continue anyway as the function might still work
+          }
+        }
+        
         const adminData = {
           id: 'admin-' + Date.now(),
           username: 'admin',
