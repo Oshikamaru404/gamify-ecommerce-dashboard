@@ -27,7 +27,7 @@ const Index = () => {
           asChild 
           className="px-12 py-8 text-2xl bg-[#ff4d4d] hover:bg-[#ff6b6b] rounded-full transform transition-all duration-500 hover:scale-110 hover:shadow-[0_0_30px_rgba(255,77,77,0.5)] animate-fade-in"
         >
-          <Link to="/">{t.discoverOffers}</Link>
+          <Link to="/home">{t.discoverOffers}</Link>
         </Button>
       </div>
     </div>

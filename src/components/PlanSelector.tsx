@@ -131,7 +131,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   };
 
   if (isLoading) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle>Choose Your Plan</CardTitle>
         </CardHeader>
@@ -142,26 +143,30 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
             <div className="h-12 bg-gray-200 rounded"></div>
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
 
   // Use credit options if available, otherwise use direct package pricing
   const availableOptions = creditOptions && creditOptions.length > 0 ? creditOptions : createPlansFromPackageData();
   if (!availableOptions || availableOptions.length === 0) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle>Choose Your Plan</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-gray-500">No plans available for this package.</p>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
 
   // Sort options by months (ascending)
   const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
 
-  return <Card>
+  return (
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Star className="h-5 w-5 text-yellow-500" />
@@ -169,16 +174,16 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isActivationPackage ?
-      // For activation packages, show single option
-      <div className="space-y-4">
+        {isActivationPackage ? (
+          // For activation packages, show single option without animation
+          <div className="space-y-4">
             <Card className="p-4 border-2 border-red-100 hover:border-red-600/30 transition-all duration-300">
               <div className="text-center">
                 <div className="flex justify-center mb-3">
                   <Crown className="h-6 w-6 text-red-600" />
                 </div>
                 <div className="mb-2">
-                  <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg animate-pulse">
+                  <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg">
                     ${sortedOptions[0]?.price || 199.99}
                   </Badge>
                 </div>
@@ -193,10 +198,12 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                 </Button>
               </div>
             </Card>
-          </div> :
-      // For regular packages, show radio group
-      <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
-            {sortedOptions.map(option => <div key={option.id} className="flex items-center space-x-2">
+          </div>
+        ) : (
+          // For regular packages, show radio group
+          <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
+            {sortedOptions.map((option) => (
+              <div key={option.id} className="flex items-center space-x-2">
                 <RadioGroupItem value={option.id} id={option.id} />
                 <Label htmlFor={option.id} className="flex-1 cursor-pointer rounded-lg border p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
@@ -215,15 +222,19 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                     </div>
                   </div>
                 </Label>
-              </div>)}
-          </RadioGroup>}
+              </div>
+            ))}
+          </RadioGroup>
+        )}
 
-        {selectedPlan && !isActivationPackage && <div className="pt-4">
+        {selectedPlan && !isActivationPackage && (
+          <div className="pt-4">
             <Button onClick={handleOrderNow} className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-6">
               <Check className="mr-2 h-5 w-5" />
               Order Now
             </Button>
-          </div>}
+          </div>
+        )}
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
@@ -235,7 +246,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           </p>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
 
 export default PlanSelector;

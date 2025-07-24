@@ -63,9 +63,10 @@ function App() {
             <TooltipProvider>
               <BrowserRouter>
                 <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
+                  {/* Public routes - Updated to use Home as default */}
+                  <Route path="/" element={<Home />} />
                   <Route path="/home" element={<Home />} />
+                  <Route path="/index" element={<Index />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:slug" element={<ProductDetail />} />
                   <Route path="/cart" element={<Cart />} />

@@ -85,14 +85,11 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {pkg.name}
           </h3>
           
-          {/* Price Display - Updated to use USD */}
+          {/* Price Display with Eye-Catching Badge */}
           <div className="text-center mb-4">
-            <div className="flex items-baseline justify-center">
-              <span className="text-sm text-gray-500 mr-1">$</span>
-              <span className="text-2xl font-bold text-red-600">
-                {displayPrice?.toFixed(2)}
-              </span>
-            </div>
+            <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              ${displayPrice?.toFixed(2)}
+            </Badge>
           </div>
 
           {/* Package Description */}
