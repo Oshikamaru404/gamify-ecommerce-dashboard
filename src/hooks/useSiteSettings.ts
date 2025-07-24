@@ -57,16 +57,7 @@ export const useUpdateSiteSetting = () => {
         throw error;
       }
       
-      // Check current user session
-      console.log('Checking current user session...');
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current session:', session?.user?.id ? 'User logged in' : 'No user session');
-      
-      if (!session?.user?.id) {
-        throw new Error('User must be logged in to update site settings');
-      }
-      
-      // Use direct table upsert with the new RLS policies
+      // The RLS policies will handle authentication, so we can proceed directly
       console.log('Attempting upsert operation...');
       const { data, error } = await supabase
         .from('site_settings')
