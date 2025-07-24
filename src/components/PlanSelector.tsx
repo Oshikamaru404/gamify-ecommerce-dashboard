@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,12 +6,14 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Check, Star, Crown } from 'lucide-react';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
+
 type PlanSelectorProps = {
   packageId: string;
   packageName: string;
   packageData: any; // The full package data from IPTV packages
   onPlanSelect: (plan: any) => void;
 };
+
 const PlanSelector: React.FC<PlanSelectorProps> = ({
   packageId,
   packageName,
@@ -67,6 +70,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     }
     return plans;
   };
+
   const createPlanData = (selectedOption: any) => {
     return {
       id: selectedOption.id,
@@ -80,6 +84,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       packageId: packageId
     };
   };
+
   const handlePlanChange = (value: string) => {
     setSelectedPlan(value);
     let selectedOption;
@@ -94,6 +99,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       onPlanSelect(createPlanData(selectedOption));
     }
   };
+
   const handleOrderNow = () => {
     let selectedOption;
     if (creditOptions && creditOptions.length > 0) {
@@ -116,6 +122,13 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       onPlanSelect(createPlanData(selectedOption));
     }
   };
+
+  // Helper function to calculate and format monthly average
+  const formatMonthlyAverage = (price: number, months: number) => {
+    const monthlyAverage = (price / months).toFixed(2);
+    return `($${monthlyAverage} per month)`;
+  };
+
   if (isLoading) {
     return <Card>
         <CardHeader>
@@ -146,6 +159,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   // Sort options by months (ascending)
   const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
+
   return <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -165,8 +179,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                 <div className="text-3xl font-bold text-gray-900 mb-2">
                   ${sortedOptions[0]?.price || 199.99}
                 </div>
-                <div className="text-sm text-gray-600 mb-3">
+                <div className="text-sm text-gray-600 mb-1">
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
+                </div>
+                <div className="text-xs text-gray-500 mb-3">
+                  {formatMonthlyAverage(sortedOptions[0]?.price || 199.99, sortedOptions[0]?.months || 12)}
                 </div>
                 <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white" onClick={handleActivationPurchase}>
                   Purchase Activation Package
@@ -184,7 +201,9 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                       <div className="font-semibold text-lg">
                         {option.months} Month{option.months > 1 ? 's' : ''}
                       </div>
-                      
+                      <div className="text-sm text-gray-500">
+                        {formatMonthlyAverage(option.price, option.months)}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-red-600">
@@ -215,4 +234,5 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default PlanSelector;
