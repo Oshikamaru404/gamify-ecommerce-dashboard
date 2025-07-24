@@ -190,6 +190,7 @@ const Subscription = () => {
               <PlanSelector
                 packageId={selectedPackage.id}
                 packageName={selectedPackage.name}
+                packageData={selectedPackage}
                 onPlanSelect={handlePlanSelect}
               />
             </div>
