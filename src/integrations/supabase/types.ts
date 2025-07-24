@@ -463,6 +463,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      upsert_site_setting: {
+        Args: { p_setting_key: string; p_setting_value: string }
+        Returns: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string
+        }
+      }
     }
     Enums: {
       feedback_status: "pending" | "approved" | "rejected"

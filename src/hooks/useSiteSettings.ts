@@ -29,11 +29,10 @@ export const useSiteSettings = () => {
       console.log('Successfully fetched site settings:', data);
       return data as SiteSetting[];
     },
-    staleTime: 0, // Always consider data stale
-    gcTime: 1000, // Keep in cache for only 1 second to force fresh fetches
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    refetchOnMount: true, // Always refetch on mount
-    refetchInterval: 10000, // Auto-refetch every 10 seconds
+    staleTime: 5000, // Consider data fresh for 5 seconds
+    gcTime: 30000, // Keep in cache for 30 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 };
 
@@ -42,7 +41,7 @@ export const useUpdateSiteSetting = () => {
   
   return useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      console.log('Updating site setting:', key, 'with value:', value);
+      console.log('Updating site setting using upsert function:', key, 'with value:', value);
       
       // Validate input
       if (!key || typeof key !== 'string' || key.trim() === '') {
@@ -53,31 +52,24 @@ export const useUpdateSiteSetting = () => {
         throw new Error('Setting value is required and must be a string');
       }
       
+      // Use the new upsert function instead of direct table operations
       const { data, error } = await supabase
-        .from('site_settings')
-        .upsert({
-          setting_key: key.trim(),
-          setting_value: value.trim(),
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'setting_key'
-        })
-        .select()
-        .single();
+        .rpc('upsert_site_setting', {
+          p_setting_key: key.trim(),
+          p_setting_value: value.trim()
+        });
       
       if (error) {
-        console.error('Error updating site setting:', error);
+        console.error('Error updating site setting via RPC:', error);
         throw error;
       }
       
-      console.log('Successfully updated site setting:', data);
+      console.log('Successfully updated site setting via RPC:', data);
       return data;
     },
     onSuccess: (data) => {
-      // Clear cache completely and refetch immediately
-      queryClient.removeQueries({ queryKey: ['site-settings'] });
+      // Invalidate and refetch the site settings
       queryClient.invalidateQueries({ queryKey: ['site-settings'] });
-      queryClient.refetchQueries({ queryKey: ['site-settings'] });
       toast.success(`${data.setting_key} updated successfully`);
     },
     onError: (error) => {
