@@ -399,6 +399,57 @@ export type Database = {
         }
         Relationships: []
       }
+      translations: {
+        Row: {
+          created_at: string
+          id: string
+          language_code: string
+          translation_key: string
+          translation_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language_code: string
+          translation_key: string
+          translation_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language_code?: string
+          translation_key?: string
+          translation_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_templates: {
+        Row: {
+          created_at: string
+          id: string
+          template_key: string
+          template_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          template_key: string
+          template_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          template_key?: string
+          template_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
