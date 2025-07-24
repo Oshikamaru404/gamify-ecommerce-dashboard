@@ -184,13 +184,10 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <Crown className="h-6 w-6 text-red-600" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">
-                  €{sortedOptions[0]?.price || 199.99}
+                  ${sortedOptions[0]?.price || 199.99}
                 </div>
                 <div className="text-sm text-gray-600 mb-3">
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
-                </div>
-                <div className="text-sm text-gray-600 mb-3">
-                  €{((sortedOptions[0]?.price || 199.99) / (sortedOptions[0]?.months || 12)).toFixed(2)}/month
                 </div>
                 <Button 
                   className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
@@ -222,10 +219,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-red-600">
-                        €{option.price}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        €{(option.price / option.months).toFixed(2)}/month
+                        ${option.price}
                       </div>
                     </div>
                   </div>

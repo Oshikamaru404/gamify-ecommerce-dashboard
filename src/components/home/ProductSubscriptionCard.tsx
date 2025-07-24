@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -91,15 +92,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               <span className="text-2xl font-bold text-red-600">
                 {displayPrice?.toFixed(2)}
               </span>
-              <span className="text-sm text-gray-500 ml-1">
-                {pkg.price_1_month ? '/ month' : pkg.price_10_credits ? '/ 10 credits' : ''}
-              </span>
             </div>
-            {pkg.price_1_month && pkg.price_12_months && (
-              <div className="text-xs text-green-600 font-medium mt-1">
-                Save ${((pkg.price_1_month * 12) - pkg.price_12_months).toFixed(2)} yearly
-              </div>
-            )}
           </div>
 
           {/* Package Description */}
