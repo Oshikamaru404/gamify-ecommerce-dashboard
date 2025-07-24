@@ -38,74 +38,71 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCryptoCheckout, setShowCryptoCheckout] = useState(false);
   
-  // Determine theme based on current route or referrer
+  // Enhanced theme detection
   const [theme, setTheme] = useState<'purple' | 'red'>('red');
   
   useEffect(() => {
-    console.log('Checkout theme detection - Current path:', location.pathname);
-    console.log('Checkout theme detection - Location state:', location.state);
-    console.log('Checkout theme detection - Referrer:', document.referrer);
-    console.log('Checkout theme detection - Cart items:', cart);
+    console.log('=== THEME DETECTION DEBUG ===');
+    console.log('Current path:', location.pathname);
+    console.log('Location state:', location.state);
+    console.log('Referrer:', document.referrer);
+    console.log('Cart items:', cart);
     
-    // Check multiple sources to determine the originating section
-    const currentPath = location.pathname;
-    const locationState = location.state;
-    const referrer = document.referrer;
+    let detectedTheme: 'purple' | 'red' = 'red';
     
-    // Priority 1: Check location state for explicit section
-    if (locationState?.section === 'panel' || locationState?.from?.includes('panel')) {
-      console.log('Theme detection: Purple from location state');
-      setTheme('purple');
-      return;
+    // Priority 1: Check location state (from Quick Order)
+    if (location.state?.section === 'panel') {
+      console.log('Theme: Purple (from location.state.section)');
+      detectedTheme = 'purple';
     }
-    
-    // Priority 2: Check current path
-    if (currentPath.includes('panel') || currentPath.includes('iptv-panel') || currentPath.includes('player-panel')) {
-      console.log('Theme detection: Purple from current path');
-      setTheme('purple');
-      return;
+    // Priority 2: Check if coming from panel/iptv related pages
+    else if (location.pathname.includes('panel') || 
+             location.pathname.includes('iptv') || 
+             location.pathname.includes('player') ||
+             location.pathname.includes('reseller')) {
+      console.log('Theme: Purple (from current path)');
+      detectedTheme = 'purple';
     }
-    
-    // Priority 3: Check referrer URL
-    if (referrer.includes('panel') || referrer.includes('reseller') || referrer.includes('iptv-panel') || referrer.includes('player-panel')) {
-      console.log('Theme detection: Purple from referrer');
-      setTheme('purple');
-      return;
+    // Priority 3: Check referrer
+    else if (document.referrer.includes('panel') || 
+             document.referrer.includes('iptv') || 
+             document.referrer.includes('player') ||
+             document.referrer.includes('reseller')) {
+      console.log('Theme: Purple (from referrer)');
+      detectedTheme = 'purple';
     }
-    
-    // Priority 4: Check cart items for panel-related products
-    const hasPanelProducts = cart.some(item => {
-      const productName = item.product.name.toLowerCase();
-      const productCategory = item.product.category?.toLowerCase() || '';
-      const productType = item.product.type || '';
-      return productName.includes('panel') || 
-             productName.includes('reseller') || 
-             productCategory.includes('panel') ||
-             productCategory.includes('iptv') ||
-             productType === 'iptv';
-    });
-    
-    if (hasPanelProducts) {
-      console.log('Theme detection: Purple from cart items');
-      setTheme('purple');
-      return;
+    // Priority 4: Check cart items
+    else if (cart.some(item => {
+      const name = item.product.name.toLowerCase();
+      const category = item.product.category?.toLowerCase() || '';
+      const type = item.product.type || '';
+      return name.includes('panel') || 
+             name.includes('player') || 
+             name.includes('iptv') || 
+             name.includes('reseller') ||
+             category.includes('panel') ||
+             category.includes('iptv') ||
+             category.includes('player') ||
+             type === 'iptv';
+    })) {
+      console.log('Theme: Purple (from cart items)');
+      detectedTheme = 'purple';
     }
-    
-    // Priority 5: Check browser history/session storage for recent navigation
-    try {
-      const recentSection = sessionStorage.getItem('recentSection');
-      if (recentSection === 'panel') {
-        console.log('Theme detection: Purple from session storage');
-        setTheme('purple');
-        return;
+    // Priority 5: Check session storage
+    else {
+      try {
+        const recentSection = sessionStorage.getItem('recentSection');
+        if (recentSection === 'panel') {
+          console.log('Theme: Purple (from session storage)');
+          detectedTheme = 'purple';
+        }
+      } catch (error) {
+        console.log('Session storage not available');
       }
-    } catch (error) {
-      console.log('Session storage not available');
     }
     
-    // Default to red for subscription, activation, home
-    console.log('Theme detection: Default red');
-    setTheme('red');
+    console.log('Final theme:', detectedTheme);
+    setTheme(detectedTheme);
   }, [location, cart]);
   
   if (cart.length === 0) {
@@ -166,7 +163,6 @@ const Checkout = () => {
     }
     
     if (formState.paymentMethod === 'crypto') {
-      // Show crypto checkout
       setShowCryptoCheckout(true);
       return;
     }
@@ -196,7 +192,8 @@ const Checkout = () => {
       primaryBg: 'bg-purple-50',
       gradient: 'from-purple-600 to-purple-700',
       border: 'border-purple-200',
-      focus: 'focus:border-purple-500 focus:ring-purple-500'
+      focus: 'focus:border-purple-500 focus:ring-purple-500',
+      accent: 'bg-purple-100 border-purple-300'
     },
     red: {
       primary: 'bg-red-600 hover:bg-red-700',
@@ -204,7 +201,8 @@ const Checkout = () => {
       primaryBg: 'bg-red-50',
       gradient: 'from-red-600 to-red-700',
       border: 'border-red-200',
-      focus: 'focus:border-red-500 focus:ring-red-500'
+      focus: 'focus:border-red-500 focus:ring-red-500',
+      accent: 'bg-red-100 border-red-300'
     }
   };
 
@@ -345,12 +343,12 @@ const Checkout = () => {
         onValueChange={(value) => handleSelectChange('paymentMethod', value)}
         className="space-y-4"
       >
-        <div className="flex items-center space-x-2 rounded-lg border p-4">
+        <div className={`flex items-center space-x-2 rounded-lg border p-4 ${currentTheme.accent}`}>
           <RadioGroupItem value="cod" id="cod" />
           <Label htmlFor="cod" className="flex-1 cursor-pointer">Cash on Delivery</Label>
           <CreditCard size={20} className="text-muted-foreground" />
         </div>
-        <div className="flex items-center space-x-2 rounded-lg border p-4">
+        <div className={`flex items-center space-x-2 rounded-lg border p-4 ${currentTheme.accent}`}>
           <RadioGroupItem value="crypto" id="crypto" />
           <Label htmlFor="crypto" className="flex-1 cursor-pointer">Cryptocurrency Payment</Label>
           <Bitcoin size={20} className={currentTheme.primaryText} />
@@ -410,9 +408,14 @@ const Checkout = () => {
       <div className="container py-8">
         <h1 className="mb-6 text-3xl font-bold">Checkout</h1>
         
-        {/* Debug info - remove in production */}
-        <div className="mb-4 p-2 bg-gray-100 rounded text-sm">
-          <strong>Theme: {theme}</strong> | Path: {location.pathname} | Referrer: {document.referrer.split('/').pop()}
+        {/* Theme indicator */}
+        <div className={`mb-4 p-3 rounded-lg ${currentTheme.accent}`}>
+          <div className="flex items-center gap-2">
+            <div className={`h-4 w-4 rounded-full bg-gradient-to-r ${currentTheme.gradient}`}></div>
+            <span className={`text-sm font-medium ${currentTheme.primaryText}`}>
+              {theme === 'purple' ? 'IPTV Panel Theme' : 'Subscription Theme'}
+            </span>
+          </div>
         </div>
         
         <div className="grid gap-8 lg:grid-cols-3">

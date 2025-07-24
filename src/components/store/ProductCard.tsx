@@ -25,17 +25,30 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
   };
 
   const handleQuickOrder = () => {
-    // Determine the current section for theme detection
+    // Enhanced section detection for theme
     const currentPath = location.pathname;
-    let section = 'subscription'; // default
+    let section = 'subscription'; // default theme
     
+    // Check if we're on a panel/iptv related page or if the product is panel/iptv related
     if (currentPath.includes('panel') || 
-        currentPath.includes('iptv-panel') || 
-        currentPath.includes('player-panel') ||
+        currentPath.includes('iptv') || 
+        currentPath.includes('player') ||
+        currentPath.includes('reseller') ||
         product.type === 'iptv' ||
-        product.category?.toLowerCase().includes('panel')) {
+        product.category?.toLowerCase().includes('panel') ||
+        product.category?.toLowerCase().includes('iptv') ||
+        product.category?.toLowerCase().includes('player') ||
+        product.name.toLowerCase().includes('panel') ||
+        product.name.toLowerCase().includes('iptv') ||
+        product.name.toLowerCase().includes('player') ||
+        product.name.toLowerCase().includes('reseller')) {
       section = 'panel';
     }
+    
+    console.log('=== QUICK ORDER THEME DETECTION ===');
+    console.log('Current path:', currentPath);
+    console.log('Product:', product);
+    console.log('Detected section:', section);
     
     // Set session storage for theme detection
     try {
@@ -44,13 +57,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
       console.log('Session storage not available');
     }
     
-    // Add to cart and navigate to checkout with section info
+    // Add to cart and navigate to checkout with detailed section info
     addToCart(product.id, 1);
     navigate('/checkout', { 
       state: { 
         section,
         from: currentPath,
-        quickOrder: true 
+        quickOrder: true,
+        productType: product.type,
+        productCategory: product.category
       } 
     });
   };
