@@ -175,7 +175,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {isActivationPackage ? (
-          // For activation packages, show single option without animation
+          // For activation packages, show single option without radio group
           <div className="space-y-4">
             <Card className="p-4 border-2 border-red-100 hover:border-red-600/30 transition-all duration-300">
               <div className="text-center">
@@ -183,7 +183,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <Crown className="h-6 w-6 text-red-600" />
                 </div>
                 <div className="mb-2">
-                  <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg">
+                  <Badge variant="red" className="text-2xl px-6 py-3 rounded-full shadow-lg">
                     ${sortedOptions[0]?.price || 199.99}
                   </Badge>
                 </div>
@@ -200,30 +200,35 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
             </Card>
           </div>
         ) : (
-          // For regular packages, show radio group
+          // For regular packages, show radio group with improved styling to match activation
           <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
-            {sortedOptions.map((option) => (
-              <div key={option.id} className="flex items-center space-x-2">
-                <RadioGroupItem value={option.id} id={option.id} />
-                <Label htmlFor={option.id} className="flex-1 cursor-pointer rounded-lg border p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold text-lg">
-                        {option.months} Month{option.months > 1 ? 's' : ''}
+            <div className="space-y-4">
+              {sortedOptions.map((option) => (
+                <div key={option.id} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option.id} id={option.id} />
+                  <Label htmlFor={option.id} className="flex-1 cursor-pointer">
+                    <Card className="p-4 border-2 border-red-100 hover:border-red-600/30 transition-all duration-300">
+                      <div className="text-center">
+                        <div className="flex justify-center mb-3">
+                          <Crown className="h-6 w-6 text-red-600" />
+                        </div>
+                        <div className="mb-2">
+                          <Badge variant="red" className="text-2xl px-6 py-3 rounded-full shadow-lg">
+                            ${option.price}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-1">
+                          {option.months} Month{option.months > 1 ? 's' : ''} Plan
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {formatMonthlyAverage(option.price, option.months)}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {formatMonthlyAverage(option.price, option.months)}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xl px-4 py-2 rounded-full shadow-lg">
-                        ${option.price}
-                      </Badge>
-                    </div>
-                  </div>
-                </Label>
-              </div>
-            ))}
+                    </Card>
+                  </Label>
+                </div>
+              ))}
+            </div>
           </RadioGroup>
         )}
 
