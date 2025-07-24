@@ -1,165 +1,81 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Zap, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { MessageCircle, User, ShoppingCart } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useStore } from '@/contexts/StoreContext';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const StoreHeader: React.FC = () => {
-  const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isPanelDropdownOpen, setIsPanelDropdownOpen] = useState(false);
+  const { t } = useLanguage();
+  const { cartItems } = useStore();
+  const { data: siteSettings } = useSiteSettings();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  // Get WhatsApp number from site settings
+  const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
 
-  const handleFreeTrial = () => {
-    const message = "Bonjour, je souhaite bénéficier de l'essai gratuit BWIVOX IPTV. Pouvez-vous m'aider?";
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+  const handleTryNow = () => {
+    const message = t.tryFree;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-white shadow-lg">
-      <div className="container flex h-20 items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="text-3xl font-bold">
-            <span className="text-red-600">BWIVOX</span>
-            <span className="text-gray-800"> IPTV</span>
-          </div>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex lg:items-center lg:gap-8">
-          <Link to="/" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Home
-          </Link>
-          <Link to="/subscription" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Subscription IPTV
-          </Link>
-          <Link to="/activation" className="text-lg font-semibold transition-colors hover:text-red-600">
-            Activation Player
-          </Link>
-          
-          {/* Panel Reseller Dropdown */}
-          <div 
-            className="relative"
-            onMouseEnter={() => setIsPanelDropdownOpen(true)}
-            onMouseLeave={() => setIsPanelDropdownOpen(false)}
-          >
-            <button 
-              className="flex items-center gap-1 text-lg font-semibold transition-colors hover:text-red-600"
-              onClick={() => setIsPanelDropdownOpen(!isPanelDropdownOpen)}
-            >
-              Panel Reseller
-              <ChevronDown size={16} className={cn("transition-transform", isPanelDropdownOpen && "rotate-180")} />
-            </button>
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center space-x-8">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-red-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">B</span>
+              </div>
+              <span className="text-xl font-bold text-gray-900">BWIVOX</span>
+            </Link>
             
-            <div className={cn(
-              "absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50 transition-all duration-200",
-              isPanelDropdownOpen ? "opacity-100 visible" : "opacity-0 invisible"
-            )}>
-              <Link 
-                to="/activation" 
-                className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                onClick={() => setIsPanelDropdownOpen(false)}
-              >
-                Activation Player
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link to="/" className="text-gray-700 hover:text-red-600 transition-colors">
+                {t.home}
               </Link>
-              <Link 
-                to="/player-panel" 
-                className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                onClick={() => setIsPanelDropdownOpen(false)}
-              >
-                Panel Player
+              <Link to="/subscription" className="text-gray-700 hover:text-red-600 transition-colors">
+                {t.subscription}
               </Link>
-            </div>
+              <Link to="/activation" className="text-gray-700 hover:text-red-600 transition-colors">
+                {t.activation}
+              </Link>
+              <Link to="/reseller" className="text-gray-700 hover:text-red-600 transition-colors">
+                {t.reseller}
+              </Link>
+              <Link to="/support" className="text-gray-700 hover:text-red-600 transition-colors">
+                {t.support}
+              </Link>
+            </nav>
           </div>
 
-          <Button 
-            onClick={handleFreeTrial}
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-6 py-2 text-lg"
-          >
-            <Zap className="mr-2" size={20} />
-            Free Trial
-          </Button>
-        </nav>
-
-        {/* Mobile Menu Button */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-12 w-12 lg:hidden"
-            onClick={toggleMenu}
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </Button>
+          <div className="flex items-center space-x-4">
+            <Button
+              onClick={handleTryNow}
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all"
+            >
+              <MessageCircle className="mr-2" size={16} />
+              {t.tryNow}
+            </Button>
+            
+            <LanguageSelector />
+            
+            <Link to="/cart" className="relative">
+              <Button variant="outline" size="sm">
+                <ShoppingCart size={16} />
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartItems.length}
+                  </span>
+                )}
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <div className={cn(
-        "absolute left-0 right-0 top-20 z-50 border-b bg-white pb-4 pt-2 shadow-lg lg:hidden",
-        isMenuOpen ? "block" : "hidden"
-      )}>
-        <nav className="flex flex-col space-y-4 px-4">
-          <Link
-            to="/"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/subscription"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Subscription IPTV
-          </Link>
-          <Link
-            to="/activation"
-            className="py-3 text-lg font-semibold"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Activation Player
-          </Link>
-          
-          {/* Mobile Panel Reseller Section */}
-          <div className="py-3">
-            <div className="text-lg font-semibold text-gray-800 mb-2">Panel Reseller</div>
-            <div className="ml-4 space-y-2">
-              <Link
-                to="/activation"
-                className="block py-2 text-base text-gray-600"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Activation Player
-              </Link>
-              <Link
-                to="/player-panel"
-                className="block py-2 text-base text-gray-600"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Panel Player
-              </Link>
-            </div>
-          </div>
-
-          <Button 
-            onClick={() => {
-              handleFreeTrial();
-              setIsMenuOpen(false);
-            }}
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold mt-2"
-          >
-            <Zap className="mr-2" size={20} />
-            Free Trial
-          </Button>
-        </nav>
       </div>
     </header>
   );

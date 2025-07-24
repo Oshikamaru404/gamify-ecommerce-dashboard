@@ -10,7 +10,7 @@ import { useIPTVPackages, useDeleteIPTVPackage, useUpdateIPTVPackage } from '@/h
 import { useSubscriptionPackages, useDeleteSubscriptionPackage, useUpdateSubscriptionPackage } from '@/hooks/useSubscriptionPackages';
 import IPTVPackageCard from '@/components/admin/IPTVPackageCard';
 import SubscriptionPackageCard from '@/components/admin/SubscriptionPackageCard';
-import PackageDialog from '@/components/admin/PackageDialog';
+import MultilingualPackageDialog from '@/components/admin/MultilingualPackageDialog';
 import SubscriptionPackageDialog from '@/components/admin/SubscriptionPackageDialog';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 import { SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
@@ -371,7 +371,7 @@ const ManageProducts = () => {
       </Tabs>
 
       {/* Dialog Components */}
-      <PackageDialog
+      <MultilingualPackageDialog
         open={isIPTVDialogOpen}
         onOpenChange={setIsIPTVDialogOpen}
         package={selectedIPTVPackage}

@@ -4,14 +4,19 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const StoreFooter: React.FC = () => {
   const { t } = useLanguage();
+  const { data: siteSettings } = useSiteSettings();
   const [showBlogSubmenu, setShowBlogSubmenu] = useState(false);
+
+  // Get WhatsApp number from site settings
+  const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
 
   const handleTryNow = () => {
     const message = "Bonjour, je souhaite essayer vos services BWIVOX IPTV. Pouvez-vous m'aider?";
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
