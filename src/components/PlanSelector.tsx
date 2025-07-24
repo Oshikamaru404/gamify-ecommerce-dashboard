@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Check, Star, Crown } from 'lucide-react';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
 
@@ -126,7 +127,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   // Helper function to calculate and format monthly average
   const formatMonthlyAverage = (price: number, months: number) => {
     const monthlyAverage = (price / months).toFixed(2);
-    return `($${monthlyAverage} per month)`;
+    return `USD ${monthlyAverage}/month`;
   };
 
   if (isLoading) {
@@ -176,8 +177,10 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                 <div className="flex justify-center mb-3">
                   <Crown className="h-6 w-6 text-red-600" />
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  ${sortedOptions[0]?.price || 199.99}
+                <div className="mb-2">
+                  <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg animate-pulse">
+                    ${sortedOptions[0]?.price || 199.99}
+                  </Badge>
                 </div>
                 <div className="text-sm text-gray-600 mb-1">
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
@@ -206,9 +209,9 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-red-600">
+                      <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xl px-4 py-2 rounded-full shadow-lg">
                         ${option.price}
-                      </div>
+                      </Badge>
                     </div>
                   </div>
                 </Label>
