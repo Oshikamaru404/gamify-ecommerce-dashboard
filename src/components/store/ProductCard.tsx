@@ -8,6 +8,7 @@ import { ShoppingCart, Eye } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { toast } from 'sonner';
 import { Product } from '@/lib/types';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 
 interface ProductCardProps {
   product: Product;
@@ -19,9 +20,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Use multilingual utilities for product name and description
+  const localizedName = useLocalizedText(product.name);
+  const localizedDescription = useLocalizedText(product.description);
+
   const handleAddToCart = () => {
     addToCart(product.id, 1);
-    toast.success(`${product.name} added to cart`);
+    toast.success(`${localizedName} added to cart`);
   };
 
   const handleQuickOrder = () => {
@@ -38,10 +43,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
         product.category?.toLowerCase().includes('panel') ||
         product.category?.toLowerCase().includes('iptv') ||
         product.category?.toLowerCase().includes('player') ||
-        product.name.toLowerCase().includes('panel') ||
-        product.name.toLowerCase().includes('iptv') ||
-        product.name.toLowerCase().includes('player') ||
-        product.name.toLowerCase().includes('reseller')) {
+        localizedName.toLowerCase().includes('panel') ||
+        localizedName.toLowerCase().includes('iptv') ||
+        localizedName.toLowerCase().includes('player') ||
+        localizedName.toLowerCase().includes('reseller')) {
       section = 'panel';
     }
     
@@ -84,13 +89,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
     ? Math.round(((product.price - product.salePrice) / product.price) * 100)
     : 0;
 
+  // Safety check to prevent raw JSON from being displayed
+  const safeName = localizedName && !localizedName.startsWith('{') ? localizedName : product.name;
+  const safeDescription = localizedDescription && !localizedDescription.startsWith('{') ? localizedDescription : product.description;
+
   return (
     <Card className="group h-full transition-all duration-300 hover:shadow-xl hover:scale-105">
       <CardHeader className="p-0">
         <div className="relative overflow-hidden rounded-t-lg">
           <img
             src={product.imageUrl}
-            alt={product.name}
+            alt={safeName}
             className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-110"
           />
           {product.salePrice && (
@@ -109,11 +118,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
       <CardContent className="flex-1 p-4">
         <div className="space-y-2">
           <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-red-600 transition-colors">
-            {product.name}
+            {safeName}
           </h3>
           
           <p className="text-sm text-muted-foreground line-clamp-3">
-            {product.description}
+            {safeDescription}
           </p>
           
           <div className="flex items-center gap-2">
