@@ -459,6 +459,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       reset_product_sales: {
         Args: Record<PropertyKey, never>
         Returns: number
