@@ -1,16 +1,23 @@
 
 import React from 'react';
 import { MessageCircle, Send } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const SocialMediaIcons: React.FC = () => {
+  const { data: siteSettings } = useSiteSettings();
+  
+  // Get WhatsApp number and Telegram username from site settings
+  const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
+  const telegramUsername = siteSettings?.find(s => s.setting_key === 'telegram_username')?.setting_value || 'bwivoxiptv';
+
   const handleWhatsAppClick = () => {
     const message = "Hello! I'm interested in your IPTV services. Can you help me?";
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
   const handleTelegramClick = () => {
-    const telegramUrl = "https://t.me/bwivoxiptv"; // Replace with your actual Telegram handle
+    const telegramUrl = `https://t.me/${telegramUsername}`;
     window.open(telegramUrl, '_blank');
   };
 

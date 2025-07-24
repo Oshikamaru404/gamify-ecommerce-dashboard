@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WhatsAppMessage {
@@ -92,4 +93,25 @@ Thank you for purchasing ${packageName}! 🎯
 • Telegram: @bwivoxiptv
 
 Welcome to the BWIVOX family! 🌟`;
+};
+
+// Function to get dynamic WhatsApp number from site settings
+export const getDynamicWhatsAppNumber = async (): Promise<string> => {
+  try {
+    const { data: settings, error } = await supabase
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'whatsapp_number')
+      .single();
+    
+    if (error) {
+      console.error('Error fetching WhatsApp number:', error);
+      return '1234567890'; // fallback
+    }
+    
+    return settings?.setting_value || '1234567890';
+  } catch (error) {
+    console.error('Error getting dynamic WhatsApp number:', error);
+    return '1234567890';
+  }
 };
