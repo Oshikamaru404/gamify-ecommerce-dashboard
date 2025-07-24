@@ -50,14 +50,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
       primaryText: 'text-[#8f35e5]',
       primaryBg: 'bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4]',
       focus: 'focus:border-[#8f35e5] focus:ring-[#8f35e5]',
-      accent: 'bg-gradient-to-r from-gray-50 to-gray-100'
+      accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
+      cryptoButton: 'bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] hover:from-[#7c2fd4] hover:to-[#6b27be]'
     },
     red: {
       primary: 'bg-red-600 hover:bg-red-700',
       primaryText: 'text-red-600',
       primaryBg: 'bg-gradient-to-r from-red-600 to-red-700',
       focus: 'focus:border-red-500 focus:ring-red-500',
-      accent: 'bg-gradient-to-r from-gray-50 to-gray-100'
+      accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
+      cryptoButton: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'
     }
   };
 
@@ -70,6 +72,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const handlePaymentMethodChange = (value: string) => {
     setFormData(prev => ({ ...prev, paymentMethod: value as 'cod' | 'crypto' }));
+  };
+
+  const handleCryptoPayment = () => {
+    if (!formData.customerName || !formData.customerEmail) {
+      toast.error('Please fill in your name and email to proceed with crypto payment');
+      return;
+    }
+    setShowCryptoCheckout(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -157,6 +167,35 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
               </div>
             </div>
 
+            {/* Prominent Crypto Payment Button */}
+            <div className="space-y-3">
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-3">Quick & Secure Crypto Payment</p>
+                <Button
+                  type="button"
+                  onClick={handleCryptoPayment}
+                  className={`w-full ${currentTheme.cryptoButton} text-white py-4 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105`}
+                  size="lg"
+                >
+                  <Bitcoin className="mr-3 h-6 w-6" />
+                  Pay with Cryptomus
+                  <span className="ml-2 text-sm opacity-90">Direct API</span>
+                </Button>
+                <p className="text-xs text-gray-500 mt-2">
+                  Instant payment with Bitcoin, Ethereum, USDT & more
+                </p>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-gray-500">or</span>
+                </div>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Customer Name */}
               <div className="space-y-2">
@@ -211,55 +250,41 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 />
               </div>
 
-              {/* Payment Method Selection */}
+              {/* Alternative Payment Method */}
               <div className="space-y-3">
-                <Label className="text-base font-semibold">Payment Method</Label>
+                <Label className="text-base font-semibold">Alternative Payment Method</Label>
                 <RadioGroup
                   value={formData.paymentMethod}
                   onValueChange={handlePaymentMethodChange}
-                  className="space-y-3"
+                  className="space-y-2"
                 >
-                  <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50">
+                  <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
                     <RadioGroupItem value="cod" id="cod" />
                     <Label htmlFor="cod" className="flex-1 cursor-pointer font-medium">
                       Cash on Delivery
                     </Label>
                     <CreditCard className="h-5 w-5 text-gray-500" />
                   </div>
-                  <div className="flex items-center space-x-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50">
-                    <RadioGroupItem value="crypto" id="crypto" />
-                    <Label htmlFor="crypto" className="flex-1 cursor-pointer font-medium">
-                      Cryptocurrency Payment
-                    </Label>
-                    <Bitcoin className={`h-5 w-5 ${currentTheme.primaryText}`} />
-                  </div>
                 </RadioGroup>
               </div>
 
-              {/* Submit Button */}
-              <div className="pt-4">
-                <Button 
-                  type="submit" 
-                  className={`w-full ${currentTheme.primaryBg} hover:from-[#7c2fd4] hover:to-[#6b27be] text-white py-3 text-lg font-semibold`}
-                  disabled={createOrderMutation.isPending}
-                >
-                  {formData.paymentMethod === 'crypto' ? (
-                    <>
-                      <Bitcoin className="mr-2 h-5 w-5" />
-                      Pay with Crypto
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="mr-2 h-5 w-5" />
-                      {createOrderMutation.isPending ? 'Processing...' : 'Submit Order'}
-                    </>
-                  )}
-                </Button>
-              </div>
+              {/* Submit Button for COD */}
+              {formData.paymentMethod === 'cod' && (
+                <div className="pt-4">
+                  <Button 
+                    type="submit" 
+                    className={`w-full ${currentTheme.primary} text-white py-3 text-lg font-semibold`}
+                    disabled={createOrderMutation.isPending}
+                  >
+                    <CreditCard className="mr-2 h-5 w-5" />
+                    {createOrderMutation.isPending ? 'Processing...' : 'Submit Order'}
+                  </Button>
+                </div>
+              )}
 
               <div className="text-center text-sm text-gray-500 pt-2">
                 {formData.paymentMethod === 'crypto' 
-                  ? 'You will be redirected to a secure crypto payment page.'
+                  ? 'Crypto payments are processed instantly through our secure API.'
                   : 'We\'ll contact you within 24 hours to complete the payment and activation process.'
                 }
               </div>
