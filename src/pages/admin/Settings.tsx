@@ -36,9 +36,12 @@ import {
   Eye,
   EyeOff,
   MessageCircle,
-  Phone
+  Phone,
+  Languages
 } from 'lucide-react';
 import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
+import WhatsAppTemplateEditor from '@/components/admin/WhatsAppTemplateEditor';
+import TranslationEditor from '@/components/admin/TranslationEditor';
 
 const generalSettingsSchema = z.object({
   storeName: z.string().min(1, 'Store name is required'),
@@ -99,7 +102,7 @@ type ApiKeysValues = z.infer<typeof apiKeysSchema>;
 
 const Settings = () => {
   const [showCryptomusApiKey, setShowCryptomusApiKey] = React.useState(false);
-  const { data: siteSettings } = useSiteSettings();
+  const { data: siteSettings, isLoading: settingsLoading } = useSiteSettings();
   const updateSiteSetting = useUpdateSiteSetting();
 
   const generalForm = useForm<GeneralSettingsValues>({
@@ -116,18 +119,22 @@ const Settings = () => {
   const contactForm = useForm<ContactSettingsValues>({
     resolver: zodResolver(contactSettingsSchema),
     defaultValues: {
-      whatsappNumber: siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '',
-      telegramUsername: siteSettings?.find(s => s.setting_key === 'telegram_username')?.setting_value || '',
+      whatsappNumber: '',
+      telegramUsername: '',
     },
   });
 
   // Update contact form when site settings load
   React.useEffect(() => {
-    if (siteSettings) {
-      contactForm.setValue('whatsappNumber', siteSettings.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '');
-      contactForm.setValue('telegramUsername', siteSettings.find(s => s.setting_key === 'telegram_username')?.setting_value || '');
+    if (siteSettings && !settingsLoading) {
+      console.log('Updating contact form with site settings:', siteSettings);
+      const whatsappSetting = siteSettings.find(s => s.setting_key === 'whatsapp_number');
+      const telegramSetting = siteSettings.find(s => s.setting_key === 'telegram_username');
+      
+      contactForm.setValue('whatsappNumber', whatsappSetting?.setting_value || '');
+      contactForm.setValue('telegramUsername', telegramSetting?.setting_value || '');
     }
-  }, [siteSettings, contactForm]);
+  }, [siteSettings, settingsLoading, contactForm]);
 
   const paymentForm = useForm<PaymentSettingsValues>({
     resolver: zodResolver(paymentSettingsSchema),
@@ -184,11 +191,32 @@ const Settings = () => {
   };
 
   const onContactSubmit = async (data: ContactSettingsValues) => {
+    console.log('Contact form submitted with data:', data);
+    
     try {
-      await updateSiteSetting.mutateAsync({ key: 'whatsapp_number', value: data.whatsappNumber });
-      await updateSiteSetting.mutateAsync({ key: 'telegram_username', value: data.telegramUsername });
+      // Validate data before sending
+      if (!data.whatsappNumber || !data.telegramUsername) {
+        toast.error('Both WhatsApp number and Telegram username are required');
+        return;
+      }
+
+      // Update WhatsApp number
+      console.log('Updating WhatsApp number:', data.whatsappNumber);
+      await updateSiteSetting.mutateAsync({ 
+        key: 'whatsapp_number', 
+        value: data.whatsappNumber.toString() 
+      });
+
+      // Update Telegram username
+      console.log('Updating Telegram username:', data.telegramUsername);
+      await updateSiteSetting.mutateAsync({ 
+        key: 'telegram_username', 
+        value: data.telegramUsername.toString() 
+      });
+
       toast.success('Contact settings saved successfully');
     } catch (error) {
+      console.error('Error saving contact settings:', error);
       toast.error('Failed to save contact settings');
     }
   };
@@ -232,6 +260,14 @@ const Settings = () => {
           <TabsTrigger value="contact" className="flex gap-2">
             <MessageCircle size={16} />
             <span>Contact</span>
+          </TabsTrigger>
+          <TabsTrigger value="whatsapp-templates" className="flex gap-2">
+            <MessageCircle size={16} />
+            <span>WhatsApp Templates</span>
+          </TabsTrigger>
+          <TabsTrigger value="translations" className="flex gap-2">
+            <Languages size={16} />
+            <span>Translations</span>
           </TabsTrigger>
           <TabsTrigger value="payment" className="flex gap-2">
             <CreditCard size={16} />
@@ -373,7 +409,15 @@ const Settings = () => {
                           WhatsApp Number
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="1234567890" />
+                          <Input 
+                            {...field} 
+                            placeholder="1234567890" 
+                            type="text"
+                            onChange={(e) => {
+                              console.log('WhatsApp number input changed:', e.target.value);
+                              field.onChange(e.target.value);
+                            }}
+                          />
                         </FormControl>
                         <FormDescription>
                           Enter the WhatsApp number without the '+' symbol (e.g., 1234567890)
@@ -393,7 +437,15 @@ const Settings = () => {
                           Telegram Username
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="bwivoxiptv" />
+                          <Input 
+                            {...field} 
+                            placeholder="bwivoxiptv" 
+                            type="text"
+                            onChange={(e) => {
+                              console.log('Telegram username input changed:', e.target.value);
+                              field.onChange(e.target.value);
+                            }}
+                          />
                         </FormControl>
                         <FormDescription>
                           Enter the Telegram username without the '@' symbol (e.g., bwivoxiptv)
@@ -417,6 +469,14 @@ const Settings = () => {
               </Button>
             </CardFooter>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="whatsapp-templates">
+          <WhatsAppTemplateEditor />
+        </TabsContent>
+
+        <TabsContent value="translations">
+          <TranslationEditor />
         </TabsContent>
         
         <TabsContent value="payment">
