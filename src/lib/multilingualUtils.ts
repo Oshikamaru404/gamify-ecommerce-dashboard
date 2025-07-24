@@ -99,6 +99,12 @@ export const useLocalizedText = (multilingualText: string | null | undefined, fa
     console.log('- Multilingual text:', multilingualText);
     console.log('- Fallback language:', fallbackLanguage);
     
+    // Add safety check for undefined/null multilingualText
+    if (multilingualText === null || multilingualText === undefined) {
+      console.log('⚠️ Null/undefined text, returning empty string');
+      return '';
+    }
+    
     const result = getLocalizedText(multilingualText, language, fallbackLanguage);
     console.log('🎯 Final result:', result);
     
