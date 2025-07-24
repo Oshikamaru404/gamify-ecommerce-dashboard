@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -28,7 +27,7 @@ const supportedLanguages = [
 const packageSchema = z.object({
   name: z.record(z.string().min(1, 'Name is required')),
   description: z.record(z.string().optional()),
-  category: z.enum(['subscription', 'panel-iptv', 'player', 'activation-player']),
+  category: z.enum(['subscription', 'panel-iptv', 'player', 'activation-player', 'reseller']),
   features: z.array(z.string()).optional(),
   price_1_month: z.number().min(0).optional(),
   price_3_months: z.number().min(0).optional(),
@@ -150,10 +149,22 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
     try {
       // Convert multilingual objects to JSON strings for database storage
       const packageData = {
-        ...data,
         name: JSON.stringify(data.name),
         description: JSON.stringify(data.description),
+        category: data.category,
         features: data.features || [],
+        price_1_month: data.price_1_month,
+        price_3_months: data.price_3_months,
+        price_6_months: data.price_6_months,
+        price_12_months: data.price_12_months,
+        price_10_credits: data.price_10_credits,
+        price_25_credits: data.price_25_credits,
+        price_50_credits: data.price_50_credits,
+        price_100_credits: data.price_100_credits,
+        icon: data.icon,
+        icon_url: data.icon_url,
+        sort_order: data.sort_order,
+        status: data.status,
       };
 
       if (editingPackage) {
@@ -240,6 +251,7 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
                         <SelectItem value="panel-iptv">Panel IPTV</SelectItem>
                         <SelectItem value="player">Panel Player</SelectItem>
                         <SelectItem value="activation-player">Activation Player</SelectItem>
+                        <SelectItem value="reseller">Reseller</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

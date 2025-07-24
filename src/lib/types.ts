@@ -1,3 +1,4 @@
+
 export type Platform = 'pc' | 'playstation' | 'xbox' | 'nintendo' | 'mobile' | 'iptv';
 
 export type Product = {
@@ -59,4 +60,15 @@ export type SalesData = {
   date: string;
   revenue: number;
   orders: number;
+};
+
+// Store context type
+export type StoreContextType = {
+  cartItems: CartItem[];
+  addToCart: (product: Product, quantity: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getTotalPrice: () => number;
+  getTotalItems: () => number;
 };

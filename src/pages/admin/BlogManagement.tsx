@@ -16,12 +16,12 @@ import {
   FileText,
   Globe
 } from 'lucide-react';
-import { useBlogArticles, useDeleteBlogArticle, useUpdateBlogArticle } from '@/hooks/useBlogArticles';
+import { useAllBlogArticles, useDeleteBlogArticle, useUpdateBlogArticle } from '@/hooks/useBlogArticles';
 import MultilingualBlogDialog from '@/components/admin/MultilingualBlogDialog';
 import { format } from 'date-fns';
 
 const BlogManagement = () => {
-  const { data: articles, isLoading } = useBlogArticles();
+  const { data: articles, isLoading } = useAllBlogArticles();
   const deleteArticle = useDeleteBlogArticle();
   const updateArticle = useUpdateBlogArticle();
 

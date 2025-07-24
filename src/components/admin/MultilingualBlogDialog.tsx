@@ -125,10 +125,14 @@ const MultilingualBlogDialog: React.FC<MultilingualBlogDialogProps> = ({
     try {
       // Convert multilingual objects to JSON strings for database storage
       const articleData = {
-        ...data,
         title: JSON.stringify(data.title),
         content: JSON.stringify(data.content),
         excerpt: JSON.stringify(data.excerpt),
+        slug: data.slug,
+        category: data.category,
+        author: data.author,
+        featured_image_url: data.featured_image_url,
+        published: data.published,
       };
 
       if (editingArticle) {

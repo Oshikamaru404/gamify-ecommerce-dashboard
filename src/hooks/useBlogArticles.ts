@@ -9,6 +9,7 @@ export type BlogArticle = {
   excerpt: string | null;
   content: string;
   author: string;
+  category: 'iptv' | 'player';
   featured_image_url: string | null;
   published: boolean;
   created_at: string;
@@ -21,6 +22,7 @@ export type CreateBlogArticleData = {
   excerpt?: string;
   content: string;
   author?: string;
+  category?: 'iptv' | 'player';
   featured_image_url?: string;
   published?: boolean;
 };
@@ -31,6 +33,7 @@ export type UpdateBlogArticleData = {
   excerpt?: string;
   content?: string;
   author?: string;
+  category?: 'iptv' | 'player';
   featured_image_url?: string;
   published?: boolean;
 };
@@ -160,7 +163,7 @@ export const useUpdateBlogArticle = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateBlogArticleData }) => {
+    mutationFn: async ({ id, ...data }: { id: string } & UpdateBlogArticleData) => {
       const { data: result, error } = await supabase
         .from('blog_articles')
         .update(data)
