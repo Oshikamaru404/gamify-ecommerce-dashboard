@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from 'lucide-react';
 import CheckoutForm from '@/components/CheckoutForm';
+import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { data: packages, isLoading } = useIPTVPackages();
-  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
   console.log('ProductDetail - Current slug:', slug);
@@ -55,20 +56,14 @@ const ProductDetail = () => {
     }
   }
 
-  const handleBuyNow = (packageName: string, duration: number, price: number) => {
-    setSelectedPackage({
-      id: `${packageCategory}-${packageName.toLowerCase().replace(/\s+/g, '-')}`,
-      name: packageName,
-      category: packageCategory,
-      price: price,
-      duration: duration
-    });
+  const handlePlanSelect = (plan: any) => {
+    setSelectedPlan(plan);
     setShowCheckout(true);
   };
 
   const handleCloseCheckout = () => {
     setShowCheckout(false);
-    setSelectedPackage(null);
+    setSelectedPlan(null);
   };
 
   const handleOrderSuccess = () => {
@@ -280,15 +275,13 @@ const ProductDetail = () => {
               </Card>
             </div>
 
-            {/* Right Column - Pricing */}
+            {/* Right Column - Plan Selection */}
             <div className="space-y-6">
-              <Card className="p-6 sticky top-6">
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                  {isActivationPackage ? 'Activation Package' : 'Choose Your Plan'}
-                </h2>
-                <div className="space-y-4">
-                  {isActivationPackage ? (
-                    // Activation package pricing (12-month only)
+              <div className="sticky top-6">
+                {isActivationPackage ? (
+                  // For activation packages, show simple card with fixed price
+                  <Card className="p-6">
+                    <h2 className="text-2xl font-bold mb-6 text-center">Activation Package</h2>
                     <Card className={`p-4 border-2 border-${primaryColor}-100 hover:border-${primaryColor}-600/30 transition-all duration-300`}>
                       <div className="text-center">
                         <Badge className={`bg-${primaryColor}-600 text-white mb-3`}>
@@ -306,51 +299,37 @@ const ProductDetail = () => {
                         </div>
                         <Button 
                           className={`w-full bg-gradient-to-r ${gradientFrom} ${gradientTo} hover:from-${primaryColor}-700 hover:to-${primaryColor}-800 text-white`}
-                          onClick={() => handleBuyNow(pkg.name, 12, pkg.price_12_months || 199.99)}
+                          onClick={() => handlePlanSelect({
+                            id: pkg.id,
+                            name: pkg.name,
+                            price: pkg.price_12_months || 199.99,
+                            months: 12,
+                            credits: 0,
+                            packageId: pkg.id
+                          })}
                         >
                           Purchase Activation Package
                         </Button>
                       </div>
                     </Card>
-                  ) : (
-                    // Subscription package pricing (multiple options)
-                    [
-                      { months: 1, price: pkg.price_1_month },
-                      { months: 3, price: pkg.price_3_months },
-                      { months: 6, price: pkg.price_6_months },
-                      { months: 12, price: pkg.price_12_months }
-                    ].filter(option => option.price).map((option, idx) => (
-                      <Card key={idx} className={`p-4 border-2 border-gray-100 hover:border-${primaryColor}-600/30 transition-all duration-300`}>
-                        <div className="text-center">
-                          <div className="flex items-center justify-between mb-2">
-                            <Badge variant="outline" className={`border-${primaryColor}-600 text-${primaryColor}-600`}>
-                              {option.months} Month{option.months > 1 ? 's' : ''}
-                            </Badge>
-                            <span className="text-2xl font-bold text-gray-900">€{option.price}</span>
-                          </div>
-                          <div className="text-sm text-gray-600 mb-3">
-                            €{(option.price! / option.months).toFixed(2)}/month
-                          </div>
-                          <Button 
-                            className={`w-full bg-gradient-to-r ${gradientFrom} ${gradientTo} hover:from-${primaryColor}-700 hover:to-${primaryColor}-800 text-white`}
-                            onClick={() => handleBuyNow(pkg.name, option.months, option.price!)}
-                          >
-                            Purchase {option.months} Month{option.months > 1 ? 's' : ''}
-                          </Button>
-                        </div>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </Card>
+                  </Card>
+                ) : (
+                  // For subscription packages, use PlanSelector with radio buttons
+                  <PlanSelector
+                    packageId={pkg.id}
+                    packageName={pkg.name}
+                    onPlanSelect={handlePlanSelect}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Checkout Form Modal */}
-        {showCheckout && selectedPackage && (
+        {showCheckout && selectedPlan && (
           <CheckoutForm 
-            packageData={selectedPackage} 
+            packageData={selectedPlan} 
             onClose={handleCloseCheckout} 
             onSuccess={handleOrderSuccess} 
           />
