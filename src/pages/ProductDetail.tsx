@@ -57,6 +57,7 @@ const ProductDetail = () => {
   }
 
   const handlePlanSelect = (plan: any) => {
+    console.log('ProductDetail - Plan selected:', plan);
     setSelectedPlan(plan);
     setShowCheckout(true);
   };
@@ -278,49 +279,12 @@ const ProductDetail = () => {
             {/* Right Column - Plan Selection */}
             <div className="space-y-6">
               <div className="sticky top-6">
-                {isActivationPackage ? (
-                  // For activation packages, show simple card with fixed price
-                  <Card className="p-6">
-                    <h2 className="text-2xl font-bold mb-6 text-center">Activation Package</h2>
-                    <Card className={`p-4 border-2 border-${primaryColor}-100 hover:border-${primaryColor}-600/30 transition-all duration-300`}>
-                      <div className="text-center">
-                        <Badge className={`bg-${primaryColor}-600 text-white mb-3`}>
-                          <Crown className="mr-1 h-4 w-4" />
-                          12 Months Activation
-                        </Badge>
-                        <div className="text-3xl font-bold text-gray-900 mb-2">
-                          €{(pkg.price_12_months || 199.99).toFixed(2)}
-                        </div>
-                        <div className="text-sm text-gray-600 mb-3">
-                          €{((pkg.price_12_months || 199.99) / 12).toFixed(2)}/month
-                        </div>
-                        <div className="text-xs text-green-600 font-medium mb-4">
-                          ✅ Full year activation + premium support
-                        </div>
-                        <Button 
-                          className={`w-full bg-gradient-to-r ${gradientFrom} ${gradientTo} hover:from-${primaryColor}-700 hover:to-${primaryColor}-800 text-white`}
-                          onClick={() => handlePlanSelect({
-                            id: pkg.id,
-                            name: pkg.name,
-                            price: pkg.price_12_months || 199.99,
-                            months: 12,
-                            credits: 0,
-                            packageId: pkg.id
-                          })}
-                        >
-                          Purchase Activation Package
-                        </Button>
-                      </div>
-                    </Card>
-                  </Card>
-                ) : (
-                  // For subscription packages, use PlanSelector with radio buttons
-                  <PlanSelector
-                    packageId={pkg.id}
-                    packageName={pkg.name}
-                    onPlanSelect={handlePlanSelect}
-                  />
-                )}
+                <PlanSelector
+                  packageId={pkg.id}
+                  packageName={pkg.name}
+                  packageData={pkg}
+                  onPlanSelect={handlePlanSelect}
+                />
               </div>
             </div>
           </div>

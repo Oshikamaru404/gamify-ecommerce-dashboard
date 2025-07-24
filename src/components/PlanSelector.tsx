@@ -4,26 +4,87 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Check, Star } from 'lucide-react';
+import { Check, Star, Crown } from 'lucide-react';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
 
 type PlanSelectorProps = {
   packageId: string;
   packageName: string;
+  packageData: any; // The full package data from IPTV packages
   onPlanSelect: (plan: any) => void;
 };
 
 const PlanSelector: React.FC<PlanSelectorProps> = ({
   packageId,
   packageName,
+  packageData,
   onPlanSelect
 }) => {
   const { data: creditOptions, isLoading } = useSubscriptionCreditOptions(packageId);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
 
+  // For activation packages, use the direct pricing from packageData
+  const isActivationPackage = packageData?.category === 'activation-player';
+  
+  // Create plans from the packageData pricing fields
+  const createPlansFromPackageData = () => {
+    const plans = [];
+    
+    if (packageData.price_1_month) {
+      plans.push({
+        id: 'plan-1-month',
+        credits: 1,
+        months: 1,
+        price: packageData.price_1_month,
+        sort_order: 1
+      });
+    }
+    
+    if (packageData.price_3_months) {
+      plans.push({
+        id: 'plan-3-months',
+        credits: 3,
+        months: 3,
+        price: packageData.price_3_months,
+        sort_order: 2
+      });
+    }
+    
+    if (packageData.price_6_months) {
+      plans.push({
+        id: 'plan-6-months',
+        credits: 6,
+        months: 6,
+        price: packageData.price_6_months,
+        sort_order: 3
+      });
+    }
+    
+    if (packageData.price_12_months) {
+      plans.push({
+        id: 'plan-12-months',
+        credits: 12,
+        months: 12,
+        price: packageData.price_12_months,
+        sort_order: 4
+      });
+    }
+    
+    return plans;
+  };
+
   const handlePlanChange = (value: string) => {
     setSelectedPlan(value);
-    const selectedOption = creditOptions?.find(option => option.id === value);
+    let selectedOption;
+    
+    if (creditOptions && creditOptions.length > 0) {
+      selectedOption = creditOptions.find(option => option.id === value);
+    } else {
+      // Use direct package pricing
+      const directPlans = createPlansFromPackageData();
+      selectedOption = directPlans.find(option => option.id === value);
+    }
+    
     if (selectedOption) {
       onPlanSelect({
         id: selectedOption.id,
@@ -37,7 +98,15 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   };
 
   const handleOrderNow = () => {
-    const selectedOption = creditOptions?.find(option => option.id === selectedPlan);
+    let selectedOption;
+    
+    if (creditOptions && creditOptions.length > 0) {
+      selectedOption = creditOptions.find(option => option.id === selectedPlan);
+    } else {
+      const directPlans = createPlansFromPackageData();
+      selectedOption = directPlans.find(option => option.id === selectedPlan);
+    }
+    
     if (selectedOption) {
       onPlanSelect({
         id: selectedOption.id,
@@ -67,7 +136,12 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
   }
 
-  if (!creditOptions || creditOptions.length === 0) {
+  // Use credit options if available, otherwise use direct package pricing
+  const availableOptions = creditOptions && creditOptions.length > 0 
+    ? creditOptions 
+    : createPlansFromPackageData();
+
+  if (!availableOptions || availableOptions.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -81,49 +155,78 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   }
 
   // Sort options by months (ascending)
-  const sortedOptions = [...creditOptions].sort((a, b) => a.months - b.months);
+  const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Star className="h-5 w-5 text-yellow-500" />
-          Choose Your Plan
+          {isActivationPackage ? 'Activation Package' : 'Choose Your Plan'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
-          {sortedOptions.map((option) => (
-            <div key={option.id} className="flex items-center space-x-2">
-              <RadioGroupItem value={option.id} id={option.id} />
-              <Label
-                htmlFor={option.id}
-                className="flex-1 cursor-pointer rounded-lg border p-4 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-semibold text-lg">
-                      {option.months} Month{option.months > 1 ? 's' : ''}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {option.credits} Credits
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-red-600">
-                      €{option.price}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      €{(option.price / option.months).toFixed(2)}/month
-                    </div>
-                  </div>
+        {isActivationPackage ? (
+          // For activation packages, show single option
+          <div className="space-y-4">
+            <Card className="p-4 border-2 border-red-100 hover:border-red-600/30 transition-all duration-300">
+              <div className="text-center">
+                <div className="flex justify-center mb-3">
+                  <Crown className="h-6 w-6 text-red-600" />
                 </div>
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+                <div className="text-3xl font-bold text-gray-900 mb-2">
+                  €{sortedOptions[0]?.price || 199.99}
+                </div>
+                <div className="text-sm text-gray-600 mb-3">
+                  {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
+                </div>
+                <div className="text-sm text-gray-600 mb-3">
+                  €{((sortedOptions[0]?.price || 199.99) / (sortedOptions[0]?.months || 12)).toFixed(2)}/month
+                </div>
+                <Button 
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+                  onClick={() => handleOrderNow()}
+                >
+                  Purchase Activation Package
+                </Button>
+              </div>
+            </Card>
+          </div>
+        ) : (
+          // For regular packages, show radio group
+          <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
+            {sortedOptions.map((option) => (
+              <div key={option.id} className="flex items-center space-x-2">
+                <RadioGroupItem value={option.id} id={option.id} />
+                <Label
+                  htmlFor={option.id}
+                  className="flex-1 cursor-pointer rounded-lg border p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-lg">
+                        {option.months} Month{option.months > 1 ? 's' : ''}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {option.credits} Credits
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-red-600">
+                        €{option.price}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        €{(option.price / option.months).toFixed(2)}/month
+                      </div>
+                    </div>
+                  </div>
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        )}
 
-        {selectedPlan && (
+        {selectedPlan && !isActivationPackage && (
           <div className="pt-4">
             <Button 
               onClick={handleOrderNow}
