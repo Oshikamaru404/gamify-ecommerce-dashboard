@@ -91,14 +91,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           
           {/* Price Display - One Month Price */}
           <div className="text-center mb-4">
-            <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               ${oneMonthPrice.toFixed(2)}/month
             </Badge>
             
             {/* Yearly Savings Badge */}
             {yearlySavings && (
               <div className="mt-2">
-                <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-full shadow-md">
+                <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm px-4 py-2 rounded-full shadow-md">
                   Save up to {yearlySavings}% yearly
                 </Badge>
               </div>
