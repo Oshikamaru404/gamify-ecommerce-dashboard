@@ -29,8 +29,8 @@ export const useSiteSettings = () => {
       console.log('Successfully fetched site settings:', data);
       return data as SiteSetting[];
     },
-    staleTime: 5000, // Consider data fresh for 5 seconds
-    gcTime: 30000, // Keep in cache for 30 seconds
+    staleTime: 5000,
+    gcTime: 30000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
@@ -41,18 +41,29 @@ export const useUpdateSiteSetting = () => {
   
   return useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      console.log('Updating site setting directly via table update:', key, 'with value:', value);
+      console.log('=== MUTATION STARTED ===');
+      console.log('Updating site setting:', key, 'with value:', value);
       
       // Validate input
       if (!key || typeof key !== 'string' || key.trim() === '') {
-        throw new Error('Setting key is required and must be a non-empty string');
+        const error = new Error('Setting key is required and must be a non-empty string');
+        console.error('Validation error:', error);
+        throw error;
       }
       
       if (!value || typeof value !== 'string') {
-        throw new Error('Setting value is required and must be a string');
+        const error = new Error('Setting value is required and must be a string');
+        console.error('Validation error:', error);
+        throw error;
       }
       
-      // Use direct table update with upsert
+      // First, let's try to check if user has permissions
+      console.log('Checking current user session...');
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session?.user?.id ? 'User logged in' : 'No user session');
+      
+      // Try updating with upsert
+      console.log('Attempting upsert operation...');
       const { data, error } = await supabase
         .from('site_settings')
         .upsert(
@@ -70,20 +81,27 @@ export const useUpdateSiteSetting = () => {
         .single();
       
       if (error) {
-        console.error('Error updating site setting via table:', error);
+        console.error('=== MUTATION ERROR ===');
+        console.error('Error details:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
         throw error;
       }
       
-      console.log('Successfully updated site setting via table:', data);
+      console.log('=== MUTATION SUCCESS ===');
+      console.log('Successfully updated site setting:', data);
       return data;
     },
     onSuccess: (data) => {
+      console.log('Mutation onSuccess called with:', data);
       // Invalidate and refetch the site settings
       queryClient.invalidateQueries({ queryKey: ['site-settings'] });
       toast.success(`${data.setting_key} updated successfully`);
     },
     onError: (error) => {
-      console.error('Error updating site setting:', error);
+      console.error('=== MUTATION ON ERROR ===');
+      console.error('Error in mutation:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to update setting';
       toast.error(errorMessage);
     },
