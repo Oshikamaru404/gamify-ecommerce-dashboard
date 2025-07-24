@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { X, Package, User, Mail, Phone, Bitcoin, Loader2 } from 'lucide-react';
+import { X, User, Mail, Phone, Bitcoin, Loader2 } from 'lucide-react';
 import { useCreateOrder } from '@/hooks/useCreateOrder';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -17,6 +17,8 @@ interface CheckoutFormProps {
     category?: string;
     price: number;
     duration: number;
+    icon_url?: string;
+    icon?: string;
   };
   onClose: () => void;
   onSuccess: () => void;
@@ -29,8 +31,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     customerWhatsapp: '',
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
-
-  const createOrderMutation = useCreateOrder();
 
   // Fixed theme detection logic with safe category access
   const category = packageData.category || '';
@@ -138,12 +138,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     await handleCryptoPayment();
   };
 
+  const createOrderMutation = useCreateOrder();
+
   // Determine if this is a credit-based package
   const isCreditBased = category.includes('panel') || category === 'player-panel' || category === 'iptv-panel';
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
   const durationDescription = isCreditBased 
     ? `${packageData.duration} credits for service management`
-    : `${packageData.duration} month${packageData.duration > 1 ? 's' : ''} subscription`;
+    : `${packageData.duration} months subscription`;
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -162,7 +164,24 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
           <div className={`${currentTheme.accent} rounded-lg p-4`}>
             <div className="flex items-start gap-3">
               <div className={`${currentTheme.primaryBg} rounded-lg p-2`}>
-                <Package className="h-5 w-5 text-white" />
+                {packageData.icon_url ? (
+                  <img 
+                    src={packageData.icon_url} 
+                    alt={packageData.name}
+                    className="h-5 w-5 rounded object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                      if (fallbackContainer) fallbackContainer.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className="h-5 w-5 flex items-center justify-center text-white text-sm"
+                  style={{ display: packageData.icon_url ? 'none' : 'flex' }}
+                >
+                  {packageData.icon || '📺'}
+                </div>
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">{packageData.name}</h3>

@@ -42,6 +42,9 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
   const yearlySavings = calculateYearlySavings();
 
+  // Determine the link path - subscription packages go directly to subscription page with package selection
+  const linkPath = pkg.category === 'subscription' ? '/subscription' : `/products/${productSlug}`;
+
   return (
     <div className="relative h-full">
       {featured && (
@@ -81,22 +84,14 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
         {/* Bottom Section - Content (White Background) */}
         <div className="flex-1 bg-white p-6 flex flex-col">
-          {/* Enhanced 30-Day Money Back Guarantee Badge */}
-          <div className="flex justify-center mb-4">
-            <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
-              <Shield className="w-4 h-4 mr-2" />
-              30-Day Money Back Guarantee
-            </div>
-          </div>
-
           {/* Package Title */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 text-center leading-tight">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 text-center leading-tight">
             {pkg.name}
           </h3>
           
           {/* Price Display - One Month Price */}
           <div className="text-center mb-4">
-            <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               ${oneMonthPrice.toFixed(2)}/month
             </Badge>
             
@@ -150,10 +145,18 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             )}
           </div>
 
+          {/* Enhanced 30-Day Money Back Guarantee Badge - Moved above button */}
+          <div className="flex justify-center mb-4">
+            <div className="bg-white border-2 border-green-500 text-green-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
+              <Shield className="w-4 h-4 mr-2" />
+              30-Day Money Back Guarantee
+            </div>
+          </div>
+
           {/* View Details Button */}
           <div className="mt-auto">
             <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-              <Link to={`/products/${productSlug}`}>
+              <Link to={linkPath}>
                 View Details
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

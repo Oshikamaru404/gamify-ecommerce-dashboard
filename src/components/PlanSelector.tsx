@@ -124,11 +124,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     return `USD ${monthlyAverage}/month`;
   };
 
-  // Calculate savings percentage for yearly plans
-  const calculateSavings = (yearlyPrice: number, monthlyPrice: number) => {
-    const yearlyTotal = yearlyPrice;
-    const monthlyTotal = monthlyPrice * 12;
-    const savings = ((monthlyTotal - yearlyTotal) / monthlyTotal) * 100;
+  // Calculate savings percentage for plans vs monthly price
+  const calculateSavings = (currentPrice: number, currentMonths: number, monthlyPrice: number) => {
+    const currentTotal = currentPrice;
+    const monthlyTotal = monthlyPrice * currentMonths;
+    const savings = ((monthlyTotal - currentTotal) / monthlyTotal) * 100;
     return Math.round(savings);
   };
 
@@ -165,7 +165,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
   const monthlyOption = sortedOptions.find(option => option.months === 1);
-  const yearlyOption = sortedOptions.find(option => option.months === 12);
 
   return (
     <Card>
@@ -192,6 +191,14 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
                 </div>
                 
+                {/* 30-Day Money Back Guarantee - Moved above button */}
+                <div className="flex justify-center mb-4">
+                  <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
+                    <Check className="w-4 h-4 mr-2" />
+                    30-Day Money Back Guarantee
+                  </div>
+                </div>
+                
                 <Button 
                   className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white" 
                   onClick={handleActivationPurchase}
@@ -215,10 +222,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                       <div className="text-sm text-gray-500">
                         {formatMonthlyAverage(option.price, option.months)}
                       </div>
-                      {option.months === 12 && monthlyOption && (
+                      {/* Add savings badges for 3, 6, and 12 month plans */}
+                      {monthlyOption && option.months > 1 && (
                         <div className="mt-1">
                           <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-3 py-1 rounded-full">
-                            Save up to {calculateSavings(option.price, monthlyOption.price)}%
+                            Save up to {calculateSavings(option.price, option.months, monthlyOption.price)}%
                           </Badge>
                         </div>
                       )}

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
@@ -13,12 +13,26 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 const Subscription = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const [searchParams] = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
   // Filter only subscription packages
   const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
+
+  // Check if a specific package is requested via URL params
+  useEffect(() => {
+    const packageParam = searchParams.get('package');
+    if (packageParam && subscriptionPackages.length > 0) {
+      const targetPackage = subscriptionPackages.find(pkg => 
+        pkg.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') === packageParam
+      );
+      if (targetPackage) {
+        setSelectedPackage(targetPackage);
+      }
+    }
+  }, [searchParams, subscriptionPackages]);
 
   const handlePackageSelect = (pkg: any) => {
     setSelectedPackage(pkg);
@@ -246,7 +260,7 @@ const Subscription = () => {
         {/* Checkout Form Modal */}
         {showCheckout && selectedPlan && (
           <CheckoutForm
-            packageData={selectedPlan}
+            packageData={{ ...selectedPlan, icon_url: selectedPackage?.icon_url, icon: selectedPackage?.icon }}
             onClose={handleCloseCheckout}
             onSuccess={handleOrderSuccess}
           />
