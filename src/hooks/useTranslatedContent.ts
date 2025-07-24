@@ -18,7 +18,7 @@ export const useTranslatedContent = () => {
     queryFn: async () => {
       console.log('Fetching translated content...');
       const { data, error } = await supabase
-        .from('translated_content' as any)
+        .from('translated_content')
         .select('*')
         .order('content_key, language_code');
       
@@ -45,7 +45,7 @@ export const useUpdateTranslatedContent = () => {
       }
       
       const { data, error } = await supabase
-        .from('translated_content' as any)
+        .from('translated_content')
         .upsert({
           content_key: contentKey.trim(),
           language_code: languageCode.trim(),
@@ -89,7 +89,7 @@ export const useCreateTranslatedContent = () => {
       }
       
       const { data, error } = await supabase
-        .from('translated_content' as any)
+        .from('translated_content')
         .insert({
           content_key: contentKey.trim(),
           language_code: languageCode.trim(),
@@ -126,7 +126,7 @@ export const useDeleteTranslatedContent = () => {
       console.log('Deleting translated content:', id);
       
       const { error } = await supabase
-        .from('translated_content' as any)
+        .from('translated_content')
         .delete()
         .eq('id', id);
       
