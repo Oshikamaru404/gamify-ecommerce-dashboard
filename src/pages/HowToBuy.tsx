@@ -1,14 +1,19 @@
-
 import React from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, CreditCard, Download, Play } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const HowToBuy = () => {
+  const { data: siteSettings } = useSiteSettings();
+  
+  // Get WhatsApp number from site settings
+  const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
+
   const handleWhatsApp = () => {
     const message = "Bonjour, je souhaite acheter un abonnement IPTV. Pouvez-vous me guider?";
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
