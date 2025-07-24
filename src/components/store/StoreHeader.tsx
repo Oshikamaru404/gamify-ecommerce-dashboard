@@ -10,7 +10,7 @@ import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const StoreHeader: React.FC = () => {
   const { t } = useLanguage();
-  const { cartItems } = useStore();
+  const { state } = useStore();
   const { data: siteSettings } = useSiteSettings();
 
   // Get WhatsApp number from site settings
@@ -67,9 +67,9 @@ const StoreHeader: React.FC = () => {
             <Link to="/cart" className="relative">
               <Button variant="outline" size="sm">
                 <ShoppingCart size={16} />
-                {cartItems.length > 0 && (
+                {state.cart.length > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartItems.length}
+                    {state.cart.length}
                   </span>
                 )}
               </Button>
