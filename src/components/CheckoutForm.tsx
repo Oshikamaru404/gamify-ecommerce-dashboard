@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -138,15 +137,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Package Summary */}
-          <div className={`${themeColors.accent} rounded-lg p-4`}>
-            <div className="flex items-start gap-3">
-              <div className={`${themeColors.primaryBg} rounded-lg p-2`}>
+          {/* Package Summary with Larger Logo */}
+          <div className={`${themeColors.accent} rounded-lg p-6`}>
+            <div className="flex items-start gap-4">
+              <div className={`${themeColors.primaryBg} rounded-lg p-3`}>
                 {packageData.icon_url ? (
                   <img 
                     src={packageData.icon_url} 
                     alt={packageData.name}
-                    className="h-8 w-8 rounded object-cover"
+                    className="h-16 w-16 rounded-lg object-cover border-2 border-red-400 shadow-lg"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
@@ -155,20 +154,20 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                   />
                 ) : null}
                 <div 
-                  className="h-8 w-8 flex items-center justify-center text-white text-lg"
+                  className="h-16 w-16 flex items-center justify-center text-white text-3xl rounded-lg"
                   style={{ display: packageData.icon_url ? 'none' : 'flex' }}
                 >
                   {packageData.icon || '📺'}
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{packageData.name}</h3>
+                <h3 className="font-semibold text-gray-900 text-lg">{packageData.name}</h3>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className={`${themeColors.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
                     {packageData.duration} {durationLabel} {isCreditBased ? '' : 'Subscription'}
                   </Badge>
                 </div>
-                <div className="mt-2">
+                <div className="mt-3">
                   <span className={`text-2xl font-bold ${themeColors.primaryText}`}>${packageData.price}</span>
                 </div>
               </div>
