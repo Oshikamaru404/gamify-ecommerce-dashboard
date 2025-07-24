@@ -29,16 +29,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   // Get the one-month price to display
   const oneMonthPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits || 0;
 
-  // Calculate monthly price for yearly plan
-  const calculateYearlyMonthlyPrice = () => {
-    if (pkg.price_12_months) {
-      return (pkg.price_12_months / 12).toFixed(2);
-    }
-    return null;
-  };
-
-  const yearlyMonthlyPrice = calculateYearlyMonthlyPrice();
-
   // All packages now go to their product detail page
   const linkPath = `/products/${productSlug}`;
 
@@ -92,11 +82,11 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               ${oneMonthPrice.toFixed(2)}/month
             </Badge>
             
-            {/* Yearly Monthly Price Badge */}
-            {yearlyMonthlyPrice && (
+            {/* Yearly Price Calculation Badge */}
+            {pkg.price_12_months && (
               <div className="mt-2">
                 <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-full shadow-md">
-                  ${yearlyMonthlyPrice}/month yearly
+                  ${pkg.price_12_months} / 12 months
                 </Badge>
               </div>
             )}
