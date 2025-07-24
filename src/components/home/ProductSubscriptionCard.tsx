@@ -26,18 +26,8 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
   const productSlug = generateSlug(pkg.name);
 
-  // Get the best price to display (prioritize longer duration for better monthly rates)
-  const getBestPrice = () => {
-    if (pkg.price_12_months) return { price: pkg.price_12_months, months: 12 };
-    if (pkg.price_6_months) return { price: pkg.price_6_months, months: 6 };
-    if (pkg.price_3_months) return { price: pkg.price_3_months, months: 3 };
-    if (pkg.price_1_month) return { price: pkg.price_1_month, months: 1 };
-    if (pkg.price_10_credits) return { price: pkg.price_10_credits, months: 1 };
-    return null;
-  };
-
-  const bestPrice = getBestPrice();
-  const monthlyPrice = bestPrice ? (bestPrice.price / bestPrice.months) : 0;
+  // Get the one-month price to display
+  const oneMonthPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits || 0;
 
   // Calculate savings for yearly plan
   const calculateYearlySavings = () => {
@@ -104,10 +94,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {pkg.name}
           </h3>
           
-          {/* Price Display with Monthly Format */}
+          {/* Price Display - One Month Price */}
           <div className="text-center mb-4">
             <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              ${monthlyPrice.toFixed(2)}/month
+              ${oneMonthPrice.toFixed(2)}/month
             </Badge>
             
             {/* Yearly Savings Badge */}
