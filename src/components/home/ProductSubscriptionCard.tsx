@@ -16,7 +16,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   package: pkg, 
   featured = false 
 }) => {
-  // Generate a URL-friendly slug from the package name
   const generateSlug = (name: string) => {
     return name.toLowerCase()
       .replace(/\s+/g, '-')
@@ -27,8 +26,20 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
   const productSlug = generateSlug(pkg.name);
 
-  // Determine the base price for display (prefer 1-month, fallback to others)
   const displayPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits;
+
+  // Calculate savings for yearly plan
+  const calculateYearlySavings = () => {
+    if (pkg.price_12_months && pkg.price_1_month) {
+      const yearlyTotal = pkg.price_12_months;
+      const monthlyTotal = pkg.price_1_month * 12;
+      const savings = ((monthlyTotal - yearlyTotal) / monthlyTotal) * 100;
+      return Math.round(savings);
+    }
+    return null;
+  };
+
+  const yearlySavings = calculateYearlySavings();
 
   return (
     <div className="relative h-full">
@@ -45,14 +56,12 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         {/* Top Section - Icon (Red Background) */}
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
           <div className="w-32 h-32 bg-red-400/30 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-            {/* Priority: Use uploaded image URL first */}
             {pkg.icon_url && (
               <img 
                 src={pkg.icon_url} 
                 alt={pkg.name}
                 className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                 onError={(e) => {
-                  // If image fails to load, hide it and show fallback
                   e.currentTarget.style.display = 'none';
                   const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
                   if (fallbackContainer) fallbackContainer.style.display = 'flex';
@@ -60,7 +69,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
               />
             )}
             
-            {/* Fallback: Use emoji if no image URL or if image fails to load */}
             <div 
               className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-4xl text-white drop-shadow-lg"
               style={{ display: pkg.icon_url ? 'none' : 'flex' }}
@@ -90,6 +98,15 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               ${displayPrice?.toFixed(2)}
             </Badge>
+            
+            {/* Yearly Savings Badge */}
+            {yearlySavings && (
+              <div className="mt-2">
+                <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-full shadow-md">
+                  Save up to {yearlySavings}% yearly
+                </Badge>
+              </div>
+            )}
           </div>
 
           {/* Package Description */}
@@ -132,7 +149,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             )}
           </div>
 
-          {/* View Details Button - Fixed route path */}
+          {/* View Details Button */}
           <div className="mt-auto">
             <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
               <Link to={`/products/${productSlug}`}>

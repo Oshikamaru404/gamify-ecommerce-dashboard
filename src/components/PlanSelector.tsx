@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,12 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Crown } from 'lucide-react';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
+
 type PlanSelectorProps = {
   packageId: string;
   packageName: string;
-  packageData: any; // The full package data from IPTV packages
+  packageData: any;
   onPlanSelect: (plan: any) => void;
 };
+
 const PlanSelector: React.FC<PlanSelectorProps> = ({
   packageId,
   packageName,
@@ -24,10 +27,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   } = useSubscriptionCreditOptions(packageId);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
 
-  // For activation packages, use the direct pricing from packageData
   const isActivationPackage = packageData?.category === 'activation-player';
 
-  // Create plans from the packageData pricing fields
   const createPlansFromPackageData = () => {
     const plans = [];
     if (packageData.price_1_month) {
@@ -68,12 +69,12 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     }
     return plans;
   };
+
   const createPlanData = (selectedOption: any) => {
     return {
       id: selectedOption.id,
       name: packageName,
       category: packageData.category,
-      // Include category from packageData
       price: selectedOption.price,
       duration: selectedOption.months,
       months: selectedOption.months,
@@ -81,13 +82,13 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       packageId: packageId
     };
   };
+
   const handlePlanChange = (value: string) => {
     setSelectedPlan(value);
     let selectedOption;
     if (creditOptions && creditOptions.length > 0) {
       selectedOption = creditOptions.find(option => option.id === value);
     } else {
-      // Use direct package pricing
       const directPlans = createPlansFromPackageData();
       selectedOption = directPlans.find(option => option.id === value);
     }
@@ -95,6 +96,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       onPlanSelect(createPlanData(selectedOption));
     }
   };
+
   const handleOrderNow = () => {
     let selectedOption;
     if (creditOptions && creditOptions.length > 0) {
@@ -108,23 +110,31 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     }
   };
 
-  // For activation packages, create a single plan option
   const handleActivationPurchase = () => {
     const directPlans = createPlansFromPackageData();
-    const selectedOption = directPlans[0]; // Use the first available plan
+    const selectedOption = directPlans[0];
 
     if (selectedOption) {
       onPlanSelect(createPlanData(selectedOption));
     }
   };
 
-  // Helper function to calculate and format monthly average
   const formatMonthlyAverage = (price: number, months: number) => {
     const monthlyAverage = (price / months).toFixed(2);
     return `USD ${monthlyAverage}/month`;
   };
+
+  // Calculate savings percentage for yearly plans
+  const calculateSavings = (yearlyPrice: number, monthlyPrice: number) => {
+    const yearlyTotal = yearlyPrice;
+    const monthlyTotal = monthlyPrice * 12;
+    const savings = ((monthlyTotal - yearlyTotal) / monthlyTotal) * 100;
+    return Math.round(savings);
+  };
+
   if (isLoading) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle>Choose Your Plan</CardTitle>
         </CardHeader>
@@ -135,25 +145,30 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
             <div className="h-12 bg-gray-200 rounded"></div>
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
 
-  // Use credit options if available, otherwise use direct package pricing
   const availableOptions = creditOptions && creditOptions.length > 0 ? creditOptions : createPlansFromPackageData();
   if (!availableOptions || availableOptions.length === 0) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle>Choose Your Plan</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-gray-500">No plans available for this package.</p>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
 
-  // Sort options by months (ascending)
   const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
-  return <Card>
+  const monthlyOption = sortedOptions.find(option => option.months === 1);
+  const yearlyOption = sortedOptions.find(option => option.months === 12);
+
+  return (
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Star className="h-5 w-5 text-yellow-500" />
@@ -161,9 +176,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isActivationPackage ?
-      // For activation packages, show single option without animation
-      <div className="space-y-4">
+        {isActivationPackage ? (
+          <div className="space-y-4">
             <Card className="p-4 border-2 border-red-100 hover:border-red-600/30 transition-all duration-300">
               <div className="text-center">
                 <div className="flex justify-center mb-3">
@@ -178,15 +192,19 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
                 </div>
                 
-                <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white" onClick={handleActivationPurchase}>
+                <Button 
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white" 
+                  onClick={handleActivationPurchase}
+                >
                   Purchase Activation Package
                 </Button>
               </div>
             </Card>
-          </div> :
-      // For regular packages, show radio group
-      <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
-            {sortedOptions.map(option => <div key={option.id} className="flex items-center space-x-2">
+          </div>
+        ) : (
+          <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
+            {sortedOptions.map(option => (
+              <div key={option.id} className="flex items-center space-x-2">
                 <RadioGroupItem value={option.id} id={option.id} />
                 <Label htmlFor={option.id} className="flex-1 cursor-pointer rounded-lg border p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
@@ -197,6 +215,13 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                       <div className="text-sm text-gray-500">
                         {formatMonthlyAverage(option.price, option.months)}
                       </div>
+                      {option.months === 12 && monthlyOption && (
+                        <div className="mt-1">
+                          <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-3 py-1 rounded-full">
+                            Save up to {calculateSavings(option.price, monthlyOption.price)}%
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xl px-4 py-2 rounded-full shadow-lg">
@@ -205,15 +230,19 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                     </div>
                   </div>
                 </Label>
-              </div>)}
-          </RadioGroup>}
+              </div>
+            ))}
+          </RadioGroup>
+        )}
 
-        {selectedPlan && !isActivationPackage && <div className="pt-4">
+        {selectedPlan && !isActivationPackage && (
+          <div className="pt-4">
             <Button onClick={handleOrderNow} className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-6">
               <Check className="mr-2 h-5 w-5" />
               Order Now
             </Button>
-          </div>}
+          </div>
+        )}
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
@@ -225,6 +254,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           </p>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default PlanSelector;
