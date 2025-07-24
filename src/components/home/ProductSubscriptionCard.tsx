@@ -55,6 +55,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         </div>
       )}
 
+      {/* Remove the overall card clickability by removing the wrapping div click handler */}
       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
         {/* Top Section - Icon (Red Background) */}
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
@@ -88,18 +89,18 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {pkg.name}
           </h3>
           
-          {/* Price Display - One Month Price */}
+          {/* Price Display - One Month Price - Make it non-clickable */}
           <div className="text-center mb-4">
-            <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg inline-block cursor-default">
               ${oneMonthPrice.toFixed(2)}/month
-            </Badge>
+            </div>
             
-            {/* Yearly Savings Badge */}
+            {/* Yearly Savings Badge - Make it non-clickable */}
             {yearlySavings && yearlySavings > 0 && (
               <div className="mt-2">
-                <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-full shadow-md">
+                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-full shadow-md inline-block cursor-default">
                   Save ${yearlySavings} yearly
-                </Badge>
+                </div>
               </div>
             )}
           </div>
@@ -144,15 +145,15 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             )}
           </div>
 
-          {/* Enhanced 30-Day Money Back Guarantee Badge - Moved above button */}
+          {/* Enhanced 30-Day Money Back Guarantee Badge - Make it non-clickable */}
           <div className="flex justify-center mb-4">
-            <div className="bg-white border-2 border-green-500 text-green-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
+            <div className="bg-white border-2 border-green-500 text-green-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center cursor-default">
               <Shield className="w-4 h-4 mr-2" />
               30-Day Money Back Guarantee
             </div>
           </div>
 
-          {/* View Details Button */}
+          {/* View Details Button - Only this should be clickable */}
           <div className="mt-auto">
             <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
               <Link to={linkPath}>

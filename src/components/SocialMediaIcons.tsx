@@ -10,17 +10,32 @@ const SocialMediaIcons: React.FC = () => {
   const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
   const telegramUsername = siteSettings?.find(s => s.setting_key === 'telegram_username')?.setting_value || 'bwivoxiptv';
 
-  // Add a refetch mechanism to ensure fresh data
+  // Force immediate refetch on mount and more frequent updates
   React.useEffect(() => {
+    // Immediately refetch when component mounts
+    refetch();
+    
+    // Set up more frequent polling
     const interval = setInterval(() => {
       refetch();
-    }, 30000); // Refetch every 30 seconds
+    }, 10000); // Refetch every 10 seconds instead of 30
 
     return () => clearInterval(interval);
   }, [refetch]);
 
+  // Add focus event listener to refetch when window gains focus
+  React.useEffect(() => {
+    const handleFocus = () => {
+      refetch();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [refetch]);
+
   const handleWhatsAppClick = () => {
     console.log('WhatsApp number used:', whatsappNumber);
+    console.log('All site settings:', siteSettings);
     const message = "Hello! I'm interested in your IPTV services. Can you help me?";
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
