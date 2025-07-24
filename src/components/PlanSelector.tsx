@@ -73,6 +73,19 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     return plans;
   };
 
+  const createPlanData = (selectedOption: any) => {
+    return {
+      id: selectedOption.id,
+      name: packageName,
+      category: packageData.category, // Include category from packageData
+      price: selectedOption.price,
+      duration: selectedOption.months,
+      months: selectedOption.months,
+      credits: selectedOption.credits,
+      packageId: packageId
+    };
+  };
+
   const handlePlanChange = (value: string) => {
     setSelectedPlan(value);
     let selectedOption;
@@ -86,14 +99,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     }
     
     if (selectedOption) {
-      onPlanSelect({
-        id: selectedOption.id,
-        name: packageName,
-        price: selectedOption.price,
-        months: selectedOption.months,
-        credits: selectedOption.credits,
-        packageId: packageId
-      });
+      onPlanSelect(createPlanData(selectedOption));
     }
   };
 
@@ -108,14 +114,17 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     }
     
     if (selectedOption) {
-      onPlanSelect({
-        id: selectedOption.id,
-        name: packageName,
-        price: selectedOption.price,
-        months: selectedOption.months,
-        credits: selectedOption.credits,
-        packageId: packageId
-      });
+      onPlanSelect(createPlanData(selectedOption));
+    }
+  };
+
+  // For activation packages, create a single plan option
+  const handleActivationPurchase = () => {
+    const directPlans = createPlansFromPackageData();
+    const selectedOption = directPlans[0]; // Use the first available plan
+    
+    if (selectedOption) {
+      onPlanSelect(createPlanData(selectedOption));
     }
   };
 
@@ -185,7 +194,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                 </div>
                 <Button 
                   className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
-                  onClick={() => handleOrderNow()}
+                  onClick={handleActivationPurchase}
                 >
                   Purchase Activation Package
                 </Button>

@@ -14,7 +14,7 @@ interface CheckoutFormProps {
   packageData: {
     id: string;
     name: string;
-    category: string;
+    category?: string;
     price: number;
     duration: number;
   };
@@ -32,10 +32,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // Fixed theme detection logic
-  const theme = packageData.category === 'panel' || 
-                packageData.category === 'iptv-panel' || 
-                packageData.category === 'player-panel' ||
+  // Fixed theme detection logic with safe category access
+  const category = packageData.category || '';
+  const theme = category === 'panel' || 
+                category === 'iptv-panel' || 
+                category === 'player-panel' ||
+                category === 'activation-player' ||
                 packageData.name.toLowerCase().includes('panel') ||
                 packageData.name.toLowerCase().includes('iptv panel') ||
                 packageData.name.toLowerCase().includes('player panel')
@@ -80,13 +82,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
       // Create the order in our database first
       const orderData = await createOrderMutation.mutateAsync({
         package_name: packageData.name,
-        package_category: packageData.category,
+        package_category: category,
         customer_name: formData.customerName,
         customer_email: formData.customerEmail,
         customer_whatsapp: formData.customerWhatsapp,
         amount: packageData.price,
         duration_months: packageData.duration,
-        order_type: packageData.category.includes('panel') ? 'credits' : 'activation',
+        order_type: category.includes('panel') ? 'credits' : 'activation',
         status: 'pending',
         payment_status: 'pending',
       });
@@ -137,7 +139,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   };
 
   // Determine if this is a credit-based package
-  const isCreditBased = packageData.category.includes('panel') || packageData.category === 'player-panel' || packageData.category === 'iptv-panel';
+  const isCreditBased = category.includes('panel') || category === 'player-panel' || category === 'iptv-panel';
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
   const durationDescription = isCreditBased 
     ? `${packageData.duration} credits for service management`
