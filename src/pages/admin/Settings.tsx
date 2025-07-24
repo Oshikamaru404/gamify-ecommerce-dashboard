@@ -34,8 +34,11 @@ import {
   Key,
   Shield,
   Eye,
-  EyeOff
+  EyeOff,
+  MessageCircle,
+  Phone
 } from 'lucide-react';
+import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 
 const generalSettingsSchema = z.object({
   storeName: z.string().min(1, 'Store name is required'),
@@ -43,6 +46,11 @@ const generalSettingsSchema = z.object({
   storePhone: z.string().min(1, 'Phone number is required'),
   storeAddress: z.string().min(1, 'Address is required'),
   currency: z.string().min(1, 'Currency is required'),
+});
+
+const contactSettingsSchema = z.object({
+  whatsappNumber: z.string().min(1, 'WhatsApp number is required'),
+  telegramUsername: z.string().min(1, 'Telegram username is required'),
 });
 
 const paymentSettingsSchema = z.object({
@@ -83,6 +91,7 @@ const apiKeysSchema = z.object({
 });
 
 type GeneralSettingsValues = z.infer<typeof generalSettingsSchema>;
+type ContactSettingsValues = z.infer<typeof contactSettingsSchema>;
 type PaymentSettingsValues = z.infer<typeof paymentSettingsSchema>;
 type EmailAutomationValues = z.infer<typeof emailAutomationSchema>;
 type DashboardColorValues = z.infer<typeof dashboardColorSchema>;
@@ -90,6 +99,8 @@ type ApiKeysValues = z.infer<typeof apiKeysSchema>;
 
 const Settings = () => {
   const [showCryptomusApiKey, setShowCryptomusApiKey] = React.useState(false);
+  const { data: siteSettings } = useSiteSettings();
+  const updateSiteSetting = useUpdateSiteSetting();
 
   const generalForm = useForm<GeneralSettingsValues>({
     resolver: zodResolver(generalSettingsSchema),
@@ -101,7 +112,23 @@ const Settings = () => {
       currency: 'USD',
     },
   });
-  
+
+  const contactForm = useForm<ContactSettingsValues>({
+    resolver: zodResolver(contactSettingsSchema),
+    defaultValues: {
+      whatsappNumber: siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '',
+      telegramUsername: siteSettings?.find(s => s.setting_key === 'telegram_username')?.setting_value || '',
+    },
+  });
+
+  // Update contact form when site settings load
+  React.useEffect(() => {
+    if (siteSettings) {
+      contactForm.setValue('whatsappNumber', siteSettings.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '');
+      contactForm.setValue('telegramUsername', siteSettings.find(s => s.setting_key === 'telegram_username')?.setting_value || '');
+    }
+  }, [siteSettings, contactForm]);
+
   const paymentForm = useForm<PaymentSettingsValues>({
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: {
@@ -155,6 +182,16 @@ const Settings = () => {
     console.log('General settings:', data);
     toast.success('General settings saved successfully');
   };
+
+  const onContactSubmit = async (data: ContactSettingsValues) => {
+    try {
+      await updateSiteSetting.mutateAsync({ key: 'whatsapp_number', value: data.whatsappNumber });
+      await updateSiteSetting.mutateAsync({ key: 'telegram_username', value: data.telegramUsername });
+      toast.success('Contact settings saved successfully');
+    } catch (error) {
+      toast.error('Failed to save contact settings');
+    }
+  };
   
   const onPaymentSubmit = (data: PaymentSettingsValues) => {
     console.log('Payment settings:', data);
@@ -191,6 +228,10 @@ const Settings = () => {
           <TabsTrigger value="general" className="flex gap-2">
             <SettingsIcon size={16} />
             <span>General</span>
+          </TabsTrigger>
+          <TabsTrigger value="contact" className="flex gap-2">
+            <MessageCircle size={16} />
+            <span>Contact</span>
           </TabsTrigger>
           <TabsTrigger value="payment" className="flex gap-2">
             <CreditCard size={16} />
@@ -306,6 +347,73 @@ const Settings = () => {
               >
                 <Save size={16} className="mr-2" />
                 Save Changes
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contact">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Settings</CardTitle>
+              <CardDescription>
+                Configure your WhatsApp and Telegram contact information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...contactForm}>
+                <form id="contact-form" onSubmit={contactForm.handleSubmit(onContactSubmit)} className="space-y-6">
+                  <FormField
+                    control={contactForm.control}
+                    name="whatsappNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Phone size={16} className="text-green-600" />
+                          WhatsApp Number
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="1234567890" />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the WhatsApp number without the '+' symbol (e.g., 1234567890)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={contactForm.control}
+                    name="telegramUsername"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <MessageCircle size={16} className="text-blue-600" />
+                          Telegram Username
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="bwivoxiptv" />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the Telegram username without the '@' symbol (e.g., bwivoxiptv)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter className="border-t px-6 py-4">
+              <Button 
+                type="submit"
+                form="contact-form"
+                className="ml-auto bg-green-600 hover:bg-green-700"
+                disabled={updateSiteSetting.isPending}
+              >
+                <Save size={16} className="mr-2" />
+                {updateSiteSetting.isPending ? 'Saving...' : 'Save Changes'}
               </Button>
             </CardFooter>
           </Card>

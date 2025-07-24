@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
+import PlanSelector from '@/components/PlanSelector';
 import StoreLayout from '@/components/store/StoreLayout';
 import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,18 +13,32 @@ const Subscription = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
   // Filter only subscription packages
   const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
 
+  const handlePackageSelect = (pkg: any) => {
+    setSelectedPackage(pkg);
+    setSelectedPlan(null);
+  };
+
+  const handlePlanSelect = (plan: any) => {
+    setSelectedPlan(plan);
+    setShowCheckout(true);
+  };
+
   const handleCloseCheckout = () => {
     setShowCheckout(false);
-    setSelectedPackage(null);
+    setSelectedPlan(null);
   };
 
   const handleOrderSuccess = () => {
     console.log('Order submitted successfully');
+    setShowCheckout(false);
+    setSelectedPlan(null);
+    setSelectedPackage(null);
   };
 
   if (isLoading) {
@@ -125,22 +140,57 @@ const Subscription = () => {
           </div>
         </div>
 
-        {/* Subscriptions Section */}
+        {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          {subscriptionPackages.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {subscriptionPackages.map((pkg) => (
-                <ProductSubscriptionCard
-                  key={pkg.id}
-                  package={pkg}
-                  featured={pkg.status === 'featured'}
-                />
-              ))}
-            </div>
+          {!selectedPackage ? (
+            // Package Selection
+            subscriptionPackages.length > 0 ? (
+              <div>
+                <h2 className="text-3xl font-bold text-center mb-12">Select Your Package</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {subscriptionPackages.map((pkg) => (
+                    <div 
+                      key={pkg.id}
+                      onClick={() => handlePackageSelect(pkg)}
+                      className="cursor-pointer transform hover:scale-105 transition-transform duration-200"
+                    >
+                      <ProductSubscriptionCard
+                        package={pkg}
+                        featured={pkg.status === 'featured'}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No Subscription Packages Available</h3>
+                <p className="text-gray-600">Subscription packages are currently being updated. Please check back later.</p>
+              </div>
+            )
           ) : (
-            <div className="text-center py-16">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">No Subscription Packages Available</h3>
-              <p className="text-gray-600">Subscription packages are currently being updated. Please check back later.</p>
+            // Plan Selection
+            <div className="max-w-2xl mx-auto">
+              <div className="mb-8">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSelectedPackage(null)}
+                  className="mb-4"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Packages
+                </Button>
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold mb-2">{selectedPackage.name}</h2>
+                  <p className="text-gray-600 mb-6">{selectedPackage.description}</p>
+                </div>
+              </div>
+
+              <PlanSelector
+                packageId={selectedPackage.id}
+                packageName={selectedPackage.name}
+                onPlanSelect={handlePlanSelect}
+              />
             </div>
           )}
         </div>
@@ -192,9 +242,9 @@ const Subscription = () => {
         </div>
 
         {/* Checkout Form Modal */}
-        {showCheckout && selectedPackage && (
+        {showCheckout && selectedPlan && (
           <CheckoutForm
-            packageData={selectedPackage}
+            packageData={selectedPlan}
             onClose={handleCloseCheckout}
             onSuccess={handleOrderSuccess}
           />
