@@ -186,7 +186,7 @@ const Subscription = () => {
                           price_25_credits: null,
                           price_50_credits: null,
                           price_100_credits: null,
-                          status: pkg.status,
+                          status: (pkg.status as "active" | "inactive" | "featured") || 'active',
                           sort_order: pkg.sort_order,
                           created_at: pkg.created_at,
                           updated_at: pkg.updated_at,
