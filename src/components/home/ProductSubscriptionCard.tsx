@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 
 interface ProductSubscriptionCardProps {
   package: IPTVPackage;
@@ -16,6 +17,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   package: pkg, 
   featured = false 
 }) => {
+  // Use multilingual utilities to get localized content
+  const localizedName = useLocalizedText(pkg.name);
+  const localizedDescription = useLocalizedText(pkg.description);
+
   const generateSlug = (name: string) => {
     return name.toLowerCase()
       .replace(/\s+/g, '-')
@@ -24,7 +29,8 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
       .trim();
   };
 
-  const productSlug = generateSlug(pkg.name);
+  // Use the localized name for slug generation
+  const productSlug = generateSlug(localizedName || pkg.name);
 
   // Get the one-month price to display
   const oneMonthPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits || 0;
@@ -44,6 +50,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   // All packages now go to their product detail page
   const linkPath = `/products/${productSlug}`;
 
+  // Add safety checks to prevent JSON from being displayed
+  const safeLocalizedName = localizedName && !localizedName.startsWith('{') ? localizedName : 'Package Name';
+  const safeLocalizedDescription = localizedDescription && !localizedDescription.startsWith('{') ? localizedDescription : '';
+
   return (
     <div className="relative h-full">
       {featured && (
@@ -55,7 +65,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         </div>
       )}
 
-      {/* Remove the overall card clickability by removing the wrapping div click handler */}
       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
         {/* Top Section - Icon (Red Background) */}
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
@@ -63,7 +72,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {pkg.icon_url && (
               <img 
                 src={pkg.icon_url} 
-                alt={pkg.name}
+                alt={safeLocalizedName}
                 className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -84,9 +93,9 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
         {/* Bottom Section - Content (White Background) */}
         <div className="flex-1 bg-white p-6 flex flex-col">
-          {/* Package Title */}
+          {/* Package Title - Now using localized name */}
           <h3 className="text-lg font-bold text-gray-900 mb-4 text-center leading-tight">
-            {pkg.name}
+            {safeLocalizedName}
           </h3>
           
           {/* Price Display - One Month Price - Make it non-clickable */}
@@ -105,9 +114,9 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             )}
           </div>
 
-          {/* Package Description */}
-          {pkg.description && (
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+          {/* Package Description - Now using localized description */}
+          {safeLocalizedDescription && (
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">{safeLocalizedDescription}</p>
           )}
 
           {/* Features List */}
