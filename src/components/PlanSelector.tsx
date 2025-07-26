@@ -31,6 +31,37 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const createPlansFromPackageData = () => {
     const plans = [];
+    
+    // For subscription packages, use the credit-based pricing
+    if (packageData.price_3_credits) {
+      plans.push({
+        id: 'plan-3-credits',
+        credits: 3,
+        months: 3,
+        price: packageData.price_3_credits,
+        sort_order: 1
+      });
+    }
+    if (packageData.price_6_credits) {
+      plans.push({
+        id: 'plan-6-credits',
+        credits: 6,
+        months: 6,
+        price: packageData.price_6_credits,
+        sort_order: 2
+      });
+    }
+    if (packageData.price_12_credits) {
+      plans.push({
+        id: 'plan-12-credits',
+        credits: 12,
+        months: 12,
+        price: packageData.price_12_credits,
+        sort_order: 3
+      });
+    }
+    
+    // Fallback to traditional month-based pricing for activation packages
     if (packageData.price_1_month) {
       plans.push({
         id: 'plan-1-month',
@@ -67,6 +98,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         sort_order: 4
       });
     }
+    
+    console.log('Created plans from package data:', plans);
     return plans;
   };
 
@@ -150,6 +183,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   }
 
   const availableOptions = creditOptions && creditOptions.length > 0 ? creditOptions : createPlansFromPackageData();
+  
+  console.log('Available options:', availableOptions);
+  console.log('Package data:', packageData);
+  console.log('Credit options from API:', creditOptions);
+  
   if (!availableOptions || availableOptions.length === 0) {
     return (
       <Card>
@@ -158,6 +196,12 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         </CardHeader>
         <CardContent>
           <p className="text-gray-500">No plans available for this package.</p>
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+            <p className="text-sm text-gray-600">Debug info:</p>
+            <p className="text-xs text-gray-500">Package ID: {packageId}</p>
+            <p className="text-xs text-gray-500">Credit options: {creditOptions?.length || 0}</p>
+            <p className="text-xs text-gray-500">Package has price_3_credits: {packageData.price_3_credits ? 'Yes' : 'No'}</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -217,16 +261,16 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-lg">
-                        {option.months} Month{option.months > 1 ? 's' : ''}
+                        {option.credits} Credit{option.credits > 1 ? 's' : ''} ({option.months} Month{option.months > 1 ? 's' : ''})
                       </div>
                       <div className="text-sm text-gray-500">
                         {formatMonthlyAverage(option.price, option.months)}
                       </div>
-                      {/* Add savings badges for 3, 6, and 12 month plans */}
-                      {monthlyOption && option.months > 1 && (
+                      {/* Add savings badges for 6 and 12 credit plans */}
+                      {sortedOptions[0] && option.credits > sortedOptions[0].credits && (
                         <div className="mt-1">
                           <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-3 py-1 rounded-full">
-                            Save up to {calculateSavings(option.price, option.months, monthlyOption.price)}%
+                            Save up to {calculateSavings(option.price, option.months, sortedOptions[0].price)}%
                           </Badge>
                         </div>
                       )}
