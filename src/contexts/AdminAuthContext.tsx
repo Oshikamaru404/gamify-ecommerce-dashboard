@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 
 interface AdminUser {
   id: string;
@@ -122,8 +121,15 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const value: AdminAuthContextType = {
+    adminUser,
+    login,
+    logout,
+    isLoading
+  };
+
   return (
-    <AdminAuthContext.Provider value={{ adminUser, login, logout, isLoading }}>
+    <AdminAuthContext.Provider value={value}>
       {children}
     </AdminAuthContext.Provider>
   );
