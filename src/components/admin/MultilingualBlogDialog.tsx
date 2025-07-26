@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -14,6 +13,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateBlogArticle, useUpdateBlogArticle } from '@/hooks/useBlogArticles';
 import { Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import ReactQuill from 'react-quill';
+import QuillEditorStyles from './QuillEditorStyles';
+import 'react-quill/dist/quill.snow.css';
 
 const supportedLanguages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -42,6 +44,39 @@ interface MultilingualBlogDialogProps {
   onOpenChange: (open: boolean) => void;
   article?: any | null;
 }
+
+// Enhanced Rich text editor modules configuration
+const quillModules = {
+  toolbar: {
+    container: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'font': [] }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'direction': 'rtl' }],
+      [{ 'align': [] }],
+      ['blockquote', 'code-block'],
+      ['link', 'image', 'video'],
+      ['clean']
+    ],
+  },
+  clipboard: {
+    matchVisual: false,
+  }
+};
+
+const quillFormats = [
+  'header', 'font', 'size',
+  'bold', 'italic', 'underline', 'strike', 'blockquote',
+  'list', 'bullet', 'indent',
+  'link', 'image', 'video',
+  'align', 'color', 'background',
+  'script', 'code-block', 'direction'
+];
 
 const MultilingualBlogDialog: React.FC<MultilingualBlogDialogProps> = ({
   open,
@@ -191,179 +226,193 @@ const MultilingualBlogDialog: React.FC<MultilingualBlogDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            {editingArticle ? 'Edit Article' : 'Create New Article'}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <QuillEditorStyles />
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              {editingArticle ? 'Edit Article' : 'Create New Article'}
+            </DialogTitle>
+          </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <FormLabel>Slug</FormLabel>
-                <div className="flex gap-2">
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input {...field} placeholder="article-slug" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="button" variant="outline" onClick={generateSlug}>
-                    Generate
-                  </Button>
-                </div>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="iptv">IPTV</SelectItem>
-                        <SelectItem value="player">Player</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="author"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Author</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="featured_image_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Featured Image URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://example.com/image.jpg" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Multilingual Content Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                <h3 className="text-lg font-semibold">Multilingual Content</h3>
-              </div>
-              
-              <Tabs value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                <TabsList className="grid w-full grid-cols-6">
-                  {supportedLanguages.map((lang) => (
-                    <TabsTrigger key={lang.code} value={lang.code} className="flex items-center gap-1">
-                      <span>{lang.flag}</span>
-                      <span className="hidden sm:inline">{lang.name}</span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-
-                {supportedLanguages.map((lang) => (
-                  <TabsContent key={lang.code} value={lang.code} className="space-y-4">
-                    <div className="space-y-4">
-                      <div>
-                        <FormLabel>Title ({lang.name})</FormLabel>
-                        <Input
-                          value={getCurrentLanguageTitle()}
-                          onChange={(e) => updateCurrentLanguageTitle(e.target.value)}
-                          placeholder={`Enter article title in ${lang.name}`}
-                        />
-                      </div>
-                      
-                      <div>
-                        <FormLabel>Excerpt ({lang.name})</FormLabel>
-                        <Textarea
-                          value={getCurrentLanguageExcerpt()}
-                          onChange={(e) => updateCurrentLanguageExcerpt(e.target.value)}
-                          placeholder={`Enter article excerpt in ${lang.name}`}
-                          rows={3}
-                        />
-                      </div>
-                      
-                      <div>
-                        <FormLabel>Content ({lang.name})</FormLabel>
-                        <Textarea
-                          value={getCurrentLanguageContent()}
-                          onChange={(e) => updateCurrentLanguageContent(e.target.value)}
-                          placeholder={`Enter article content in ${lang.name}`}
-                          rows={10}
-                        />
-                      </div>
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="published"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Published</FormLabel>
-                    <div className="text-sm text-gray-500">
-                      Make this article visible to the public
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <FormLabel>Slug</FormLabel>
+                  <div className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input {...field} placeholder="article-slug" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                    <Button type="button" variant="outline" onClick={generateSlug}>
+                      Generate
+                    </Button>
+                  </div>
+                </div>
 
-            <div className="flex justify-end gap-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createArticle.isPending || updateArticle.isPending}>
-                {createArticle.isPending || updateArticle.isPending ? 'Saving...' : 'Save Article'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="iptv">IPTV</SelectItem>
+                          <SelectItem value="player">Player</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="author"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Author</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="featured_image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Featured Image URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://example.com/image.jpg" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Multilingual Content Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  <h3 className="text-lg font-semibold">Multilingual Content</h3>
+                </div>
+                
+                <Tabs value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                  <TabsList className="grid w-full grid-cols-6">
+                    {supportedLanguages.map((lang) => (
+                      <TabsTrigger key={lang.code} value={lang.code} className="flex items-center gap-1">
+                        <span>{lang.flag}</span>
+                        <span className="hidden sm:inline">{lang.name}</span>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  {supportedLanguages.map((lang) => (
+                    <TabsContent key={lang.code} value={lang.code} className="space-y-4">
+                      <div className="space-y-4">
+                        <div>
+                          <FormLabel>Title ({lang.name})</FormLabel>
+                          <Input
+                            value={getCurrentLanguageTitle()}
+                            onChange={(e) => updateCurrentLanguageTitle(e.target.value)}
+                            placeholder={`Enter article title in ${lang.name}`}
+                          />
+                        </div>
+                        
+                        <div>
+                          <FormLabel>Excerpt ({lang.name})</FormLabel>
+                          <Textarea
+                            value={getCurrentLanguageExcerpt()}
+                            onChange={(e) => updateCurrentLanguageExcerpt(e.target.value)}
+                            placeholder={`Enter article excerpt in ${lang.name}`}
+                            rows={3}
+                          />
+                        </div>
+                        
+                        <div>
+                          <FormLabel>Content ({lang.name})</FormLabel>
+                          <div className="border rounded-md overflow-hidden bg-white">
+                            <ReactQuill
+                              theme="snow"
+                              value={getCurrentLanguageContent()}
+                              onChange={(content) => updateCurrentLanguageContent(content)}
+                              modules={quillModules}
+                              formats={quillFormats}
+                              placeholder={`Write your article content in ${lang.name}...`}
+                              style={{ 
+                                height: '350px',
+                                backgroundColor: 'white'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </div>
+
+              {/* Add some padding after the rich text editor */}
+              <div className="pt-12">
+                <FormField
+                  control={form.control}
+                  name="published"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Published</FormLabel>
+                        <div className="text-sm text-gray-500">
+                          Make this article visible to the public
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex justify-end gap-4">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createArticle.isPending || updateArticle.isPending}>
+                  {createArticle.isPending || updateArticle.isPending ? 'Saving...' : 'Save Article'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
