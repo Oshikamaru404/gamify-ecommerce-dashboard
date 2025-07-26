@@ -100,9 +100,9 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
         secret: secret,
       });
 
-      // Verify the token
-      const token = parseInt(verificationCode);
-      const isValid = totp.validate({ token, window: 1 }) !== null;
+      // Verify the token - pass the string directly
+      const cleanToken = verificationCode.replace(/\D/g, '');
+      const isValid = totp.validate({ token: cleanToken, window: 1 }) !== null;
 
       if (isValid) {
         // Generate backup codes

@@ -20,13 +20,14 @@ export const verifyTOTP = (secret: string, token: string): boolean => {
       secret: secret,
     });
 
-    const tokenInt = parseInt(token);
-    if (isNaN(tokenInt)) {
+    // Remove any non-digit characters and ensure it's a string
+    const cleanToken = token.replace(/\D/g, '');
+    if (cleanToken.length !== 6) {
       return false;
     }
 
     // Allow a window of 1 step (30 seconds) in both directions
-    const result = totp.validate({ token: tokenInt, window: 1 });
+    const result = totp.validate({ token: cleanToken, window: 1 });
     return result !== null;
   } catch (error) {
     console.error('Error verifying TOTP:', error);
