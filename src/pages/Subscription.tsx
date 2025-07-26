@@ -8,18 +8,18 @@ import PlanSelector from '@/components/PlanSelector';
 import StoreLayout from '@/components/store/StoreLayout';
 import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
 
 const Subscription = () => {
   const { t } = useLanguage();
-  const { data: packages, isLoading } = useIPTVPackages();
+  const { data: packages, isLoading } = useSubscriptionPackages();
   const [searchParams] = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Filter only subscription packages
-  const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
+  // Filter only active subscription packages
+  const subscriptionPackages = packages?.filter(pkg => pkg.status !== 'inactive') || [];
 
   // Check if a specific package is requested via URL params
   useEffect(() => {
@@ -170,7 +170,27 @@ const Subscription = () => {
                       className="cursor-pointer transform hover:scale-105 transition-transform duration-200"
                     >
                       <ProductSubscriptionCard
-                        package={pkg}
+                        package={{
+                          id: pkg.id,
+                          name: pkg.name,
+                          category: 'subscription' as const,
+                          description: pkg.description,
+                          icon: pkg.icon,
+                          icon_url: pkg.icon_url,
+                          features: pkg.features,
+                          price_1_month: pkg.price_3_credits,
+                          price_3_months: pkg.price_6_credits,
+                          price_6_months: null,
+                          price_12_months: pkg.price_12_credits,
+                          price_10_credits: null,
+                          price_25_credits: null,
+                          price_50_credits: null,
+                          price_100_credits: null,
+                          status: pkg.status,
+                          sort_order: pkg.sort_order,
+                          created_at: pkg.created_at,
+                          updated_at: pkg.updated_at,
+                        }}
                         featured={pkg.status === 'featured'}
                       />
                     </div>
