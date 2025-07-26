@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useTranslatedText } from '@/hooks/useTranslatedText';
 
 const StoreFooter: React.FC = () => {
-  const { t } = useLanguage();
+  const { t: staticT } = useLanguage();
+  const { t } = useTranslatedText();
   const { data: siteSettings } = useSiteSettings();
   const [showBlogSubmenu, setShowBlogSubmenu] = useState(false);
 
@@ -15,7 +17,7 @@ const StoreFooter: React.FC = () => {
   const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
 
   const handleTryNow = () => {
-    const message = "Bonjour, je souhaite essayer vos services BWIVOX IPTV. Pouvez-vous m'aider?";
+    const message = t('whatsapp_try_message', "Bonjour, je souhaite essayer vos services BWIVOX IPTV. Pouvez-vous m'aider?");
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -29,47 +31,47 @@ const StoreFooter: React.FC = () => {
       <div className="container py-8 md:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-red-600">BWIVOX IPTV</h3>
+            <h3 className="mb-4 text-lg font-semibold text-red-600">{t('brand_name', 'BWIVOX IPTV')}</h3>
             <p className="text-sm text-gray-600 mb-6">
-              {t.footerDescription}
+              {t('footer_brand_description', staticT.footerDescription)}
             </p>
             <Button onClick={handleTryNow} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white">
               <MessageCircle className="mr-2" size={16} />
-              {t.tryNow}
+              {t('try_now_button', staticT.tryNow)}
             </Button>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">Services</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">{t('services_section_title', 'Services')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/subscription" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Subscription IPTV
+                  {t('subscription_service_title', 'Subscription IPTV')}
                 </Link>
               </li>
               <li>
                 <Link to="/activation" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Activation Player
+                  {t('activation_service_title', 'Activation Player')}
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">Panel Reseller</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">{t('panel_reseller_title', 'Panel Reseller')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/iptv-panel" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Panel IPTV
+                  {t('panel_iptv_service', 'Panel IPTV')}
                 </Link>
               </li>
               <li>
                 <Link to="/player-panel" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Panel Player
+                  {t('panel_player_service', 'Panel Player')}
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">Information</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">{t('information_section_title', 'Information')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <div className="text-gray-700 font-medium mb-1">
@@ -77,7 +79,7 @@ const StoreFooter: React.FC = () => {
                     onClick={toggleBlogSubmenu}
                     className="flex items-center w-full text-left hover:text-red-600 transition-colors"
                   >
-                    Blog
+                    {t('blog_section_title', 'Blog')}
                     {showBlogSubmenu ? (
                       <ChevronDown className="ml-1 h-4 w-4" />
                     ) : (
@@ -89,12 +91,12 @@ const StoreFooter: React.FC = () => {
                   <ul className="ml-4 space-y-1 mt-2">
                     <li>
                       <Link to="/blog-iptv" className="text-gray-600 hover:text-red-600 transition-colors">
-                        Blog IPTV
+                        {t('blog_iptv_title', 'Blog IPTV')}
                       </Link>
                     </li>
                     <li>
                       <Link to="/blog-player" className="text-gray-600 hover:text-red-600 transition-colors">
-                        Blog Player
+                        {t('blog_player_title', 'Blog Player')}
                       </Link>
                     </li>
                   </ul>
@@ -102,34 +104,34 @@ const StoreFooter: React.FC = () => {
               </li>
               <li>
                 <Link to="/support" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Support
+                  {t('support_link_title', 'Support')}
                 </Link>
               </li>
               <li>
                 <Link to="/how-to-buy" className="text-gray-600 hover:text-red-600 transition-colors">
-                  How to Buy
+                  {t('how_to_buy_link_title', 'How to Buy')}
                 </Link>
               </li>
               <li>
                 <Link to="/full-reviews" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Full Reviews
+                  {t('full_reviews_link_title', 'Full Reviews')}
                 </Link>
               </li>
               <li>
                 <Link to="/refund-policy" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Refund Policy
+                  {t('refund_policy_link_title', 'Refund Policy')}
                 </Link>
               </li>
               <li>
                 <Link to="/privacy-policy" className="text-gray-600 hover:text-red-600 transition-colors">
-                  Privacy Policy
+                  {t('privacy_policy_link_title', 'Privacy Policy')}
                 </Link>
               </li>
             </ul>
           </div>
         </div>
         <div className="mt-8 border-t pt-8 text-center text-sm text-gray-600">
-          <p>&copy; {new Date().getFullYear()} BWIVOX IPTV. Tous droits réservés.</p>
+          <p>{t('copyright_text', `© ${new Date().getFullYear()} BWIVOX IPTV. Tous droits réservés.`)}</p>
         </div>
       </div>
     </footer>

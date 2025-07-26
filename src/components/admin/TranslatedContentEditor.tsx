@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Globe, Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { Globe, Plus, Edit, Trash2, Save, X, RefreshCw } from 'lucide-react';
 import { useTranslatedContent, useUpdateTranslatedContent, useCreateTranslatedContent, useDeleteTranslatedContent } from '@/hooks/useTranslatedContent';
 import { toast } from 'sonner';
 
@@ -22,8 +22,41 @@ const supportedLanguages = [
   { code: 'ar', name: 'العربية', flag: '🇸🇦' },
 ];
 
-// Default content keys that should be available
+// Enhanced content keys for all hardcoded text in the application
 const defaultContentKeys = [
+  // Product Card Text
+  'most_popular_badge',
+  'per_month',
+  'save_yearly',
+  'money_back_guarantee',
+  'view_details_button',
+  'feature_4k_technology',
+  'feature_8000_channels',
+  'feature_vod_library',
+  
+  // Footer Content
+  'brand_name',
+  'footer_brand_description',
+  'try_now_button',
+  'whatsapp_try_message',
+  'services_section_title',
+  'subscription_service_title',
+  'activation_service_title',
+  'panel_reseller_title',
+  'panel_iptv_service',
+  'panel_player_service',
+  'information_section_title',
+  'blog_section_title',
+  'blog_iptv_title',
+  'blog_player_title',
+  'support_link_title',
+  'how_to_buy_link_title',
+  'full_reviews_link_title',
+  'refund_policy_link_title',
+  'privacy_policy_link_title',
+  'copyright_text',
+  
+  // Service Descriptions
   'service_warranty_30_days',
   'device_activation_service',
   'activation_packages_12_months',
@@ -35,7 +68,6 @@ const defaultContentKeys = [
   'panel_player_title',
   'why_choose_us_title',
   'testimonials_title',
-  'footer_description',
   'contact_us_title',
   'support_title',
   'how_to_buy_title',
@@ -45,6 +77,8 @@ const defaultContentKeys = [
   'about_us_title',
   'features_title',
   'pricing_title',
+  
+  // Common UI Text
   'try_now_text',
   'get_started_text',
   'learn_more_text',
@@ -52,10 +86,28 @@ const defaultContentKeys = [
   'whatsapp_contact_text',
   'email_contact_text',
   'phone_contact_text',
-  'address_text',
-  'working_hours_text',
-  'copyright_text',
-  'terms_conditions_text',
+  'add_to_cart_text',
+  'buy_now_text',
+  'compare_packages_text',
+  'view_all_text',
+  'show_more_text',
+  'show_less_text',
+  'read_more_text',
+  'loading_text',
+  'saving_text',
+  'success_text',
+  'error_text',
+  'confirm_text',
+  'cancel_text',
+  'ok_text',
+  'yes_text',
+  'no_text',
+  'continue_text',
+  'back_text',
+  'next_text',
+  'close_text',
+  
+  // Quality Assurance Text
   'quality_guarantee_text',
   'customer_satisfaction_text',
   'technical_support_text',
@@ -68,10 +120,8 @@ const defaultContentKeys = [
   'new_arrivals_text',
   'bestsellers_text',
   'recommended_text',
-  'add_to_cart_text',
-  'buy_now_text',
-  'view_details_text',
-  'compare_packages_text',
+  
+  // Service Features
   'service_description_text',
   'package_features_text',
   'compatibility_text',
@@ -80,6 +130,8 @@ const defaultContentKeys = [
   'setup_guide_text',
   'user_manual_text',
   'video_tutorials_text',
+  
+  // Contact & Support
   'live_chat_text',
   'ticket_system_text',
   'knowledge_base_text',
@@ -88,93 +140,36 @@ const defaultContentKeys = [
   'newsletter_signup_text',
   'subscribe_text',
   'unsubscribe_text',
-  'update_preferences_text',
+  
+  // Account & Settings
   'account_settings_text',
   'profile_settings_text',
   'notification_settings_text',
   'security_settings_text',
   'language_settings_text',
-  'theme_settings_text',
-  'accessibility_settings_text',
-  'backup_settings_text',
-  'export_data_text',
-  'import_data_text',
-  'reset_settings_text',
-  'delete_account_text',
-  'logout_text',
   'login_text',
   'register_text',
   'forgot_password_text',
   'reset_password_text',
   'change_password_text',
   'verify_email_text',
-  'resend_verification_text',
-  'account_verified_text',
-  'account_suspended_text',
-  'account_expired_text',
-  'subscription_expired_text',
-  'payment_failed_text',
+  'logout_text',
+  
+  // Order & Payment Status
   'payment_successful_text',
+  'payment_failed_text',
   'order_confirmed_text',
-  'order_shipped_text',
-  'order_delivered_text',
   'order_cancelled_text',
   'refund_processed_text',
   'refund_pending_text',
-  'refund_denied_text',
+  'subscription_expired_text',
+  
+  // System Messages
   'maintenance_mode_text',
   'coming_soon_text',
   'page_not_found_text',
   'server_error_text',
-  'network_error_text',
-  'loading_text',
-  'saving_text',
-  'success_text',
-  'error_text',
-  'warning_text',
-  'info_text',
-  'confirm_text',
-  'cancel_text',
-  'ok_text',
-  'yes_text',
-  'no_text',
-  'continue_text',
-  'back_text',
-  'next_text',
-  'previous_text',
-  'skip_text',
-  'finish_text',
-  'close_text',
-  'minimize_text',
-  'maximize_text',
-  'restore_text',
-  'refresh_text',
-  'reload_text',
-  'search_text',
-  'filter_text',
-  'sort_text',
-  'export_text',
-  'import_text',
-  'print_text',
-  'share_text',
-  'copy_text',
-  'paste_text',
-  'cut_text',
-  'undo_text',
-  'redo_text',
-  'select_all_text',
-  'deselect_all_text',
-  'select_text',
-  'deselect_text',
-  'expand_text',
-  'collapse_text',
-  'show_more_text',
-  'show_less_text',
-  'read_more_text',
-  'read_less_text',
-  'view_all_text',
-  'hide_text',
-  'show_text'
+  'network_error_text'
 ];
 
 interface NewContentDialogProps {
@@ -221,12 +216,23 @@ const NewContentDialog: React.FC<NewContentDialogProps> = ({ open, onOpenChange 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="contentKey">Content Key</Label>
+            <Select value={contentKey} onValueChange={setContentKey}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a content key" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60 overflow-y-auto">
+                {defaultContentKeys.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {key}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Input
-              id="contentKey"
+              className="mt-2"
               value={contentKey}
               onChange={(e) => setContentKey(e.target.value)}
-              placeholder="e.g., service_warranty_30_days"
-              required
+              placeholder="Or type a custom key"
             />
           </div>
           
@@ -276,10 +282,55 @@ const TranslatedContentEditor: React.FC = () => {
   const { data: translatedContent, isLoading, error } = useTranslatedContent();
   const updateContent = useUpdateTranslatedContent();
   const deleteContent = useDeleteTranslatedContent();
+  const createContent = useCreateTranslatedContent();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [showNewDialog, setShowNewDialog] = useState(false);
+
+  const generateDefaultContent = async () => {
+    const defaultValues: Record<string, string> = {
+      'most_popular_badge': 'Most Popular',
+      'per_month': 'month',
+      'save_yearly': 'Save ${{amount}} yearly',
+      'money_back_guarantee': '30-Day Money Back Guarantee',
+      'view_details_button': 'View Details',
+      'feature_4k_technology': '4K Premium Technology',
+      'feature_8000_channels': '8000+ Channels',
+      'feature_vod_library': 'VOD Library',
+      'brand_name': 'BWIVOX IPTV',
+      'footer_brand_description': 'Your premium IPTV service provider with guaranteed quality and 24/7 support.',
+      'try_now_button': 'Try Now',
+      'whatsapp_try_message': 'Hello, I would like to try your BWIVOX IPTV services. Can you help me?',
+      'services_section_title': 'Services',
+      'subscription_service_title': 'Subscription IPTV',
+      'activation_service_title': 'Activation Player',
+      'panel_reseller_title': 'Panel Reseller',
+      'panel_iptv_service': 'Panel IPTV',
+      'panel_player_service': 'Panel Player',
+      'information_section_title': 'Information',
+      'blog_section_title': 'Blog',
+      'blog_iptv_title': 'Blog IPTV',
+      'blog_player_title': 'Blog Player',
+      'support_link_title': 'Support',
+      'how_to_buy_link_title': 'How to Buy',
+      'copyright_text': `© ${new Date().getFullYear()} BWIVOX IPTV. All rights reserved.`
+    };
+
+    try {
+      for (const [key, value] of Object.entries(defaultValues)) {
+        await createContent.mutateAsync({
+          contentKey: key,
+          languageCode: 'en',
+          value: value,
+        });
+      }
+      toast.success('Default content generated successfully!');
+    } catch (error) {
+      console.error('Error generating default content:', error);
+      toast.error('Failed to generate some default content');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -359,22 +410,24 @@ const TranslatedContentEditor: React.FC = () => {
     setEditValue('');
   };
 
-  const filteredContent = Object.entries(contentByKey).filter(([key, translations]) => {
-    return translations[selectedLanguage];
-  });
-
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            Translated Content
+            Translated Content Management
           </CardTitle>
-          <Button onClick={() => setShowNewDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Content
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={generateDefaultContent} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Generate Defaults
+            </Button>
+            <Button onClick={() => setShowNewDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Content
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

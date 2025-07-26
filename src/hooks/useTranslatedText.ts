@@ -29,5 +29,7 @@ export const useTranslatedText = () => {
     return fallback;
   };
 
-  return { getTranslatedText };
+  const t = (contentKey: string, fallback: string = '') => getTranslatedText(contentKey, fallback);
+
+  return { getTranslatedText, t };
 };
