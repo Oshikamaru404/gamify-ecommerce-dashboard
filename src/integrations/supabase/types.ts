@@ -16,23 +16,35 @@ export type Database = {
     Tables: {
       admin_users: {
         Row: {
+          backup_codes: string[] | null
           created_at: string | null
+          created_backup_codes_at: string | null
           id: string
           role: string | null
+          two_factor_enabled: boolean | null
+          two_factor_secret: string | null
           user_id: string | null
           username: string
         }
         Insert: {
+          backup_codes?: string[] | null
           created_at?: string | null
+          created_backup_codes_at?: string | null
           id?: string
           role?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           user_id?: string | null
           username: string
         }
         Update: {
+          backup_codes?: string[] | null
           created_at?: string | null
+          created_backup_codes_at?: string | null
           id?: string
           role?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           user_id?: string | null
           username?: string
         }

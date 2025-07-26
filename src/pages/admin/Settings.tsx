@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, Globe, MessageSquare, Palette, FileText } from 'lucide-react';
+import { Settings, Globe, MessageSquare, Palette, FileText, Shield } from 'lucide-react';
 import TranslationEditor from '@/components/admin/TranslationEditor';
 import TranslatedContentEditor from '@/components/admin/TranslatedContentEditor';
 import ContactSettingsEditor from '@/components/admin/ContactSettingsEditor';
 import CSSStyleEditor from '@/components/admin/CSSStyleEditor';
+import TwoFactorSettings from '@/components/admin/TwoFactorSettings';
 
 const AdminSettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
@@ -19,10 +20,14 @@ const AdminSettings: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             General
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Security
           </TabsTrigger>
           <TabsTrigger value="translations" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
@@ -55,6 +60,10 @@ const AdminSettings: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-4">
+          <TwoFactorSettings />
         </TabsContent>
 
         <TabsContent value="translations" className="space-y-4">
