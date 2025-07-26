@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const QuillEditorStyles: React.FC = () => {
-  return (
-    <style jsx global>{`
+  useEffect(() => {
+    // Create style element and inject CSS
+    const style = document.createElement('style');
+    style.textContent = `
       .ql-toolbar {
         border-top: 1px solid #ccc !important;
         border-left: 1px solid #ccc !important;
@@ -76,8 +78,19 @@ const QuillEditorStyles: React.FC = () => {
         border-right: 1px solid #ddd !important;
         padding-right: 8px !important;
       }
-    `}</style>
-  );
+    `;
+    
+    document.head.appendChild(style);
+    
+    // Cleanup function to remove the style when component unmounts
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
+
+  return null;
 };
 
 export default QuillEditorStyles;
