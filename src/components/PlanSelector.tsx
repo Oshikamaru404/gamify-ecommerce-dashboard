@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,84 +26,114 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   } = useSubscriptionCreditOptions(packageId);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
 
+  // Enhanced debugging
+  console.log('🔍 PlanSelector Debug Info:');
+  console.log('📦 Package ID:', packageId);
+  console.log('📦 Package Name:', packageName);
+  console.log('📦 Package Data:', packageData);
+  console.log('💳 Credit Options from DB:', creditOptions);
+  console.log('⏳ Is Loading:', isLoading);
+
   const isActivationPackage = packageData?.category === 'activation-player';
 
   const createPlansFromPackageData = () => {
     const plans = [];
     
-    // For subscription packages, use the credit-based pricing
-    if (packageData.price_3_credits) {
+    console.log('🛠️ Creating plans from package data...');
+    console.log('📊 Available price fields:', {
+      price_3_credits: packageData.price_3_credits,
+      price_6_credits: packageData.price_6_credits,
+      price_12_credits: packageData.price_12_credits,
+      price_1_month: packageData.price_1_month,
+      price_3_months: packageData.price_3_months,
+      price_6_months: packageData.price_6_months,
+      price_12_months: packageData.price_12_months
+    });
+    
+    // For subscription packages, prioritize credit-based pricing
+    if (packageData.price_3_credits && packageData.price_3_credits > 0) {
       plans.push({
         id: 'plan-3-credits',
         credits: 3,
         months: 3,
-        price: packageData.price_3_credits,
+        price: Number(packageData.price_3_credits),
         sort_order: 1
       });
+      console.log('✅ Added 3-credit plan:', packageData.price_3_credits);
     }
-    if (packageData.price_6_credits) {
+    if (packageData.price_6_credits && packageData.price_6_credits > 0) {
       plans.push({
         id: 'plan-6-credits',
         credits: 6,
         months: 6,
-        price: packageData.price_6_credits,
+        price: Number(packageData.price_6_credits),
         sort_order: 2
       });
+      console.log('✅ Added 6-credit plan:', packageData.price_6_credits);
     }
-    if (packageData.price_12_credits) {
+    if (packageData.price_12_credits && packageData.price_12_credits > 0) {
       plans.push({
         id: 'plan-12-credits',
         credits: 12,
         months: 12,
-        price: packageData.price_12_credits,
+        price: Number(packageData.price_12_credits),
         sort_order: 3
       });
+      console.log('✅ Added 12-credit plan:', packageData.price_12_credits);
     }
     
-    // Fallback to traditional month-based pricing for activation packages
-    if (packageData.price_1_month) {
-      plans.push({
-        id: 'plan-1-month',
-        credits: 1,
-        months: 1,
-        price: packageData.price_1_month,
-        sort_order: 1
-      });
-    }
-    if (packageData.price_3_months) {
-      plans.push({
-        id: 'plan-3-months',
-        credits: 3,
-        months: 3,
-        price: packageData.price_3_months,
-        sort_order: 2
-      });
-    }
-    if (packageData.price_6_months) {
-      plans.push({
-        id: 'plan-6-months',
-        credits: 6,
-        months: 6,
-        price: packageData.price_6_months,
-        sort_order: 3
-      });
-    }
-    if (packageData.price_12_months) {
-      plans.push({
-        id: 'plan-12-months',
-        credits: 12,
-        months: 12,
-        price: packageData.price_12_months,
-        sort_order: 4
-      });
+    // Fallback to traditional month-based pricing for activation packages or if no credit plans exist
+    if (plans.length === 0) {
+      console.log('🔄 No credit plans found, trying month-based pricing...');
+      
+      if (packageData.price_1_month && packageData.price_1_month > 0) {
+        plans.push({
+          id: 'plan-1-month',
+          credits: 1,
+          months: 1,
+          price: Number(packageData.price_1_month),
+          sort_order: 1
+        });
+        console.log('✅ Added 1-month plan:', packageData.price_1_month);
+      }
+      if (packageData.price_3_months && packageData.price_3_months > 0) {
+        plans.push({
+          id: 'plan-3-months',
+          credits: 3,
+          months: 3,
+          price: Number(packageData.price_3_months),
+          sort_order: 2
+        });
+        console.log('✅ Added 3-months plan:', packageData.price_3_months);
+      }
+      if (packageData.price_6_months && packageData.price_6_months > 0) {
+        plans.push({
+          id: 'plan-6-months',
+          credits: 6,
+          months: 6,
+          price: Number(packageData.price_6_months),
+          sort_order: 3
+        });
+        console.log('✅ Added 6-months plan:', packageData.price_6_months);
+      }
+      if (packageData.price_12_months && packageData.price_12_months > 0) {
+        plans.push({
+          id: 'plan-12-months',
+          credits: 12,
+          months: 12,
+          price: Number(packageData.price_12_months),
+          sort_order: 4
+        });
+        console.log('✅ Added 12-months plan:', packageData.price_12_months);
+      }
     }
     
-    console.log('Created plans from package data:', plans);
+    console.log('🎯 Final plans created:', plans);
     return plans;
   };
 
   const createPlanData = (selectedOption: any) => {
-    return {
+    const planData = {
       id: selectedOption.id,
       name: packageName,
       category: packageData.category,
@@ -114,6 +143,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       credits: selectedOption.credits,
       packageId: packageId
     };
+    console.log('📋 Created plan data:', planData);
+    return planData;
   };
 
   const handlePlanChange = (value: string) => {
@@ -166,6 +197,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   };
 
   if (isLoading) {
+    console.log('⏳ Still loading credit options...');
     return (
       <Card>
         <CardHeader>
@@ -182,13 +214,21 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
   }
 
-  const availableOptions = creditOptions && creditOptions.length > 0 ? creditOptions : createPlansFromPackageData();
+  // Determine which options to use - database credit options or fallback package data
+  let availableOptions = [];
   
-  console.log('Available options:', availableOptions);
-  console.log('Package data:', packageData);
-  console.log('Credit options from API:', creditOptions);
+  if (creditOptions && creditOptions.length > 0) {
+    console.log('🎯 Using credit options from database:', creditOptions);
+    availableOptions = creditOptions;
+  } else {
+    console.log('🔄 No database credit options, creating from package data...');
+    availableOptions = createPlansFromPackageData();
+  }
+  
+  console.log('📊 Final available options:', availableOptions);
   
   if (!availableOptions || availableOptions.length === 0) {
+    console.log('❌ No plans available - showing debug info');
     return (
       <Card>
         <CardHeader>
@@ -197,10 +237,18 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         <CardContent>
           <p className="text-gray-500">No plans available for this package.</p>
           <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <p className="text-sm text-gray-600">Debug info:</p>
-            <p className="text-xs text-gray-500">Package ID: {packageId}</p>
-            <p className="text-xs text-gray-500">Credit options: {creditOptions?.length || 0}</p>
-            <p className="text-xs text-gray-500">Package has price_3_credits: {packageData.price_3_credits ? 'Yes' : 'No'}</p>
+            <p className="text-sm text-gray-600 font-semibold">Debug Info:</p>
+            <div className="space-y-1 text-xs text-gray-500">
+              <p><strong>Package ID:</strong> {packageId}</p>
+              <p><strong>Package Name:</strong> {packageName}</p>
+              <p><strong>Credit options from DB:</strong> {creditOptions?.length || 0}</p>
+              <p><strong>Package category:</strong> {packageData?.category}</p>
+              <p><strong>Has price_3_credits:</strong> {packageData.price_3_credits ? `Yes (${packageData.price_3_credits})` : 'No'}</p>
+              <p><strong>Has price_6_credits:</strong> {packageData.price_6_credits ? `Yes (${packageData.price_6_credits})` : 'No'}</p>
+              <p><strong>Has price_12_credits:</strong> {packageData.price_12_credits ? `Yes (${packageData.price_12_credits})` : 'No'}</p>
+              <p><strong>Has price_1_month:</strong> {packageData.price_1_month ? `Yes (${packageData.price_1_month})` : 'No'}</p>
+              <p><strong>Package Data Keys:</strong> {Object.keys(packageData || {}).join(', ')}</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -209,6 +257,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
   const monthlyOption = sortedOptions.find(option => option.months === 1);
+
+  console.log('✅ Rendering plan selector with options:', sortedOptions);
 
   return (
     <Card>
