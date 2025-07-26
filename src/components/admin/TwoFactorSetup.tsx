@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { Shield, Copy, Download, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import QRCode from 'qrcode';
 import * as OTPAuth from 'otpauth';
-import { encode as base32Encode } from 'thirty-two';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TwoFactorSetupProps {
@@ -17,6 +15,30 @@ interface TwoFactorSetupProps {
   onSetupComplete: () => void;
   onCancel: () => void;
 }
+
+// Browser-compatible base32 encoding function
+const base32Encode = (buffer: Uint8Array): string => {
+  const base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = 0;
+  let value = 0;
+  let output = '';
+
+  for (let i = 0; i < buffer.length; i++) {
+    value = (value << 8) | buffer[i];
+    bits += 8;
+
+    while (bits >= 5) {
+      output += base32chars[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+
+  if (bits > 0) {
+    output += base32chars[(value << (5 - bits)) & 31];
+  }
+
+  return output;
+};
 
 const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
   adminUser,
@@ -39,7 +61,7 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
     // Generate a random 20-byte secret
     const buffer = new Uint8Array(20);
     crypto.getRandomValues(buffer);
-    const secretKey = base32Encode(buffer).toString().replace(/=/g, '');
+    const secretKey = base32Encode(buffer);
     
     setSecret(secretKey);
     generateQRCode(secretKey);
