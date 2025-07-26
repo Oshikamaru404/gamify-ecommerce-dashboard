@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Globe, MessageSquare, Palette, FileText, Shield } from 'lucide-react';
 import TranslationEditor from '@/components/admin/TranslationEditor';
-import TranslatedContentEditor from '@/components/admin/TranslatedContentEditor';
+import ImprovedTranslatedContentEditor from '@/components/admin/ImprovedTranslatedContentEditor';
 import ContactSettingsEditor from '@/components/admin/ContactSettingsEditor';
 import CSSStyleEditor from '@/components/admin/CSSStyleEditor';
 import TwoFactorSettings from '@/components/admin/TwoFactorSettings';
@@ -71,7 +71,7 @@ const AdminSettings: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="translated-content" className="space-y-4">
-          <TranslatedContentEditor />
+          <ImprovedTranslatedContentEditor />
         </TabsContent>
 
         <TabsContent value="contact" className="space-y-4">
