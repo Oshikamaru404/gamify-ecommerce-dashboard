@@ -35,54 +35,112 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   console.log('⏳ Is Loading:', isLoading);
 
   const isActivationPackage = packageData?.category === 'activation-player';
+  const isIPTVPackage = packageData?.category === 'panel-iptv' || packageData?.category?.includes('iptv');
+  const isSubscriptionPackage = !isActivationPackage && !isIPTVPackage;
 
   const createPlansFromPackageData = () => {
     const plans = [];
     
     console.log('🛠️ Creating plans from package data...');
+    console.log('📊 Package category:', packageData.category);
     console.log('📊 Available price fields:', {
+      // Subscription package fields
       price_3_credits: packageData.price_3_credits,
       price_6_credits: packageData.price_6_credits,
       price_12_credits: packageData.price_12_credits,
+      // IPTV package fields
+      price_10_credits: packageData.price_10_credits,
+      price_25_credits: packageData.price_25_credits,
+      price_50_credits: packageData.price_50_credits,
+      price_100_credits: packageData.price_100_credits,
+      // Standard month-based pricing
       price_1_month: packageData.price_1_month,
       price_3_months: packageData.price_3_months,
       price_6_months: packageData.price_6_months,
       price_12_months: packageData.price_12_months
     });
     
-    // For subscription packages, prioritize credit-based pricing
-    if (packageData.price_3_credits && packageData.price_3_credits > 0) {
-      plans.push({
-        id: 'plan-3-credits',
-        credits: 3,
-        months: 3,
-        price: Number(packageData.price_3_credits),
-        sort_order: 1
-      });
-      console.log('✅ Added 3-credit plan:', packageData.price_3_credits);
-    }
-    if (packageData.price_6_credits && packageData.price_6_credits > 0) {
-      plans.push({
-        id: 'plan-6-credits',
-        credits: 6,
-        months: 6,
-        price: Number(packageData.price_6_credits),
-        sort_order: 2
-      });
-      console.log('✅ Added 6-credit plan:', packageData.price_6_credits);
-    }
-    if (packageData.price_12_credits && packageData.price_12_credits > 0) {
-      plans.push({
-        id: 'plan-12-credits',
-        credits: 12,
-        months: 12,
-        price: Number(packageData.price_12_credits),
-        sort_order: 3
-      });
-      console.log('✅ Added 12-credit plan:', packageData.price_12_credits);
+    if (isIPTVPackage) {
+      console.log('📺 Processing IPTV package pricing...');
+      
+      // IPTV packages use credit-based pricing with different field names
+      if (packageData.price_10_credits && packageData.price_10_credits > 0) {
+        plans.push({
+          id: 'plan-10-credits',
+          credits: 10,
+          months: 1,
+          price: Number(packageData.price_10_credits),
+          sort_order: 1
+        });
+        console.log('✅ Added 10-credit plan:', packageData.price_10_credits);
+      }
+      if (packageData.price_25_credits && packageData.price_25_credits > 0) {
+        plans.push({
+          id: 'plan-25-credits',
+          credits: 25,
+          months: 3,
+          price: Number(packageData.price_25_credits),
+          sort_order: 2
+        });
+        console.log('✅ Added 25-credit plan:', packageData.price_25_credits);
+      }
+      if (packageData.price_50_credits && packageData.price_50_credits > 0) {
+        plans.push({
+          id: 'plan-50-credits',
+          credits: 50,
+          months: 6,
+          price: Number(packageData.price_50_credits),
+          sort_order: 3
+        });
+        console.log('✅ Added 50-credit plan:', packageData.price_50_credits);
+      }
+      if (packageData.price_100_credits && packageData.price_100_credits > 0) {
+        plans.push({
+          id: 'plan-100-credits',
+          credits: 100,
+          months: 12,
+          price: Number(packageData.price_100_credits),
+          sort_order: 4
+        });
+        console.log('✅ Added 100-credit plan:', packageData.price_100_credits);
+      }
+    } else if (isSubscriptionPackage) {
+      console.log('🔄 Processing subscription package pricing...');
+      
+      // For subscription packages, prioritize credit-based pricing
+      if (packageData.price_3_credits && packageData.price_3_credits > 0) {
+        plans.push({
+          id: 'plan-3-credits',
+          credits: 3,
+          months: 3,
+          price: Number(packageData.price_3_credits),
+          sort_order: 1
+        });
+        console.log('✅ Added 3-credit plan:', packageData.price_3_credits);
+      }
+      if (packageData.price_6_credits && packageData.price_6_credits > 0) {
+        plans.push({
+          id: 'plan-6-credits',
+          credits: 6,
+          months: 6,
+          price: Number(packageData.price_6_credits),
+          sort_order: 2
+        });
+        console.log('✅ Added 6-credit plan:', packageData.price_6_credits);
+      }
+      if (packageData.price_12_credits && packageData.price_12_credits > 0) {
+        plans.push({
+          id: 'plan-12-credits',
+          credits: 12,
+          months: 12,
+          price: Number(packageData.price_12_credits),
+          sort_order: 3
+        });
+        console.log('✅ Added 12-credit plan:', packageData.price_12_credits);
+      }
     }
     
-    // Fallback to traditional month-based pricing for activation packages or if no credit plans exist
+    // Fallback to traditional month-based pricing if no credit plans exist
     if (plans.length === 0) {
       console.log('🔄 No credit plans found, trying month-based pricing...');
       
@@ -188,7 +246,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     return `USD ${monthlyAverage}/month`;
   };
 
-  // Calculate savings percentage for plans vs monthly price
   const calculateSavings = (currentPrice: number, currentMonths: number, monthlyPrice: number) => {
     const currentTotal = currentPrice;
     const monthlyTotal = monthlyPrice * currentMonths;
@@ -214,7 +271,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
   }
 
-  // Determine which options to use - database credit options or fallback package data
   let availableOptions = [];
   
   if (creditOptions && creditOptions.length > 0) {
@@ -243,10 +299,14 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
               <p><strong>Package Name:</strong> {packageName}</p>
               <p><strong>Credit options from DB:</strong> {creditOptions?.length || 0}</p>
               <p><strong>Package category:</strong> {packageData?.category}</p>
-              <p><strong>Has price_3_credits:</strong> {packageData.price_3_credits ? `Yes (${packageData.price_3_credits})` : 'No'}</p>
-              <p><strong>Has price_6_credits:</strong> {packageData.price_6_credits ? `Yes (${packageData.price_6_credits})` : 'No'}</p>
-              <p><strong>Has price_12_credits:</strong> {packageData.price_12_credits ? `Yes (${packageData.price_12_credits})` : 'No'}</p>
+              <p><strong>Is IPTV Package:</strong> {isIPTVPackage ? 'Yes' : 'No'}</p>
+              <p><strong>Is Subscription Package:</strong> {isSubscriptionPackage ? 'Yes' : 'No'}</p>
+              <p><strong>Has price_10_credits:</strong> {packageData.price_10_credits ? `Yes (${packageData.price_10_credits})` : 'No'}</p>
+              <p><strong>Has price_25_credits:</strong> {packageData.price_25_credits ? `Yes (${packageData.price_25_credits})` : 'No'}</p>
+              <p><strong>Has price_50_credits:</strong> {packageData.price_50_credits ? `Yes (${packageData.price_50_credits})` : 'No'}</p>
+              <p><strong>Has price_100_credits:</strong> {packageData.price_100_credits ? `Yes (${packageData.price_100_credits})` : 'No'}</p>
               <p><strong>Has price_1_month:</strong> {packageData.price_1_month ? `Yes (${packageData.price_1_month})` : 'No'}</p>
+              <p><strong>Has price_3_months:</strong> {packageData.price_3_months ? `Yes (${packageData.price_3_months})` : 'No'}</p>
               <p><strong>Package Data Keys:</strong> {Object.keys(packageData || {}).join(', ')}</p>
             </div>
           </div>
@@ -285,7 +345,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
                 </div>
                 
-                {/* 30-Day Money Back Guarantee - Moved above button */}
                 <div className="flex justify-center mb-4">
                   <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
                     <Check className="w-4 h-4 mr-2" />
@@ -311,12 +370,14 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-lg">
-                        {option.credits} Credit{option.credits > 1 ? 's' : ''} ({option.months} Month{option.months > 1 ? 's' : ''})
+                        {isIPTVPackage 
+                          ? `${option.credits} Credits (${option.months} Month${option.months > 1 ? 's' : ''})`
+                          : `${option.credits} Credit${option.credits > 1 ? 's' : ''} (${option.months} Month${option.months > 1 ? 's' : ''})`
+                        }
                       </div>
                       <div className="text-sm text-gray-500">
                         {formatMonthlyAverage(option.price, option.months)}
                       </div>
-                      {/* Add savings badges for 6 and 12 credit plans */}
                       {sortedOptions[0] && option.credits > sortedOptions[0].credits && (
                         <div className="mt-1">
                           <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-3 py-1 rounded-full">
