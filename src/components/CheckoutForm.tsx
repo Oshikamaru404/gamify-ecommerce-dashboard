@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -32,7 +31,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Determine package type for theming and display
+  // FIXED: Correct category detection for theme and display
   const category = packageData.category || '';
   const isPanelCategory = category.includes('panel-') || 
                          category === 'panel-iptv' || 
@@ -131,18 +130,17 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // Display logic: Panel packages show credits, subscription packages show months
+  // FIXED: Display logic for panel vs subscription packages
   const isCreditsDisplay = isPanelCategory;
   const durationLabel = isCreditsDisplay ? 'Credits' : 'Months';
-  const durationDescription = isCreditsDisplay 
-    ? `${packageData.duration} credits for service management`
-    : `${packageData.duration} months subscription`;
+  const durationText = isCreditsDisplay ? 'Credits bought' : 'Months subscription';
 
   console.log('CheckoutForm - Package data received:', packageData);
   console.log('CheckoutForm - Icon URL:', packageData.icon_url);
   console.log('CheckoutForm - Category:', category);
   console.log('CheckoutForm - Is Panel Category (purple theme):', isPanelCategory);
   console.log('CheckoutForm - Is Credits Display:', isCreditsDisplay);
+  console.log('CheckoutForm - Duration Text:', durationText);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -189,6 +187,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                     {packageData.duration} {durationLabel}
                   </Badge>
                 </div>
+                <p className="text-sm text-gray-600 mt-1">{durationText}</p>
                 <div className="mt-3">
                   <span className={`text-2xl font-bold ${themeColors.primaryText}`}>${packageData.price}</span>
                 </div>

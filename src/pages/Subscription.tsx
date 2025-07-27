@@ -8,18 +8,27 @@ import PlanSelector from '@/components/PlanSelector';
 import StoreLayout from '@/components/store/StoreLayout';
 import CheckoutForm from '@/components/CheckoutForm';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const Subscription = () => {
   const { t } = useLanguage();
-  const { data: packages, isLoading } = useSubscriptionPackages();
+  const { data: allPackages, isLoading } = useIPTVPackages();
   const [searchParams] = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Filter only active subscription packages
-  const subscriptionPackages = packages?.filter(pkg => pkg.status !== 'inactive') || [];
+  // FIXED: Filter for subscription packages only (not panel packages)
+  const subscriptionPackages = allPackages?.filter(pkg => 
+    pkg.status !== 'inactive' && 
+    pkg.category === 'subscription' || 
+    pkg.category === 'iptv' ||
+    (pkg.category !== 'panel-iptv' && pkg.category !== 'panel-player' && pkg.category !== 'panel-reseller')
+  ) || [];
+
+  console.log('🔍 Subscription Page Debug:');
+  console.log('📦 All packages:', allPackages);
+  console.log('📺 Filtered subscription packages:', subscriptionPackages);
 
   // Check if a specific package is requested via URL params
   useEffect(() => {
@@ -161,7 +170,7 @@ const Subscription = () => {
             // Package Selection
             subscriptionPackages.length > 0 ? (
               <div>
-                <h2 className="text-3xl font-bold text-center mb-12">Select Your Package</h2>
+                <h2 className="text-3xl font-bold text-center mb-12">Select Your Subscription Package</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {subscriptionPackages.map((pkg) => (
                     <div 
@@ -170,27 +179,7 @@ const Subscription = () => {
                       className="cursor-pointer transform hover:scale-105 transition-transform duration-200"
                     >
                       <ProductSubscriptionCard
-                        package={{
-                          id: pkg.id,
-                          name: pkg.name,
-                          category: 'subscription' as const,
-                          description: pkg.description,
-                          icon: pkg.icon,
-                          icon_url: pkg.icon_url,
-                          features: pkg.features,
-                          price_1_month: pkg.price_3_credits,
-                          price_3_months: pkg.price_6_credits,
-                          price_6_months: null,
-                          price_12_months: pkg.price_12_credits,
-                          price_10_credits: null,
-                          price_25_credits: null,
-                          price_50_credits: null,
-                          price_100_credits: null,
-                          status: (pkg.status as "active" | "inactive" | "featured") || 'active',
-                          sort_order: pkg.sort_order,
-                          created_at: pkg.created_at,
-                          updated_at: pkg.updated_at,
-                        }}
+                        package={pkg}
                         featured={pkg.status === 'featured'}
                       />
                     </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,16 +34,23 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   console.log('⏳ Is Loading:', isLoading);
 
   const isActivationPackage = packageData?.category === 'activation-player';
+  
+  // FIXED: Correct category detection - only panel categories use credits
   const isPanelCategory = packageData?.category?.includes('panel-') || 
                          packageData?.category === 'panel-iptv' || 
                          packageData?.category === 'panel-player' || 
                          packageData?.category === 'panel-reseller';
+
+  // FIXED: All non-panel packages (including subscription, iptv, etc.) should use months
+  const isSubscriptionPackage = !isPanelCategory && !isActivationPackage;
 
   const createPlansFromPackageData = () => {
     const plans = [];
     
     console.log('🛠️ Creating plans from package data...');
     console.log('📊 Package category:', packageData.category);
+    console.log('📊 Is Panel Category:', isPanelCategory);
+    console.log('📊 Is Subscription Package:', isSubscriptionPackage);
     console.log('📊 Available price fields:', {
       // Panel package fields (credits)
       price_10_credits: packageData.price_10_credits,
@@ -158,7 +164,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       name: packageName,
       category: packageData.category,
       price: selectedOption.price,
-      // For panel packages, duration is credits; for subscription packages, duration is months
+      // FIXED: For panel packages, duration is credits; for subscription packages, duration is months
       duration: isPanelCategory ? selectedOption.credits : selectedOption.months,
       months: selectedOption.months,
       credits: selectedOption.credits,
@@ -265,6 +271,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
               <p><strong>Credit options from DB:</strong> {creditOptions?.length || 0}</p>
               <p><strong>Package category:</strong> {packageData?.category}</p>
               <p><strong>Is Panel Category:</strong> {isPanelCategory ? 'Yes' : 'No'}</p>
+              <p><strong>Is Subscription Package:</strong> {isSubscriptionPackage ? 'Yes' : 'No'}</p>
             </div>
           </div>
         </CardContent>
