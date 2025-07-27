@@ -6,11 +6,7 @@ export const useScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Smooth scroll to top when route changes
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
+    // Scroll to top immediately on route change
+    window.scrollTo(0, 0);
   }, [pathname]);
 };

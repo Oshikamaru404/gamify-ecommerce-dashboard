@@ -32,11 +32,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Determine theme based on package category
+  // Determine theme based on package category - panel categories get purple theme
   const category = packageData.category || '';
-  const isPanelCategory = category === 'panel-iptv' || category === 'panel-player';
+  const isPanelCategory = category === 'panel-iptv' || category === 'panel-player' || category === 'panel-reseller';
   
-  // IPTV Panel packages get purple theme, everything else gets red theme
+  // Panel packages get purple theme, everything else gets red theme
   const themeColors = isPanelCategory ? {
     primary: 'bg-purple-600 hover:bg-purple-700',
     primaryText: 'text-purple-600',
@@ -128,8 +128,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // Determine if this is a credit-based package (IPTV Panel packages)
-  const isCreditBased = category === 'panel-iptv' || category === 'panel-player';
+  // Determine if this is a credit-based package - ALL panel categories are credit-based
+  const isCreditBased = category === 'panel-iptv' || category === 'panel-player' || category === 'panel-reseller';
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
   const durationDescription = isCreditBased 
     ? `${packageData.duration} credits for service management`
@@ -154,7 +154,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Package Summary with Smaller Logo */}
+          {/* Package Summary with Correct Logo */}
           <div className={`${themeColors.accent} rounded-lg p-6`}>
             <div className="flex items-start gap-4">
               <div className={`${themeColors.primaryBg} rounded-lg p-2`}>

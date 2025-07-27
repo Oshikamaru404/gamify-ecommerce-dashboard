@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,8 +36,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   console.log('⏳ Is Loading:', isLoading);
 
   const isActivationPackage = packageData?.category === 'activation-player';
-  const isPanelIPTVPackage = packageData?.category === 'panel-iptv' || packageData?.category === 'panel-player';
-  const isSubscriptionIPTVPackage = packageData?.category?.includes('iptv') && !isPanelIPTVPackage;
+  const isPanelIPTVPackage = packageData?.category === 'panel-iptv' || packageData?.category === 'panel-player' || packageData?.category === 'panel-reseller';
+  const isSubscriptionIPTVPackage = (packageData?.category?.includes('iptv') || packageData?.category?.includes('subscription')) && !isPanelIPTVPackage;
 
   const createPlansFromPackageData = () => {
     const plans = [];
@@ -44,15 +45,15 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     console.log('🛠️ Creating plans from package data...');
     console.log('📊 Package category:', packageData.category);
     console.log('📊 Available price fields:', {
-      // Subscription package fields
-      price_3_credits: packageData.price_3_credits,
-      price_6_credits: packageData.price_6_credits,
-      price_12_credits: packageData.price_12_credits,
-      // IPTV package fields
+      // Panel package fields (credits)
       price_10_credits: packageData.price_10_credits,
       price_25_credits: packageData.price_25_credits,
       price_50_credits: packageData.price_50_credits,
       price_100_credits: packageData.price_100_credits,
+      // Subscription package fields (credits)
+      price_3_credits: packageData.price_3_credits,
+      price_6_credits: packageData.price_6_credits,
+      price_12_credits: packageData.price_12_credits,
       // Standard month-based pricing
       price_1_month: packageData.price_1_month,
       price_3_months: packageData.price_3_months,
@@ -182,51 +183,51 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         });
         console.log('✅ Added 12-credits plan:', packageData.price_12_credits);
       }
-    }
-    
-    // Fallback to traditional month-based pricing if no specific plans exist
-    if (plans.length === 0) {
-      console.log('🔄 No specific plans found, trying month-based pricing...');
       
-      if (packageData.price_1_month && packageData.price_1_month > 0) {
-        plans.push({
-          id: 'plan-1-month',
-          credits: 1,
-          months: 1,
-          price: Number(packageData.price_1_month),
-          sort_order: 1
-        });
-        console.log('✅ Added 1-month plan:', packageData.price_1_month);
-      }
-      if (packageData.price_3_months && packageData.price_3_months > 0) {
-        plans.push({
-          id: 'plan-3-months',
-          credits: 3,
-          months: 3,
-          price: Number(packageData.price_3_months),
-          sort_order: 2
-        });
-        console.log('✅ Added 3-months plan:', packageData.price_3_months);
-      }
-      if (packageData.price_6_months && packageData.price_6_months > 0) {
-        plans.push({
-          id: 'plan-6-months',
-          credits: 6,
-          months: 6,
-          price: Number(packageData.price_6_months),
-          sort_order: 3
-        });
-        console.log('✅ Added 6-months plan:', packageData.price_6_months);
-      }
-      if (packageData.price_12_months && packageData.price_12_months > 0) {
-        plans.push({
-          id: 'plan-12-months',
-          credits: 12,
-          months: 12,
-          price: Number(packageData.price_12_months),
-          sort_order: 4
-        });
-        console.log('✅ Added 12-months plan:', packageData.price_12_months);
+      // Fallback to traditional month-based pricing if no credit plans exist
+      if (plans.length === 0) {
+        console.log('🔄 No credit plans found, trying month-based pricing...');
+        
+        if (packageData.price_1_month && packageData.price_1_month > 0) {
+          plans.push({
+            id: 'plan-1-month',
+            credits: 1,
+            months: 1,
+            price: Number(packageData.price_1_month),
+            sort_order: 1
+          });
+          console.log('✅ Added 1-month plan:', packageData.price_1_month);
+        }
+        if (packageData.price_3_months && packageData.price_3_months > 0) {
+          plans.push({
+            id: 'plan-3-months',
+            credits: 3,
+            months: 3,
+            price: Number(packageData.price_3_months),
+            sort_order: 2
+          });
+          console.log('✅ Added 3-months plan:', packageData.price_3_months);
+        }
+        if (packageData.price_6_months && packageData.price_6_months > 0) {
+          plans.push({
+            id: 'plan-6-months',
+            credits: 6,
+            months: 6,
+            price: Number(packageData.price_6_months),
+            sort_order: 3
+          });
+          console.log('✅ Added 6-months plan:', packageData.price_6_months);
+        }
+        if (packageData.price_12_months && packageData.price_12_months > 0) {
+          plans.push({
+            id: 'plan-12-months',
+            credits: 12,
+            months: 12,
+            price: Number(packageData.price_12_months),
+            sort_order: 4
+          });
+          console.log('✅ Added 12-months plan:', packageData.price_12_months);
+        }
       }
     }
     
@@ -243,7 +244,9 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       duration: selectedOption.months,
       months: selectedOption.months,
       credits: selectedOption.credits,
-      packageId: packageId
+      packageId: packageId,
+      icon_url: packageData.icon_url,
+      icon: packageData.icon
     };
     console.log('📋 Created plan data:', planData);
     return planData;
@@ -345,13 +348,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
               <p><strong>Package category:</strong> {packageData?.category}</p>
               <p><strong>Is Panel IPTV Package:</strong> {isPanelIPTVPackage ? 'Yes' : 'No'}</p>
               <p><strong>Is Subscription IPTV Package:</strong> {isSubscriptionIPTVPackage ? 'Yes' : 'No'}</p>
-              <p><strong>Has price_10_credits:</strong> {packageData.price_10_credits ? `Yes (${packageData.price_10_credits})` : 'No'}</p>
-              <p><strong>Has price_25_credits:</strong> {packageData.price_25_credits ? `Yes (${packageData.price_25_credits})` : 'No'}</p>
-              <p><strong>Has price_50_credits:</strong> {packageData.price_50_credits ? `Yes (${packageData.price_50_credits})` : 'No'}</p>
-              <p><strong>Has price_100_credits:</strong> {packageData.price_100_credits ? `Yes (${packageData.price_100_credits})` : 'No'}</p>
-              <p><strong>Has price_1_month:</strong> {packageData.price_1_month ? `Yes (${packageData.price_1_month})` : 'No'}</p>
-              <p><strong>Has price_3_months:</strong> {packageData.price_3_months ? `Yes (${packageData.price_3_months})` : 'No'}</p>
-              <p><strong>Package Data Keys:</strong> {Object.keys(packageData || {}).join(', ')}</p>
             </div>
           </div>
         </CardContent>
