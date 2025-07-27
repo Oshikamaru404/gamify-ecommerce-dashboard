@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
@@ -21,9 +20,7 @@ const Subscription = () => {
   // FIXED: Filter for subscription packages only (not panel packages)
   const subscriptionPackages = allPackages?.filter(pkg => 
     pkg.status !== 'inactive' && 
-    pkg.category === 'subscription' || 
-    pkg.category === 'iptv' ||
-    (pkg.category !== 'panel-iptv' && pkg.category !== 'panel-player' && pkg.category !== 'panel-reseller')
+    (pkg.category === 'subscription' || pkg.category === 'reseller' || pkg.category === 'player' || pkg.category === 'activation-player')
   ) || [];
 
   console.log('🔍 Subscription Page Debug:');
