@@ -32,11 +32,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Fix category detection - panel categories include panel-iptv, panel-player, panel-reseller
+  // Determine package type for theming and display
   const category = packageData.category || '';
-  const isPanelCategory = category.includes('panel-') || category === 'panel-iptv' || category === 'panel-player' || category === 'panel-reseller';
+  const isPanelCategory = category.includes('panel-') || 
+                         category === 'panel-iptv' || 
+                         category === 'panel-player' || 
+                         category === 'panel-reseller';
   
-  // Panel packages get purple theme, everything else gets red theme
+  // Panel packages get purple theme and display credits, everything else gets red theme and displays months
   const themeColors = isPanelCategory ? {
     primary: 'bg-purple-600 hover:bg-purple-700',
     primaryText: 'text-purple-600',
@@ -128,10 +131,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // Fix credit vs months display logic
-  const isCreditBased = isPanelCategory;
-  const durationLabel = isCreditBased ? 'Credits' : 'Months';
-  const durationDescription = isCreditBased 
+  // Display logic: Panel packages show credits, subscription packages show months
+  const isCreditsDisplay = isPanelCategory;
+  const durationLabel = isCreditsDisplay ? 'Credits' : 'Months';
+  const durationDescription = isCreditsDisplay 
     ? `${packageData.duration} credits for service management`
     : `${packageData.duration} months subscription`;
 
@@ -139,7 +142,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   console.log('CheckoutForm - Icon URL:', packageData.icon_url);
   console.log('CheckoutForm - Category:', category);
   console.log('CheckoutForm - Is Panel Category (purple theme):', isPanelCategory);
-  console.log('CheckoutForm - Is Credit Based:', isCreditBased);
+  console.log('CheckoutForm - Is Credits Display:', isCreditsDisplay);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -183,7 +186,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                 <h3 className="font-semibold text-gray-900 text-lg">{packageData.name}</h3>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className={`${themeColors.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
-                    {packageData.duration} {durationLabel} {isCreditBased ? '' : 'Subscription'}
+                    {packageData.duration} {durationLabel}
                   </Badge>
                 </div>
                 <div className="mt-3">
@@ -230,7 +233,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
               />
             </div>
 
-            {/* WhatsApp Number - Now Required */}
+            {/* WhatsApp Number - Required */}
             <div className="space-y-2">
               <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
                 <Phone className={`h-4 w-4 ${themeColors.primaryText}`} />

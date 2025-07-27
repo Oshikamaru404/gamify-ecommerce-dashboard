@@ -39,8 +39,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                          packageData?.category === 'panel-iptv' || 
                          packageData?.category === 'panel-player' || 
                          packageData?.category === 'panel-reseller';
-  const isSubscriptionIPTVPackage = packageData?.category === 'subscription' || 
-                                   (packageData?.category?.includes('iptv') && !isPanelCategory);
 
   const createPlansFromPackageData = () => {
     const plans = [];
@@ -160,6 +158,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       name: packageName,
       category: packageData.category,
       price: selectedOption.price,
+      // For panel packages, duration is credits; for subscription packages, duration is months
       duration: isPanelCategory ? selectedOption.credits : selectedOption.months,
       months: selectedOption.months,
       credits: selectedOption.credits,
@@ -266,7 +265,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
               <p><strong>Credit options from DB:</strong> {creditOptions?.length || 0}</p>
               <p><strong>Package category:</strong> {packageData?.category}</p>
               <p><strong>Is Panel Category:</strong> {isPanelCategory ? 'Yes' : 'No'}</p>
-              <p><strong>Is Subscription IPTV Package:</strong> {isSubscriptionIPTVPackage ? 'Yes' : 'No'}</p>
             </div>
           </div>
         </CardContent>
