@@ -32,9 +32,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Determine theme based on package category - panel categories get purple theme
+  // Fix category detection - panel categories include panel-iptv, panel-player, panel-reseller
   const category = packageData.category || '';
-  const isPanelCategory = category === 'panel-iptv' || category === 'panel-player' || category === 'panel-reseller';
+  const isPanelCategory = category.includes('panel-') || category === 'panel-iptv' || category === 'panel-player' || category === 'panel-reseller';
   
   // Panel packages get purple theme, everything else gets red theme
   const themeColors = isPanelCategory ? {
@@ -76,7 +76,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
         customer_whatsapp: formData.customerWhatsapp,
         amount: packageData.price,
         duration_months: packageData.duration,
-        order_type: (packageData.category || '').includes('panel') ? 'credits' : 'activation',
+        order_type: isPanelCategory ? 'credits' : 'activation',
         status: 'pending',
         payment_status: 'pending',
       });
@@ -128,8 +128,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // Determine if this is a credit-based package - ALL panel categories are credit-based
-  const isCreditBased = category === 'panel-iptv' || category === 'panel-player' || category === 'panel-reseller';
+  // Fix credit vs months display logic
+  const isCreditBased = isPanelCategory;
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
   const durationDescription = isCreditBased 
     ? `${packageData.duration} credits for service management`
@@ -167,7 +167,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                     onError={(e) => {
                       console.error('Failed to load package image:', packageData.icon_url);
                       e.currentTarget.style.display = 'none';
-                      const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
+                      const fallbackContainer = e.currentTarget.nextElementSibling as HTMLElement;
                       if (fallbackContainer) fallbackContainer.style.display = 'flex';
                     }}
                   />
