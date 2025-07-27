@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -31,8 +32,19 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Use red theme for all checkout forms
-  const themeColors = {
+  // Determine theme based on package category
+  const category = packageData.category || '';
+  const isPanelCategory = category.includes('panel') || category.includes('iptv') || category.includes('player') || category.includes('reseller');
+  
+  // Use purple theme for panel/IPTV categories, red for others
+  const themeColors = isPanelCategory ? {
+    primary: 'bg-purple-600 hover:bg-purple-700',
+    primaryText: 'text-purple-600',
+    primaryBg: 'bg-gradient-to-r from-purple-600 to-purple-700',
+    focus: 'focus:border-purple-500 focus:ring-purple-500',
+    accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
+    cryptoButton: 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800'
+  } : {
     primary: 'bg-red-600 hover:bg-red-700',
     primaryText: 'text-red-600',
     primaryBg: 'bg-gradient-to-r from-red-600 to-red-700',
@@ -117,7 +129,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   const createOrderMutation = useCreateOrder();
 
   // Determine if this is a credit-based package
-  const category = packageData.category || '';
   const isCreditBased = category.includes('panel') || category === 'player-panel' || category === 'iptv-panel';
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
   const durationDescription = isCreditBased 
@@ -126,6 +137,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   console.log('CheckoutForm - Package data received:', packageData);
   console.log('CheckoutForm - Icon URL:', packageData.icon_url);
+  console.log('CheckoutForm - Category:', category);
+  console.log('CheckoutForm - Is Panel Category:', isPanelCategory);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -140,15 +153,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Package Summary with Larger Logo */}
+          {/* Package Summary with Smaller Logo */}
           <div className={`${themeColors.accent} rounded-lg p-6`}>
             <div className="flex items-start gap-4">
-              <div className={`${themeColors.primaryBg} rounded-lg p-3`}>
+              <div className={`${themeColors.primaryBg} rounded-lg p-2`}>
                 {packageData.icon_url ? (
                   <img 
                     src={packageData.icon_url} 
                     alt={packageData.name}
-                    className="h-16 w-16 rounded-lg object-cover border-2 border-red-400 shadow-lg"
+                    className="h-12 w-12 rounded-lg object-cover border-2 shadow-lg"
+                    style={{ borderColor: isPanelCategory ? '#8b5cf6' : '#dc2626' }}
                     onError={(e) => {
                       console.error('Failed to load package image:', packageData.icon_url);
                       e.currentTarget.style.display = 'none';
@@ -158,7 +172,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                   />
                 ) : null}
                 <div 
-                  className="h-16 w-16 flex items-center justify-center text-white text-3xl rounded-lg"
+                  className="h-12 w-12 flex items-center justify-center text-white text-2xl rounded-lg"
                   style={{ display: packageData.icon_url ? 'none' : 'flex' }}
                 >
                   {packageData.icon || '📺'}

@@ -370,10 +370,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-lg">
-                        {isIPTVPackage 
-                          ? `${option.credits} Credits (${option.months} Month${option.months > 1 ? 's' : ''})`
-                          : `${option.credits} Credit${option.credits > 1 ? 's' : ''} (${option.months} Month${option.months > 1 ? 's' : ''})`
-                        }
+                        {option.credits} Credit{option.credits > 1 ? 's' : ''}
                       </div>
                       <div className="text-sm text-gray-500">
                         {formatMonthlyAverage(option.price, option.months)}
