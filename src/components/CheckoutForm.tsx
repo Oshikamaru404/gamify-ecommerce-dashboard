@@ -32,11 +32,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Determine theme based on package category - only panel-iptv and panel-player should be purple
+  // Determine theme based on package category
   const category = packageData.category || '';
   const isPanelCategory = category === 'panel-iptv' || category === 'panel-player';
   
-  // Use purple theme ONLY for panel-iptv and panel-player, red for everything else
+  // IPTV Panel packages get purple theme, everything else gets red theme
   const themeColors = isPanelCategory ? {
     primary: 'bg-purple-600 hover:bg-purple-700',
     primaryText: 'text-purple-600',
@@ -128,7 +128,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // Determine if this is a credit-based package
+  // Determine if this is a credit-based package (IPTV Panel packages)
   const isCreditBased = category === 'panel-iptv' || category === 'panel-player';
   const durationLabel = isCreditBased ? 'Credits' : 'Months';
   const durationDescription = isCreditBased 
@@ -139,6 +139,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   console.log('CheckoutForm - Icon URL:', packageData.icon_url);
   console.log('CheckoutForm - Category:', category);
   console.log('CheckoutForm - Is Panel Category (purple theme):', isPanelCategory);
+  console.log('CheckoutForm - Is Credit Based:', isCreditBased);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
