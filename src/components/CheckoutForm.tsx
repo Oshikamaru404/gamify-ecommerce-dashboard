@@ -22,15 +22,14 @@ const checkoutFormSchema = z.object({
 })
 
 interface CheckoutFormProps {
-  selectedPackage: any;
-  selectedPlan: { duration: number; price: number } | null;
-  onOrderSuccess: () => void;
-  onCancel: () => void;
+  packageData: any;
+  onClose: () => void;
+  onSuccess: () => void;
 }
 
 type CheckoutFormValues = z.infer<typeof checkoutFormSchema>
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPlan, onOrderSuccess, onCancel }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuccess }) => {
   const { language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,10 +58,25 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPl
     return pkg.name || 'Unknown Package';
   };
 
+  const getDisplayDuration = () => {
+    if (packageData.duration) {
+      // For credit-based packages (player/iptv panels)
+      if (packageData.category?.includes('panel')) {
+        return `${packageData.duration} Credits`;
+      }
+      // For subscription packages with months
+      return `${packageData.duration} ${packageData.duration === 1 ? 'Month' : 'Months'}`;
+    }
+    return 'Package';
+  };
+
+  const isSubscriptionPackage = packageData.category === 'subscription';
+  const isPanelPackage = packageData.category?.includes('panel');
+
   async function onSubmit(data: CheckoutFormValues) {
     setIsSubmitting(true);
     // Here, you would typically send the form data to your backend
-    // along with the selected package and plan information.
+    // along with the selected package information.
     // For this example, we'll just simulate a successful submission.
     
     // Simulate an API call
@@ -70,7 +84,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPl
     
     setIsSubmitting(false);
     toast.success("Order placed successfully!");
-    onOrderSuccess();
+    onSuccess();
   }
 
   return (
@@ -94,19 +108,19 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPl
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  {selectedPackage?.icon_url && (
+                  {packageData?.icon_url && (
                     <img 
-                      src={selectedPackage.icon_url} 
-                      alt={getPackageDisplayName(selectedPackage)}
+                      src={packageData.icon_url} 
+                      alt={getPackageDisplayName(packageData)}
                       className="w-10 h-10 object-contain flex-shrink-0" 
                     />
                   )}
                   <div className="flex-1">
                     <h3 className="font-semibold text-sm">
-                      {getPackageDisplayName(selectedPackage)}
+                      {getPackageDisplayName(packageData)}
                     </h3>
                     <p className="text-xs text-gray-600">
-                      {selectedPlan?.duration} {selectedPlan?.duration === 1 ? 'Month' : 'Months'}
+                      {getDisplayDuration()}
                     </p>
                   </div>
                 </div>
@@ -114,17 +128,19 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPl
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Package:</span>
-                    <span className="font-medium">{getPackageDisplayName(selectedPackage)}</span>
+                    <span className="font-medium">{getPackageDisplayName(packageData)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Duration:</span>
+                    <span>
+                      {isPanelPackage ? 'Credits:' : 'Duration:'}
+                    </span>
                     <span className="font-medium">
-                      {selectedPlan?.duration} {selectedPlan?.duration === 1 ? 'Month' : 'Months'}
+                      {getDisplayDuration()}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                     <span>Total:</span>
-                    <span>${selectedPlan?.price}</span>
+                    <span>${packageData?.price}</span>
                   </div>
                 </div>
               </CardContent>
@@ -189,7 +205,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPl
                     <Button 
                       type="button" 
                       variant="outline" 
-                      onClick={onCancel}
+                      onClick={onClose}
                       className="flex-1"
                     >
                       Cancel
