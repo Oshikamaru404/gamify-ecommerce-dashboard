@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 
 interface SubscriptionPackage {
   id: string;
@@ -36,31 +38,9 @@ const MultilingualPackageCard: React.FC<MultilingualPackageCardProps> = ({
   onEdit, 
   onDelete 
 }) => {
-  const { language } = useLanguage();
-  
-  // Parse multilingual name
-  const getLocalizedName = (name: string) => {
-    try {
-      const parsed = JSON.parse(name);
-      return parsed[language] || parsed.en || name;
-    } catch {
-      return name;
-    }
-  };
-
-  // Parse multilingual description
-  const getLocalizedDescription = (description: string | null) => {
-    if (!description) return '';
-    try {
-      const parsed = JSON.parse(description);
-      return parsed[language] || parsed.en || description;
-    } catch {
-      return description;
-    }
-  };
-
-  const displayName = getLocalizedName(pkg.name);
-  const displayDescription = getLocalizedDescription(pkg.description);
+  // Use the multilingual utility functions
+  const displayName = useLocalizedText(pkg.name);
+  const displayDescription = useLocalizedText(pkg.description);
 
   return (
     <Card className="h-full">
