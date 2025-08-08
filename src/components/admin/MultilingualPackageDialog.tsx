@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -223,9 +224,10 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
     form.setValue('description', { ...currentDescriptions, [selectedLanguage]: value });
   };
 
-  const handleImageUrlChange = (imageUrl: string) => {
+  const handleImageUpload = (imageUrl: string) => {
     form.setValue('icon_url', imageUrl);
     setShowImageUploader(false);
+    toast.success('Image uploaded successfully');
   };
 
   return (
@@ -614,9 +616,8 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
                 <DialogTitle>Upload Package Logo</DialogTitle>
               </DialogHeader>
               <ImageUploader
-                currentImageUrl={form.watch('icon_url')}
-                onImageUrlChange={handleImageUrlChange}
-                label="Package Logo"
+                onImageUpload={handleImageUpload}
+                onCancel={() => setShowImageUploader(false)}
               />
             </DialogContent>
           </Dialog>

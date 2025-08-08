@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
@@ -11,26 +12,14 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const Subscription = () => {
   const { t } = useLanguage();
-  const { data: allPackages, isLoading } = useIPTVPackages();
+  const { data: packages, isLoading } = useIPTVPackages();
   const [searchParams] = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // CORRECTED: Filter for ONLY subscription-related packages (not panel packages)
-  // True subscription packages: subscription, player, activation-player
-  // Exclude panel packages: panel-iptv, panel-player
-  const subscriptionPackages = allPackages?.filter(pkg => 
-    pkg.status !== 'inactive' && 
-    (pkg.category === 'subscription' || 
-     pkg.category === 'player' || 
-     pkg.category === 'activation-player')
-  ) || [];
-
-  console.log('🔍 Subscription Page Debug:');
-  console.log('📦 All packages:', allPackages);
-  console.log('📺 Filtered subscription packages (months-based only):', subscriptionPackages);
-  console.log('🚫 Excluded panel packages (credit-based)');
+  // Filter only subscription packages
+  const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
 
   // Check if a specific package is requested via URL params
   useEffect(() => {
@@ -172,7 +161,7 @@ const Subscription = () => {
             // Package Selection
             subscriptionPackages.length > 0 ? (
               <div>
-                <h2 className="text-3xl font-bold text-center mb-12">Select Your Subscription Package</h2>
+                <h2 className="text-3xl font-bold text-center mb-12">Select Your Package</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {subscriptionPackages.map((pkg) => (
                     <div 

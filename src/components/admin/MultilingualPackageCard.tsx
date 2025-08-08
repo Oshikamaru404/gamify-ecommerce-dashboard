@@ -20,14 +20,8 @@ const MultilingualPackageCard: React.FC<MultilingualPackageCardProps> = ({
   onDelete,
   onToggleStatus,
 }) => {
-  console.log('🎯 MultilingualPackageCard rendering package:', pkg.name);
-  console.log('🎯 Package description:', pkg.description);
-  
   const localizedName = useLocalizedText(pkg.name);
   const localizedDescription = useLocalizedText(pkg.description);
-  
-  console.log('🎯 Localized name result:', localizedName);
-  console.log('🎯 Localized description result:', localizedDescription);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -75,16 +69,12 @@ const MultilingualPackageCard: React.FC<MultilingualPackageCardProps> = ({
     return prices.length > 0 ? prices.join(', ') : 'No pricing set';
   };
 
-  // Add safety check to prevent JSON from being displayed
-  const safeLocalizedName = localizedName && !localizedName.startsWith('{') ? localizedName : 'Package Name';
-  const safeLocalizedDescription = localizedDescription && !localizedDescription.startsWith('{') ? localizedDescription : '';
-
   return (
     <Card className="relative">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <CardTitle className="text-lg mb-2">{safeLocalizedName}</CardTitle>
+            <CardTitle className="text-lg mb-2">{localizedName}</CardTitle>
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline">{getCategoryDisplay(pkg.category)}</Badge>
               <Badge className={getStatusColor(pkg.status || 'active')}>
@@ -95,7 +85,7 @@ const MultilingualPackageCard: React.FC<MultilingualPackageCardProps> = ({
           {pkg.icon_url && (
             <img 
               src={pkg.icon_url} 
-              alt={safeLocalizedName} 
+              alt={localizedName} 
               className="h-12 w-12 object-contain rounded"
             />
           )}
@@ -103,8 +93,8 @@ const MultilingualPackageCard: React.FC<MultilingualPackageCardProps> = ({
       </CardHeader>
       
       <CardContent>
-        {safeLocalizedDescription && (
-          <p className="text-sm text-gray-600 mb-3">{safeLocalizedDescription}</p>
+        {localizedDescription && (
+          <p className="text-sm text-gray-600 mb-3">{localizedDescription}</p>
         )}
         
         <div className="space-y-2">
@@ -126,14 +116,6 @@ const MultilingualPackageCard: React.FC<MultilingualPackageCardProps> = ({
               <span className="text-gray-600">{pkg.sort_order}</span>
             </div>
           )}
-          
-          {/* Debug info (remove in production) */}
-          <div className="text-xs text-gray-400 mt-2 p-2 bg-gray-50 rounded">
-            <div>Raw name: {JSON.stringify(pkg.name)}</div>
-            <div>Raw description: {JSON.stringify(pkg.description)}</div>
-            <div>Localized name: {localizedName}</div>
-            <div>Localized description: {localizedDescription}</div>
-          </div>
         </div>
         
         <div className="flex justify-end gap-2 mt-4">

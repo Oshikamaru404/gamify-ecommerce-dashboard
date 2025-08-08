@@ -27,135 +27,60 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   } = useSubscriptionCreditOptions(packageId);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
 
-  console.log('🔍 PlanSelector Debug Info:');
-  console.log('📦 Package ID:', packageId);
-  console.log('📦 Package Name:', packageName);
-  console.log('📦 Package Data:', packageData);
-  console.log('💳 Credit Options from DB:', creditOptions);
-  console.log('⏳ Is Loading:', isLoading);
-
   const isActivationPackage = packageData?.category === 'activation-player';
-  
-  // CORRECTED: Proper category detection for different package types
-  // Panel packages use credits system: panel-iptv, panel-player
-  const isPanelCategory = packageData?.category === 'panel-iptv' || 
-                         packageData?.category === 'panel-player';
-
-  // Subscription packages use months system: subscription, player, activation-player
-  const isSubscriptionPackage = packageData?.category === 'subscription' || 
-                               packageData?.category === 'player' || 
-                               packageData?.category === 'activation-player';
 
   const createPlansFromPackageData = () => {
     const plans = [];
-    
-    console.log('🛠️ Creating plans from package data...');
-    console.log('📊 Package category:', packageData.category);
-    console.log('📊 Is Panel Category (uses credits):', isPanelCategory);
-    console.log('📊 Is Subscription Package (uses months):', isSubscriptionPackage);
-    
-    if (isPanelCategory) {
-      console.log('🔧 Processing Panel package pricing (credits system)...');
-      
-      // Panel packages use credit-based pricing
-      if (packageData.price_10_credits && packageData.price_10_credits > 0) {
-        plans.push({
-          id: 'plan-10-credits',
-          credits: 10,
-          months: 1,
-          price: Number(packageData.price_10_credits),
-          sort_order: 1
-        });
-      }
-      if (packageData.price_25_credits && packageData.price_25_credits > 0) {
-        plans.push({
-          id: 'plan-25-credits',
-          credits: 25,
-          months: 1,
-          price: Number(packageData.price_25_credits),
-          sort_order: 2
-        });
-      }
-      if (packageData.price_50_credits && packageData.price_50_credits > 0) {
-        plans.push({
-          id: 'plan-50-credits',
-          credits: 50,
-          months: 1,
-          price: Number(packageData.price_50_credits),
-          sort_order: 3
-        });
-      }
-      if (packageData.price_100_credits && packageData.price_100_credits > 0) {
-        plans.push({
-          id: 'plan-100-credits',
-          credits: 100,
-          months: 1,
-          price: Number(packageData.price_100_credits),
-          sort_order: 4
-        });
-      }
-    } else if (isSubscriptionPackage) {
-      console.log('📺 Processing Subscription package pricing (months system)...');
-      
-      // Subscription packages use month-based pricing
-      if (packageData.price_1_month && packageData.price_1_month > 0) {
-        plans.push({
-          id: 'plan-1-month',
-          credits: 1, // This represents months for subscription packages
-          months: 1,
-          price: Number(packageData.price_1_month),
-          sort_order: 1
-        });
-      }
-      if (packageData.price_3_months && packageData.price_3_months > 0) {
-        plans.push({
-          id: 'plan-3-months',
-          credits: 3, // This represents months for subscription packages
-          months: 3,
-          price: Number(packageData.price_3_months),
-          sort_order: 2
-        });
-      }
-      if (packageData.price_6_months && packageData.price_6_months > 0) {
-        plans.push({
-          id: 'plan-6-months',
-          credits: 6, // This represents months for subscription packages
-          months: 6,
-          price: Number(packageData.price_6_months),
-          sort_order: 3
-        });
-      }
-      if (packageData.price_12_months && packageData.price_12_months > 0) {
-        plans.push({
-          id: 'plan-12-months',
-          credits: 12, // This represents months for subscription packages
-          months: 12,
-          price: Number(packageData.price_12_months),
-          sort_order: 4
-        });
-      }
+    if (packageData.price_1_month) {
+      plans.push({
+        id: 'plan-1-month',
+        credits: 1,
+        months: 1,
+        price: packageData.price_1_month,
+        sort_order: 1
+      });
     }
-    
-    console.log('🎯 Final plans created:', plans);
+    if (packageData.price_3_months) {
+      plans.push({
+        id: 'plan-3-months',
+        credits: 3,
+        months: 3,
+        price: packageData.price_3_months,
+        sort_order: 2
+      });
+    }
+    if (packageData.price_6_months) {
+      plans.push({
+        id: 'plan-6-months',
+        credits: 6,
+        months: 6,
+        price: packageData.price_6_months,
+        sort_order: 3
+      });
+    }
+    if (packageData.price_12_months) {
+      plans.push({
+        id: 'plan-12-months',
+        credits: 12,
+        months: 12,
+        price: packageData.price_12_months,
+        sort_order: 4
+      });
+    }
     return plans;
   };
 
   const createPlanData = (selectedOption: any) => {
-    const planData = {
+    return {
       id: selectedOption.id,
       name: packageName,
       category: packageData.category,
       price: selectedOption.price,
-      // CORRECTED: For panel packages, duration is credits; for subscription packages, duration is months
-      duration: isPanelCategory ? selectedOption.credits : selectedOption.months,
+      duration: selectedOption.months,
       months: selectedOption.months,
       credits: selectedOption.credits,
-      packageId: packageId,
-      icon_url: packageData.icon_url,
-      icon: packageData.icon
+      packageId: packageId
     };
-    console.log('📋 Created plan data:', planData);
-    return planData;
   };
 
   const handlePlanChange = (value: string) => {
@@ -199,6 +124,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     return `USD ${monthlyAverage}/month`;
   };
 
+  // Calculate savings percentage for plans vs monthly price
   const calculateSavings = (currentPrice: number, currentMonths: number, monthlyPrice: number) => {
     const currentTotal = currentPrice;
     const monthlyTotal = monthlyPrice * currentMonths;
@@ -207,7 +133,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   };
 
   if (isLoading) {
-    console.log('⏳ Still loading credit options...');
     return (
       <Card>
         <CardHeader>
@@ -224,20 +149,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
   }
 
-  let availableOptions = [];
-  
-  if (creditOptions && creditOptions.length > 0) {
-    console.log('🎯 Using credit options from database:', creditOptions);
-    availableOptions = creditOptions;
-  } else {
-    console.log('🔄 No database credit options, creating from package data...');
-    availableOptions = createPlansFromPackageData();
-  }
-  
-  console.log('📊 Final available options:', availableOptions);
-  
+  const availableOptions = creditOptions && creditOptions.length > 0 ? creditOptions : createPlansFromPackageData();
   if (!availableOptions || availableOptions.length === 0) {
-    console.log('❌ No plans available - showing debug info');
     return (
       <Card>
         <CardHeader>
@@ -245,17 +158,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         </CardHeader>
         <CardContent>
           <p className="text-gray-500">No plans available for this package.</p>
-          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <p className="text-sm text-gray-600 font-semibold">Debug Info:</p>
-            <div className="space-y-1 text-xs text-gray-500">
-              <p><strong>Package ID:</strong> {packageId}</p>
-              <p><strong>Package Name:</strong> {packageName}</p>
-              <p><strong>Credit options from DB:</strong> {creditOptions?.length || 0}</p>
-              <p><strong>Package category:</strong> {packageData?.category}</p>
-              <p><strong>Is Panel Category:</strong> {isPanelCategory ? 'Yes (Credits)' : 'No'}</p>
-              <p><strong>Is Subscription Package:</strong> {isSubscriptionPackage ? 'Yes (Months)' : 'No'}</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     );
@@ -263,8 +165,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
   const monthlyOption = sortedOptions.find(option => option.months === 1);
-
-  console.log('✅ Rendering plan selector with options:', sortedOptions);
 
   return (
     <Card>
@@ -291,6 +191,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
                 </div>
                 
+                {/* 30-Day Money Back Guarantee - Moved above button */}
                 <div className="flex justify-center mb-4">
                   <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
                     <Check className="w-4 h-4 mr-2" />
@@ -316,21 +217,16 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-lg">
-                        {isPanelCategory 
-                          ? `${option.credits} Credit${option.credits > 1 ? 's' : ''}`
-                          : `${option.months} Month${option.months > 1 ? 's' : ''}`
-                        }
+                        {option.months} Month{option.months > 1 ? 's' : ''}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {isPanelCategory 
-                          ? `${option.credits} credits for management`
-                          : formatMonthlyAverage(option.price, option.months)
-                        }
+                        {formatMonthlyAverage(option.price, option.months)}
                       </div>
-                      {!isPanelCategory && sortedOptions[0] && option.months > sortedOptions[0].months && (
+                      {/* Add savings badges for 3, 6, and 12 month plans */}
+                      {monthlyOption && option.months > 1 && (
                         <div className="mt-1">
                           <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-3 py-1 rounded-full">
-                            Save up to {calculateSavings(option.price, option.months, sortedOptions[0].price)}%
+                            Save up to {calculateSavings(option.price, option.months, monthlyOption.price)}%
                           </Badge>
                         </div>
                       )}

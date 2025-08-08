@@ -6,8 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
-import { useLocalizedText } from '@/lib/multilingualUtils';
-import { useTranslatedText } from '@/hooks/useTranslatedText';
 
 interface ProductSubscriptionCardProps {
   package: IPTVPackage;
@@ -18,11 +16,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   package: pkg, 
   featured = false 
 }) => {
-  // Use multilingual utilities to get localized content
-  const localizedName = useLocalizedText(pkg.name);
-  const localizedDescription = useLocalizedText(pkg.description);
-  const { t } = useTranslatedText();
-
   const generateSlug = (name: string) => {
     return name.toLowerCase()
       .replace(/\s+/g, '-')
@@ -31,8 +24,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
       .trim();
   };
 
-  // Use the localized name for slug generation
-  const productSlug = generateSlug(localizedName || pkg.name);
+  const productSlug = generateSlug(pkg.name);
 
   // Get the one-month price to display
   const oneMonthPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits || 0;
@@ -52,21 +44,18 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   // All packages now go to their product detail page
   const linkPath = `/products/${productSlug}`;
 
-  // Add safety checks to prevent JSON from being displayed
-  const safeLocalizedName = localizedName && !localizedName.startsWith('{') ? localizedName : 'Package Name';
-  const safeLocalizedDescription = localizedDescription && !localizedDescription.startsWith('{') ? localizedDescription : '';
-
   return (
     <div className="relative h-full">
       {featured && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
           <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center">
             <Star className="w-4 h-4 mr-1 fill-current" />
-            {t('most_popular_badge', 'Most Popular')}
+            Most Popular
           </Badge>
         </div>
       )}
 
+      {/* Remove the overall card clickability by removing the wrapping div click handler */}
       <div className="flex flex-col h-full rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
         {/* Top Section - Icon (Red Background) */}
         <div className="h-64 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center relative rounded-2xl">
@@ -74,7 +63,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {pkg.icon_url && (
               <img 
                 src={pkg.icon_url} 
-                alt={safeLocalizedName}
+                alt={pkg.name}
                 className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -95,30 +84,30 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
 
         {/* Bottom Section - Content (White Background) */}
         <div className="flex-1 bg-white p-6 flex flex-col">
-          {/* Package Title - Now using localized name */}
+          {/* Package Title */}
           <h3 className="text-lg font-bold text-gray-900 mb-4 text-center leading-tight">
-            {safeLocalizedName}
+            {pkg.name}
           </h3>
           
           {/* Price Display - One Month Price - Make it non-clickable */}
           <div className="text-center mb-4">
             <div className="bg-gradient-to-r from-green-500 to-green-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg inline-block cursor-default">
-              ${oneMonthPrice.toFixed(2)}/{t('per_month', 'month')}
+              ${oneMonthPrice.toFixed(2)}/month
             </div>
             
             {/* Yearly Savings Badge - Make it non-clickable */}
             {yearlySavings && yearlySavings > 0 && (
               <div className="mt-2">
                 <div className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-full shadow-md inline-block cursor-default">
-                  {t('save_yearly', 'Save ${{amount}} yearly').replace('{{amount}}', yearlySavings.toString())}
+                  Save ${yearlySavings} yearly
                 </div>
               </div>
             )}
           </div>
 
-          {/* Package Description - Now using localized description */}
-          {safeLocalizedDescription && (
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">{safeLocalizedDescription}</p>
+          {/* Package Description */}
+          {pkg.description && (
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
           )}
 
           {/* Features List */}
@@ -138,19 +127,19 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
                   <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                   </div>
-                  <span className="text-gray-700 text-xs leading-relaxed">{t('feature_4k_technology', '4K Premium Technology')}</span>
+                  <span className="text-gray-700 text-xs leading-relaxed">4K Premium Technology</span>
                 </div>
                 <div className="flex items-start">
                   <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                   </div>
-                  <span className="text-gray-700 text-xs leading-relaxed">{t('feature_8000_channels', '8000+ Channels')}</span>
+                  <span className="text-gray-700 text-xs leading-relaxed">8000+ Channels</span>
                 </div>
                 <div className="flex items-start">
                   <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                   </div>
-                  <span className="text-gray-700 text-xs leading-relaxed">{t('feature_vod_library', 'VOD Library')}</span>
+                  <span className="text-gray-700 text-xs leading-relaxed">VOD Library</span>
                 </div>
               </>
             )}
@@ -160,7 +149,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           <div className="flex justify-center mb-4">
             <div className="bg-white border-2 border-green-500 text-green-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center cursor-default">
               <Shield className="w-4 h-4 mr-2" />
-              {t('money_back_guarantee', '30-Day Money Back Guarantee')}
+              30-Day Money Back Guarantee
             </div>
           </div>
 
@@ -168,7 +157,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           <div className="mt-auto">
             <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
               <Link to={linkPath}>
-                {t('view_details_button', 'View Details')}
+                View Details
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

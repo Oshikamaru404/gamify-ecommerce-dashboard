@@ -31,27 +31,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // CORRECTED: Proper category detection for theme and display
-  const category = packageData.category || '';
-  
-  // Panel packages (purple theme, credits): panel-iptv, panel-player
-  const isPanelCategory = category === 'panel-iptv' || 
-                         category === 'panel-player';
-  
-  // Subscription packages (red theme, months): subscription, player, activation-player
-  const isSubscriptionCategory = category === 'subscription' || 
-                               category === 'player' || 
-                               category === 'activation-player';
-  
-  // CORRECTED: Theme colors - Purple for panel packages, Red for subscription packages
-  const themeColors = isPanelCategory ? {
-    primary: 'bg-purple-600 hover:bg-purple-700',
-    primaryText: 'text-purple-600',
-    primaryBg: 'bg-gradient-to-r from-purple-600 to-purple-700',
-    focus: 'focus:border-purple-500 focus:ring-purple-500',
-    accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
-    cryptoButton: 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800'
-  } : {
+  // Use red theme for all checkout forms
+  const themeColors = {
     primary: 'bg-red-600 hover:bg-red-700',
     primaryText: 'text-red-600',
     primaryBg: 'bg-gradient-to-r from-red-600 to-red-700',
@@ -83,7 +64,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
         customer_whatsapp: formData.customerWhatsapp,
         amount: packageData.price,
         duration_months: packageData.duration,
-        order_type: isPanelCategory ? 'credits' : 'activation',
+        order_type: (packageData.category || '').includes('panel') ? 'credits' : 'activation',
         status: 'pending',
         payment_status: 'pending',
       });
@@ -135,16 +116,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // CORRECTED: Display logic for panel vs subscription packages
-  const durationLabel = isPanelCategory ? 'Credits' : 'Months';
-  const durationText = isPanelCategory ? 'Credits for management' : 'Months subscription';
+  // Determine if this is a credit-based package
+  const category = packageData.category || '';
+  const isCreditBased = category.includes('panel') || category === 'player-panel' || category === 'iptv-panel';
+  const durationLabel = isCreditBased ? 'Credits' : 'Months';
+  const durationDescription = isCreditBased 
+    ? `${packageData.duration} credits for service management`
+    : `${packageData.duration} months subscription`;
 
   console.log('CheckoutForm - Package data received:', packageData);
   console.log('CheckoutForm - Icon URL:', packageData.icon_url);
-  console.log('CheckoutForm - Category:', category);
-  console.log('CheckoutForm - Is Panel Category (purple theme, credits):', isPanelCategory);
-  console.log('CheckoutForm - Is Subscription Category (red theme, months):', isSubscriptionCategory);
-  console.log('CheckoutForm - Duration Text:', durationText);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -159,39 +140,37 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Package Summary with Correct Logo and Theme */}
+          {/* Package Summary with Larger Logo */}
           <div className={`${themeColors.accent} rounded-lg p-6`}>
             <div className="flex items-start gap-4">
-              <div className={`${themeColors.primaryBg} rounded-lg p-2`}>
+              <div className={`${themeColors.primaryBg} rounded-lg p-3`}>
                 {packageData.icon_url ? (
                   <img 
                     src={packageData.icon_url} 
                     alt={packageData.name}
-                    className="h-12 w-12 rounded-lg object-cover border-2 shadow-lg"
-                    style={{ borderColor: isPanelCategory ? '#8b5cf6' : '#dc2626' }}
+                    className="h-16 w-16 rounded-lg object-cover border-2 border-red-400 shadow-lg"
                     onError={(e) => {
                       console.error('Failed to load package image:', packageData.icon_url);
                       e.currentTarget.style.display = 'none';
-                      const fallbackContainer = e.currentTarget.nextElementSibling as HTMLElement;
+                      const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
                       if (fallbackContainer) fallbackContainer.style.display = 'flex';
                     }}
                   />
                 ) : null}
                 <div 
-                  className="h-12 w-12 flex items-center justify-center text-white text-2xl rounded-lg"
+                  className="h-16 w-16 flex items-center justify-center text-white text-3xl rounded-lg"
                   style={{ display: packageData.icon_url ? 'none' : 'flex' }}
                 >
-                  {packageData.icon || (isPanelCategory ? '🔧' : '📺')}
+                  {packageData.icon || '📺'}
                 </div>
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900 text-lg">{packageData.name}</h3>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className={`${themeColors.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
-                    {packageData.duration} {durationLabel}
+                    {packageData.duration} {durationLabel} {isCreditBased ? '' : 'Subscription'}
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{durationText}</p>
                 <div className="mt-3">
                   <span className={`text-2xl font-bold ${themeColors.primaryText}`}>${packageData.price}</span>
                 </div>
@@ -236,7 +215,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
               />
             </div>
 
-            {/* WhatsApp Number - Required */}
+            {/* WhatsApp Number - Now Required */}
             <div className="space-y-2">
               <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
                 <Phone className={`h-4 w-4 ${themeColors.primaryText}`} />

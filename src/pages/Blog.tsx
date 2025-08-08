@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, ArrowLeft, Clock } from 'lucide-react';
 import { useBlogArticles } from '@/hooks/useBlogArticles';
-import { useLocalizedText } from '@/lib/multilingualUtils';
 
 const Blog = () => {
   const { data: articles, isLoading, error } = useBlogArticles();
@@ -76,10 +76,6 @@ const Blog = () => {
 
   // If an article is selected, show the full article view
   if (selectedArticle) {
-    const localizedTitle = useLocalizedText(selectedArticle.title);
-    const localizedContent = useLocalizedText(selectedArticle.content);
-    const localizedExcerpt = useLocalizedText(selectedArticle.excerpt);
-
     return (
       <StoreLayout>
         <div className="bg-white min-h-screen">
@@ -101,7 +97,7 @@ const Blog = () => {
                 <div className="mb-8 overflow-hidden rounded-lg shadow-lg">
                   <img
                     src={selectedArticle.featured_image_url}
-                    alt={localizedTitle}
+                    alt={selectedArticle.title}
                     className="w-full h-64 md:h-96 object-cover"
                   />
                 </div>
@@ -110,12 +106,12 @@ const Blog = () => {
               {/* Article header */}
               <header className="mb-8 text-center border-b border-gray-200 pb-8">
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                  {localizedTitle}
+                  {selectedArticle.title}
                 </h1>
                 
-                {localizedExcerpt && (
+                {selectedArticle.excerpt && (
                   <p className="text-xl text-gray-600 mb-6 italic">
-                    {localizedExcerpt}
+                    {selectedArticle.excerpt}
                   </p>
                 )}
 
@@ -134,16 +130,16 @@ const Blog = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock size={16} />
-                    <span>{estimateReadingTime(localizedContent)} min de lecture</span>
+                    <span>{estimateReadingTime(selectedArticle.content)} min de lecture</span>
                   </div>
                 </div>
               </header>
 
-              {/* Article content - now renders rich text HTML with proper multilingual support */}
+              {/* Article content - now renders rich text HTML */}
               <div className="prose prose-lg max-w-none">
                 <div 
                   className="text-lg leading-relaxed rich-text-content"
-                  dangerouslySetInnerHTML={{ __html: localizedContent }}
+                  dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
                 />
               </div>
 
@@ -184,65 +180,59 @@ const Blog = () => {
 
           {articles && articles.length > 0 ? (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {articles.map((article) => {
-                const localizedTitle = useLocalizedText(article.title);
-                const localizedContent = useLocalizedText(article.content);
-                const localizedExcerpt = useLocalizedText(article.excerpt);
-
-                return (
-                  <Card 
-                    key={article.id} 
-                    className="group cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white overflow-hidden"
-                    onClick={() => setSelectedArticle(article)}
-                  >
-                    {article.featured_image_url && (
-                      <div className="overflow-hidden">
-                        <img
-                          src={article.featured_image_url}
-                          alt={localizedTitle}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    )}
+              {articles.map((article) => (
+                <Card 
+                  key={article.id} 
+                  className="group cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white overflow-hidden"
+                  onClick={() => setSelectedArticle(article)}
+                >
+                  {article.featured_image_url && (
+                    <div className="overflow-hidden">
+                      <img
+                        src={article.featured_image_url}
+                        alt={article.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-red-600 transition-colors line-clamp-2">
+                      {article.title}
+                    </h3>
                     
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-red-600 transition-colors line-clamp-2">
-                        {localizedTitle}
-                      </h3>
-                      
-                      <p className="text-gray-600 mb-4 line-clamp-3">
-                        {localizedExcerpt || createExcerpt(localizedContent)}
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                        <div className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          {new Date(article.created_at).toLocaleDateString('fr-FR')}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {estimateReadingTime(localizedContent)} min
-                        </div>
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {article.excerpt || createExcerpt(article.content)}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <div className="flex items-center gap-1">
+                        <Calendar size={14} />
+                        {new Date(article.created_at).toLocaleDateString('fr-FR')}
                       </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <User size={14} />
-                          {article.author}
-                        </div>
-                        
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-0 h-auto font-medium"
-                        >
-                          Lire la suite →
-                        </Button>
+                      <div className="flex items-center gap-1">
+                        <Clock size={14} />
+                        {estimateReadingTime(article.content)} min
                       </div>
                     </div>
-                  </Card>
-                );
-              })}
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <User size={14} />
+                        {article.author}
+                      </div>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-0 h-auto font-medium"
+                      >
+                        Lire la suite →
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           ) : (
             <div className="text-center py-16">
