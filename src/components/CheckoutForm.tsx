@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -33,12 +34,19 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   // FIXED: Correct category detection for theme and display
   const category = packageData.category || '';
-  const isPanelCategory = category.includes('panel-') || 
-                         category === 'panel-iptv' || 
+  
+  // Panel packages (purple theme, credits): panel-iptv, panel-player, panel-reseller
+  const isPanelCategory = category === 'panel-iptv' || 
                          category === 'panel-player' || 
                          category === 'panel-reseller';
   
-  // Panel packages get purple theme and display credits, everything else gets red theme and displays months
+  // Subscription packages (red theme, months): subscription, reseller, player, activation-player
+  const isSubscriptionCategory = category === 'subscription' || 
+                               category === 'reseller' || 
+                               category === 'player' || 
+                               category === 'activation-player';
+  
+  // Panel packages get purple theme and display credits, subscription packages get red theme and display months
   const themeColors = isPanelCategory ? {
     primary: 'bg-purple-600 hover:bg-purple-700',
     primaryText: 'text-purple-600',
@@ -131,15 +139,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   const createOrderMutation = useCreateOrder();
 
   // FIXED: Display logic for panel vs subscription packages
-  const isCreditsDisplay = isPanelCategory;
-  const durationLabel = isCreditsDisplay ? 'Credits' : 'Months';
-  const durationText = isCreditsDisplay ? 'Credits bought' : 'Months subscription';
+  const durationLabel = isPanelCategory ? 'Credits' : 'Months';
+  const durationText = isPanelCategory ? 'Credits bought' : 'Months subscription';
 
   console.log('CheckoutForm - Package data received:', packageData);
   console.log('CheckoutForm - Icon URL:', packageData.icon_url);
   console.log('CheckoutForm - Category:', category);
   console.log('CheckoutForm - Is Panel Category (purple theme):', isPanelCategory);
-  console.log('CheckoutForm - Is Credits Display:', isCreditsDisplay);
+  console.log('CheckoutForm - Is Subscription Category (red theme):', isSubscriptionCategory);
   console.log('CheckoutForm - Duration Text:', durationText);
 
   return (

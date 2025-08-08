@@ -35,14 +35,17 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const isActivationPackage = packageData?.category === 'activation-player';
   
-  // FIXED: Correct category detection - only panel categories use credits
-  const isPanelCategory = packageData?.category?.includes('panel-') || 
-                         packageData?.category === 'panel-iptv' || 
+  // FIXED: Proper category detection
+  // Panel packages (credits): panel-iptv, panel-player, panel-reseller
+  const isPanelCategory = packageData?.category === 'panel-iptv' || 
                          packageData?.category === 'panel-player' || 
                          packageData?.category === 'panel-reseller';
 
-  // FIXED: All non-panel packages (including subscription, iptv, etc.) should use months
-  const isSubscriptionPackage = !isPanelCategory && !isActivationPackage;
+  // Subscription packages (months): subscription, reseller, player, activation-player
+  const isSubscriptionPackage = packageData?.category === 'subscription' || 
+                               packageData?.category === 'reseller' || 
+                               packageData?.category === 'player' || 
+                               packageData?.category === 'activation-player';
 
   const createPlansFromPackageData = () => {
     const plans = [];
@@ -51,18 +54,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     console.log('📊 Package category:', packageData.category);
     console.log('📊 Is Panel Category:', isPanelCategory);
     console.log('📊 Is Subscription Package:', isSubscriptionPackage);
-    console.log('📊 Available price fields:', {
-      // Panel package fields (credits)
-      price_10_credits: packageData.price_10_credits,
-      price_25_credits: packageData.price_25_credits,
-      price_50_credits: packageData.price_50_credits,
-      price_100_credits: packageData.price_100_credits,
-      // Subscription package fields (months)
-      price_1_month: packageData.price_1_month,
-      price_3_months: packageData.price_3_months,
-      price_6_months: packageData.price_6_months,
-      price_12_months: packageData.price_12_months
-    });
     
     if (isPanelCategory) {
       console.log('📺 Processing Panel package pricing (credits)...');
@@ -76,39 +67,35 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           price: Number(packageData.price_10_credits),
           sort_order: 1
         });
-        console.log('✅ Added 10-credit plan:', packageData.price_10_credits);
       }
       if (packageData.price_25_credits && packageData.price_25_credits > 0) {
         plans.push({
           id: 'plan-25-credits',
           credits: 25,
-          months: 3,
+          months: 1,
           price: Number(packageData.price_25_credits),
           sort_order: 2
         });
-        console.log('✅ Added 25-credit plan:', packageData.price_25_credits);
       }
       if (packageData.price_50_credits && packageData.price_50_credits > 0) {
         plans.push({
           id: 'plan-50-credits',
           credits: 50,
-          months: 6,
+          months: 1,
           price: Number(packageData.price_50_credits),
           sort_order: 3
         });
-        console.log('✅ Added 50-credit plan:', packageData.price_50_credits);
       }
       if (packageData.price_100_credits && packageData.price_100_credits > 0) {
         plans.push({
           id: 'plan-100-credits',
           credits: 100,
-          months: 12,
+          months: 1,
           price: Number(packageData.price_100_credits),
           sort_order: 4
         });
-        console.log('✅ Added 100-credit plan:', packageData.price_100_credits);
       }
-    } else {
+    } else if (isSubscriptionPackage) {
       console.log('📺 Processing Subscription package pricing (months)...');
       
       // Subscription packages use month-based pricing
@@ -120,7 +107,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           price: Number(packageData.price_1_month),
           sort_order: 1
         });
-        console.log('✅ Added 1-month plan:', packageData.price_1_month);
       }
       if (packageData.price_3_months && packageData.price_3_months > 0) {
         plans.push({
@@ -130,7 +116,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           price: Number(packageData.price_3_months),
           sort_order: 2
         });
-        console.log('✅ Added 3-months plan:', packageData.price_3_months);
       }
       if (packageData.price_6_months && packageData.price_6_months > 0) {
         plans.push({
@@ -140,7 +125,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           price: Number(packageData.price_6_months),
           sort_order: 3
         });
-        console.log('✅ Added 6-months plan:', packageData.price_6_months);
       }
       if (packageData.price_12_months && packageData.price_12_months > 0) {
         plans.push({
@@ -150,7 +134,6 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           price: Number(packageData.price_12_months),
           sort_order: 4
         });
-        console.log('✅ Added 12-months plan:', packageData.price_12_months);
       }
     }
     
@@ -340,9 +323,12 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                         }
                       </div>
                       <div className="text-sm text-gray-500">
-                        {formatMonthlyAverage(option.price, option.months)}
+                        {isPanelCategory 
+                          ? `${option.credits} credits for management`
+                          : formatMonthlyAverage(option.price, option.months)
+                        }
                       </div>
-                      {sortedOptions[0] && option.credits > sortedOptions[0].credits && (
+                      {!isPanelCategory && sortedOptions[0] && option.months > sortedOptions[0].months && (
                         <div className="mt-1">
                           <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-3 py-1 rounded-full">
                             Save up to {calculateSavings(option.price, option.months, sortedOptions[0].price)}%

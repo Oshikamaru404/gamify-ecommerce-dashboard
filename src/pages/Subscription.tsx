@@ -17,10 +17,14 @@ const Subscription = () => {
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // FIXED: Filter for subscription packages only (not panel packages)
+  // FIXED: Filter for ONLY subscription packages (not panel packages)
+  // Subscription packages: subscription, reseller, player, activation-player
   const subscriptionPackages = allPackages?.filter(pkg => 
     pkg.status !== 'inactive' && 
-    (pkg.category === 'subscription' || pkg.category === 'reseller' || pkg.category === 'player' || pkg.category === 'activation-player')
+    (pkg.category === 'subscription' || 
+     pkg.category === 'reseller' || 
+     pkg.category === 'player' || 
+     pkg.category === 'activation-player')
   ) || [];
 
   console.log('🔍 Subscription Page Debug:');
