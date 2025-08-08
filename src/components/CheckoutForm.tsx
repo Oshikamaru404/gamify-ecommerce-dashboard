@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -32,14 +33,11 @@ type CheckoutFormValues = z.infer<typeof checkoutFormSchema>
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPlan, onOrderSuccess, onCancel }) => {
   const { language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    customerName: '',
-    customerEmail: '',
-    customerWhatsapp: '',
-  });
 
   const {
+    register,
     handleSubmit,
+    formState: { errors },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
     defaultValues: {
@@ -143,31 +141,33 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPl
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="customerName">Full Name *</Label>
                       <Input
                         id="customerName"
                         type="text"
-                        value={formData.customerName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, customerName: e.target.value }))}
-                        required
+                        {...register("customerName")}
                         className="mt-1"
                         placeholder="Enter your full name"
                       />
+                      {errors.customerName && (
+                        <p className="text-sm text-red-600 mt-1">{errors.customerName.message}</p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="customerEmail">Email Address *</Label>
                       <Input
                         id="customerEmail"
                         type="email"
-                        value={formData.customerEmail}
-                        onChange={(e) => setFormData(prev => ({ ...prev, customerEmail: e.target.value }))}
-                        required
+                        {...register("customerEmail")}
                         className="mt-1"
                         placeholder="Enter your email"
                       />
+                      {errors.customerEmail && (
+                        <p className="text-sm text-red-600 mt-1">{errors.customerEmail.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -176,8 +176,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPl
                     <Input
                       id="customerWhatsapp"
                       type="tel"
-                      value={formData.customerWhatsapp}
-                      onChange={(e) => setFormData(prev => ({ ...prev, customerWhatsapp: e.target.value }))}
+                      {...register("customerWhatsapp")}
                       className="mt-1"
                       placeholder="Enter your WhatsApp number (e.g., +1234567890)"
                     />

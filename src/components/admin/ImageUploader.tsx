@@ -8,11 +8,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface ImageUploaderProps {
-  onImageUpload: (imageUrl: string) => void;
-  onCancel: () => void;
+  onImageUpload?: (imageUrl: string) => void;
+  onCancel?: () => void;
+  currentImageUrl?: string;
+  onImageUrlChange?: (url: string) => void;
+  label?: string;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onCancel }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ 
+  onImageUpload, 
+  onCancel, 
+  currentImageUrl,
+  onImageUrlChange,
+  label = "Upload image" 
+}) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
@@ -36,7 +45,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onCancel }
         .from('package-images')
         .getPublicUrl(filePath);
 
-      onImageUpload(data.publicUrl);
+      // Use the appropriate callback
+      if (onImageUrlChange) {
+        onImageUrlChange(data.publicUrl);
+      } else if (onImageUpload) {
+        onImageUpload(data.publicUrl);
+      }
       
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -76,6 +90,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onCancel }
 
   return (
     <div className="space-y-4">
+      {/* Show current image if available */}
+      {currentImageUrl && (
+        <div className="flex items-center gap-4 p-4 border rounded-lg">
+          <img 
+            src={currentImageUrl} 
+            alt="Current" 
+            className="w-16 h-16 object-cover rounded"
+          />
+          <div className="flex-1">
+            <p className="text-sm font-medium">Current image</p>
+            <p className="text-xs text-gray-500">{currentImageUrl}</p>
+          </div>
+        </div>
+      )}
+
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           dragActive 
@@ -91,7 +120,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onCancel }
         <div className="mt-4">
           <Label htmlFor="file-upload" className="cursor-pointer">
             <span className="mt-2 block text-sm font-medium text-gray-900">
-              {uploading ? 'Uploading...' : 'Upload image or drag and drop'}
+              {uploading ? 'Uploading...' : label || 'Upload image or drag and drop'}
             </span>
             <span className="mt-1 block text-xs text-gray-500">
               PNG, JPG, GIF up to 10MB
@@ -117,12 +146,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, onCancel }
         </div>
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          <X className="mr-2 h-4 w-4" />
-          Cancel
-        </Button>
-      </div>
+      {onCancel && (
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            <X className="mr-2 h-4 w-4" />
+            Cancel
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
