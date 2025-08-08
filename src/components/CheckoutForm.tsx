@@ -1,266 +1,222 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { X, User, Mail, Phone, Bitcoin, Loader2 } from 'lucide-react';
-import { useCreateOrder } from '@/hooks/useCreateOrder';
-import { supabase } from '@/integrations/supabase/client';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { ShoppingCart, User, Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+const checkoutFormSchema = z.object({
+  customerName: z.string().min(2, {
+    message: "Full name must be at least 2 characters.",
+  }),
+  customerEmail: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  customerWhatsapp: z.string().optional(),
+})
 
 interface CheckoutFormProps {
-  packageData: {
-    id: string;
-    name: string;
-    category?: string;
-    price: number;
-    duration: number;
-    icon_url?: string;
-    icon?: string;
-  };
-  onClose: () => void;
-  onSuccess: () => void;
+  selectedPackage: any;
+  selectedPlan: { duration: number; price: number } | null;
+  onOrderSuccess: () => void;
+  onCancel: () => void;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuccess }) => {
+type CheckoutFormValues = z.infer<typeof checkoutFormSchema>
+
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ selectedPackage, selectedPlan, onOrderSuccess, onCancel }) => {
+  const { language } = useLanguage();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
     customerWhatsapp: '',
   });
-  const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // Use red theme for all checkout forms
-  const themeColors = {
-    primary: 'bg-red-600 hover:bg-red-700',
-    primaryText: 'text-red-600',
-    primaryBg: 'bg-gradient-to-r from-red-600 to-red-700',
-    focus: 'focus:border-red-500 focus:ring-red-500',
-    accent: 'bg-gradient-to-r from-gray-50 to-gray-100',
-    cryptoButton: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'
-  };
+  const {
+    handleSubmit,
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutFormSchema),
+    defaultValues: {
+      customerName: "",
+      customerEmail: "",
+      customerWhatsapp: "",
+    },
+  })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCryptoPayment = async () => {
-    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    setIsProcessingCrypto(true);
-
-    try {
-      // Create the order in our database first
-      const orderData = await createOrderMutation.mutateAsync({
-        package_name: packageData.name,
-        package_category: packageData.category || '',
-        customer_name: formData.customerName,
-        customer_email: formData.customerEmail,
-        customer_whatsapp: formData.customerWhatsapp,
-        amount: packageData.price,
-        duration_months: packageData.duration,
-        order_type: (packageData.category || '').includes('panel') ? 'credits' : 'activation',
-        status: 'pending',
-        payment_status: 'pending',
-      });
-
-      // Create Cryptomus invoice through edge function
-      const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke(
-        'create-cryptomus-invoice',
-        {
-          body: {
-            packageData,
-            customerInfo: formData,
-            orderId: orderData.id
-          }
-        }
-      );
-
-      if (invoiceError) {
-        throw invoiceError;
+  const getPackageDisplayName = (pkg: any) => {
+    if (typeof pkg.name === 'string') {
+      try {
+        const parsed = JSON.parse(pkg.name);
+        return parsed[language] || parsed.en || pkg.name;
+      } catch {
+        return pkg.name;
       }
-
-      if (invoiceData.result?.url) {
-        // Update order with payment UUID
-        await supabase
-          .from('orders')
-          .update({ 
-            payment_status: 'processing',
-            customer_whatsapp: `${formData.customerWhatsapp}|cryptomus:${invoiceData.result.uuid}`
-          })
-          .eq('id', orderData.id);
-
-        // Redirect to Cryptomus payment page
-        window.location.href = invoiceData.result.url;
-      } else {
-        throw new Error('Failed to create payment invoice');
-      }
-
-    } catch (error) {
-      console.error('Error creating crypto payment:', error);
-      toast.error('Failed to create payment. Please try again.');
-    } finally {
-      setIsProcessingCrypto(false);
     }
+    return pkg.name || 'Unknown Package';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await handleCryptoPayment();
-  };
-
-  const createOrderMutation = useCreateOrder();
-
-  // Determine if this is a credit-based package
-  const category = packageData.category || '';
-  const isCreditBased = category.includes('panel') || category === 'player-panel' || category === 'iptv-panel';
-  const durationLabel = isCreditBased ? 'Credits' : 'Months';
-  const durationDescription = isCreditBased 
-    ? `${packageData.duration} credits for service management`
-    : `${packageData.duration} months subscription`;
-
-  console.log('CheckoutForm - Package data received:', packageData);
-  console.log('CheckoutForm - Icon URL:', packageData.icon_url);
+  async function onSubmit(data: CheckoutFormValues) {
+    setIsSubmitting(true);
+    // Here, you would typically send the form data to your backend
+    // along with the selected package and plan information.
+    // For this example, we'll just simulate a successful submission.
+    
+    // Simulate an API call
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+    setIsSubmitting(false);
+    toast.success("Order placed successfully!");
+    onOrderSuccess();
+  }
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold">Crypto Payment</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Package Summary with Larger Logo */}
-          <div className={`${themeColors.accent} rounded-lg p-6`}>
-            <div className="flex items-start gap-4">
-              <div className={`${themeColors.primaryBg} rounded-lg p-3`}>
-                {packageData.icon_url ? (
-                  <img 
-                    src={packageData.icon_url} 
-                    alt={packageData.name}
-                    className="h-16 w-16 rounded-lg object-cover border-2 border-red-400 shadow-lg"
-                    onError={(e) => {
-                      console.error('Failed to load package image:', packageData.icon_url);
-                      e.currentTarget.style.display = 'none';
-                      const fallbackContainer = e.currentTarget.parentElement?.nextElementSibling as HTMLElement;
-                      if (fallbackContainer) fallbackContainer.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div 
-                  className="h-16 w-16 flex items-center justify-center text-white text-3xl rounded-lg"
-                  style={{ display: packageData.icon_url ? 'none' : 'flex' }}
-                >
-                  {packageData.icon || '📺'}
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 text-lg">{packageData.name}</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge className={`${themeColors.primaryBg} text-white px-3 py-1 text-sm font-bold`}>
-                    {packageData.duration} {durationLabel} {isCreditBased ? '' : 'Subscription'}
-                  </Badge>
-                </div>
-                <div className="mt-3">
-                  <span className={`text-2xl font-bold ${themeColors.primaryText}`}>${packageData.price}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Customer Name */}
-            <div className="space-y-2">
-              <Label htmlFor="customerName" className="flex items-center gap-2">
-                <User className={`h-4 w-4 ${themeColors.primaryText}`} />
-                Full Name *
-              </Label>
-              <Input
-                id="customerName"
-                name="customerName"
-                type="text"
-                placeholder="Enter your full name"
-                value={formData.customerName}
-                onChange={handleInputChange}
-                required
-                className={`border-gray-300 ${themeColors.focus}`}
-              />
-            </div>
-
-            {/* Customer Email */}
-            <div className="space-y-2">
-              <Label htmlFor="customerEmail" className="flex items-center gap-2">
-                <Mail className={`h-4 w-4 ${themeColors.primaryText}`} />
-                Email Address *
-              </Label>
-              <Input
-                id="customerEmail"
-                name="customerEmail"
-                type="email"
-                placeholder="Enter your email address"
-                value={formData.customerEmail}
-                onChange={handleInputChange}
-                required
-                className={`border-gray-300 ${themeColors.focus}`}
-              />
-            </div>
-
-            {/* WhatsApp Number - Now Required */}
-            <div className="space-y-2">
-              <Label htmlFor="customerWhatsapp" className="flex items-center gap-2">
-                <Phone className={`h-4 w-4 ${themeColors.primaryText}`} />
-                WhatsApp Number *
-              </Label>
-              <Input
-                id="customerWhatsapp"
-                name="customerWhatsapp"
-                type="tel"
-                placeholder="Enter your WhatsApp number"
-                value={formData.customerWhatsapp}
-                onChange={handleInputChange}
-                required
-                className={`border-gray-300 ${themeColors.focus}`}
-              />
-            </div>
-
-            {/* Crypto Payment Button */}
-            <div className="pt-4">
-              <Button 
-                type="submit" 
-                className={`w-full ${themeColors.cryptoButton} text-white py-4 text-lg font-semibold shadow-lg transform transition-all duration-200 hover:scale-105`}
-                disabled={isProcessingCrypto}
-              >
-                {isProcessingCrypto ? (
-                  <>
-                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                    Creating Payment...
-                  </>
-                ) : (
-                  <>
-                    <Bitcoin className="mr-2 h-6 w-6" />
-                    Pay with Cryptocurrency
-                  </>
-                )}
-              </Button>
-            </div>
-
-            <div className="text-center text-sm text-gray-500 pt-2">
-              Crypto payments are processed instantly through our secure API. You'll be redirected to complete your payment.
-            </div>
-          </form>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Order</h1>
+          <p className="text-gray-600">Fill in your details to complete the purchase</p>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Order Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  {selectedPackage?.icon_url && (
+                    <img 
+                      src={selectedPackage.icon_url} 
+                      alt={getPackageDisplayName(selectedPackage)}
+                      className="w-10 h-10 object-contain flex-shrink-0" 
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm">
+                      {getPackageDisplayName(selectedPackage)}
+                    </h3>
+                    <p className="text-xs text-gray-600">
+                      {selectedPlan?.duration} {selectedPlan?.duration === 1 ? 'Month' : 'Months'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Package:</span>
+                    <span className="font-medium">{getPackageDisplayName(selectedPackage)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Duration:</span>
+                    <span className="font-medium">
+                      {selectedPlan?.duration} {selectedPlan?.duration === 1 ? 'Month' : 'Months'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold border-t pt-2">
+                    <span>Total:</span>
+                    <span>${selectedPlan?.price}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Checkout Form */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Customer Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="customerName">Full Name *</Label>
+                      <Input
+                        id="customerName"
+                        type="text"
+                        value={formData.customerName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, customerName: e.target.value }))}
+                        required
+                        className="mt-1"
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customerEmail">Email Address *</Label>
+                      <Input
+                        id="customerEmail"
+                        type="email"
+                        value={formData.customerEmail}
+                        onChange={(e) => setFormData(prev => ({ ...prev, customerEmail: e.target.value }))}
+                        required
+                        className="mt-1"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="customerWhatsapp">WhatsApp Number (Optional)</Label>
+                    <Input
+                      id="customerWhatsapp"
+                      type="tel"
+                      value={formData.customerWhatsapp}
+                      onChange={(e) => setFormData(prev => ({ ...prev, customerWhatsapp: e.target.value }))}
+                      className="mt-1"
+                      placeholder="Enter your WhatsApp number (e.g., +1234567890)"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      We'll send order updates via WhatsApp if provided
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4 pt-6">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={onCancel}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        'Complete Order'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
