@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
@@ -8,6 +9,7 @@ import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from '
 import CheckoutForm from '@/components/CheckoutForm';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -112,6 +114,10 @@ const ProductDetail = () => {
     );
   }
 
+  // Use multilingual utility functions
+  const packageName = useLocalizedText(pkg.name);
+  const packageDescription = useLocalizedText(pkg.description);
+
   // Determine colors and styling based on package category
   const isActivationPackage = packageCategory === 'activation-player';
   const primaryColor = 'red';
@@ -142,7 +148,7 @@ const ProductDetail = () => {
                   {pkg.icon_url ? (
                     <img 
                       src={pkg.icon_url} 
-                      alt={pkg.name} 
+                      alt={packageName} 
                       className="w-20 h-20 rounded-xl object-cover border-4 border-white shadow-lg" 
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -160,8 +166,8 @@ const ProductDetail = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-2">{pkg.name}</h1>
-                  <p className="text-white/90 text-xl">{pkg.description}</p>
+                  <h1 className="text-4xl font-bold mb-2">{packageName}</h1>
+                  <p className="text-white/90 text-xl">{packageDescription}</p>
                   <div className="flex items-center gap-2 mt-4">
                     <Badge className="bg-white/20 text-white">
                       <Star className="w-4 h-4 mr-1 fill-current" />
@@ -287,7 +293,7 @@ const ProductDetail = () => {
               <div className="sticky top-6">
                 <PlanSelector
                   packageId={pkg.id}
-                  packageName={pkg.name}
+                  packageName={packageName}
                   packageData={pkg}
                   onPlanSelect={handlePlanSelect}
                 />

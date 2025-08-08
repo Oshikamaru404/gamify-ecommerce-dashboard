@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
@@ -8,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Server, Settings, Shield, Star, BarChart3 } from 'lucide-react';
 import CheckoutForm from '@/components/CheckoutForm';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 
 const IPTVDetail = () => {
   const { slug } = useParams();
@@ -28,6 +28,10 @@ const IPTVDetail = () => {
   // Find the package by slug
   const panelIptvPackages = packages?.filter(pkg => pkg.category === 'panel-iptv' && pkg.status !== 'inactive') || [];
   const pkg = panelIptvPackages.find(p => generateSlug(p.name) === slug);
+
+  // Use multilingual utility functions
+  const packageName = pkg ? useLocalizedText(pkg.name) : '';
+  const packageDescription = pkg ? useLocalizedText(pkg.description) : '';
 
   const handleBuyNow = (packageName: string, credits: number, price: number) => {
     setSelectedPackage({
@@ -105,7 +109,7 @@ const IPTVDetail = () => {
                   {pkg.icon_url ? (
                     <img 
                       src={pkg.icon_url} 
-                      alt={pkg.name} 
+                      alt={packageName} 
                       className="w-20 h-20 rounded-xl object-cover shadow-lg" 
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -123,8 +127,8 @@ const IPTVDetail = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-2">{pkg.name}</h1>
-                  <p className="text-purple-100 text-xl">{pkg.description}</p>
+                  <h1 className="text-4xl font-bold mb-2">{packageName}</h1>
+                  <p className="text-purple-100 text-xl">{packageDescription}</p>
                   <div className="flex items-center gap-2 mt-4">
                     <Badge className="bg-white/20 text-white">
                       <Star className="w-4 h-4 mr-1 fill-current" />
@@ -257,7 +261,7 @@ const IPTVDetail = () => {
                         </div>
                         <Button 
                           className="w-full bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] hover:from-[#7c2fd4] hover:to-[#6b27be] text-white"
-                          onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}
+                          onClick={() => handleBuyNow(packageName, option.credits, option.price!)}
                         >
                           Purchase {option.credits} Credits
                         </Button>

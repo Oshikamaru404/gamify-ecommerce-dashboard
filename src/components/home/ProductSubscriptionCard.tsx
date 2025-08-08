@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 
 interface ProductSubscriptionCardProps {
   package: IPTVPackage;
@@ -16,6 +17,10 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   package: pkg, 
   featured = false 
 }) => {
+  // Use multilingual utility functions
+  const packageName = useLocalizedText(pkg.name);
+  const packageDescription = useLocalizedText(pkg.description);
+
   const generateSlug = (name: string) => {
     return name.toLowerCase()
       .replace(/\s+/g, '-')
@@ -24,7 +29,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
       .trim();
   };
 
-  const productSlug = generateSlug(pkg.name);
+  const productSlug = generateSlug(packageName);
 
   // Get the one-month price to display
   const oneMonthPrice = pkg.price_1_month || pkg.price_3_months || pkg.price_6_months || pkg.price_12_months || pkg.price_10_credits || 0;
@@ -63,7 +68,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {pkg.icon_url && (
               <img 
                 src={pkg.icon_url} 
-                alt={pkg.name}
+                alt={packageName}
                 className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -86,7 +91,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
         <div className="flex-1 bg-white p-6 flex flex-col">
           {/* Package Title */}
           <h3 className="text-lg font-bold text-gray-900 mb-4 text-center leading-tight">
-            {pkg.name}
+            {packageName}
           </h3>
           
           {/* Price Display - One Month Price - Make it non-clickable */}
@@ -106,8 +111,8 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           </div>
 
           {/* Package Description */}
-          {pkg.description && (
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+          {packageDescription && (
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">{packageDescription}</p>
           )}
 
           {/* Features List */}
