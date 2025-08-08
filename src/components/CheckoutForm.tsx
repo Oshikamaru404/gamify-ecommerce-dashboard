@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -35,18 +34,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   // FIXED: Correct category detection for theme and display
   const category = packageData.category || '';
   
-  // Panel packages (purple theme, credits): panel-iptv, panel-player, panel-reseller
-  const isPanelCategory = category === 'panel-iptv' || 
-                         category === 'panel-player' || 
-                         category === 'panel-reseller';
+  // Only panel-iptv packages use credits system with purple theme
+  const isPanelCategory = category === 'panel-iptv';
   
-  // Subscription packages (red theme, months): subscription, reseller, player, activation-player
+  // All other subscription packages use months system with red theme
   const isSubscriptionCategory = category === 'subscription' || 
-                               category === 'reseller' || 
                                category === 'player' || 
                                category === 'activation-player';
   
-  // Panel packages get purple theme and display credits, subscription packages get red theme and display months
+  // FIXED: Theme colors - Purple only for panel-iptv, Red for all subscription packages
   const themeColors = isPanelCategory ? {
     primary: 'bg-purple-600 hover:bg-purple-700',
     primaryText: 'text-purple-600',
