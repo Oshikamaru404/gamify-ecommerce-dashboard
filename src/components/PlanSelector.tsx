@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,11 +36,12 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const isActivationPackage = packageData?.category === 'activation-player';
   
-  // FIXED: Correct category detection
-  // Only panel-iptv uses credits system with purple theme
-  const isPanelCategory = packageData?.category === 'panel-iptv';
+  // CORRECTED: Proper category detection for different package types
+  // Panel packages use credits system: panel-iptv, panel-player
+  const isPanelCategory = packageData?.category === 'panel-iptv' || 
+                         packageData?.category === 'panel-player';
 
-  // All other packages (subscription, player, activation-player) use months system with red theme
+  // Subscription packages use months system: subscription, player, activation-player
   const isSubscriptionPackage = packageData?.category === 'subscription' || 
                                packageData?.category === 'player' || 
                                packageData?.category === 'activation-player';
@@ -49,11 +51,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     
     console.log('🛠️ Creating plans from package data...');
     console.log('📊 Package category:', packageData.category);
-    console.log('📊 Is Panel Category (credits):', isPanelCategory);
-    console.log('📊 Is Subscription Package (months):', isSubscriptionPackage);
+    console.log('📊 Is Panel Category (uses credits):', isPanelCategory);
+    console.log('📊 Is Subscription Package (uses months):', isSubscriptionPackage);
     
     if (isPanelCategory) {
-      console.log('📺 Processing Panel package pricing (credits)...');
+      console.log('🔧 Processing Panel package pricing (credits system)...');
       
       // Panel packages use credit-based pricing
       if (packageData.price_10_credits && packageData.price_10_credits > 0) {
@@ -93,13 +95,13 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         });
       }
     } else if (isSubscriptionPackage) {
-      console.log('📺 Processing Subscription package pricing (months)...');
+      console.log('📺 Processing Subscription package pricing (months system)...');
       
       // Subscription packages use month-based pricing
       if (packageData.price_1_month && packageData.price_1_month > 0) {
         plans.push({
           id: 'plan-1-month',
-          credits: 1, // For subscription packages, this represents months
+          credits: 1, // This represents months for subscription packages
           months: 1,
           price: Number(packageData.price_1_month),
           sort_order: 1
@@ -108,7 +110,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       if (packageData.price_3_months && packageData.price_3_months > 0) {
         plans.push({
           id: 'plan-3-months',
-          credits: 3, // For subscription packages, this represents months
+          credits: 3, // This represents months for subscription packages
           months: 3,
           price: Number(packageData.price_3_months),
           sort_order: 2
@@ -117,7 +119,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       if (packageData.price_6_months && packageData.price_6_months > 0) {
         plans.push({
           id: 'plan-6-months',
-          credits: 6, // For subscription packages, this represents months
+          credits: 6, // This represents months for subscription packages
           months: 6,
           price: Number(packageData.price_6_months),
           sort_order: 3
@@ -126,7 +128,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       if (packageData.price_12_months && packageData.price_12_months > 0) {
         plans.push({
           id: 'plan-12-months',
-          credits: 12, // For subscription packages, this represents months
+          credits: 12, // This represents months for subscription packages
           months: 12,
           price: Number(packageData.price_12_months),
           sort_order: 4
@@ -144,7 +146,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
       name: packageName,
       category: packageData.category,
       price: selectedOption.price,
-      // FIXED: For panel packages, duration is credits; for subscription packages, duration is months
+      // CORRECTED: For panel packages, duration is credits; for subscription packages, duration is months
       duration: isPanelCategory ? selectedOption.credits : selectedOption.months,
       months: selectedOption.months,
       credits: selectedOption.credits,
@@ -250,8 +252,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
               <p><strong>Package Name:</strong> {packageName}</p>
               <p><strong>Credit options from DB:</strong> {creditOptions?.length || 0}</p>
               <p><strong>Package category:</strong> {packageData?.category}</p>
-              <p><strong>Is Panel Category:</strong> {isPanelCategory ? 'Yes' : 'No'}</p>
-              <p><strong>Is Subscription Package:</strong> {isSubscriptionPackage ? 'Yes' : 'No'}</p>
+              <p><strong>Is Panel Category:</strong> {isPanelCategory ? 'Yes (Credits)' : 'No'}</p>
+              <p><strong>Is Subscription Package:</strong> {isSubscriptionPackage ? 'Yes (Months)' : 'No'}</p>
             </div>
           </div>
         </CardContent>

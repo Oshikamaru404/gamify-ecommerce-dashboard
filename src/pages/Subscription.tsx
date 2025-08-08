@@ -17,19 +17,20 @@ const Subscription = () => {
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // FIXED: Filter for ONLY subscription packages (not panel packages)
-  // Subscription packages: subscription, reseller, player, activation-player
+  // CORRECTED: Filter for ONLY subscription-related packages (not panel packages)
+  // True subscription packages: subscription, player, activation-player
+  // Exclude panel packages: panel-iptv, panel-player
   const subscriptionPackages = allPackages?.filter(pkg => 
     pkg.status !== 'inactive' && 
     (pkg.category === 'subscription' || 
-     pkg.category === 'reseller' || 
      pkg.category === 'player' || 
      pkg.category === 'activation-player')
   ) || [];
 
   console.log('🔍 Subscription Page Debug:');
   console.log('📦 All packages:', allPackages);
-  console.log('📺 Filtered subscription packages:', subscriptionPackages);
+  console.log('📺 Filtered subscription packages (months-based only):', subscriptionPackages);
+  console.log('🚫 Excluded panel packages (credit-based)');
 
   // Check if a specific package is requested via URL params
   useEffect(() => {

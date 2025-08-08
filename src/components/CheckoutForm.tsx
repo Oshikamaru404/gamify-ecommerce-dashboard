@@ -31,18 +31,19 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   });
   const [isProcessingCrypto, setIsProcessingCrypto] = useState(false);
 
-  // FIXED: Correct category detection for theme and display
+  // CORRECTED: Proper category detection for theme and display
   const category = packageData.category || '';
   
-  // Only panel-iptv packages use credits system with purple theme
-  const isPanelCategory = category === 'panel-iptv';
+  // Panel packages (purple theme, credits): panel-iptv, panel-player
+  const isPanelCategory = category === 'panel-iptv' || 
+                         category === 'panel-player';
   
-  // All other subscription packages use months system with red theme
+  // Subscription packages (red theme, months): subscription, player, activation-player
   const isSubscriptionCategory = category === 'subscription' || 
                                category === 'player' || 
                                category === 'activation-player';
   
-  // FIXED: Theme colors - Purple only for panel-iptv, Red for all subscription packages
+  // CORRECTED: Theme colors - Purple for panel packages, Red for subscription packages
   const themeColors = isPanelCategory ? {
     primary: 'bg-purple-600 hover:bg-purple-700',
     primaryText: 'text-purple-600',
@@ -134,15 +135,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const createOrderMutation = useCreateOrder();
 
-  // FIXED: Display logic for panel vs subscription packages
+  // CORRECTED: Display logic for panel vs subscription packages
   const durationLabel = isPanelCategory ? 'Credits' : 'Months';
-  const durationText = isPanelCategory ? 'Credits bought' : 'Months subscription';
+  const durationText = isPanelCategory ? 'Credits for management' : 'Months subscription';
 
   console.log('CheckoutForm - Package data received:', packageData);
   console.log('CheckoutForm - Icon URL:', packageData.icon_url);
   console.log('CheckoutForm - Category:', category);
-  console.log('CheckoutForm - Is Panel Category (purple theme):', isPanelCategory);
-  console.log('CheckoutForm - Is Subscription Category (red theme):', isSubscriptionCategory);
+  console.log('CheckoutForm - Is Panel Category (purple theme, credits):', isPanelCategory);
+  console.log('CheckoutForm - Is Subscription Category (red theme, months):', isSubscriptionCategory);
   console.log('CheckoutForm - Duration Text:', durationText);
 
   return (
@@ -158,7 +159,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Package Summary with Correct Logo */}
+          {/* Package Summary with Correct Logo and Theme */}
           <div className={`${themeColors.accent} rounded-lg p-6`}>
             <div className="flex items-start gap-4">
               <div className={`${themeColors.primaryBg} rounded-lg p-2`}>
@@ -180,7 +181,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                   className="h-12 w-12 flex items-center justify-center text-white text-2xl rounded-lg"
                   style={{ display: packageData.icon_url ? 'none' : 'flex' }}
                 >
-                  {packageData.icon || '📺'}
+                  {packageData.icon || (isPanelCategory ? '🔧' : '📺')}
                 </div>
               </div>
               <div className="flex-1">

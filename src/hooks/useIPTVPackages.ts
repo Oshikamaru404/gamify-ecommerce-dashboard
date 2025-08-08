@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 export type IPTVPackage = {
   id: string;
   name: string;
-  category: 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'activation-player';
+  category: 'subscription' | 'reseller' | 'player' | 'panel-iptv' | 'panel-player' | 'activation-player';
   description: string | null;
   icon: string | null;
   icon_url: string | null;
