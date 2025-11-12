@@ -11,12 +11,27 @@ import CheckoutForm from '@/components/CheckoutForm';
 import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { useHomepageContent } from '@/hooks/useHomepageContent';
+import { getLocalizedText } from '@/lib/multilingualUtils';
 
 const Home = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const { data: homepageContent } = useHomepageContent();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+
+  // Helper function to get content from CMS
+  const getContent = (sectionKey: string, field: string, fallback: string = '') => {
+    const section = homepageContent?.find(s => s.section_key === sectionKey);
+    if (!section?.content_data) return fallback;
+    
+    const value = section.content_data[field];
+    if (typeof value === 'object' && value !== null) {
+      return getLocalizedText(JSON.stringify(value), language);
+    }
+    return value || fallback;
+  };
 
   const handleFreeTrial = () => {
     const message = `${t.tryFree} BWIVOX IPTV. ${t.contact}?`;
@@ -58,17 +73,17 @@ const Home = () => {
         <section className="bg-gradient-to-r from-red-600 to-red-800 text-white py-20">
           <div className="container text-center">
             <h1 className="text-6xl font-extrabold mb-6">
-              {t.heroTitle.split(' ')[0]} <span className="text-red-200">{t.heroTitle.split(' ')[1]}</span>
+              {getContent('hero', 'title', t.heroTitle)}
             </h1>
             <p className="text-2xl mb-8 max-w-4xl mx-auto">
-              {t.heroSubtitle}
+              {getContent('hero', 'subtitle', t.heroSubtitle)}
             </p>
             
             {/* 30-Day Money Back Guarantee Badge - Enhanced version from subscription page */}
             <div className="mb-8">
               <div className="inline-flex items-center gap-3 bg-white backdrop-blur-sm border-2 border-red-500 rounded-full px-8 py-4 shadow-xl transform hover:scale-105 transition-all duration-300">
                 <Shield className="h-7 w-7 text-red-500" />
-                <span className="text-red-600 font-bold text-xl">30-Day Money Back Guarantee</span>
+                <span className="text-red-600 font-bold text-xl">{getContent('hero', 'guaranteeText', '30-Day Money Back Guarantee')}</span>
               </div>
             </div>
 
@@ -78,7 +93,7 @@ const Home = () => {
               className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-8 py-4 text-xl"
             >
               <Zap className="mr-2" size={24} />
-              {t.freeTrial}
+              {getContent('hero', 'ctaButtonText', t.freeTrial)}
             </Button>
           </div>
         </section>
@@ -87,7 +102,7 @@ const Home = () => {
         <section className="py-20">
           <div className="container">
             <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">
-              {t.subscriptionsTitle}
+              {getContent('subscriptions', 'title', t.subscriptionsTitle)}
             </h2>
             
             {/* 30-Day Warranty Section */}
@@ -95,11 +110,14 @@ const Home = () => {
               <div className="max-w-3xl mx-auto p-6 bg-blue-50 border border-blue-200 rounded-xl">
                 <div className="flex items-center justify-center gap-3 mb-3">
                   <Shield className="h-6 w-6 text-blue-600" />
-                  <h3 className="text-xl font-semibold text-blue-900">30-Day Service Warranty</h3>
+                  <h3 className="text-xl font-semibold text-blue-900">
+                    {getContent('subscriptions', 'warrantyTitle', '30-Day Service Warranty')}
+                  </h3>
                 </div>
                 <p className="text-blue-800">
-                  All our subscription packages come with a 30-day warranty. Experience any issues? 
-                  Contact our support team for immediate assistance or receive a full refund within the warranty period.
+                  {getContent('subscriptions', 'warrantyDescription', 
+                    'All our subscription packages come with a 30-day warranty. Experience any issues? Contact our support team for immediate assistance or receive a full refund within the warranty period.'
+                  )}
                 </p>
               </div>
             </div>
@@ -131,15 +149,15 @@ const Home = () => {
           <div className="container">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                What Our Customers Say
+                {getContent('feedback', 'title', 'What Our Customers Say')}
               </h2>
               <p className="text-xl text-gray-600 mb-8">
-                Real feedback from our valued IPTV customers
+                {getContent('feedback', 'subtitle', 'Real feedback from our valued IPTV customers')}
               </p>
               <Link to="/feedback">
                 <Button className="bg-red-600 hover:bg-red-700 text-white">
                   <MessageSquarePlus className="mr-2" size={20} />
-                  Share Your Feedback
+                  {getContent('feedback', 'ctaButtonText', 'Share Your Feedback')}
                 </Button>
               </Link>
             </div>
@@ -153,10 +171,10 @@ const Home = () => {
           <div className="container">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                {t.whyChooseTitle}
+                {getContent('features', 'title', t.whyChooseTitle)}
               </h2>
               <p className="text-xl text-gray-600">
-                {t.whyChooseSubtitle}
+                {getContent('features', 'subtitle', t.whyChooseSubtitle)}
               </p>
             </div>
             
@@ -165,9 +183,11 @@ const Home = () => {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Star className="text-red-600" size={32} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.premiumQuality}</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {getContent('features', 'feature1Title', t.premiumQuality)}
+                </h3>
                 <p className="text-gray-600">
-                  {t.premiumQualityDesc}
+                  {getContent('features', 'feature1Desc', t.premiumQualityDesc)}
                 </p>
               </div>
               
@@ -175,9 +195,11 @@ const Home = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="text-green-600" size={32} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.guaranteedReliability}</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {getContent('features', 'feature2Title', t.guaranteedReliability)}
+                </h3>
                 <p className="text-gray-600">
-                  {t.guaranteedReliabilityDesc}
+                  {getContent('features', 'feature2Desc', t.guaranteedReliabilityDesc)}
                 </p>
               </div>
               
@@ -185,9 +207,11 @@ const Home = () => {
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="text-blue-600" size={32} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.fastActivation}</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {getContent('features', 'feature3Title', t.fastActivation)}
+                </h3>
                 <p className="text-gray-600">
-                  {t.fastActivationDesc}
+                  {getContent('features', 'feature3Desc', t.fastActivationDesc)}
                 </p>
               </div>
             </div>
@@ -201,10 +225,10 @@ const Home = () => {
         <section className="bg-red-600 text-white py-16">
           <div className="container text-center">
             <h3 className="text-4xl font-bold mb-6">
-              {t.ctaTitle}
+              {getContent('cta', 'title', t.ctaTitle)}
             </h3>
             <p className="text-xl mb-8">
-              {t.ctaSubtitle}
+              {getContent('cta', 'subtitle', t.ctaSubtitle)}
             </p>
           </div>
         </section>

@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -16,23 +16,35 @@ export type Database = {
     Tables: {
       admin_users: {
         Row: {
+          backup_codes: string[] | null
           created_at: string | null
+          created_backup_codes_at: string | null
           id: string
           role: string | null
+          two_factor_enabled: boolean | null
+          two_factor_secret: string | null
           user_id: string | null
           username: string
         }
         Insert: {
+          backup_codes?: string[] | null
           created_at?: string | null
+          created_backup_codes_at?: string | null
           id?: string
           role?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           user_id?: string | null
           username: string
         }
         Update: {
+          backup_codes?: string[] | null
           created_at?: string | null
+          created_backup_codes_at?: string | null
           id?: string
           role?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           user_id?: string | null
           username?: string
         }
@@ -131,6 +143,36 @@ export type Database = {
           name?: string
           status?: Database["public"]["Enums"]["feedback_status"]
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      homepage_content: {
+        Row: {
+          content_data: Json
+          created_at: string
+          id: string
+          is_enabled: boolean
+          section_key: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          content_data?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          section_key: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          content_data?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          section_key?: string
+          sort_order?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -399,6 +441,33 @@ export type Database = {
         }
         Relationships: []
       }
+      translated_content: {
+        Row: {
+          content_key: string
+          content_value: string
+          created_at: string
+          id: string
+          language_code: string
+          updated_at: string
+        }
+        Insert: {
+          content_key: string
+          content_value: string
+          created_at?: string
+          id?: string
+          language_code: string
+          updated_at?: string
+        }
+        Update: {
+          content_key?: string
+          content_value?: string
+          created_at?: string
+          id?: string
+          language_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       translations: {
         Row: {
           created_at: string
@@ -455,18 +524,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      delete_all_published_feedback: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      is_admin_user: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      reset_product_sales: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      delete_all_published_feedback: { Args: never; Returns: number }
+      is_admin_user: { Args: never; Returns: boolean }
+      reset_product_sales: { Args: never; Returns: number }
       upsert_site_setting: {
         Args: { p_setting_key: string; p_setting_value: string }
         Returns: {
@@ -475,6 +535,12 @@ export type Database = {
           setting_key: string
           setting_value: string
           updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "site_settings"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
     }

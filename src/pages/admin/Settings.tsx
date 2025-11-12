@@ -42,6 +42,7 @@ import {
 import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 import WhatsAppTemplateEditor from '@/components/admin/WhatsAppTemplateEditor';
 import TranslationEditor from '@/components/admin/TranslationEditor';
+import HomepageCMSEditor from '@/components/admin/HomepageCMSEditor';
 
 const generalSettingsSchema = z.object({
   storeName: z.string().min(1, 'Store name is required'),
@@ -269,6 +270,10 @@ const Settings = () => {
             <Languages size={16} />
             <span>Translations</span>
           </TabsTrigger>
+          <TabsTrigger value="homepage-cms" className="flex gap-2">
+            <Palette size={16} />
+            <span>Homepage CMS</span>
+          </TabsTrigger>
           <TabsTrigger value="payment" className="flex gap-2">
             <CreditCard size={16} />
             <span>Payment</span>
@@ -477,6 +482,10 @@ const Settings = () => {
 
         <TabsContent value="translations">
           <TranslationEditor />
+        </TabsContent>
+
+        <TabsContent value="homepage-cms">
+          <HomepageCMSEditor />
         </TabsContent>
         
         <TabsContent value="payment">
