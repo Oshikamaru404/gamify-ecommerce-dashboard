@@ -225,8 +225,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                       {/* Add savings badges for 3, 6, and 12 month plans */}
                       {monthlyOption && option.months > 1 && (
                         <div className="mt-1">
-                          <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-3 py-1 rounded-full">
-                            Save up to {calculateSavings(option.price, option.months, monthlyOption.price)}%
+                          <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm px-3 py-1 rounded-full">
+                            Save {calculateSavings(option.price, option.months, monthlyOption.price)}% yearly
                           </Badge>
                         </div>
                       )}
