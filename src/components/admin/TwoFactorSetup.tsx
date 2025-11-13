@@ -137,7 +137,7 @@ const TwoFactorSetup = () => {
         .from('admin_users')
         .select('password_hash, username')
         .eq('username', 'admin')
-        .single();
+        .single() as any;
 
       if (!adminUser) throw new Error('Admin not found');
 

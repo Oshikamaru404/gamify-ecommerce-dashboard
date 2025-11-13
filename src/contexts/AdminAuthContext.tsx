@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import * as OTPAuth from 'otpauth';
 import bcrypt from 'bcryptjs';
-import bcrypt from 'bcryptjs';
 
 interface AdminUser {
   id: string;
@@ -77,7 +76,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         .from('admin_users')
         .select('*')
         .eq('username', username)
-        .maybeSingle();
+        .maybeSingle() as any;
 
       if (fetchError) {
         console.error('Error fetching admin user:', fetchError);
