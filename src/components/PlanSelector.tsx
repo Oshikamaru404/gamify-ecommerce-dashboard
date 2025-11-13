@@ -31,6 +31,12 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const createPlansFromPackageData = () => {
     console.log('PlanSelector - Creating plans from package data:', packageData);
+    console.log('PlanSelector - Price fields:', {
+      price_1_month: packageData.price_1_month,
+      price_3_months: packageData.price_3_months,
+      price_6_months: packageData.price_6_months,
+      price_12_months: packageData.price_12_months
+    });
     const plans = [];
     if (packageData.price_1_month) {
       plans.push({
