@@ -151,7 +151,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
   }
 
-  const availableOptions = creditOptions && creditOptions.length > 0 ? creditOptions : createPlansFromPackageData();
+  const availableOptions = (creditOptions && creditOptions.length > 0) ? creditOptions : createPlansFromPackageData();
+  
+  console.log('PlanSelector - Available options:', availableOptions);
+  console.log('PlanSelector - Credit options:', creditOptions);
+  
   if (!availableOptions || availableOptions.length === 0) {
     return (
       <Card>
