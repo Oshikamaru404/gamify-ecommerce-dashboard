@@ -7,7 +7,7 @@ import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import FeedbackCards from '@/components/home/FeedbackCards';
 import NewsletterSubscription from '@/components/home/NewsletterSubscription';
 import ActivationSection from '@/components/home/ActivationSection';
-import CheckoutForm from '@/components/CheckoutForm';
+import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
@@ -233,10 +233,18 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Checkout Form Modal */}
+        {/* Payment Options Checkout Modal */}
         {showCheckout && selectedPackage && (
-          <CheckoutForm
-            packageData={selectedPackage}
+          <PaymentOptionsCheckout
+            packageData={{
+              id: selectedPackage.id,
+              name: selectedPackage.name,
+              category: selectedPackage.category,
+              description: selectedPackage.description,
+              icon_url: selectedPackage.icon_url,
+              price: selectedPackage.price || 0,
+              duration: selectedPackage.duration || 1
+            }}
             onClose={handleCloseCheckout}
             onSuccess={handleOrderSuccess}
           />

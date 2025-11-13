@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Server, Settings, Shield, Star, BarChart3 } from 'lucide-react';
-import CheckoutForm from '@/components/CheckoutForm';
+import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 
@@ -33,11 +33,14 @@ const IPTVDetail = () => {
   const packageName = pkg ? useLocalizedText(pkg.name) : '';
   const packageDescription = pkg ? useLocalizedText(pkg.description) : '';
 
-  const handleBuyNow = (packageName: string, credits: number, price: number) => {
+  const handleBuyNow = (credits: number, price: number) => {
+    if (!pkg) return;
     setSelectedPackage({
-      id: `iptv-${packageName.toLowerCase().replace(/\s+/g, '-')}`,
+      id: pkg.id,
       name: packageName,
-      category: 'iptv-panel',
+      category: 'panel-iptv',
+      description: packageDescription,
+      icon_url: pkg.icon_url,
       price: price,
       duration: credits
     });
@@ -50,7 +53,8 @@ const IPTVDetail = () => {
   };
 
   const handleOrderSuccess = () => {
-    console.log('Order submitted successfully');
+    setShowCheckout(false);
+    setSelectedPackage(null);
   };
 
   if (isLoading) {
@@ -261,7 +265,7 @@ const IPTVDetail = () => {
                         </div>
                         <Button 
                           className="w-full bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] hover:from-[#7c2fd4] hover:to-[#6b27be] text-white"
-                          onClick={() => handleBuyNow(packageName, option.credits, option.price!)}
+                          onClick={() => handleBuyNow(option.credits, option.price!)}
                         >
                           Purchase {option.credits} Credits
                         </Button>
@@ -274,12 +278,12 @@ const IPTVDetail = () => {
           </div>
         </div>
 
-        {/* Checkout Form Modal */}
+        {/* Payment Options Checkout Modal */}
         {showCheckout && selectedPackage && (
-          <CheckoutForm 
-            packageData={selectedPackage} 
-            onClose={handleCloseCheckout} 
-            onSuccess={handleOrderSuccess} 
+          <PaymentOptionsCheckout
+            packageData={selectedPackage}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
           />
         )}
       </div>

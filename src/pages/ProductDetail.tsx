@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from 'lucide-react';
-import CheckoutForm from '@/components/CheckoutForm';
+import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
@@ -58,15 +58,7 @@ const ProductDetail = () => {
   }
 
   const handlePlanSelect = (plan: any) => {
-    console.log('ProductDetail - Plan selected:', plan);
-    // Ensure the plan includes the icon_url from the original package
-    const enrichedPlan = {
-      ...plan,
-      icon_url: pkg?.icon_url,
-      icon: pkg?.icon
-    };
-    console.log('ProductDetail - Enriched plan with icon data:', enrichedPlan);
-    setSelectedPlan(enrichedPlan);
+    setSelectedPlan(plan);
     setShowCheckout(true);
   };
 
@@ -76,7 +68,8 @@ const ProductDetail = () => {
   };
 
   const handleOrderSuccess = () => {
-    console.log('Order submitted successfully');
+    setShowCheckout(false);
+    setSelectedPlan(null);
   };
 
   if (isLoading) {
@@ -303,11 +296,20 @@ const ProductDetail = () => {
         </div>
 
         {/* Checkout Form Modal */}
-        {showCheckout && selectedPlan && (
-          <CheckoutForm 
-            packageData={selectedPlan} 
-            onClose={handleCloseCheckout} 
-            onSuccess={handleOrderSuccess} 
+        {/* Payment Options Checkout Modal */}
+        {showCheckout && selectedPlan && pkg && (
+          <PaymentOptionsCheckout
+            packageData={{
+              id: pkg.id,
+              name: useLocalizedText(pkg.name),
+              category: pkg.category,
+              description: pkg.description,
+              icon_url: pkg.icon_url,
+              price: selectedPlan.price,
+              duration: selectedPlan.credits || selectedPlan.months || selectedPlan.duration
+            }}
+            onClose={handleCloseCheckout}
+            onSuccess={handleOrderSuccess}
           />
         )}
       </div>
