@@ -222,14 +222,14 @@ const Subscription = () => {
                   Back to Packages
                 </Button>
                 <div className="text-center">
-                  <h2 className="text-3xl font-bold mb-2">{selectedPackage.name}</h2>
-                  <p className="text-gray-600 mb-6">{selectedPackage.description}</p>
+                  <h2 className="text-3xl font-bold mb-2">{useLocalizedText(selectedPackage.name)}</h2>
+                  <p className="text-gray-600 mb-6">{useLocalizedText(selectedPackage.description)}</p>
                 </div>
               </div>
 
               <PlanSelector
                 packageId={selectedPackage.id}
-                packageName={selectedPackage.name}
+                packageName={useLocalizedText(selectedPackage.name)}
                 packageData={selectedPackage}
                 onPlanSelect={handlePlanSelect}
               />
