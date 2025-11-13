@@ -46,7 +46,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     });
     const plans = [];
     
-    // Check for month-based pricing (iptv_packages with direct month pricing)
+    // Check for month-based pricing from iptv_packages table (price_1_month, price_3_months, etc.)
     if (packageData.price_1_month || packageData.price_3_months || packageData.price_6_months || packageData.price_12_months) {
       console.log('PlanSelector - Month-based pricing detected (iptv_packages)');
       
@@ -87,10 +87,10 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         });
       }
     }
-    // Check for subscription packages (price_3_credits, price_6_credits, price_12_credits)
-    // These are MONTH-based subscriptions, not credit-based
+    // Check for subscription_packages table (price_3_credits, price_6_credits, price_12_credits)
+    // NOTE: Despite the naming, these are MONTHLY subscriptions, NOT credit-based!
     else if (packageData.price_3_credits || packageData.price_6_credits || packageData.price_12_credits) {
-      console.log('PlanSelector - Month-based subscription pricing detected (subscription_packages)');
+      console.log('PlanSelector - Monthly subscription pricing detected (subscription_packages table)');
       
       if (packageData.price_3_credits) {
         plans.push({
@@ -120,7 +120,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         });
       }
     }
-    // Check for credit-based pricing (panel packages with 10, 25, 50, 100 credits)
+    // Check for ACTUAL credit-based pricing (panel packages with 10, 25, 50, 100 credits)
     else if (packageData.price_10_credits || packageData.price_25_credits || packageData.price_50_credits || packageData.price_100_credits) {
       console.log('PlanSelector - Credit-based pricing detected (panel packages)');
       
