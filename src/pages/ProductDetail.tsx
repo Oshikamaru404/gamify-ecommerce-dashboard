@@ -33,22 +33,26 @@ const ProductDetail = () => {
     return baseSlug;
   };
 
-  // Find the package by slug across all categories
+  // Find the package by slug across all categories (prefer subscription variants if duplicates exist)
   let pkg: any = null;
   let packageCategory = '';
 
   if (packages) {
-    // Check all package categories
-    for (const p of packages) {
-      if (p.status !== 'inactive') {
-        const generatedSlug = generateSlug(p.name, p.category);
-        
-        if (generatedSlug === slug) {
-          pkg = p;
-          packageCategory = p.category;
-          break;
-        }
-      }
+    const matches = packages.filter((p: any) => {
+      if (p.status === 'inactive') return false;
+      const generatedSlug = generateSlug(p.name, p.category);
+      return generatedSlug === slug;
+    });
+
+    if (matches.length > 0) {
+      const preferredOrder = ['subscription', 'iptv', 'panel-iptv', 'activation-player'];
+      matches.sort((a: any, b: any) => {
+        const ia = preferredOrder.indexOf(a.category);
+        const ib = preferredOrder.indexOf(b.category);
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      });
+      pkg = matches[0];
+      packageCategory = pkg.category;
     }
   }
 
