@@ -324,7 +324,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-lg">
-                        {option.months > 0 
+                        {(isActivationPackage || packageData?.category === 'subscription' || option.months > 0) 
                           ? `${option.months} Month${option.months > 1 ? 's' : ''}`
                           : `${option.credits} Credits`
                         }
