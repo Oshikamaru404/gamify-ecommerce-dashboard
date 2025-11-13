@@ -3,23 +3,27 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
+import SubscriptionPackageCard from '@/components/home/SubscriptionPackageCard';
 import PlanSelector from '@/components/PlanSelector';
 import StoreLayout from '@/components/store/StoreLayout';
-import CheckoutForm from '@/components/CheckoutForm';
+import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
+import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
+import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const Subscription = () => {
   const { t } = useLanguage();
-  const { data: packages, isLoading } = useIPTVPackages();
+  const { data: packages, isLoading: packagesLoading } = useSubscriptionPackages();
   const [searchParams] = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Filter only subscription packages
-  const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
+  // Filter active subscription packages
+  const subscriptionPackages = packages?.filter(pkg => pkg.status !== 'inactive') || [];
+  const isLoading = packagesLoading;
 
   // Check if a specific package is requested via URL params
   useEffect(() => {
@@ -50,7 +54,6 @@ const Subscription = () => {
   };
 
   const handleOrderSuccess = () => {
-    console.log('Order submitted successfully');
     setShowCheckout(false);
     setSelectedPlan(null);
     setSelectedPackage(null);
@@ -169,7 +172,7 @@ const Subscription = () => {
                       onClick={() => handlePackageSelect(pkg)}
                       className="cursor-pointer transform hover:scale-105 transition-transform duration-200"
                     >
-                      <ProductSubscriptionCard
+                      <SubscriptionPackageCard
                         package={pkg}
                         featured={pkg.status === 'featured'}
                       />
@@ -257,10 +260,18 @@ const Subscription = () => {
           </div>
         </div>
 
-        {/* Checkout Form Modal */}
-        {showCheckout && selectedPlan && (
-          <CheckoutForm
-            packageData={{ ...selectedPlan, icon_url: selectedPackage?.icon_url, icon: selectedPackage?.icon }}
+        {/* Payment Options Checkout Modal */}
+        {showCheckout && selectedPlan && selectedPackage && (
+          <PaymentOptionsCheckout
+            packageData={{
+              id: selectedPackage.id,
+              name: selectedPackage.name,
+              category: 'subscription',
+              description: selectedPackage.description,
+              icon_url: selectedPackage.icon_url,
+              price: selectedPlan.price,
+              duration: selectedPlan.credits || selectedPlan.months
+            }}
             onClose={handleCloseCheckout}
             onSuccess={handleOrderSuccess}
           />

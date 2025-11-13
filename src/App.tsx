@@ -1,8 +1,9 @@
 
+import { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { StoreProvider } from "./contexts/StoreContext";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
@@ -54,6 +55,21 @@ const queryClient = new QueryClient({
   },
 });
 
+// Scroll to top component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -62,6 +78,7 @@ function App() {
           <StoreProvider>
             <TooltipProvider>
               <BrowserRouter>
+                <ScrollToTop />
                 <Routes>
                   {/* Public routes - Updated to use Home as default */}
                   <Route path="/" element={<Home />} />
