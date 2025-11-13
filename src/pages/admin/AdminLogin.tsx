@@ -212,15 +212,6 @@ const AdminLogin = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 text-center font-medium mb-2">
-              Default Admin Credentials:
-            </p>
-            <div className="text-sm text-gray-700 space-y-1">
-              <p><strong>Username:</strong> admin</p>
-              <p><strong>Password:</strong> admin123</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

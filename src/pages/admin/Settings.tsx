@@ -43,6 +43,7 @@ import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 import WhatsAppTemplateEditor from '@/components/admin/WhatsAppTemplateEditor';
 import TranslationEditor from '@/components/admin/TranslationEditor';
 import HomepageCMSEditor from '@/components/admin/HomepageCMSEditor';
+import TwoFactorSetup from '@/components/admin/TwoFactorSetup';
 
 const generalSettingsSchema = z.object({
   storeName: z.string().min(1, 'Store name is required'),
@@ -289,6 +290,10 @@ const Settings = () => {
           <TabsTrigger value="api-keys" className="flex gap-2">
             <Key size={16} />
             <span>API Keys</span>
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex gap-2">
+            <Shield size={16} />
+            <span>Security</span>
           </TabsTrigger>
         </TabsList>
         
@@ -1187,6 +1192,10 @@ const Settings = () => {
               </Button>
             </CardFooter>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="security">
+          <TwoFactorSetup />
         </TabsContent>
       </Tabs>
     </div>
