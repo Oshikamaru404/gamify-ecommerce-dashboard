@@ -4,7 +4,7 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Server, Settings, BarChart3, ArrowRight } from 'lucide-react';
-import CheckoutForm from '@/components/CheckoutForm';
+import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
@@ -16,19 +16,13 @@ const IPTVPanel = () => {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  const handleContactWhatsApp = (packageName: string, credits: number, price: number) => {
-    const message = `${t.contact}, ${packageName} - ${credits} ${t.currency}${price}`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   const handleBuyNow = (pkg: any, credits: number, price: number) => {
     setSelectedPackage({
-      id: `iptv-${pkg.id}`,
+      id: pkg.id,
       name: pkg.name,
       description: pkg.description,
       icon_url: pkg.icon_url,
-      category: 'panel-iptv',
+      category: pkg.category,
       price: price,
       duration: credits
     });
@@ -218,13 +212,13 @@ const IPTVPanel = () => {
         </div>
 
         {/* Checkout Form Modal */}
-        {showCheckout && selectedPackage && (
-          <CheckoutForm 
-            packageData={selectedPackage} 
-            onClose={handleCloseCheckout} 
-            onSuccess={handleOrderSuccess} 
-          />
-        )}
+          {showCheckout && selectedPackage && (
+            <PaymentOptionsCheckout
+              packageData={selectedPackage}
+              onClose={handleCloseCheckout}
+              onSuccess={handleOrderSuccess}
+            />
+          )}
       </div>
     </StoreLayout>
   );
