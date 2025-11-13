@@ -30,16 +30,20 @@ const ManageProducts = () => {
   const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] = useState(false);
 
   // Filter IPTV packages by search term
-  const filteredIPTVPackages = iptvPackages?.filter(pkg =>
-    pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pkg.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredIPTVPackages = iptvPackages?.filter(pkg => {
+    const name = typeof pkg.name === 'string' ? pkg.name : JSON.stringify(pkg.name);
+    const description = typeof pkg.description === 'string' ? pkg.description : JSON.stringify(pkg.description);
+    return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      description?.toLowerCase().includes(searchTerm.toLowerCase());
+  }) || [];
 
   // Filter subscription packages by search term
-  const filteredSubscriptionPackages = subscriptionPackages?.filter(pkg =>
-    pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pkg.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredSubscriptionPackages = subscriptionPackages?.filter(pkg => {
+    const name = typeof pkg.name === 'string' ? pkg.name : JSON.stringify(pkg.name);
+    const description = typeof pkg.description === 'string' ? pkg.description : JSON.stringify(pkg.description);
+    return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      description?.toLowerCase().includes(searchTerm.toLowerCase());
+  }) || [];
 
   // Categorize IPTV packages exactly as they appear on the website
   const iptvPackagesByCategory = {

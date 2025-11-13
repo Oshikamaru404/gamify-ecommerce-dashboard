@@ -19,10 +19,12 @@ const ManageSubscriptionPackages = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Filter packages by search term
-  const filteredPackages = packages?.filter(pkg =>
-    pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pkg.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredPackages = packages?.filter(pkg => {
+    const name = typeof pkg.name === 'string' ? pkg.name : JSON.stringify(pkg.name);
+    const description = typeof pkg.description === 'string' ? pkg.description : JSON.stringify(pkg.description);
+    return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      description?.toLowerCase().includes(searchTerm.toLowerCase());
+  }) || [];
 
   const handleEdit = (pkg: SubscriptionPackage) => {
     setSelectedPackage(pkg);

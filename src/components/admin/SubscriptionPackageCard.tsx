@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Star, DollarSign, CreditCard } from 'lucide-react';
 import { SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedText } from '@/lib/multilingualUtils';
 
 interface SubscriptionPackageCardProps {
   package: SubscriptionPackage;
@@ -22,6 +24,9 @@ const SubscriptionPackageCard: React.FC<SubscriptionPackageCardProps> = ({
 }) => {
   const isFeatured = pkg.status === 'featured';
   const { data: creditOptions } = useSubscriptionCreditOptions(pkg.id);
+  const { language } = useLanguage();
+  const displayName = getLocalizedText(pkg.name, language);
+  const displayDescription = getLocalizedText(pkg.description, language);
   
   return (
     <Card className={`relative transition-all duration-200 hover:shadow-lg ${isFeatured ? 'border-2 border-yellow-400' : ''}`}>
@@ -49,8 +54,8 @@ const SubscriptionPackageCard: React.FC<SubscriptionPackageCardProps> = ({
               )}
             </div>
             <div>
-              <CardTitle className="text-lg">{pkg.name}</CardTitle>
-              <p className="text-sm text-gray-600">{pkg.description}</p>
+              <CardTitle className="text-lg">{displayName}</CardTitle>
+              <p className="text-sm text-gray-600">{displayDescription}</p>
             </div>
           </div>
           <div className="flex gap-2">
