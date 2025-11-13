@@ -3,28 +3,25 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Star, Check, Zap, Shield, Crown, CheckCircle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import SubscriptionPackageCard from '@/components/home/SubscriptionPackageCard';
+import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
 import PlanSelector from '@/components/PlanSelector';
 import StoreLayout from '@/components/store/StoreLayout';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
-import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
-import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
+import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card } from '@/components/ui/card';
-import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const Subscription = () => {
   const { t } = useLanguage();
-  const { data: packages, isLoading: packagesLoading } = useSubscriptionPackages();
+  const { data: packages, isLoading } = useIPTVPackages();
   const [searchParams] = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Filter active subscription packages
-  const subscriptionPackages = packages?.filter(pkg => pkg.status !== 'inactive') || [];
-  const isLoading = packagesLoading;
+  // Filter subscription packages from iptv_packages table
+  const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
 
   // Check if a specific package is requested via URL params
   useEffect(() => {
@@ -198,7 +195,7 @@ const Subscription = () => {
                       onClick={() => handlePackageSelect(pkg)}
                       className="cursor-pointer transform hover:scale-105 transition-transform duration-200"
                     >
-                      <SubscriptionPackageCard
+                      <ProductSubscriptionCard
                         package={pkg}
                         featured={pkg.status === 'featured'}
                       />
