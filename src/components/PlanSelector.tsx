@@ -33,9 +33,9 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     console.log('PlanSelector - Creating plans from package data:', packageData);
     const plans = [];
     
-    // Check for month-based pricing (subscription packages)
+    // Check for month-based pricing (iptv_packages with direct month pricing)
     if (packageData.price_1_month || packageData.price_3_months || packageData.price_6_months || packageData.price_12_months) {
-      console.log('PlanSelector - Month-based pricing detected');
+      console.log('PlanSelector - Month-based pricing detected (iptv_packages)');
       
       if (packageData.price_1_month) {
         plans.push({
@@ -74,10 +74,42 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         });
       }
     }
-    
-    // Check for credit-based pricing (panel packages)
-    if (packageData.price_10_credits || packageData.price_25_credits || packageData.price_50_credits || packageData.price_100_credits) {
-      console.log('PlanSelector - Credit-based pricing detected');
+    // Check for subscription packages (price_3_credits, price_6_credits, price_12_credits)
+    // These are MONTH-based subscriptions, not credit-based
+    else if (packageData.price_3_credits || packageData.price_6_credits || packageData.price_12_credits) {
+      console.log('PlanSelector - Month-based subscription pricing detected (subscription_packages)');
+      
+      if (packageData.price_3_credits) {
+        plans.push({
+          id: 'plan-3-months',
+          credits: packageData.credits_3_months || 3,
+          months: packageData.credits_3_months || 3,
+          price: packageData.price_3_credits,
+          sort_order: 2
+        });
+      }
+      if (packageData.price_6_credits) {
+        plans.push({
+          id: 'plan-6-months',
+          credits: packageData.credits_6_months || 6,
+          months: packageData.credits_6_months || 6,
+          price: packageData.price_6_credits,
+          sort_order: 3
+        });
+      }
+      if (packageData.price_12_credits) {
+        plans.push({
+          id: 'plan-12-months',
+          credits: packageData.credits_12_months || 12,
+          months: packageData.credits_12_months || 12,
+          price: packageData.price_12_credits,
+          sort_order: 4
+        });
+      }
+    }
+    // Check for credit-based pricing (panel packages with 10, 25, 50, 100 credits)
+    else if (packageData.price_10_credits || packageData.price_25_credits || packageData.price_50_credits || packageData.price_100_credits) {
+      console.log('PlanSelector - Credit-based pricing detected (panel packages)');
       
       if (packageData.price_10_credits) {
         plans.push({
