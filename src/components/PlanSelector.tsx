@@ -30,6 +30,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   const isActivationPackage = packageData?.category === 'activation-player';
 
   const createPlansFromPackageData = () => {
+    console.log('PlanSelector - Creating plans from package data:', packageData);
     const plans = [];
     if (packageData.price_1_month) {
       plans.push({
@@ -67,6 +68,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
         sort_order: 4
       });
     }
+    console.log('PlanSelector - Created plans:', plans);
     return plans;
   };
 
