@@ -9,24 +9,17 @@ import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from '
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { data: iptvPackages, isLoading: iptvLoading } = useIPTVPackages();
-  const { data: subscriptionPackages, isLoading: subscriptionLoading } = useSubscriptionPackages();
+  const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  const isLoading = iptvLoading || subscriptionLoading;
-
-  // Combine all packages
-  const allPackages = [...(iptvPackages || []), ...(subscriptionPackages || [])];
-
   // Enhanced slug generation to match all package types
-  const generateSlug = (name: string, category?: string) => {
+  const generateSlug = (name: string, category: string) => {
     const baseSlug = name.toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '')
@@ -44,17 +37,15 @@ const ProductDetail = () => {
   let pkg: any = null;
   let packageCategory = '';
 
-  if (allPackages.length > 0) {
+  if (packages) {
     // Check all package categories
-    for (const p of allPackages) {
+    for (const p of packages) {
       if (p.status !== 'inactive') {
-        // Handle both IPTV packages (with category) and subscription packages (without category field)
-        const pkgCategory = 'category' in p ? p.category : 'subscription';
-        const generatedSlug = generateSlug(p.name, pkgCategory);
+        const generatedSlug = generateSlug(p.name, p.category);
         
         if (generatedSlug === slug) {
           pkg = p;
-          packageCategory = pkgCategory;
+          packageCategory = p.category;
           break;
         }
       }
