@@ -4,7 +4,8 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Monitor, Settings, BarChart3, Crown, ArrowRight } from 'lucide-react';
-import CheckoutForm from '@/components/CheckoutForm';
+import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
+import { useLocalizedText } from '@/lib/multilingualUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { Link } from 'react-router-dom';
@@ -15,17 +16,13 @@ const PlayerPanel = () => {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  const handleContactWhatsApp = (packageName: string, credits: number, price: number) => {
-    const message = `${t.contact}, ${packageName} - ${credits} credits for $${price}`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const handleBuyNow = (packageName: string, credits: number, price: number) => {
+  const handleBuyNow = (pkg: any, credits: number, price: number) => {
     setSelectedPackage({
-      id: `player-${packageName.toLowerCase().replace(/\s+/g, '-')}`,
-      name: packageName,
-      category: 'player-panel',
+      id: pkg.id,
+      name: pkg.name,
+      description: pkg.description,
+      icon_url: pkg.icon_url,
+      category: pkg.category,
       price: price,
       duration: credits
     });
@@ -103,7 +100,11 @@ const PlayerPanel = () => {
 
           <section className="space-y-16">
             {playerPackages.length > 0 ? (
-              playerPackages.map((pkg, index) => (
+              playerPackages.map((pkg, index) => {
+                const displayName = useLocalizedText(pkg.name);
+                const displayDescription = useLocalizedText(pkg.description);
+                
+                return (
                 <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                   <div className="bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] text-white p-8">
                     <div className="flex items-center gap-4">
@@ -111,7 +112,7 @@ const PlayerPanel = () => {
                         {pkg.icon_url ? (
                           <img 
                             src={pkg.icon_url} 
-                            alt={pkg.name} 
+                            alt={displayName} 
                             className="w-14 h-14 rounded-lg object-cover shadow-lg" 
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -129,8 +130,8 @@ const PlayerPanel = () => {
                         </div>
                       </div>
                       <div>
-                        <h2 className="text-3xl font-bold">{pkg.name}</h2>
-                        <p className="text-purple-100 text-lg">{pkg.description}</p>
+                        <h2 className="text-3xl font-bold">{displayName}</h2>
+                        <p className="text-purple-100 text-lg">{displayDescription}</p>
                       </div>
                     </div>
                   </div>
@@ -186,7 +187,8 @@ const PlayerPanel = () => {
                     </div>
                   </div>
                 </div>
-              ))
+              );
+            })
             ) : (
               <div className="text-center py-16">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">No Player Packages Available</h3>
@@ -212,13 +214,13 @@ const PlayerPanel = () => {
         </div>
 
         {/* Checkout Form Modal */}
-        {showCheckout && selectedPackage && (
-          <CheckoutForm 
-            packageData={selectedPackage} 
-            onClose={handleCloseCheckout} 
-            onSuccess={handleOrderSuccess} 
-          />
-        )}
+          {showCheckout && selectedPackage && (
+            <PaymentOptionsCheckout
+              packageData={selectedPackage}
+              onClose={handleCloseCheckout}
+              onSuccess={handleOrderSuccess}
+            />
+          )}
       </div>
     </StoreLayout>
   );
