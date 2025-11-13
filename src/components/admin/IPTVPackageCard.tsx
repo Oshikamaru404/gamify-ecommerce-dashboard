@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor } from 'lucide-react';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedText } from '@/lib/multilingualUtils';
 
 type IPTVPackageCardProps = {
   package: IPTVPackage;
@@ -20,6 +22,9 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   onDelete,
   onToggleFeatured,
 }) => {
+  const { language } = useLanguage();
+  const displayName = getLocalizedText(pkg.name, language);
+  const displayDescription = getLocalizedText(pkg.description, language);
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'subscription':
@@ -235,7 +240,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
             </div>
             <div className="flex-1 min-w-0">
               <CardTitle className="text-lg text-gray-900 break-words leading-tight">
-                {pkg.name}
+                {displayName}
               </CardTitle>
               <div className="flex flex-wrap gap-2 mt-2">
                 {getCategoryBadge(pkg.category)}
@@ -274,8 +279,8 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        {pkg.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{pkg.description}</p>
+        {displayDescription && (
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{displayDescription}</p>
         )}
         
         {renderPricing()}

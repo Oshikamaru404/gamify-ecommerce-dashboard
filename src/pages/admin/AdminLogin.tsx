@@ -5,16 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, adminUser, isLoading: authLoading } = useAdminAuth();
+  const { login, verifyOtp, adminUser, isLoading: authLoading } = useAdminAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -29,45 +30,97 @@ const AdminLogin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !password) {
-      toast({
-        title: 'Error',
-        description: 'Please enter both username and password',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    console.log('AdminLogin - Attempting login...');
-
-    try {
-      const success = await login(username, password);
-      
-      if (success) {
-        console.log('AdminLogin - Login successful');
+    if (!showOtpInput) {
+      // First step: validate username and password
+      if (!username || !password) {
         toast({
-          title: 'Login Successful',
-          description: 'Welcome to the admin dashboard!',
-        });
-        navigate('/admin', { replace: true });
-      } else {
-        console.log('AdminLogin - Login failed');
-        toast({
-          title: 'Login Failed',
-          description: 'Invalid username or password. Please try again.',
+          title: 'Error',
+          description: 'Please enter both username and password',
           variant: 'destructive',
         });
+        return;
       }
-    } catch (error) {
-      console.error('AdminLogin - Login error:', error);
-      toast({
-        title: 'Error',
-        description: 'An error occurred during login. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
+
+      setIsLoading(true);
+      console.log('AdminLogin - Attempting login...');
+
+      try {
+        const result = await login(username, password);
+        
+        if (result.success) {
+          if (result.requires2FA) {
+            console.log('AdminLogin - 2FA required');
+            setShowOtpInput(true);
+            toast({
+              title: 'Authentication Required',
+              description: 'Please enter your 6-digit authentication code',
+            });
+          } else {
+            console.log('AdminLogin - Login successful');
+            toast({
+              title: 'Login Successful',
+              description: 'Welcome to the admin dashboard!',
+            });
+            navigate('/admin', { replace: true });
+          }
+        } else {
+          console.log('AdminLogin - Login failed');
+          toast({
+            title: 'Login Failed',
+            description: 'Invalid username or password. Please try again.',
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('AdminLogin - Login error:', error);
+        toast({
+          title: 'Error',
+          description: 'An error occurred during login. Please try again.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Second step: verify OTP
+      if (!otpCode || otpCode.length !== 6) {
+        toast({
+          title: 'Error',
+          description: 'Please enter a valid 6-digit code',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const success = await verifyOtp(otpCode);
+        
+        if (success) {
+          console.log('AdminLogin - OTP verified, login successful');
+          toast({
+            title: 'Login Successful',
+            description: 'Welcome to the admin dashboard!',
+          });
+          navigate('/admin', { replace: true });
+        } else {
+          toast({
+            title: 'Invalid Code',
+            description: 'The authentication code is incorrect. Please try again.',
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('AdminLogin - OTP verification error:', error);
+        toast({
+          title: 'Error',
+          description: 'An error occurred during verification. Please try again.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -104,46 +157,53 @@ const AdminLogin = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
+            {!showOtpInput ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="otp">Authentication Code</Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  id="otp"
+                  type="text"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Enter 6-digit code"
+                  disabled={isLoading}
+                  maxLength={6}
                   required
-                  disabled={isLoading}
+                  className="text-center text-2xl tracking-widest"
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
+                <p className="text-sm text-muted-foreground text-center">
+                  Enter the code from your authenticator app
+                </p>
               </div>
-            </div>
+            )}
             <Button
               type="submit"
               className="w-full bg-red-600 hover:bg-red-700"
