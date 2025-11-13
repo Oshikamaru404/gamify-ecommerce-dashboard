@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import ProductSubscriptionCard from '@/components/home/ProductSubscriptionCard';
+import SubscriptionPackageCard from '@/components/home/SubscriptionPackageCard';
 import FeedbackCards from '@/components/home/FeedbackCards';
 import NewsletterSubscription from '@/components/home/NewsletterSubscription';
 import ActivationSection from '@/components/home/ActivationSection';
@@ -11,15 +12,19 @@ import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
 import { useHomepageContent } from '@/hooks/useHomepageContent';
 import { getLocalizedText } from '@/lib/multilingualUtils';
 
 const Home = () => {
   const { t, language } = useLanguage();
-  const { data: packages, isLoading } = useIPTVPackages();
+  const { data: iptvPackages, isLoading: iptvLoading } = useIPTVPackages();
+  const { data: subscriptionPackages, isLoading: subscriptionLoading } = useSubscriptionPackages();
   const { data: homepageContent } = useHomepageContent();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+
+  const isLoading = iptvLoading || subscriptionLoading;
 
   // Helper function to get content from CMS
   const getContent = (sectionKey: string, field: string, fallback: string = '') => {
@@ -48,8 +53,8 @@ const Home = () => {
     console.log('Order submitted successfully');
   };
 
-  // Filter only subscription packages
-  const subscriptionPackages = packages?.filter(pkg => pkg.category === 'subscription' && pkg.status !== 'inactive') || [];
+  // Filter active subscription packages
+  const activeSubscriptionPackages = subscriptionPackages?.filter(pkg => pkg.status !== 'inactive') || [];
 
   if (isLoading) {
     return (
@@ -122,10 +127,10 @@ const Home = () => {
               </div>
             </div>
 
-            {subscriptionPackages.length > 0 ? (
+            {activeSubscriptionPackages.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {subscriptionPackages.map((pkg) => (
-                  <ProductSubscriptionCard
+                {activeSubscriptionPackages.map((pkg) => (
+                  <SubscriptionPackageCard
                     key={pkg.id}
                     package={pkg}
                     featured={pkg.status === 'featured'}
