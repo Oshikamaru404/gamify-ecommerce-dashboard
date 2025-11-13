@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import * as OTPAuth from 'otpauth';
 import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 interface AdminUser {
   id: string;
@@ -88,7 +89,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         return { success: false };
       }
 
-      // Verify password
+      // Verify password hash
       const isPasswordValid = await bcrypt.compare(password, adminUserData.password_hash || '');
       
       if (!isPasswordValid) {
@@ -97,22 +98,21 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
 
       // Check if 2FA is enabled
-      if (adminUserData?.two_factor_enabled && adminUserData?.two_factor_secret) {
+      if (adminUserData.two_factor_enabled && adminUserData.two_factor_secret) {
         console.log('AdminAuth - 2FA enabled, requiring OTP');
         setPendingAuth({
-          id: adminUserData.id || 'admin-' + Date.now(),
+          id: adminUserData.id,
           username: adminUserData.username,
-          role: adminUserData.role || 'admin'
+          role: adminUserData.role
         });
         return { success: true, requires2FA: true };
       }
 
       // No 2FA required, complete login
       const adminData = {
-        id: adminUserData?.id || 'admin-' + Date.now(),
+        id: adminUserData.id,
         username: adminUserData.username,
-        email: 'admin@demo.com',
-        twoFactorEnabled: adminUserData?.two_factor_enabled || false
+        twoFactorEnabled: adminUserData.two_factor_enabled || false
       };
       
       console.log('AdminAuth - Login successful, setting admin user:', adminData);
