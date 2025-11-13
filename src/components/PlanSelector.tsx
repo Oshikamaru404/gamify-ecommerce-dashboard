@@ -30,7 +30,20 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   const isActivationPackage = packageData?.category === 'activation-player';
 
   const createPlansFromPackageData = () => {
-    console.log('PlanSelector - Creating plans from package data:', packageData);
+    console.log('PlanSelector - Full package data received:', packageData);
+    console.log('PlanSelector - Pricing fields:', {
+      price_1_month: packageData.price_1_month,
+      price_3_months: packageData.price_3_months,
+      price_6_months: packageData.price_6_months,
+      price_12_months: packageData.price_12_months,
+      price_3_credits: packageData.price_3_credits,
+      price_6_credits: packageData.price_6_credits,
+      price_12_credits: packageData.price_12_credits,
+      price_10_credits: packageData.price_10_credits,
+      price_25_credits: packageData.price_25_credits,
+      price_50_credits: packageData.price_50_credits,
+      price_100_credits: packageData.price_100_credits
+    });
     const plans = [];
     
     // Check for month-based pricing (iptv_packages with direct month pricing)
