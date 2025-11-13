@@ -9,7 +9,8 @@ import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from '
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { useLocalizedText } from '@/lib/multilingualUtils';
+import { useLocalizedText, getLocalizedText } from '@/lib/multilingualUtils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -17,10 +18,15 @@ const ProductDetail = () => {
   const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const { language } = useLanguage();
 
-  // Enhanced slug generation to match all package types
-  const generateSlug = (name: string, category: string) => {
-    const baseSlug = name.toLowerCase()
+  // Enhanced slug generation to match all package types (handles multilingual names)
+  const generateSlug = (name: any, category: string) => {
+    const rawText = typeof name === 'string' ? name : JSON.stringify(name || '');
+    const localized = getLocalizedText(rawText, language, 'en');
+    const baseSlug = localized
+      .toString()
+      .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
