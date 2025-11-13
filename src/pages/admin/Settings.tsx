@@ -254,48 +254,50 @@ const Settings = () => {
       </div>
       
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="general" className="flex gap-2">
-            <SettingsIcon size={16} />
-            <span>General</span>
-          </TabsTrigger>
-          <TabsTrigger value="contact" className="flex gap-2">
-            <MessageCircle size={16} />
-            <span>Contact</span>
-          </TabsTrigger>
-          <TabsTrigger value="whatsapp-templates" className="flex gap-2">
-            <MessageCircle size={16} />
-            <span>WhatsApp Templates</span>
-          </TabsTrigger>
-          <TabsTrigger value="translations" className="flex gap-2">
-            <Languages size={16} />
-            <span>Translations</span>
-          </TabsTrigger>
-          <TabsTrigger value="homepage-cms" className="flex gap-2">
-            <Palette size={16} />
-            <span>Homepage CMS</span>
-          </TabsTrigger>
-          <TabsTrigger value="payment" className="flex gap-2">
-            <CreditCard size={16} />
-            <span>Payment</span>
-          </TabsTrigger>
-          <TabsTrigger value="email" className="flex gap-2">
-            <Mail size={16} />
-            <span>Email Automation</span>
-          </TabsTrigger>
-          <TabsTrigger value="dashboard" className="flex gap-2">
-            <Palette size={16} />
-            <span>Dashboard Colors</span>
-          </TabsTrigger>
-          <TabsTrigger value="api-keys" className="flex gap-2">
-            <Key size={16} />
-            <span>API Keys</span>
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex gap-2">
-            <Shield size={16} />
-            <span>Security</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="inline-flex flex-wrap h-auto gap-2 bg-transparent p-0">
+            <TabsTrigger value="general" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <SettingsIcon size={16} />
+              <span className="hidden sm:inline">General</span>
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <MessageCircle size={16} />
+              <span className="hidden sm:inline">Contact</span>
+            </TabsTrigger>
+            <TabsTrigger value="whatsapp-templates" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <MessageCircle size={16} />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </TabsTrigger>
+            <TabsTrigger value="translations" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Languages size={16} />
+              <span className="hidden sm:inline">Translations</span>
+            </TabsTrigger>
+            <TabsTrigger value="homepage-cms" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Palette size={16} />
+              <span className="hidden sm:inline">Homepage</span>
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <CreditCard size={16} />
+              <span className="hidden sm:inline">Payment</span>
+            </TabsTrigger>
+            <TabsTrigger value="email" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Mail size={16} />
+              <span className="hidden sm:inline">Email</span>
+            </TabsTrigger>
+            <TabsTrigger value="dashboard" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Palette size={16} />
+              <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="api-keys" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Key size={16} />
+              <span className="hidden sm:inline">API Keys</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Shield size={16} />
+              <span className="hidden sm:inline">Security</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value="general">
           <Card>
