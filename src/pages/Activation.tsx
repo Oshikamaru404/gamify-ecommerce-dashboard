@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,13 @@ import { Crown, Smartphone, Tv, Tablet, Monitor, Zap, Shield, Clock, CheckCircle
 import StoreLayout from '@/components/store/StoreLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 
 const Activation = () => {
   const { t } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -37,6 +40,30 @@ const Activation = () => {
       return `${baseSlug}-activation`;
     }
     return baseSlug;
+  };
+
+  const handleBuyNow = (pkg: any) => {
+    const packageData = {
+      id: pkg.id,
+      name: pkg.name,
+      category: pkg.category,
+      description: pkg.description,
+      icon_url: pkg.icon_url,
+      price: pkg.price_12_months || 0,
+      duration: 12
+    };
+    setSelectedPackage(packageData);
+    setShowCheckout(true);
+  };
+
+  const handleCloseCheckout = () => {
+    setShowCheckout(false);
+    setSelectedPackage(null);
+  };
+
+  const handleOrderSuccess = () => {
+    setShowCheckout(false);
+    setSelectedPackage(null);
   };
 
   const deviceTypes = [
@@ -267,13 +294,14 @@ const Activation = () => {
                             </div>
                           </div>
 
-                          {/* View Details Button */}
+                          {/* Buy Now Button */}
                           <div className="mt-auto">
-                            <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-                              <Link to={`/products/${productSlug}`}>
-                                Purchase 12-Month Package
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </Link>
+                            <Button 
+                              onClick={() => handleBuyNow(pkg)}
+                              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl"
+                            >
+                              Buy Now - €{price12Months.toFixed(2)}
+                              <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -321,6 +349,15 @@ const Activation = () => {
           </div>
         </section>
       </div>
+
+      {/* Checkout Form Modal */}
+      {showCheckout && selectedPackage && (
+        <PaymentOptionsCheckout
+          packageData={selectedPackage}
+          onClose={handleCloseCheckout}
+          onSuccess={handleOrderSuccess}
+        />
+      )}
     </StoreLayout>
   );
 };
