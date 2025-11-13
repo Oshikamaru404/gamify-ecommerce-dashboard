@@ -31,49 +31,92 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const createPlansFromPackageData = () => {
     console.log('PlanSelector - Creating plans from package data:', packageData);
-    console.log('PlanSelector - Price fields:', {
-      price_1_month: packageData.price_1_month,
-      price_3_months: packageData.price_3_months,
-      price_6_months: packageData.price_6_months,
-      price_12_months: packageData.price_12_months
-    });
     const plans = [];
-    if (packageData.price_1_month) {
-      plans.push({
-        id: 'plan-1-month',
-        credits: 1,
-        months: 1,
-        price: packageData.price_1_month,
-        sort_order: 1
-      });
+    
+    // Check for month-based pricing (subscription packages)
+    if (packageData.price_1_month || packageData.price_3_months || packageData.price_6_months || packageData.price_12_months) {
+      console.log('PlanSelector - Month-based pricing detected');
+      
+      if (packageData.price_1_month) {
+        plans.push({
+          id: 'plan-1-month',
+          credits: 1,
+          months: 1,
+          price: packageData.price_1_month,
+          sort_order: 1
+        });
+      }
+      if (packageData.price_3_months) {
+        plans.push({
+          id: 'plan-3-months',
+          credits: 3,
+          months: 3,
+          price: packageData.price_3_months,
+          sort_order: 2
+        });
+      }
+      if (packageData.price_6_months) {
+        plans.push({
+          id: 'plan-6-months',
+          credits: 6,
+          months: 6,
+          price: packageData.price_6_months,
+          sort_order: 3
+        });
+      }
+      if (packageData.price_12_months) {
+        plans.push({
+          id: 'plan-12-months',
+          credits: 12,
+          months: 12,
+          price: packageData.price_12_months,
+          sort_order: 4
+        });
+      }
     }
-    if (packageData.price_3_months) {
-      plans.push({
-        id: 'plan-3-months',
-        credits: 3,
-        months: 3,
-        price: packageData.price_3_months,
-        sort_order: 2
-      });
+    
+    // Check for credit-based pricing (panel packages)
+    if (packageData.price_10_credits || packageData.price_25_credits || packageData.price_50_credits || packageData.price_100_credits) {
+      console.log('PlanSelector - Credit-based pricing detected');
+      
+      if (packageData.price_10_credits) {
+        plans.push({
+          id: 'plan-10-credits',
+          credits: 10,
+          months: 0,
+          price: packageData.price_10_credits,
+          sort_order: 1
+        });
+      }
+      if (packageData.price_25_credits) {
+        plans.push({
+          id: 'plan-25-credits',
+          credits: 25,
+          months: 0,
+          price: packageData.price_25_credits,
+          sort_order: 2
+        });
+      }
+      if (packageData.price_50_credits) {
+        plans.push({
+          id: 'plan-50-credits',
+          credits: 50,
+          months: 0,
+          price: packageData.price_50_credits,
+          sort_order: 3
+        });
+      }
+      if (packageData.price_100_credits) {
+        plans.push({
+          id: 'plan-100-credits',
+          credits: 100,
+          months: 0,
+          price: packageData.price_100_credits,
+          sort_order: 4
+        });
+      }
     }
-    if (packageData.price_6_months) {
-      plans.push({
-        id: 'plan-6-months',
-        credits: 6,
-        months: 6,
-        price: packageData.price_6_months,
-        sort_order: 3
-      });
-    }
-    if (packageData.price_12_months) {
-      plans.push({
-        id: 'plan-12-months',
-        credits: 12,
-        months: 12,
-        price: packageData.price_12_months,
-        sort_order: 4
-      });
-    }
+    
     console.log('PlanSelector - Created plans:', plans);
     return plans;
   };
@@ -128,6 +171,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   };
 
   const formatMonthlyAverage = (price: number, months: number) => {
+    if (months === 0) return null; // Credit-based pricing has no monthly average
     const monthlyAverage = (price / months).toFixed(2);
     return `USD ${monthlyAverage}/month`;
   };
@@ -175,7 +219,13 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
   }
 
-  const sortedOptions = [...availableOptions].sort((a, b) => a.months - b.months);
+  const sortedOptions = [...availableOptions].sort((a, b) => {
+    // Sort credit-based options by credits, month-based by months
+    if (a.months === 0 && b.months === 0) return a.credits - b.credits;
+    if (a.months === 0) return -1;
+    if (b.months === 0) return 1;
+    return a.months - b.months;
+  });
   const monthlyOption = sortedOptions.find(option => option.months === 1);
 
   return (
@@ -229,11 +279,16 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-lg">
-                        {option.months} Month{option.months > 1 ? 's' : ''}
+                        {option.months > 0 
+                          ? `${option.months} Month${option.months > 1 ? 's' : ''}`
+                          : `${option.credits} Credits`
+                        }
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {formatMonthlyAverage(option.price, option.months)}
-                      </div>
+                      {option.months > 0 && (
+                        <div className="text-sm text-gray-500">
+                          {formatMonthlyAverage(option.price, option.months)}
+                        </div>
+                      )}
                       {/* Add savings badges for 3, 6, and 12 month plans */}
                       {monthlyOption && option.months > 1 && (
                         <div className="mt-1">
