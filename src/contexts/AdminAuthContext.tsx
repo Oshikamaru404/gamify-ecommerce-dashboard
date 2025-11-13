@@ -19,14 +19,15 @@ interface LoginResult {
 interface AdminAuthContextType {
   adminUser: AdminUser | null;
   login: (username: string, password: string) => Promise<LoginResult>;
-  verifyOtp: (code: string) => Promise<boolean>;
+  verifyOtp: (code: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
 }
 
 interface PendingAuth {
+  id: string;
   username: string;
-  secret: string;
+  role: string;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
@@ -125,8 +126,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (adminUserData?.two_factor_enabled && adminUserData?.two_factor_secret) {
           console.log('AdminAuth - 2FA enabled, requiring OTP');
           setPendingAuth({
+            id: adminUserData.id || 'admin-' + Date.now(),
             username: 'admin',
-            secret: adminUserData.two_factor_secret
+            role: 'admin'
           });
           return { success: true, requires2FA: true };
         }
@@ -154,47 +156,81 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const verifyOtp = async (code: string): Promise<boolean> => {
+  const verifyOtp = async (code: string): Promise<{ success: boolean; error?: string }> => {
+    if (!pendingAuth) {
+      return { success: false, error: 'No pending authentication' };
+    }
+
     try {
-      if (!pendingAuth) {
-        console.error('AdminAuth - No pending authentication');
-        return false;
+      const { data: adminUser } = await supabase
+        .from('admin_users')
+        .select('two_factor_secret, backup_codes')
+        .eq('username', pendingAuth.username)
+        .single();
+
+      if (!adminUser?.two_factor_secret) {
+        return { success: false, error: 'Two-factor authentication not configured' };
       }
 
-      // Verify the OTP code
+      // Check if it's a backup code (8 characters)
+      if (code.length === 8) {
+        const backupCodes = adminUser.backup_codes || [];
+        const codeIndex = backupCodes.indexOf(code.toUpperCase());
+        
+        if (codeIndex === -1) {
+          return { success: false, error: 'Invalid backup code' };
+        }
+
+        // Remove used backup code
+        const updatedCodes = backupCodes.filter((_, index) => index !== codeIndex);
+        await supabase
+          .from('admin_users')
+          .update({ backup_codes: updatedCodes })
+          .eq('username', pendingAuth.username);
+
+        const adminUserData: AdminUser = {
+          id: pendingAuth.id,
+          username: pendingAuth.username,
+          twoFactorEnabled: true,
+        };
+
+        setAdminUser(adminUserData);
+        setPendingAuth(null);
+        localStorage.setItem('admin_user', JSON.stringify(adminUserData));
+
+        return { success: true };
+      }
+
+      // Verify TOTP code (6 digits)
       const totp = new OTPAuth.TOTP({
         issuer: 'Admin Panel',
         label: pendingAuth.username,
         algorithm: 'SHA1',
         digits: 6,
         period: 30,
-        secret: OTPAuth.Secret.fromBase32(pendingAuth.secret),
+        secret: OTPAuth.Secret.fromBase32(adminUser.two_factor_secret),
       });
 
       const delta = totp.validate({ token: code, window: 1 });
-
-      if (delta !== null) {
-        // OTP is valid
-        const adminData = {
-          id: 'admin-' + Date.now(),
-          username: pendingAuth.username,
-          email: 'admin@demo.com',
-          twoFactorEnabled: true
-        };
-        
-        console.log('AdminAuth - OTP verified, login successful:', adminData);
-        setAdminUser(adminData);
-        localStorage.setItem('admin_user', JSON.stringify(adminData));
-        setPendingAuth(null);
-        
-        return true;
+      
+      if (delta === null) {
+        return { success: false, error: 'Invalid verification code' };
       }
 
-      console.log('AdminAuth - Invalid OTP code');
-      return false;
+      const adminUserData: AdminUser = {
+        id: pendingAuth.id,
+        username: pendingAuth.username,
+        twoFactorEnabled: true,
+      };
+
+      setAdminUser(adminUserData);
+      setPendingAuth(null);
+      localStorage.setItem('admin_user', JSON.stringify(adminUserData));
+
+      return { success: true };
     } catch (error) {
-      console.error('AdminAuth - OTP verification error:', error);
-      return false;
+      console.error('OTP verification error:', error);
+      return { success: false, error: 'Verification failed' };
     }
   };
 

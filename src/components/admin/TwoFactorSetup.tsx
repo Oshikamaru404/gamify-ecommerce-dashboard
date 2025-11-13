@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, Copy, Check } from 'lucide-react';
+import { Shield, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import QRCode from 'qrcode';
@@ -11,6 +11,8 @@ const TwoFactorSetup = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [secret, setSecret] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [showBackupCodes, setShowBackupCodes] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -21,7 +23,7 @@ const TwoFactorSetup = () => {
     try {
       const { data: adminUser } = await supabase
         .from('admin_users')
-        .select('two_factor_secret')
+        .select('two_factor_secret, backup_codes')
         .eq('username', 'admin')
         .single();
 
@@ -40,6 +42,7 @@ const TwoFactorSetup = () => {
         
         setQrCodeUrl(qrCode);
         setSecret(adminUser.two_factor_secret);
+        setBackupCodes(adminUser.backup_codes || []);
       }
     } catch (error) {
       console.error('Error loading 2FA setup:', error);
@@ -49,6 +52,72 @@ const TwoFactorSetup = () => {
         variant: 'destructive',
       });
     }
+  };
+
+  const generateBackupCodes = () => {
+    const codes: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+      codes.push(code);
+    }
+    return codes;
+  };
+
+  const regenerateBackupCodes = async () => {
+    try {
+      const newCodes = generateBackupCodes();
+      
+      const { error } = await supabase
+        .from('admin_users')
+        .update({ 
+          backup_codes: newCodes,
+          created_backup_codes_at: new Date().toISOString()
+        })
+        .eq('username', 'admin');
+
+      if (error) throw error;
+
+      setBackupCodes(newCodes);
+      setShowBackupCodes(true);
+      
+      toast({
+        title: 'Success',
+        description: 'Backup codes regenerated successfully',
+      });
+    } catch (error) {
+      console.error('Error regenerating backup codes:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to regenerate backup codes',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const downloadBackupCodes = () => {
+    const content = backupCodes.join('\n');
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup-codes.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: 'Downloaded',
+      description: 'Backup codes downloaded successfully',
+    });
+  };
+
+  const copyBackupCodes = () => {
+    navigator.clipboard.writeText(backupCodes.join('\n'));
+    toast({
+      title: 'Copied',
+      description: 'Backup codes copied to clipboard',
+    });
   };
 
   const copySecret = () => {
@@ -115,6 +184,67 @@ const TwoFactorSetup = () => {
               <strong>Important:</strong> Save your secret key in a secure location. If you lose access to your authenticator app, you'll need this key to regain access.
             </p>
           </div>
+        </div>
+
+        <div className="space-y-4 pt-6 border-t">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Backup Codes</h3>
+              <p className="text-sm text-muted-foreground">
+                Use these codes to access your account if you lose your device
+              </p>
+            </div>
+            <Button 
+              onClick={regenerateBackupCodes}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              {backupCodes.length > 0 ? 'Regenerate' : 'Generate'} Codes
+            </Button>
+          </div>
+
+          {backupCodes.length > 0 && (
+            <div className="space-y-4">
+              <div className="bg-muted rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-2 font-mono text-sm">
+                  {backupCodes.map((code, index) => (
+                    <div key={index} className="p-2 bg-background rounded border">
+                      {code}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  onClick={downloadBackupCodes}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download
+                </Button>
+                <Button 
+                  onClick={copyBackupCodes}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy All
+                </Button>
+              </div>
+
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                <p className="text-sm text-destructive">
+                  <strong>Warning:</strong> Each backup code can only be used once. Store them securely and regenerate new codes after using them.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

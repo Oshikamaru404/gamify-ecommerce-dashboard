@@ -82,11 +82,11 @@ const AdminLogin = () => {
         setIsLoading(false);
       }
     } else {
-      // Second step: verify OTP
-      if (!otpCode || otpCode.length !== 6) {
+      // Second step: verify OTP or backup code
+      if (!otpCode || (otpCode.length !== 6 && otpCode.length !== 8)) {
         toast({
           title: 'Error',
-          description: 'Please enter a valid 6-digit code',
+          description: 'Please enter a valid 6-digit code or 8-character backup code',
           variant: 'destructive',
         });
         return;
@@ -95,9 +95,9 @@ const AdminLogin = () => {
       setIsLoading(true);
 
       try {
-        const success = await verifyOtp(otpCode);
+        const result = await verifyOtp(otpCode);
         
-        if (success) {
+        if (result.success) {
           console.log('AdminLogin - OTP verified, login successful');
           toast({
             title: 'Login Successful',
@@ -107,7 +107,7 @@ const AdminLogin = () => {
         } else {
           toast({
             title: 'Invalid Code',
-            description: 'The authentication code is incorrect. Please try again.',
+            description: result.error || 'The authentication code is incorrect. You can also use a backup code if you\'ve lost access to your authenticator.',
             variant: 'destructive',
           });
         }
@@ -182,8 +182,11 @@ const AdminLogin = () => {
                     placeholder="Enter your password"
                     disabled={isLoading}
                     required
-                  />
-                </div>
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter your 6-digit code from Google Authenticator or an 8-character backup code
+                </p>
+              </div>
               </>
             ) : (
               <div className="space-y-2">
@@ -192,12 +195,12 @@ const AdminLogin = () => {
                   id="otp"
                   type="text"
                   value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Enter 6-digit code"
+                  onChange={(e) => setOtpCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
+                  placeholder="Enter code"
                   disabled={isLoading}
-                  maxLength={6}
+                  maxLength={8}
                   required
-                  className="text-center text-2xl tracking-widest"
+                  className="text-center text-xl tracking-widest font-mono"
                 />
                 <p className="text-sm text-muted-foreground text-center">
                   Enter the code from your authenticator app
