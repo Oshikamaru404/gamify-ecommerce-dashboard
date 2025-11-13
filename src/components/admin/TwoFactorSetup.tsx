@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, Copy, Check, RefreshCw, Download } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Shield, Copy, Check, RefreshCw, Download, User, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import QRCode from 'qrcode';
 import * as OTPAuth from 'otpauth';
+import bcrypt from 'bcryptjs';
+import { Separator } from '@/components/ui/separator';
 
 const TwoFactorSetup = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [secret, setSecret] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showBackupCodes, setShowBackupCodes] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,11 +32,16 @@ const TwoFactorSetup = () => {
     try {
       const { data: adminUser } = await supabase
         .from('admin_users')
-        .select('two_factor_secret, backup_codes')
+        .select('username, two_factor_secret, backup_codes, two_factor_enabled')
         .eq('username', 'admin')
         .single();
 
-      if (adminUser?.two_factor_secret) {
+      if (adminUser) {
+        setNewUsername(adminUser.username || '');
+        setIs2FAEnabled(adminUser.two_factor_enabled || false);
+        setBackupCodes(adminUser.backup_codes || []);
+        
+        if (adminUser.two_factor_secret) {
         const totp = new OTPAuth.TOTP({
           issuer: 'Admin Panel',
           label: 'admin',
@@ -39,10 +53,10 @@ const TwoFactorSetup = () => {
 
         const otpauthUrl = totp.toString();
         const qrCode = await QRCode.toDataURL(otpauthUrl);
-        
-        setQrCodeUrl(qrCode);
-        setSecret(adminUser.two_factor_secret);
-        setBackupCodes(adminUser.backup_codes || []);
+          
+          setQrCodeUrl(qrCode);
+          setSecret(adminUser.two_factor_secret);
+        }
       }
     } catch (error) {
       console.error('Error loading 2FA setup:', error);
@@ -120,6 +134,128 @@ const TwoFactorSetup = () => {
     });
   };
 
+  const handleChangeUsername = async () => {
+    if (!newUsername.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Username cannot be empty',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('admin_users')
+        .update({ username: newUsername })
+        .eq('username', 'admin');
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Username updated successfully. Please log in with your new username.',
+      });
+
+      // Update localStorage with new username
+      const adminData = JSON.parse(localStorage.getItem('admin_user') || '{}');
+      adminData.username = newUsername;
+      localStorage.setItem('admin_user', JSON.stringify(adminData));
+    } catch (error) {
+      console.error('Error updating username:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update username',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: 'Error',
+        description: 'All password fields are required',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: 'Error',
+        description: 'New passwords do not match',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast({
+        title: 'Error',
+        description: 'Password must be at least 8 characters long',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Verify current password
+      const { data: adminUser } = await supabase
+        .from('admin_users')
+        .select('password_hash')
+        .eq('username', newUsername || 'admin')
+        .single();
+
+      if (!adminUser?.password_hash) {
+        toast({
+          title: 'Error',
+          description: 'Admin user not found',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, adminUser.password_hash);
+      
+      if (!isCurrentPasswordValid) {
+        toast({
+          title: 'Error',
+          description: 'Current password is incorrect',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      const { error } = await supabase
+        .from('admin_users')
+        .update({ password_hash: hashedPassword })
+        .eq('username', newUsername || 'admin');
+
+      if (error) throw error;
+
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      toast({
+        title: 'Success',
+        description: 'Password updated successfully',
+      });
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update password',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const copySecret = () => {
     navigator.clipboard.writeText(secret);
     setCopied(true);
@@ -131,6 +267,7 @@ const TwoFactorSetup = () => {
   };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
@@ -248,6 +385,84 @@ const TwoFactorSetup = () => {
         </div>
       </CardContent>
     </Card>
+
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <User className="h-5 w-5" />
+          <CardTitle>Username & Password</CardTitle>
+        </div>
+        <CardDescription>
+          Change your admin login credentials
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="newUsername">Username</Label>
+            <div className="flex gap-2">
+              <Input
+                id="newUsername"
+                type="text"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+                placeholder="Enter new username"
+              />
+              <Button onClick={handleChangeUsername} variant="outline">
+                Update
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+          <h3 className="font-medium flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            Change Password
+          </h3>
+          
+          <div className="space-y-2">
+            <Label htmlFor="currentPassword">Current Password</Label>
+            <Input
+              id="currentPassword"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Enter current password"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">New Password</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Enter new password (min 8 characters)"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+            />
+          </div>
+
+          <Button onClick={handleChangePassword} className="w-full">
+            Change Password
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+    </>
   );
 };
 

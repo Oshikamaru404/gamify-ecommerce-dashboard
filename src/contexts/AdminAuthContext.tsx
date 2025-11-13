@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import * as OTPAuth from 'otpauth';
+import bcrypt from 'bcryptjs';
 
 interface AdminUser {
   id: string;
@@ -70,75 +71,55 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       console.log('AdminAuth - Attempting admin login with:', { username });
       
-      // Simple hardcoded admin credentials for demo
-      if (username === 'admin' && password === 'admin123') {
-        // Create or get admin user record in the database
-        const { data: existingUser, error: checkError } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('username', 'admin')
-          .maybeSingle();
+      // Fetch admin user from database
+      const { data: adminUserData, error: fetchError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('username', username)
+        .maybeSingle();
 
-        if (checkError) {
-          console.error('Error checking existing admin user:', checkError);
-        }
-
-        let adminUserData = existingUser;
-
-        // If no admin user exists, create one without 2FA enabled
-        if (!existingUser) {
-          console.log('Creating admin user record...');
-
-          const { data: newUser, error: createError } = await supabase
-            .from('admin_users')
-            .insert([
-              {
-                username: 'admin',
-                role: 'admin',
-                user_id: null,
-                two_factor_enabled: false,
-                two_factor_secret: null
-              }
-            ])
-            .select()
-            .single();
-
-          if (createError) {
-            console.error('Error creating admin user:', createError);
-            return { success: false };
-          }
-
-          adminUserData = newUser;
-        }
-
-        // Check if 2FA is enabled
-        if (adminUserData?.two_factor_enabled && adminUserData?.two_factor_secret) {
-          console.log('AdminAuth - 2FA enabled, requiring OTP');
-          setPendingAuth({
-            id: adminUserData.id || 'admin-' + Date.now(),
-            username: 'admin',
-            role: 'admin'
-          });
-          return { success: true, requires2FA: true };
-        }
-
-        // No 2FA required, complete login
-        const adminData = {
-          id: adminUserData?.id || 'admin-' + Date.now(),
-          username: 'admin',
-          email: 'admin@demo.com',
-          twoFactorEnabled: adminUserData?.two_factor_enabled || false
-        };
-        
-        console.log('AdminAuth - Login successful, setting admin user:', adminData);
-        setAdminUser(adminData);
-        localStorage.setItem('admin_user', JSON.stringify(adminData));
-        
-        return { success: true, requires2FA: false };
+      if (fetchError) {
+        console.error('Error fetching admin user:', fetchError);
+        return { success: false };
       }
+
+      if (!adminUserData) {
+        console.log('AdminAuth - User not found');
+        return { success: false };
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, adminUserData.password_hash || '');
       
-      console.log('AdminAuth - Invalid credentials');
-      return { success: false };
+      if (!isPasswordValid) {
+        console.log('AdminAuth - Invalid password');
+        return { success: false };
+      }
+
+      // Check if 2FA is enabled
+      if (adminUserData?.two_factor_enabled && adminUserData?.two_factor_secret) {
+        console.log('AdminAuth - 2FA enabled, requiring OTP');
+        setPendingAuth({
+          id: adminUserData.id || 'admin-' + Date.now(),
+          username: adminUserData.username,
+          role: adminUserData.role || 'admin'
+        });
+        return { success: true, requires2FA: true };
+      }
+
+      // No 2FA required, complete login
+      const adminData = {
+        id: adminUserData?.id || 'admin-' + Date.now(),
+        username: adminUserData.username,
+        email: 'admin@demo.com',
+        twoFactorEnabled: adminUserData?.two_factor_enabled || false
+      };
+      
+      console.log('AdminAuth - Login successful, setting admin user:', adminData);
+      setAdminUser(adminData);
+      localStorage.setItem('admin_user', JSON.stringify(adminData));
+      
+      return { success: true, requires2FA: false };
     } catch (error) {
       console.error('AdminAuth - Login error:', error);
       return { success: false };
