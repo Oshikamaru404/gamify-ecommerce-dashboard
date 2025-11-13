@@ -9,20 +9,24 @@ import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from '
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { data: packages, isLoading } = useIPTVPackages();
+  const { data: iptvPackages, isLoading: iptvLoading } = useIPTVPackages();
+  const { data: subscriptionPackages, isLoading: subscriptionLoading } = useSubscriptionPackages();
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  console.log('ProductDetail - Current slug:', slug);
-  console.log('ProductDetail - All packages:', packages);
+  const isLoading = iptvLoading || subscriptionLoading;
+
+  // Combine all packages
+  const allPackages = [...(iptvPackages || []), ...(subscriptionPackages || [])];
 
   // Enhanced slug generation to match all package types
-  const generateSlug = (name: string, category: string) => {
+  const generateSlug = (name: string, category?: string) => {
     const baseSlug = name.toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '')
@@ -37,20 +41,20 @@ const ProductDetail = () => {
   };
 
   // Find the package by slug across all categories
-  let pkg = null;
+  let pkg: any = null;
   let packageCategory = '';
 
-  if (packages) {
+  if (allPackages.length > 0) {
     // Check all package categories
-    for (const p of packages) {
+    for (const p of allPackages) {
       if (p.status !== 'inactive') {
-        const generatedSlug = generateSlug(p.name, p.category);
-        console.log(`ProductDetail - Checking package: ${p.name}, category: ${p.category}, generated slug: ${generatedSlug}, target slug: ${slug}`);
+        // Handle both IPTV packages (with category) and subscription packages (without category field)
+        const pkgCategory = 'category' in p ? p.category : 'subscription';
+        const generatedSlug = generateSlug(p.name, pkgCategory);
         
         if (generatedSlug === slug) {
           pkg = p;
-          packageCategory = p.category;
-          console.log('ProductDetail - Found matching package:', pkg);
+          packageCategory = pkgCategory;
           break;
         }
       }

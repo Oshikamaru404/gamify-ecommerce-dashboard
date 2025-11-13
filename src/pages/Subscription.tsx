@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Star, Check, Zap, Shield } from 'lucide-react';
+import { ArrowLeft, Star, Check, Zap, Shield, Crown, CheckCircle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubscriptionPackageCard from '@/components/home/SubscriptionPackageCard';
 import PlanSelector from '@/components/PlanSelector';
@@ -11,6 +11,7 @@ import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Card } from '@/components/ui/card';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const Subscription = () => {
@@ -125,34 +126,59 @@ const Subscription = () => {
           </div>
         </div>
 
-        {/* 30-Day Warranty Section */}
-        <div className="bg-white py-12">
+        {/* Premium Features Section */}
+        <div className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="p-8 bg-blue-50 border border-blue-200 rounded-2xl">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <Shield className="h-8 w-8 text-blue-600" />
-                  <h2 className="text-2xl font-bold text-blue-900">30-Day Service Warranty</h2>
+            <div className="text-center mb-12">
+              <Crown className="h-12 w-12 mx-auto mb-4 text-red-600" />
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Premium IPTV Subscription Benefits
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Experience the best IPTV service with our flexible subscription packages. 
+                Choose your preferred credits and enjoy seamless streaming.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="text-center p-6 rounded-lg bg-gradient-to-br from-red-50 to-white border border-red-100">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star className="text-red-600" size={32} />
                 </div>
-                <p className="text-lg text-blue-800 leading-relaxed">
-                  We stand behind our service quality. All subscription packages include a comprehensive 30-day warranty. 
-                  If you experience any technical issues or are not satisfied with our service during this period, 
-                  contact our support team for immediate resolution or receive a full refund - no questions asked.
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Ultra HD 4K</h3>
+                <p className="text-gray-600">
+                  Crystal-clear 4K streaming for the ultimate viewing experience
                 </p>
-                <div className="mt-6 grid md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-blue-800">Full refund guarantee</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-blue-800">24/7 technical support</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-blue-800">No questions asked policy</span>
-                  </div>
+              </div>
+              
+              <div className="text-center p-6 rounded-lg bg-gradient-to-br from-green-50 to-white border border-green-100">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="text-green-600" size={32} />
                 </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">99.9% Uptime</h3>
+                <p className="text-gray-600">
+                  Guaranteed reliability with industry-leading uptime
+                </p>
+              </div>
+              
+              <div className="text-center p-6 rounded-lg bg-gradient-to-br from-blue-50 to-white border border-blue-100">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="text-blue-600" size={32} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Instant Setup</h3>
+                <p className="text-gray-600">
+                  Get started immediately with instant activation
+                </p>
+              </div>
+
+              <div className="text-center p-6 rounded-lg bg-gradient-to-br from-purple-50 to-white border border-purple-100">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="text-purple-600" size={32} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">24/7 Support</h3>
+                <p className="text-gray-600">
+                  Round-the-clock customer support via WhatsApp
+                </p>
               </div>
             </div>
           </div>
@@ -214,20 +240,50 @@ const Subscription = () => {
           )}
         </div>
 
-        {/* Features Section */}
-        <div className="bg-white py-16">
+        {/* Additional Features & Info Sections */}
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* 30-Day Warranty Highlight */}
+            <div className="mb-12">
+              <Card className="p-8 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <Shield className="h-10 w-10 text-blue-600" />
+                  <h2 className="text-3xl font-bold text-blue-900">30-Day Money Back Guarantee</h2>
+                </div>
+                <p className="text-center text-lg text-blue-800 max-w-3xl mx-auto leading-relaxed">
+                  We stand behind our service quality. All subscription packages include a comprehensive 30-day warranty. 
+                  If you experience any technical issues or are not satisfied with our service, contact our support team 
+                  for immediate resolution or receive a full refund - no questions asked.
+                </p>
+                <div className="mt-6 flex justify-center gap-8 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-blue-900 font-medium">Full Refund Policy</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-blue-900 font-medium">24/7 Technical Support</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-blue-900 font-medium">Instant Assistance</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Why Choose Us */}
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 {t.whyChooseTitle}
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 {t.whyChooseSubtitle}
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Star className="text-red-600" size={32} />
                 </div>
@@ -235,9 +291,9 @@ const Subscription = () => {
                 <p className="text-gray-600">
                   {t.premiumQualityDesc}
                 </p>
-              </div>
+              </Card>
               
-              <div className="text-center">
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="text-green-600" size={32} />
                 </div>
@@ -245,9 +301,9 @@ const Subscription = () => {
                 <p className="text-gray-600">
                   {t.guaranteedReliabilityDesc}
                 </p>
-              </div>
+              </Card>
               
-              <div className="text-center">
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="text-blue-600" size={32} />
                 </div>
@@ -255,7 +311,7 @@ const Subscription = () => {
                 <p className="text-gray-600">
                   {t.fastActivationDesc}
                 </p>
-              </div>
+              </Card>
             </div>
           </div>
         </div>
