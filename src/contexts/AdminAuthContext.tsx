@@ -85,20 +85,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
         let adminUserData = existingUser;
 
-        // If no admin user exists, create one with 2FA enabled by default
+        // If no admin user exists, create one without 2FA enabled
         if (!existingUser) {
-          console.log('Creating admin user record with 2FA...');
-          
-          // Generate a new TOTP secret
-          const secret = new OTPAuth.Secret({ size: 20 });
-          const totp = new OTPAuth.TOTP({
-            issuer: 'Admin Panel',
-            label: 'admin',
-            algorithm: 'SHA1',
-            digits: 6,
-            period: 30,
-            secret: secret,
-          });
+          console.log('Creating admin user record...');
 
           const { data: newUser, error: createError } = await supabase
             .from('admin_users')
@@ -107,8 +96,8 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 username: 'admin',
                 role: 'admin',
                 user_id: null,
-                two_factor_enabled: true,
-                two_factor_secret: secret.base32
+                two_factor_enabled: false,
+                two_factor_secret: null
               }
             ])
             .select()
