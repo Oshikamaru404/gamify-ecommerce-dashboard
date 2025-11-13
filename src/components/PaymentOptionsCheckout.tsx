@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingCart, MessageCircle, CreditCard, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -57,8 +58,8 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   };
 
   const handleWhatsAppOrder = async () => {
-    if (!formData.customerName || !formData.customerEmail) {
-      toast.error('Please fill in all required fields');
+    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
+      toast.error('Please fill in all required fields including WhatsApp number');
       return;
     }
 
@@ -116,8 +117,8 @@ Order ID: ${orderData.id}`;
   };
 
   const handleCryptoPayment = async () => {
-    if (!formData.customerName || !formData.customerEmail) {
-      toast.error('Please fill in all required fields');
+    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
+      toast.error('Please fill in all required fields including WhatsApp number');
       return;
     }
 
@@ -280,55 +281,94 @@ Payment link has been generated. Awaiting payment confirmation.`;
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="customerWhatsapp">WhatsApp Number (Optional)</Label>
+              <Label htmlFor="customerWhatsapp">WhatsApp Number *</Label>
               <Input
                 id="customerWhatsapp"
                 name="customerWhatsapp"
                 value={formData.customerWhatsapp}
                 onChange={handleInputChange}
                 placeholder="+1234567890"
+                required
               />
+              <p className="text-xs text-muted-foreground">
+                Required for order updates and support
+              </p>
             </div>
           </div>
 
-          {/* Payment Options */}
+          {/* Payment Options - Tabs */}
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Choose Payment Method</h3>
             
-            <div className="grid gap-4">
-              <Button
-                onClick={handleWhatsAppOrder}
-                disabled={isProcessing}
-                className="w-full h-auto py-4 bg-green-600 hover:bg-green-700"
-              >
-                {isProcessing ? (
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                ) : (
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                )}
-                <div className="text-left flex-1">
-                  <div className="font-semibold">Order via WhatsApp</div>
-                  <div className="text-xs opacity-90">Complete order through WhatsApp support</div>
-                </div>
-              </Button>
-
-              <Button
-                onClick={handleCryptoPayment}
-                disabled={isProcessing}
-                className="w-full h-auto py-4"
-                variant="default"
-              >
-                {isProcessing ? (
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                ) : (
-                  <CreditCard className="h-5 w-5 mr-2" />
-                )}
-                <div className="text-left flex-1">
-                  <div className="font-semibold">Pay with Cryptocurrency</div>
-                  <div className="text-xs opacity-90">Secure payment via Cryptomus</div>
-                </div>
-              </Button>
-            </div>
+            <Tabs defaultValue="whatsapp" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp Order
+                </TabsTrigger>
+                <TabsTrigger value="crypto" className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Cryptocurrency
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="whatsapp" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <MessageCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-green-900 mb-1">Order via WhatsApp</h4>
+                        <p className="text-sm text-green-700">
+                          Complete your order through our WhatsApp support. Our team will guide you through the payment process.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleWhatsAppOrder}
+                      disabled={isProcessing}
+                      className="w-full h-12 bg-green-600 hover:bg-green-700"
+                    >
+                      {isProcessing ? (
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      ) : (
+                        <MessageCircle className="h-5 w-5 mr-2" />
+                      )}
+                      Continue to WhatsApp
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="crypto" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <CreditCard className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-blue-900 mb-1">Pay with Cryptocurrency</h4>
+                        <p className="text-sm text-blue-700">
+                          Secure instant payment via Cryptomus. Supports Bitcoin, USDT, and other major cryptocurrencies.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleCryptoPayment}
+                      disabled={isProcessing}
+                      className="w-full h-12"
+                      variant="default"
+                    >
+                      {isProcessing ? (
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      ) : (
+                        <CreditCard className="h-5 w-5 mr-2" />
+                      )}
+                      Pay with Crypto
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
 
           <p className="text-sm text-muted-foreground text-center">
