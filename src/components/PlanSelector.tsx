@@ -246,7 +246,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
   }
 
-  const availableOptions = (creditOptions && creditOptions.length > 0) ? creditOptions : createPlansFromPackageData();
+  // Build options: for subscription category, ALWAYS use month-based options from DB and ignore creditOptions
+  const directPlans = createPlansFromPackageData();
+  const availableOptions = packageData?.category === 'subscription'
+    ? directPlans
+    : ((creditOptions && creditOptions.length > 0) ? creditOptions : directPlans);
   
   console.log('PlanSelector - Available options:', availableOptions);
   console.log('PlanSelector - Credit options:', creditOptions);
@@ -317,7 +321,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
           </div>
         ) : (
           <RadioGroup value={selectedPlan} onValueChange={handlePlanChange}>
-            {sortedOptions.map(option => (
+            {(packageData?.category === 'subscription' ? sortedOptions.filter(o => (o.months ?? 0) > 0) : sortedOptions).map(option => (
               <div key={option.id} className="flex items-center space-x-2">
                 <RadioGroupItem value={option.id} id={option.id} />
                 <Label htmlFor={option.id} className="flex-1 cursor-pointer rounded-lg border p-4 hover:bg-gray-50 transition-colors">
