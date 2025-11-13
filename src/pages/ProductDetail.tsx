@@ -45,6 +45,7 @@ const ProductDetail = () => {
     });
 
     if (matches.length > 0) {
+      // Prefer subscription > iptv > panel-iptv > activation-player for duplicate slugs
       const preferredOrder = ['subscription', 'iptv', 'panel-iptv', 'activation-player'];
       matches.sort((a: any, b: any) => {
         const ia = preferredOrder.indexOf(a.category);
