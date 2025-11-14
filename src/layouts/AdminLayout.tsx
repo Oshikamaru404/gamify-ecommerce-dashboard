@@ -24,7 +24,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Dashboard', href: '/admin', icon: Home },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Products', href: '/admin/products', icon: Package },
-    { name: 'Subscriptions', href: '/admin/subscriptions', icon: Users },
     { name: 'Content', href: '/admin/content', icon: FileText },
     { name: 'Blog', href: '/admin/blog', icon: BookOpen },
     { name: 'Communication', href: '/admin/communication', icon: MessageSquare },
