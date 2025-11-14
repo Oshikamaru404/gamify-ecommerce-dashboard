@@ -20,6 +20,7 @@ export type Database = {
           created_at: string | null
           created_backup_codes_at: string | null
           id: string
+          password_hash: string | null
           role: string | null
           two_factor_enabled: boolean | null
           two_factor_secret: string | null
@@ -31,6 +32,7 @@ export type Database = {
           created_at?: string | null
           created_backup_codes_at?: string | null
           id?: string
+          password_hash?: string | null
           role?: string | null
           two_factor_enabled?: boolean | null
           two_factor_secret?: string | null
@@ -42,6 +44,7 @@ export type Database = {
           created_at?: string | null
           created_backup_codes_at?: string | null
           id?: string
+          password_hash?: string | null
           role?: string | null
           two_factor_enabled?: boolean | null
           two_factor_secret?: string | null

@@ -33,6 +33,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import AdminLogin from "./pages/admin/AdminLogin";
+import ResetAdminPassword from "./pages/admin/ResetAdminPassword";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 import Dashboard from "./pages/admin/Dashboard";
@@ -109,6 +110,7 @@ function App() {
                   
                   {/* Admin routes */}
                   <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/reset-password" element={<ResetAdminPassword />} />
                   <Route path="/admin" element={
                     <AdminProtectedRoute>
                       <AdminLayout>
