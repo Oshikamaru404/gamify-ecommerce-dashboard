@@ -44,7 +44,7 @@ const ResetAdminPassword = () => {
       // Update the admin user password
       const { error } = await supabase
         .from('admin_users')
-        .update({ password_hash: hashedPassword })
+        .update({ password_hash: hashedPassword } as any)
         .eq('username', username);
 
       if (error) {
