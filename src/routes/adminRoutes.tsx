@@ -4,7 +4,6 @@ import AdminLayout from '@/layouts/AdminLayout';
 import Dashboard from '@/pages/admin/Dashboard';
 import Orders from '@/pages/admin/Orders';
 import ManageProducts from '@/pages/admin/ManageProducts';
-import ManageSubscriptionPackages from '@/pages/admin/ManageSubscriptionPackages';
 import EditProduct from '@/pages/admin/EditProduct';
 import Content from '@/pages/admin/Content';
 import Settings from '@/pages/admin/Settings';
@@ -19,7 +18,6 @@ const AdminRoutes = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/products" element={<ManageProducts />} />
-        <Route path="/subscriptions" element={<ManageSubscriptionPackages />} />
         <Route path="/products/edit/:id" element={<EditProduct />} />
         <Route path="/content" element={<Content />} />
         <Route path="/settings" element={<Settings />} />
