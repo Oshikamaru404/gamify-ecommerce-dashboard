@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -214,6 +214,17 @@ const AdminLogin = () => {
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
+            
+            {!showOtpInput && (
+              <div className="text-center mt-4">
+                <Link 
+                  to="/admin/reset-password" 
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
