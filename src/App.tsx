@@ -16,6 +16,7 @@ import PaymentReturn from "./pages/PaymentReturn";
 import Blog from "./pages/Blog";
 import BlogIPTV from "./pages/BlogIPTV";
 import BlogPlayer from "./pages/BlogPlayer";
+import BlogArticleDetail from "./pages/BlogArticleDetail";
 import Reviews from "./pages/Reviews";
 import FullReviews from "./pages/FullReviews";
 import FeedbackSubmission from "./pages/FeedbackSubmission";
@@ -93,6 +94,10 @@ function App() {
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/iptv" element={<BlogIPTV />} />
                   <Route path="/blog/player" element={<BlogPlayer />} />
+                  <Route path="/blog-iptv" element={<BlogIPTV />} />
+                  <Route path="/blog-iptv/:slug" element={<BlogArticleDetail category="iptv" backPath="/blog-iptv" backLabel="Retour aux articles IPTV" />} />
+                  <Route path="/blog-player" element={<BlogPlayer />} />
+                  <Route path="/blog-player/:slug" element={<BlogArticleDetail category="player" backPath="/blog-player" backLabel="Retour aux articles Player" />} />
                   <Route path="/reviews" element={<Reviews />} />
                   <Route path="/reviews/full" element={<FullReviews />} />
                   <Route path="/feedback" element={<FeedbackSubmission />} />

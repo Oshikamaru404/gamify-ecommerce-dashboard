@@ -119,6 +119,28 @@ export const useBlogArticle = (id: string) => {
   });
 };
 
+// Hook to fetch a blog article by slug
+export const useBlogArticleBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['blog-article-slug', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .select('*')
+        .eq('slug', slug)
+        .eq('published', true)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data as BlogArticle;
+    },
+    enabled: !!slug,
+  });
+};
+
 // Hook to create a blog article
 export const useCreateBlogArticle = () => {
   const queryClient = useQueryClient();
