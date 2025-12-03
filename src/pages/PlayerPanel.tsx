@@ -165,7 +165,7 @@ const PlayerPanel = () => {
                             <div className="space-y-2">
                               <Button 
                                 className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white" 
-                                onClick={() => handleBuyNow(pkg.name, option.credits, option.price!)}
+                                onClick={() => handleBuyNow(pkg, option.credits, option.price!)}
                               >
                                 Quick Order
                               </Button>
