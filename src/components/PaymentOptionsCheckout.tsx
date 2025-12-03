@@ -51,7 +51,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   };
 
   const getDisplayDuration = () => {
-    if (packageData.category?.includes('panel')) {
+    if (packageData.category?.includes('panel') || packageData.category === 'player') {
       return `${packageData.duration} Credits`;
     }
     return `${packageData.duration} ${packageData.duration === 1 ? 'Month' : 'Months'}`;
