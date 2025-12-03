@@ -14,6 +14,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateBlogArticle, useUpdateBlogArticle } from '@/hooks/useBlogArticles';
 import { Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const supportedLanguages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -318,12 +320,25 @@ const MultilingualBlogDialog: React.FC<MultilingualBlogDialogProps> = ({
                       
                       <div>
                         <FormLabel>Content ({lang.name})</FormLabel>
-                        <Textarea
-                          value={getCurrentLanguageContent()}
-                          onChange={(e) => updateCurrentLanguageContent(e.target.value)}
-                          placeholder={`Enter article content in ${lang.name}`}
-                          rows={10}
-                        />
+                        <div className="mt-1">
+                          <ReactQuill
+                            theme="snow"
+                            value={getCurrentLanguageContent()}
+                            onChange={(value) => updateCurrentLanguageContent(value)}
+                            placeholder={`Enter article content in ${lang.name}`}
+                            modules={{
+                              toolbar: [
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                [{ 'color': [] }, { 'background': [] }],
+                                ['link', 'image'],
+                                ['clean']
+                              ],
+                            }}
+                            className="bg-background"
+                          />
+                        </div>
                       </div>
                     </div>
                   </TabsContent>

@@ -31,25 +31,40 @@ const MultilingualBlogCard: React.FC<MultilingualBlogCardProps> = ({
 }) => {
   const { language } = useLanguage();
 
-  // Parse multilingual title
+  // Parse multilingual title - handle both JSON and plain string
   const getLocalizedTitle = (title: string) => {
-    try {
-      const parsed = JSON.parse(title);
-      return parsed[language] || parsed.en || title;
-    } catch {
-      return title;
+    if (!title) return '';
+    // Check if it looks like JSON (starts with { or ")
+    if (title.startsWith('{') || title.startsWith('"')) {
+      try {
+        const parsed = JSON.parse(title);
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed[language] || parsed.en || Object.values(parsed)[0] || title;
+        }
+        return parsed;
+      } catch {
+        return title;
+      }
     }
+    return title;
   };
 
-  // Parse multilingual excerpt
+  // Parse multilingual excerpt - handle both JSON and plain string
   const getLocalizedExcerpt = (excerpt: string | null) => {
     if (!excerpt) return '';
-    try {
-      const parsed = JSON.parse(excerpt);
-      return parsed[language] || parsed.en || excerpt;
-    } catch {
-      return excerpt;
+    // Check if it looks like JSON (starts with { or ")
+    if (excerpt.startsWith('{') || excerpt.startsWith('"')) {
+      try {
+        const parsed = JSON.parse(excerpt);
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed[language] || parsed.en || Object.values(parsed)[0] || excerpt;
+        }
+        return parsed;
+      } catch {
+        return excerpt;
+      }
     }
+    return excerpt;
   };
 
   const displayTitle = getLocalizedTitle(article.title);
