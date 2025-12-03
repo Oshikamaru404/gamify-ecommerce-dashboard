@@ -179,7 +179,7 @@ const IPTVPanel = () => {
                                   variant="outline" 
                                   className="w-full border-[#8f35e5] text-[#8f35e5] hover:bg-[#8f35e5] hover:text-white"
                                 >
-                                  <Link to={`/iptv/${generateSlug(displayName)}`}>
+                                  <Link to={`/iptv-panel/${generateSlug(displayName)}`}>
                                     View Details
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                   </Link>

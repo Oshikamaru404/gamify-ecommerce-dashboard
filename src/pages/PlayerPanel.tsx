@@ -175,7 +175,7 @@ const PlayerPanel = () => {
                                 variant="outline" 
                                 className="w-full border-[#8f35e5] text-[#8f35e5] hover:bg-[#8f35e5] hover:text-white"
                               >
-                                <Link to={`/player/${generateSlug(pkg.name)}`}>
+                                <Link to={`/player-panel/${generateSlug(pkg.name)}`}>
                                   View Details
                                   <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>
