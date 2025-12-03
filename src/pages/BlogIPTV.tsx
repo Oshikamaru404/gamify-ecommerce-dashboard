@@ -6,21 +6,26 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, Clock } from 'lucide-react';
 import { useBlogArticlesByCategory } from '@/hooks/useBlogArticles';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedText } from '@/lib/multilingualUtils';
 
 const BlogIPTV = () => {
   const { data: articles, isLoading, error } = useBlogArticlesByCategory('iptv');
+  const { language } = useLanguage();
 
   // Function to estimate reading time
   const estimateReadingTime = (content: string) => {
     const wordsPerMinute = 200;
-    const textContent = content.replace(/<[^>]*>/g, '');
+    const localizedContent = getLocalizedText(content, language);
+    const textContent = localizedContent.replace(/<[^>]*>/g, '');
     const words = textContent.trim().split(/\s+/).length;
     return Math.ceil(words / wordsPerMinute);
   };
 
   // Function to create excerpt from rich text content
   const createExcerpt = (content: string, maxLength: number = 150) => {
-    const textContent = content.replace(/<[^>]*>/g, '');
+    const localizedContent = getLocalizedText(content, language);
+    const textContent = localizedContent.replace(/<[^>]*>/g, '');
     return textContent.length > maxLength 
       ? textContent.substring(0, maxLength) + '...' 
       : textContent;
@@ -95,9 +100,9 @@ const BlogIPTV = () => {
                   >
                     {article.featured_image_url && (
                       <div className="overflow-hidden">
-                        <img
+                      <img
                           src={article.featured_image_url}
-                          alt={article.title}
+                          alt={getLocalizedText(article.title, language)}
                           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
@@ -105,11 +110,11 @@ const BlogIPTV = () => {
                     
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-red-600 transition-colors line-clamp-2">
-                        {article.title}
+                        {getLocalizedText(article.title, language)}
                       </h3>
                       
                       <p className="text-gray-600 mb-4 line-clamp-3">
-                        {article.excerpt || createExcerpt(article.content)}
+                        {article.excerpt ? getLocalizedText(article.excerpt, language) : createExcerpt(article.content)}
                       </p>
                       
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
