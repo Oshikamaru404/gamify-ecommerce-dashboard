@@ -100,6 +100,7 @@ function App() {
                   <Route path="/blog-player/:slug" element={<BlogArticleDetail category="player" backPath="/blog-player" backLabel="Retour aux articles Player" />} />
                   <Route path="/reviews" element={<Reviews />} />
                   <Route path="/reviews/full" element={<FullReviews />} />
+                  <Route path="/full-reviews" element={<FullReviews />} />
                   <Route path="/feedback" element={<FeedbackSubmission />} />
                   <Route path="/support" element={<Support />} />
                   <Route path="/how-to-buy" element={<HowToBuy />} />
