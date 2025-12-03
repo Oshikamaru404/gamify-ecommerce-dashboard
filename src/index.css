@@ -306,19 +306,41 @@ img, video {
 
 /* Quill editor custom styles */
 .ql-toolbar {
-  @apply border-gray-300 rounded-t-md;
+  @apply border-input rounded-t-md bg-background;
 }
 
 .ql-container {
-  @apply border-gray-300 rounded-b-md;
+  @apply border-input rounded-b-md bg-background;
 }
 
 .ql-editor {
-  @apply min-h-[200px] text-gray-700;
+  @apply min-h-[200px] text-foreground;
 }
 
 .ql-editor.ql-blank::before {
-  @apply text-gray-400 italic;
+  @apply text-muted-foreground italic;
+}
+
+/* Dark mode support for Quill */
+.dark .ql-toolbar .ql-stroke {
+  stroke: hsl(var(--foreground));
+}
+
+.dark .ql-toolbar .ql-fill {
+  fill: hsl(var(--foreground));
+}
+
+.dark .ql-toolbar .ql-picker {
+  color: hsl(var(--foreground));
+}
+
+.dark .ql-toolbar .ql-picker-options {
+  background-color: hsl(var(--popover));
+  border-color: hsl(var(--border));
+}
+
+.dark .ql-toolbar .ql-picker-item:hover {
+  color: hsl(var(--primary));
 }
 
 /* Responsive adjustments */
