@@ -12,14 +12,19 @@ import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield } from 'luci
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useHomepageContent } from '@/hooks/useHomepageContent';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { getLocalizedText } from '@/lib/multilingualUtils';
 
 const Home = () => {
   const { t, language } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
   const { data: homepageContent } = useHomepageContent();
+  const { data: siteSettings } = useSiteSettings();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  
+  // Get WhatsApp number from site settings
+  const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
 
   // Helper function to get content from CMS
   const getContent = (sectionKey: string, field: string, fallback: string = '') => {
@@ -35,7 +40,7 @@ const Home = () => {
 
   const handleFreeTrial = () => {
     const message = `${t.tryFree} BWIVOX IPTV. ${t.contact}?`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
