@@ -3,6 +3,8 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, ArrowLeft, Clock } from 'lucide-react';
 import { useBlogArticleBySlug } from '@/hooks/useBlogArticles';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedText } from '@/lib/multilingualUtils';
 
 interface BlogArticleDetailProps {
   category: 'iptv' | 'player';
@@ -14,10 +16,12 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data: article, isLoading, error } = useBlogArticleBySlug(slug || '');
+  const { language } = useLanguage();
 
   const estimateReadingTime = (content: string) => {
     const wordsPerMinute = 200;
-    const textContent = content.replace(/<[^>]*>/g, '');
+    const localizedContent = getLocalizedText(content, language);
+    const textContent = localizedContent.replace(/<[^>]*>/g, '');
     const words = textContent.trim().split(/\s+/).length;
     return Math.ceil(words / wordsPerMinute);
   };
@@ -76,7 +80,7 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
               <div className="mb-8 overflow-hidden rounded-lg shadow-lg">
                 <img
                   src={article.featured_image_url}
-                  alt={article.title}
+                  alt={getLocalizedText(article.title, language)}
                   className="w-full h-64 md:h-96 object-cover"
                 />
               </div>
@@ -84,12 +88,12 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
 
             <header className="mb-8 text-center border-b border-gray-200 pb-8">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                {article.title}
+                {getLocalizedText(article.title, language)}
               </h1>
               
               {article.excerpt && (
                 <p className="text-xl text-gray-600 mb-6 italic">
-                  {article.excerpt}
+                  {getLocalizedText(article.excerpt, language)}
                 </p>
               )}
 
@@ -116,7 +120,7 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
             <div className="prose prose-lg max-w-none">
               <div 
                 className="text-lg leading-relaxed rich-text-content"
-                dangerouslySetInnerHTML={{ __html: article.content }}
+                dangerouslySetInnerHTML={{ __html: getLocalizedText(article.content, language) }}
               />
             </div>
 
