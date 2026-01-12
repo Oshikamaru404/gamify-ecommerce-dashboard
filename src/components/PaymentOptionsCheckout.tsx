@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, MessageCircle, CreditCard, X, Loader2 } from 'lucide-react';
+import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -36,9 +36,29 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const { data: siteSettings } = useSiteSettings();
+  const [imageError, setImageError] = useState(false);
 
   const displayName = useLocalizedText(packageData.name);
   const displayDescription = useLocalizedText(packageData.description);
+
+  // Determine border color based on category
+  const getCategoryBorderClass = () => {
+    const category = packageData.category?.toLowerCase() || '';
+    if (category.includes('panel') || category.includes('reseller')) {
+      return 'border-blue-500 ring-2 ring-blue-200';
+    }
+    // Red for subscription, activation-player, and default
+    return 'border-red-500 ring-2 ring-red-200';
+  };
+
+  // Get fallback icon color based on category
+  const getFallbackIconClass = () => {
+    const category = packageData.category?.toLowerCase() || '';
+    if (category.includes('panel') || category.includes('reseller')) {
+      return 'text-blue-500';
+    }
+    return 'text-red-500';
+  };
 
   const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
 
@@ -226,13 +246,18 @@ Payment link has been generated. Awaiting payment confirmation.`;
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
-                {packageData.icon_url && (
-                  <img 
-                    src={packageData.icon_url} 
-                    alt={displayName}
-                    className="w-12 h-12 object-contain"
-                  />
-                )}
+                <div className={`w-14 h-14 rounded-lg border-2 ${getCategoryBorderClass()} bg-white flex items-center justify-center overflow-hidden`}>
+                  {packageData.icon_url && !imageError ? (
+                    <img 
+                      src={packageData.icon_url} 
+                      alt={displayName}
+                      className="w-10 h-10 object-contain"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <Package className={`w-8 h-8 ${getFallbackIconClass()}`} />
+                  )}
+                </div>
                 <div className="flex-1">
                   <h3 className="font-semibold">{displayName}</h3>
                   {displayDescription && (
