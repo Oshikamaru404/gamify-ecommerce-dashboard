@@ -287,7 +287,7 @@ const Activation = () => {
 
                           {/* 30-Day Money Back Guarantee Badge - Now at bottom */}
                           <div className="flex justify-center mb-4">
-                            <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
+                            <div className="bg-green-50 border-2 border-green-500 text-green-700 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
                               <Shield className="w-4 h-4 mr-2" />
                               30-Day Money Back Guarantee
                             </div>
