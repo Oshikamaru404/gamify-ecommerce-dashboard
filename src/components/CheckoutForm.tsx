@@ -69,10 +69,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   const displayName = useLocalizedText(packageData.name);
   const displayDescription = useLocalizedText(packageData.description);
 
+  const isCreditsPackage = () => {
+    return packageData.category?.includes('panel') || packageData.category === 'player';
+  };
+
   const getDisplayDuration = () => {
     if (packageData.duration) {
       // For credit-based packages (player/iptv panels)
-      if (packageData.category?.includes('panel')) {
+      if (isCreditsPackage()) {
         return `${packageData.duration} Credits`;
       }
       // For subscription packages with months
@@ -81,8 +85,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
     return 'Package';
   };
 
+  const getDurationLabel = () => {
+    return isCreditsPackage() ? 'Credit:' : 'Duration:';
+  };
+
   const isSubscriptionPackage = packageData.category === 'subscription';
-  const isPanelPackage = packageData.category?.includes('panel');
 
   async function onSubmit(data: CheckoutFormValues) {
     setIsSubmitting(true);
@@ -153,7 +160,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                       </div>
                       <div className="flex justify-between">
                         <span>
-                          {isPanelPackage ? 'Credits:' : 'Duration:'}
+                          {getDurationLabel()}
                         </span>
                         <span className="font-medium">
                           {getDisplayDuration()}
