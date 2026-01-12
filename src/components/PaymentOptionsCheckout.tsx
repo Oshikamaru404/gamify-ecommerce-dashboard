@@ -71,11 +71,19 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     }));
   };
 
+  const isCreditsPackage = () => {
+    return packageData.category?.includes('panel') || packageData.category === 'player';
+  };
+
   const getDisplayDuration = () => {
-    if (packageData.category?.includes('panel') || packageData.category === 'player') {
+    if (isCreditsPackage()) {
       return `${packageData.duration} Credits`;
     }
     return `${packageData.duration} ${packageData.duration === 1 ? 'Month' : 'Months'}`;
+  };
+
+  const getDurationLabel = () => {
+    return isCreditsPackage() ? 'Credit:' : 'Duration:';
   };
 
   const handleWhatsAppOrder = async () => {
@@ -270,7 +278,7 @@ Payment link has been generated. Awaiting payment confirmation.`;
                 </div>
               </div>
               <div className="flex justify-between pt-2 border-t">
-                <span className="font-medium">Duration:</span>
+                <span className="font-medium">{getDurationLabel()}</span>
                 <span>{getDisplayDuration()}</span>
               </div>
               <div className="flex justify-between text-lg font-bold">
