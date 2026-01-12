@@ -248,7 +248,7 @@ Payment link has been generated. Awaiting payment confirmation.`;
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
                 <div 
-                  className="p-1.5 rounded-lg bg-white flex items-center justify-center flex-shrink-0"
+                  className="rounded-lg bg-white flex items-center justify-center flex-shrink-0"
                   style={{ border: '5px solid', ...getCategoryBorderStyle() }}
                 >
                   {packageData.icon_url && !imageError ? (
