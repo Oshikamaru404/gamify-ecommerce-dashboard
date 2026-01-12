@@ -129,7 +129,8 @@ ${formData.customerWhatsapp ? `WhatsApp: ${formData.customerWhatsapp}` : ''}
 
 Order ID: ${orderData.id}`;
 
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+      // Use web.whatsapp.com as wa.me/api.whatsapp.com may be blocked in some regions
+      const whatsappUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
       
       toast.success('Order created! Redirecting to WhatsApp...');
       setTimeout(() => {
@@ -214,7 +215,8 @@ Order ID: ${orderData.id}
 
 Payment link has been generated. Awaiting payment confirmation.`;
 
-          const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(notificationMessage)}`;
+          // Use web.whatsapp.com as wa.me/api.whatsapp.com may be blocked in some regions
+          const whatsappUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(notificationMessage)}`;
           window.open(whatsappUrl, '_blank');
         }
 
