@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import MetricCard from '@/components/admin/MetricCard';
 import SalesChart from '@/components/admin/SalesChart';
-import RecentOrdersTable from '@/components/admin/RecentOrdersTable';
+import RecentOrdersGrid from '@/components/admin/RecentOrdersGrid';
+import OrderNotification from '@/components/admin/OrderNotification';
 import { 
   DollarSign, 
   ShoppingCart, 
@@ -12,7 +12,8 @@ import {
   TrendingUp, 
   Database,
   RefreshCw,
-  Trash2
+  Trash2,
+  Sparkles
 } from 'lucide-react';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { useRecentOrders } from '@/hooks/useRecentOrders';
@@ -143,11 +144,22 @@ const Dashboard = () => {
     refetchOrders();
   };
 
+  const handleNewOrder = () => {
+    refetchOrders();
+    refetchMetrics();
+  };
+
   return (
     <div className="space-y-6">
+      {/* Real-time order notifications */}
+      <OrderNotification onNewOrder={handleNewOrder} />
+      
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">BWIVOX Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-primary" />
+            BWIVOX Admin Dashboard
+          </h1>
           <p className="text-muted-foreground">
             Monitor your IPTV business performance and manage operations.
           </p>
@@ -193,7 +205,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Charts and Tables */}
+      {/* Charts and Orders Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -205,11 +217,17 @@ const Dashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Orders</CardTitle>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+              {recentOrders?.length || 0} orders
+            </span>
           </CardHeader>
           <CardContent>
-            <RecentOrdersTable orders={recentOrders || []} />
+            <RecentOrdersGrid 
+              orders={recentOrders || []} 
+              isLoading={ordersLoading}
+            />
           </CardContent>
         </Card>
       </div>
