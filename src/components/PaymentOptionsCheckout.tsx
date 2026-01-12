@@ -42,20 +42,21 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const displayDescription = useLocalizedText(packageData.description);
 
   // Determine border color based on category
-  const getCategoryBorderClass = () => {
+  const getCategoryBorderStyle = () => {
     const category = packageData.category?.toLowerCase() || '';
     if (category.includes('panel') || category.includes('reseller')) {
-      return 'border-blue-500 ring-2 ring-blue-200';
+      // Same purple as panel reseller buttons (#8f35e5)
+      return { borderColor: '#8f35e5', boxShadow: '0 0 0 3px rgba(143, 53, 229, 0.2)' };
     }
     // Red for subscription, activation-player, and default
-    return 'border-red-500 ring-2 ring-red-200';
+    return { borderColor: '#ef4444', boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)' };
   };
 
   // Get fallback icon color based on category
   const getFallbackIconClass = () => {
     const category = packageData.category?.toLowerCase() || '';
     if (category.includes('panel') || category.includes('reseller')) {
-      return 'text-blue-500';
+      return 'text-[#8f35e5]';
     }
     return 'text-red-500';
   };
@@ -246,7 +247,10 @@ Payment link has been generated. Awaiting payment confirmation.`;
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className={`p-1 rounded-lg border-4 ${getCategoryBorderClass()} bg-white flex items-center justify-center flex-shrink-0`}>
+                <div 
+                  className="p-1.5 rounded-lg bg-white flex items-center justify-center flex-shrink-0"
+                  style={{ border: '5px solid', ...getCategoryBorderStyle() }}
+                >
                   {packageData.icon_url && !imageError ? (
                     <img 
                       src={packageData.icon_url} 
