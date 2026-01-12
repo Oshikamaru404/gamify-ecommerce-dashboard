@@ -177,30 +177,30 @@ const FullReviews = () => {
                 const { icon: IconComponent, color } = getFeedbackIcon(feedback.feedback_type);
                 
                 return (
-                  <div key={feedback.id} className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
-                    <div className="flex items-start justify-between mb-6">
+                  <div key={feedback.id} className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-xl transition-shadow duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
                       <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-red-600 font-semibold text-lg">
                             {feedback.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                           </span>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 text-lg">{feedback.name}</h3>
-                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-lg truncate">{feedback.name}</h3>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
                             <div className="flex items-center text-green-600">
-                              <Check className="w-4 h-4 mr-1" />
+                              <Check className="w-4 h-4 mr-1 flex-shrink-0" />
                               Verified Customer
                             </div>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <span className={`flex items-center ${color}`}>
-                              <IconComponent className="w-4 h-4 mr-1" />
+                              <IconComponent className="w-4 h-4 mr-1 flex-shrink-0" />
                               {feedback.feedback_type.charAt(0).toUpperCase() + feedback.feedback_type.slice(1)}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-1 flex-shrink-0">
                         {renderStars(feedback.feedback_type)}
                       </div>
                     </div>
