@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -38,6 +38,8 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
   const { data: siteSettings } = useSiteSettings();
   const [imageError, setImageError] = useState(false);
 
@@ -143,13 +145,11 @@ ${formData.customerWhatsapp ? `WhatsApp: ${formData.customerWhatsapp}` : ''}
 
 Order ID: ${orderData.id}`;
 
-      // Use web.whatsapp.com as wa.me/api.whatsapp.com may be blocked in some regions
-      const whatsappUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
+      // Store WhatsApp URL for auto-redirect
+      const url = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
+      setWhatsappUrl(url);
       
-      // Open WhatsApp in new tab
-      window.open(whatsappUrl, '_blank');
-      
-      // Show success screen
+      // Show success screen first (will auto-redirect via useEffect)
       setOrderPlaced(true);
       toast.success('Order placed successfully!');
 
@@ -258,63 +258,63 @@ Payment link has been generated. Awaiting payment confirmation.`;
     onClose();
   };
 
-  // Success Screen
+  // Auto-redirect countdown when order is placed
+  useEffect(() => {
+    if (orderPlaced && whatsappUrl && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (orderPlaced && whatsappUrl && countdown === 0) {
+      window.open(whatsappUrl, '_blank');
+    }
+  }, [orderPlaced, whatsappUrl, countdown]);
+
+  // Success Screen - Compact version
   if (orderPlaced) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-8 pb-6 space-y-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="h-12 w-12 text-green-600" />
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+        <Card className="w-full max-w-sm animate-in zoom-in-95 duration-200">
+          <CardContent className="pt-6 pb-5 px-5 text-center space-y-4">
+            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
             
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-green-700">Order Placed Successfully!</h2>
-              <p className="text-muted-foreground">
-                Your order has been created and sent to our WhatsApp support team.
+            <div>
+              <h2 className="text-xl font-bold text-green-700">Order Confirmed!</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Order #{placedOrderId?.slice(0, 8)}
               </p>
             </div>
 
-            <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-left">
+            <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Order ID:</span>
-                <span className="font-mono text-sm">{placedOrderId?.slice(0, 8)}...</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Package:</span>
-                <span className="font-medium">{displayName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Amount:</span>
-                <span className="font-bold text-primary">${packageData.price}</span>
+                <span className="text-muted-foreground">{displayName}</span>
+                <span className="font-bold">${packageData.price}</span>
               </div>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
-                📱 A WhatsApp window has opened with your order details. 
-                Please send the message to complete your order.
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="text-sm text-green-800">
+                📱 Redirecting to WhatsApp in <span className="font-bold">{countdown}s</span>
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 pt-2">
-              <Button 
-                onClick={handleBackToStore}
-                className="w-full"
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Back to Store
-              </Button>
+            <div className="flex gap-2 pt-1">
               <Button 
                 variant="outline"
-                onClick={() => {
-                  const message = `🛒 New Order Request\n\n📦 Package: ${displayName}\n💰 Price: $${packageData.price}\n⏱️ Duration: ${getDisplayDuration()}\n\n👤 Customer Details:\nName: ${formData.customerName}\nEmail: ${formData.customerEmail}\nWhatsApp: ${formData.customerWhatsapp}\n\nOrder ID: ${placedOrderId}`;
-                  const whatsappUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
-                  window.open(whatsappUrl, '_blank');
-                }}
+                size="sm"
+                onClick={handleBackToStore}
+                className="flex-1"
               >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Reopen WhatsApp
+                <Home className="h-4 w-4 mr-1" />
+                Store
+              </Button>
+              <Button 
+                size="sm"
+                onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank')}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                <MessageCircle className="h-4 w-4 mr-1" />
+                WhatsApp
               </Button>
             </div>
           </CardContent>
