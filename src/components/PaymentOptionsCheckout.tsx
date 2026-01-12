@@ -246,16 +246,16 @@ Payment link has been generated. Awaiting payment confirmation.`;
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className={`w-16 h-16 rounded-lg border-4 ${getCategoryBorderClass()} bg-white flex items-center justify-center overflow-hidden flex-shrink-0`}>
+                <div className={`p-1 rounded-lg border-4 ${getCategoryBorderClass()} bg-white flex items-center justify-center flex-shrink-0`}>
                   {packageData.icon_url && !imageError ? (
                     <img 
                       src={packageData.icon_url} 
                       alt={displayName}
-                      className="w-8 h-8 object-contain"
+                      className="w-12 h-12 object-contain"
                       onError={() => setImageError(true)}
                     />
                   ) : (
-                    <Package className={`w-6 h-6 ${getFallbackIconClass()}`} />
+                    <Package className={`w-10 h-10 ${getFallbackIconClass()}`} />
                   )}
                 </div>
                 <div className="flex-1">
