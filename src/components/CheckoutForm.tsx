@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, User, Loader2 } from 'lucide-react';
+import { ShoppingCart, User, Loader2, Package } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -33,6 +33,24 @@ type CheckoutFormValues = z.infer<typeof checkoutFormSchema>
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuccess }) => {
   const { language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Determine border style based on category
+  const getCategoryBorderStyle = () => {
+    const category = packageData.category?.toLowerCase() || '';
+    if (category.includes('panel') || category.includes('reseller')) {
+      return { borderColor: '#8f35e5', boxShadow: '0 0 0 3px rgba(143, 53, 229, 0.2)' };
+    }
+    return { borderColor: '#ef4444', boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)' };
+  };
+
+  const getFallbackIconClass = () => {
+    const category = packageData.category?.toLowerCase() || '';
+    if (category.includes('panel') || category.includes('reseller')) {
+      return 'text-[#8f35e5]';
+    }
+    return 'text-red-500';
+  };
 
   const {
     register,
@@ -103,13 +121,21 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      {packageData?.icon_url && (
-                        <img 
-                          src={packageData.icon_url} 
-                          alt={displayName}
-                          className="w-10 h-10 object-contain flex-shrink-0" 
-                        />
-                      )}
+                      <div 
+                        className="rounded-lg bg-white flex items-center justify-center flex-shrink-0"
+                        style={{ border: '5px solid', ...getCategoryBorderStyle() }}
+                      >
+                        {packageData?.icon_url && !imageError ? (
+                          <img 
+                            src={packageData.icon_url} 
+                            alt={displayName}
+                            className="w-12 h-12 object-contain" 
+                            onError={() => setImageError(true)}
+                          />
+                        ) : (
+                          <Package className={`w-10 h-10 ${getFallbackIconClass()}`} />
+                        )}
+                      </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-sm">
                           {displayName}
