@@ -293,14 +293,16 @@ const Activation = () => {
                             </div>
                           </div>
 
-                          {/* Buy Now Button */}
+                          {/* View Details Button */}
                           <div className="mt-auto">
                             <Button 
-                              onClick={() => handleBuyNow(pkg)}
+                              asChild
                               className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl"
                             >
-                              Buy Now - €{price12Months.toFixed(2)}
-                              <ArrowRight className="ml-2 h-4 w-4" />
+                              <Link to={`/products/${productSlug}`}>
+                                Purchase 12-Month Package
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
                             </Button>
                           </div>
                         </div>
