@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package } from 'lucide-react';
+import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -35,6 +35,9 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     customerWhatsapp: ''
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: siteSettings } = useSiteSettings();
   const [imageError, setImageError] = useState(false);
 
@@ -92,7 +95,15 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       return;
     }
 
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      toast.error('Order is being processed, please wait...');
+      return;
+    }
+
+    setIsSubmitting(true);
     setIsProcessing(true);
+    
     try {
       // Create order in database
       const { data: orderData, error: orderError } = await supabase
@@ -115,6 +126,9 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
       if (orderError) throw orderError;
 
+      // Store order ID for success screen
+      setPlacedOrderId(orderData.id);
+
       // Create WhatsApp message
       const message = `🛒 New Order Request
 
@@ -132,15 +146,17 @@ Order ID: ${orderData.id}`;
       // Use web.whatsapp.com as wa.me/api.whatsapp.com may be blocked in some regions
       const whatsappUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
       
-      toast.success('Order created! Redirecting to WhatsApp...');
-      setTimeout(() => {
-        window.open(whatsappUrl, '_blank');
-        onSuccess();
-      }, 1000);
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, '_blank');
+      
+      // Show success screen
+      setOrderPlaced(true);
+      toast.success('Order placed successfully!');
 
     } catch (error) {
       console.error('Error creating order:', error);
       toast.error('Failed to create order. Please try again.');
+      setIsSubmitting(false);
     } finally {
       setIsProcessing(false);
     }
@@ -236,12 +252,83 @@ Payment link has been generated. Awaiting payment confirmation.`;
     }
   };
 
+  // Handle going back to store
+  const handleBackToStore = () => {
+    onSuccess();
+    onClose();
+  };
+
+  // Success Screen
+  if (orderPlaced) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-8 pb-6 space-y-6">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="h-12 w-12 text-green-600" />
+            </div>
+            
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-green-700">Order Placed Successfully!</h2>
+              <p className="text-muted-foreground">
+                Your order has been created and sent to our WhatsApp support team.
+              </p>
+            </div>
+
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-left">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Order ID:</span>
+                <span className="font-mono text-sm">{placedOrderId?.slice(0, 8)}...</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Package:</span>
+                <span className="font-medium">{displayName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Amount:</span>
+                <span className="font-bold text-primary">${packageData.price}</span>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                📱 A WhatsApp window has opened with your order details. 
+                Please send the message to complete your order.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 pt-2">
+              <Button 
+                onClick={handleBackToStore}
+                className="w-full"
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Back to Store
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  const message = `🛒 New Order Request\n\n📦 Package: ${displayName}\n💰 Price: $${packageData.price}\n⏱️ Duration: ${getDisplayDuration()}\n\n👤 Customer Details:\nName: ${formData.customerName}\nEmail: ${formData.customerEmail}\nWhatsApp: ${formData.customerWhatsapp}\n\nOrder ID: ${placedOrderId}`;
+                  const whatsappUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
+                  window.open(whatsappUrl, '_blank');
+                }}
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Reopen WhatsApp
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">Complete Your Order</CardTitle>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} disabled={isSubmitting}>
             <X className="h-5 w-5" />
           </Button>
         </CardHeader>
