@@ -8,7 +8,7 @@ import FeedbackCards from '@/components/home/FeedbackCards';
 import NewsletterSubscription from '@/components/home/NewsletterSubscription';
 import ActivationSection from '@/components/home/ActivationSection';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
-import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield } from 'lucide-react';
+import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useHomepageContent } from '@/hooks/useHomepageContent';
@@ -168,6 +168,19 @@ const Home = () => {
             </div>
             
             <FeedbackCards />
+            
+            {/* View All Reviews Button */}
+            <div className="text-center mt-10">
+              <Link to="/full-reviews">
+                <Button 
+                  variant="outline" 
+                  className="border-2 border-red-500 text-red-600 hover:bg-red-50 font-semibold px-8 py-3"
+                >
+                  View All Reviews
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
 
