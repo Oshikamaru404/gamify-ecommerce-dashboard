@@ -35,10 +35,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Determine border style based on category
+  // Determine border style based on category (purple for panel, player, reseller)
   const getCategoryBorderStyle = () => {
     const category = packageData.category?.toLowerCase() || '';
-    if (category.includes('panel') || category.includes('reseller')) {
+    if (category.includes('panel') || category.includes('reseller') || category === 'player') {
       return { borderColor: '#8f35e5', boxShadow: '0 0 0 3px rgba(143, 53, 229, 0.2)' };
     }
     return { borderColor: '#ef4444', boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)' };
@@ -46,7 +46,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageData, onClose, onSuc
 
   const getFallbackIconClass = () => {
     const category = packageData.category?.toLowerCase() || '';
-    if (category.includes('panel') || category.includes('reseller')) {
+    if (category.includes('panel') || category.includes('reseller') || category === 'player') {
       return 'text-[#8f35e5]';
     }
     return 'text-red-500';

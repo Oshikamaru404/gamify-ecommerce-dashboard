@@ -106,14 +106,14 @@ const PlayerPanel = () => {
                 
                 return (
                 <div key={pkg.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                  <div className="bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] text-white p-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-[#8f35e5] to-[#7c2fd4] text-white p-4 sm:p-6 md:p-8">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+                      <div className="w-12 h-12 sm:w-14 md:w-16 sm:h-14 md:h-16 flex-shrink-0 flex items-center justify-center">
                         {pkg.icon_url ? (
                           <img 
                             src={pkg.icon_url} 
                             alt={displayName} 
-                            className="w-14 h-14 rounded-lg object-cover shadow-lg" 
+                            className="w-10 h-10 sm:w-12 md:w-14 sm:h-12 md:h-14 rounded-lg object-cover shadow-lg" 
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               const fallback = e.currentTarget.nextElementSibling as HTMLElement;
@@ -123,15 +123,15 @@ const PlayerPanel = () => {
                         ) : null}
                         
                         <div 
-                          className="w-14 h-14 rounded-lg bg-white/20 flex items-center justify-center text-3xl backdrop-blur-sm" 
+                          className="w-10 h-10 sm:w-12 md:w-14 sm:h-12 md:h-14 rounded-lg bg-white/20 flex items-center justify-center text-2xl sm:text-3xl backdrop-blur-sm" 
                           style={{ display: pkg.icon_url ? 'none' : 'flex' }}
                         >
                           {pkg.icon || '🎮'}
                         </div>
                       </div>
-                      <div>
-                        <h2 className="text-3xl font-bold">{displayName}</h2>
-                        <p className="text-purple-100 text-lg">{displayDescription}</p>
+                      <div className="min-w-0">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">{displayName}</h2>
+                        <p className="text-purple-100 text-sm sm:text-base md:text-lg line-clamp-2">{displayDescription}</p>
                       </div>
                     </div>
                   </div>
