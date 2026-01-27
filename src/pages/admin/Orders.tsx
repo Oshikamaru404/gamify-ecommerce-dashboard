@@ -37,6 +37,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import OrderDetailModal from '@/components/admin/OrderDetailModal';
+import MobileOrderCard from '@/components/admin/MobileOrderCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Define order interface with correct database column names
 interface Order {
@@ -57,6 +59,7 @@ interface Order {
 const ORDERS_PER_PAGE = 10;
 
 const Orders = () => {
+  const isMobile = useIsMobile();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -273,44 +276,42 @@ const Orders = () => {
   }
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">BWIVOX IPTV Orders</h1>
-        <p className="text-muted-foreground">
-          Manage your IPTV customer orders and track their status. Changes to payment status will automatically update dashboard metrics.
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">BWIVOX IPTV Orders</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          Manage your IPTV customer orders and track their status.
         </p>
       </div>
       
       <Card className="overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle>IPTV Order Management ({filteredOrders.length} orders)</CardTitle>
-            <Button variant="default" size="sm" className="bg-red-600 hover:bg-red-700">
+        <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="text-base sm:text-lg">Orders ({filteredOrders.length})</CardTitle>
+            <Button variant="default" size="sm" className="bg-red-600 hover:bg-red-700 w-full sm:w-auto">
               <FileText className="mr-2 h-4 w-4" />
-              Export Orders
+              Export
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search IPTV orders..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+          <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search orders..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
             
-            <div className="flex flex-wrap gap-4">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by category" />
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
@@ -321,8 +322,8 @@ const Orders = () => {
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by status" />
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
@@ -335,8 +336,8 @@ const Orders = () => {
               </Select>
               
               <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by payment" />
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue placeholder="Payment" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Payments</SelectItem>
@@ -346,106 +347,126 @@ const Orders = () => {
                   <SelectItem value="refunded">Refunded</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Button variant="outline" size="sm" onClick={resetFilters} className="w-full sm:w-auto">
+                Reset
+              </Button>
             </div>
           </div>
           
           {filteredOrders.length > 0 ? (
             <>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Order ID</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Package</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Payment</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {currentOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">{order.id.slice(0, 8)}...</TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{order.customer_name}</div>
-                            <div className="text-xs text-muted-foreground">{order.customer_email}</div>
-                            {order.customer_whatsapp && (
-                              <div className="text-xs text-green-600">📱 {order.customer_whatsapp}</div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">{order.package_name}</div>
-                          <div className="text-xs text-muted-foreground">{order.order_type}</div>
-                        </TableCell>
-                        <TableCell>{getCategoryBadge(order.package_category)}</TableCell>
-                        <TableCell>
-                          <div className="font-medium">{order.duration_months} {order.duration_months === 1 ? 'month' : 'months'}</div>
-                        </TableCell>
-                        <TableCell>{formatDate(order.created_at)}</TableCell>
-                        <TableCell>
-                          <Select 
-                            value={order.status} 
-                            onValueChange={(value) => updateOrderStatus(order.id, value)}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue>
-                                {getOrderStatusBadge(order.status)}
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="processing">Processing</SelectItem>
-                              <SelectItem value="shipped">Shipped</SelectItem>
-                              <SelectItem value="delivered">Delivered</SelectItem>
-                              <SelectItem value="cancelled">Cancelled</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Select 
-                            value={order.payment_status} 
-                            onValueChange={(value) => updatePaymentStatus(order.id, value)}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue>
-                                {getPaymentStatusBadge(order.payment_status)}
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="paid">Paid</SelectItem>
-                              <SelectItem value="failed">Failed</SelectItem>
-                              <SelectItem value="refunded">Refunded</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">€{order.amount.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewOrder(order)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+              {/* Mobile Card View */}
+              {isMobile ? (
+                <div className="grid gap-3">
+                  {currentOrders.map((order) => (
+                    <MobileOrderCard
+                      key={order.id}
+                      order={order}
+                      onView={handleViewOrder}
+                      onUpdateStatus={updateOrderStatus}
+                      onUpdatePayment={updatePaymentStatus}
+                    />
+                  ))}
+                </div>
+              ) : (
+                /* Desktop Table View */
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Package</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Duration</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Payment</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {currentOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">{order.id.slice(0, 8)}...</TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{order.customer_name}</div>
+                              <div className="text-xs text-muted-foreground">{order.customer_email}</div>
+                              {order.customer_whatsapp && (
+                                <div className="text-xs text-green-600">📱 {order.customer_whatsapp}</div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">{order.package_name}</div>
+                            <div className="text-xs text-muted-foreground">{order.order_type}</div>
+                          </TableCell>
+                          <TableCell>{getCategoryBadge(order.package_category)}</TableCell>
+                          <TableCell>
+                            <div className="font-medium">{order.duration_months} {order.duration_months === 1 ? 'month' : 'months'}</div>
+                          </TableCell>
+                          <TableCell>{formatDate(order.created_at)}</TableCell>
+                          <TableCell>
+                            <Select 
+                              value={order.status} 
+                              onValueChange={(value) => updateOrderStatus(order.id, value)}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue>
+                                  {getOrderStatusBadge(order.status)}
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="processing">Processing</SelectItem>
+                                <SelectItem value="shipped">Shipped</SelectItem>
+                                <SelectItem value="delivered">Delivered</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Select 
+                              value={order.payment_status} 
+                              onValueChange={(value) => updatePaymentStatus(order.id, value)}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue>
+                                  {getPaymentStatusBadge(order.payment_status)}
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="paid">Paid</SelectItem>
+                                <SelectItem value="failed">Failed</SelectItem>
+                                <SelectItem value="refunded">Refunded</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">€{order.amount.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewOrder(order)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
 
               {totalPages > 1 && (
                 <div className="mt-6 flex justify-center">

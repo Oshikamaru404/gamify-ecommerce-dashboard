@@ -156,10 +156,10 @@ const ManageProducts = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage Products</h1>
-          <p className="text-gray-600 mt-2">Manage all package types including IPTV and subscription packages</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Manage Products</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Manage all package types including IPTV and subscription packages</p>
         </div>
       </div>
 
@@ -193,9 +193,9 @@ const ManageProducts = () => {
 
         {/* IPTV Packages Tab */}
         <TabsContent value="iptv" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">IPTV Packages</h2>
-            <Button onClick={handleCreateNewIPTV} className="bg-red-600 hover:bg-red-700">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg sm:text-xl font-semibold">IPTV Packages</h2>
+            <Button onClick={handleCreateNewIPTV} className="bg-red-600 hover:bg-red-700 w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add IPTV Package
             </Button>
@@ -203,28 +203,34 @@ const ManageProducts = () => {
 
           {/* IPTV Package Categories */}
           <Tabs defaultValue="subscription" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="subscription" className="flex items-center gap-2">
-                <Tv size={16} />
-                Subscription
-              </TabsTrigger>
-              <TabsTrigger value="panelIptv" className="flex items-center gap-2">
-                <Monitor size={16} />
-                Panel IPTV
-              </TabsTrigger>
-              <TabsTrigger value="panelPlayer" className="flex items-center gap-2">
-                <GamepadIcon size={16} />
-                Panel Player
-              </TabsTrigger>
-              <TabsTrigger value="activationPlayer" className="flex items-center gap-2">
-                <Crown size={16} />
-                Activation Player
-              </TabsTrigger>
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                <Tv size={16} />
-                All Packages
-              </TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto -mx-2 px-2">
+              <TabsList className="inline-flex gap-1 h-auto flex-wrap sm:flex-nowrap min-w-max sm:min-w-0 sm:w-full sm:grid sm:grid-cols-5">
+                <TabsTrigger value="subscription" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Tv size={14} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">Subscription</span>
+                  <span className="sm:hidden">Sub</span>
+                </TabsTrigger>
+                <TabsTrigger value="panelIptv" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Monitor size={14} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">Panel IPTV</span>
+                  <span className="sm:hidden">IPTV</span>
+                </TabsTrigger>
+                <TabsTrigger value="panelPlayer" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <GamepadIcon size={14} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">Panel Player</span>
+                  <span className="sm:hidden">Player</span>
+                </TabsTrigger>
+                <TabsTrigger value="activationPlayer" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Crown size={14} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">Activation</span>
+                  <span className="sm:hidden">Act</span>
+                </TabsTrigger>
+                <TabsTrigger value="all" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Tv size={14} className="flex-shrink-0" />
+                  <span>All</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             {Object.entries(iptvPackagesByCategory).map(([category, categoryPackages]) => (
               <TabsContent key={category} value={category} className="space-y-6">
