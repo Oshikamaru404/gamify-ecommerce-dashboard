@@ -150,47 +150,52 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Real-time order notifications */}
       <OrderNotification onNewOrder={handleNewOrder} />
       
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Sparkles className="h-8 w-8 text-primary" />
-            BWIVOX Admin Dashboard
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+            BWIVOX Dashboard
           </h1>
-          <p className="text-muted-foreground">
-            Monitor your IPTV business performance and manage operations.
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Monitor your IPTV business performance.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
+            size="sm"
             onClick={handleSeedOrders}
             disabled={seeding}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 text-xs sm:text-sm"
           >
-            <Database className="h-4 w-4" />
-            {seeding ? 'Seeding...' : 'Seed Sample Orders'}
+            <Database className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">{seeding ? 'Seeding...' : 'Seed Orders'}</span>
+            <span className="sm:hidden">{seeding ? '...' : 'Seed'}</span>
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleResetOrders}
             disabled={resetting}
-            className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
+            className="flex items-center gap-1 text-xs sm:text-sm text-red-600 border-red-600 hover:bg-red-50"
           >
-            <Trash2 className="h-4 w-4" />
-            {resetting ? 'Resetting...' : 'Reset All Orders'}
+            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">{resetting ? 'Resetting...' : 'Reset'}</span>
+            <span className="sm:hidden">{resetting ? '...' : 'Reset'}</span>
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={metricsLoading || ordersLoading}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 text-xs sm:text-sm"
           >
-            <RefreshCw className={`h-4 w-4 ${metricsLoading || ordersLoading ? 'animate-spin' : ''}`} />
-            Refresh Data
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${metricsLoading || ordersLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
       </div>
