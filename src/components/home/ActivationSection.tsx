@@ -183,18 +183,26 @@ const ActivationSection = () => {
 
                       {/* Bottom Section - Content (White Background) */}
                       <div className="flex-1 bg-white p-6 flex flex-col">
-                        {/* Enhanced 30-Day Money Back Guarantee Badge */}
-                        <div className="flex justify-center mb-4">
-                          <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
-                            <Shield className="w-4 h-4 mr-2" />
-                            30-Day Money Back Guarantee
-                          </div>
-                        </div>
-
                         {/* Package Title */}
-                        <h4 className="text-lg font-bold text-gray-900 mb-2 text-center leading-tight">
+                        <h4 className="text-lg font-bold text-gray-900 mb-3 text-center leading-tight">
                           {pkg.name}
                         </h4>
+
+                        {/* 12-Month Pricing - Now under package name */}
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border-2 border-green-500 mb-4">
+                          <div className="text-center">
+                            <Badge className="bg-green-600 text-white mb-2">
+                              <Crown className="mr-1 h-4 w-4" />
+                              12 Months Plan
+                            </Badge>
+                            <div className="text-3xl font-bold text-green-700 mb-1">
+                              €{price12Months.toFixed(2)}
+                            </div>
+                            <div className="text-xs text-green-600 font-medium">
+                              ✅ Full year activation + support included
+                            </div>
+                          </div>
+                        </div>
                         
                         {/* Package Description */}
                         {pkg.description && (
@@ -203,7 +211,7 @@ const ActivationSection = () => {
 
                         {/* Features */}
                         {pkg.features && pkg.features.length > 0 ? (
-                          <div className="space-y-2 mb-6 flex-grow">
+                          <div className="space-y-2 mb-4 flex-grow">
                             {pkg.features.slice(0, 4).map((feature: string, featureIndex: number) => (
                               <div key={featureIndex} className="flex items-start">
                                 <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
@@ -214,7 +222,7 @@ const ActivationSection = () => {
                             ))}
                           </div>
                         ) : (
-                          <div className="space-y-2 mb-6 flex-grow">
+                          <div className="space-y-2 mb-4 flex-grow">
                             <div className="flex items-start">
                               <div className="flex-shrink-0 w-4 h-4 bg-red-100 rounded-full flex items-center justify-center mt-0.5 mr-2">
                                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
@@ -242,24 +250,15 @@ const ActivationSection = () => {
                           </div>
                         )}
 
-                        {/* 12-Month Pricing */}
-                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-500 mb-4">
-                          <div className="text-center">
-                            <Badge className="bg-green-600 text-white mb-3">
-                              <Crown className="mr-1 h-4 w-4" />
-                              12 Months Plan
-                            </Badge>
-                            <div className="text-3xl font-bold text-green-700 mb-2">
-                              €{price12Months.toFixed(2)}
-                            </div>
-                            
-                            <div className="text-xs text-green-600 font-medium">
-                              ✅ Full year activation + support included
-                            </div>
+                        {/* 30-Day Money Back Guarantee Badge - Now at bottom */}
+                        <div className="flex justify-center mb-4">
+                          <div className="bg-green-50 border-2 border-green-500 text-green-700 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
+                            <Shield className="w-4 h-4 mr-2" />
+                            30-Day Money Back Guarantee
                           </div>
                         </div>
 
-                        {/* View Details Button */}
+                        {/* Buy Now Button */}
                         <div className="mt-auto">
                           <Button asChild className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
                             <Link to={`/products/${productSlug}`}>
