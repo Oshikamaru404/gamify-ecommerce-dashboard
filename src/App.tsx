@@ -115,9 +115,9 @@ function App() {
                   <Route path="/refund-policy" element={<RefundPolicy />} />
                   
                   {/* Admin routes */}
-                  <Route path="/blacknode/login" element={<AdminLogin />} />
-                  <Route path="/blacknode/reset-password" element={<ResetAdminPassword />} />
-                  <Route path="/blacknode" element={
+                  <Route path="/diza/login" element={<AdminLogin />} />
+                  <Route path="/diza/reset-password" element={<ResetAdminPassword />} />
+                  <Route path="/diza" element={
                     <AdminProtectedRoute>
                       <AdminLayout>
                         <Outlet />
