@@ -214,16 +214,6 @@ const PlayerDetail = () => {
                 </div>
               </Card>
 
-              {/* Money Back Guarantee */}
-              <Card className="p-6 bg-gradient-to-r from-green-50 to-green-100 border-green-200">
-                <div className="flex items-center">
-                  <Shield className="h-8 w-8 text-green-600 mr-4" />
-                  <div>
-                    <h3 className="text-xl font-bold text-green-800">30-Day Money Back Guarantee</h3>
-                    <p className="text-green-700">Not satisfied? Get your money back within 30 days, no questions asked.</p>
-                  </div>
-                </div>
-              </Card>
             </div>
 
             {/* Right Column - Pricing */}
@@ -257,6 +247,14 @@ const PlayerDetail = () => {
                       </div>
                     </Card>
                   ))}
+                </div>
+                
+                {/* Single subtle guarantee badge */}
+                <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                  <div className="flex items-center justify-center gap-2 text-green-700 text-sm font-medium">
+                    <Shield className="w-4 h-4" />
+                    <span>30-Day Money Back Guarantee</span>
+                  </div>
                 </div>
               </Card>
             </div>
