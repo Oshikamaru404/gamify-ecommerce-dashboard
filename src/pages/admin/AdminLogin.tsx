@@ -23,7 +23,7 @@ const AdminLogin = () => {
   useEffect(() => {
     if (adminUser && !authLoading) {
       console.log('AdminLogin - Already logged in, redirecting to admin dashboard');
-      navigate('/blacknode', { replace: true });
+      navigate('/diza', { replace: true });
     }
   }, [adminUser, authLoading, navigate]);
 
@@ -61,7 +61,7 @@ const AdminLogin = () => {
               title: 'Login Successful',
               description: 'Welcome to the admin dashboard!',
             });
-            navigate('/blacknode', { replace: true });
+            navigate('/diza', { replace: true });
           }
         } else {
           console.log('AdminLogin - Login failed');
@@ -103,7 +103,7 @@ const AdminLogin = () => {
             title: 'Login Successful',
             description: 'Welcome to the admin dashboard!',
           });
-          navigate('/blacknode', { replace: true });
+          navigate('/diza', { replace: true });
         } else {
           toast({
             title: 'Invalid Code',
@@ -218,7 +218,7 @@ const AdminLogin = () => {
             {!showOtpInput && (
               <div className="text-center mt-4">
                 <Link 
-                  to="/blacknode/reset-password" 
+                  to="/diza/reset-password" 
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   Forgot your password?

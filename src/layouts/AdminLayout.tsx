@@ -25,14 +25,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const navigation = [
-    { name: 'Dashboard', href: '/blacknode', icon: Home },
-    { name: 'Orders', href: '/blacknode/orders', icon: ShoppingCart },
-    { name: 'Products', href: '/blacknode/products', icon: Package },
-    { name: 'Content', href: '/blacknode/content', icon: FileText },
-    { name: 'Blog', href: '/blacknode/blog', icon: BookOpen },
-    { name: 'Communication', href: '/blacknode/communication', icon: MessageSquare },
-    { name: 'Style Editor', href: '/blacknode/style', icon: Palette },
-    { name: 'Settings', href: '/blacknode/settings', icon: Settings },
+    { name: 'Dashboard', href: '/diza', icon: Home },
+    { name: 'Orders', href: '/diza/orders', icon: ShoppingCart },
+    { name: 'Products', href: '/diza/products', icon: Package },
+    { name: 'Content', href: '/diza/content', icon: FileText },
+    { name: 'Blog', href: '/diza/blog', icon: BookOpen },
+    { name: 'Communication', href: '/diza/communication', icon: MessageSquare },
+    { name: 'Style Editor', href: '/diza/style', icon: Palette },
+    { name: 'Settings', href: '/diza/settings', icon: Settings },
   ];
 
   const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
