@@ -28,7 +28,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
 
   if (!adminUser) {
     console.log('AdminProtectedRoute - No admin user, redirecting to login');
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/blacknode/login" replace />;
   }
 
   console.log('AdminProtectedRoute - Admin user authenticated, rendering children');
