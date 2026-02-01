@@ -248,14 +248,6 @@ const PlayerDetail = () => {
                     </Card>
                   ))}
                 </div>
-                
-                {/* Single subtle guarantee badge */}
-                <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                  <div className="flex items-center justify-center gap-2 text-green-700 text-sm font-medium">
-                    <Shield className="w-4 h-4" />
-                    <span>30-Day Money Back Guarantee</span>
-                  </div>
-                </div>
               </Card>
             </div>
           </div>
