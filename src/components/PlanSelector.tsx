@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Check, Star, Crown } from 'lucide-react';
+import { Check, Star, Crown, Shield } from 'lucide-react';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
 
 type PlanSelectorProps = {
@@ -302,12 +302,9 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                   {sortedOptions[0]?.months || 12} Month{(sortedOptions[0]?.months || 12) > 1 ? 's' : ''} Activation
                 </div>
                 
-                {/* 30-Day Money Back Guarantee - Moved above button */}
-                <div className="flex justify-center mb-4">
-                  <div className="bg-white border-2 border-red-500 text-red-600 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center transform hover:scale-105 transition-all duration-300">
-                    <Check className="w-4 h-4 mr-2" />
-                    30-Day Money Back Guarantee
-                  </div>
+                <div className="text-xs text-gray-500 mb-3 flex items-center justify-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  <span>30-day guarantee included</span>
                 </div>
                 
                 <Button 
