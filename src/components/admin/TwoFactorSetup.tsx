@@ -163,7 +163,7 @@ const TwoFactorSetup = () => {
 
       setTimeout(() => {
         localStorage.removeItem('admin_user');
-        window.location.href = '/admin/login';
+        window.location.href = '/blacknode/login';
       }, 2000);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to update', variant: 'destructive' });
