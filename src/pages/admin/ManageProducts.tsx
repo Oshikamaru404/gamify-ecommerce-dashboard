@@ -308,6 +308,11 @@ const ManageProducts = () => {
                   <span className="hidden sm:inline">Subscription</span>
                   <span className="sm:hidden">Sub</span>
                 </TabsTrigger>
+                <TabsTrigger value="activationPlayer" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Crown size={14} className="flex-shrink-0" />
+                  <span className="hidden sm:inline">Activation</span>
+                  <span className="sm:hidden">Act</span>
+                </TabsTrigger>
                 <TabsTrigger value="panelIptv" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
                   <Monitor size={14} className="flex-shrink-0" />
                   <span className="hidden sm:inline">Panel IPTV</span>
@@ -317,11 +322,6 @@ const ManageProducts = () => {
                   <GamepadIcon size={14} className="flex-shrink-0" />
                   <span className="hidden sm:inline">Panel Player</span>
                   <span className="sm:hidden">Player</span>
-                </TabsTrigger>
-                <TabsTrigger value="activationPlayer" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-                  <Crown size={14} className="flex-shrink-0" />
-                  <span className="hidden sm:inline">Activation</span>
-                  <span className="sm:hidden">Act</span>
                 </TabsTrigger>
                 <TabsTrigger value="all" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
                   <Tv size={14} className="flex-shrink-0" />
