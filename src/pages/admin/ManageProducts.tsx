@@ -20,6 +20,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -46,11 +47,17 @@ const ManageProducts = () => {
   const [isIPTVDialogOpen, setIsIPTVDialogOpen] = useState(false);
   const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] = useState(false);
 
-  // DnD sensors
+  // DnD sensors - includes TouchSensor for mobile support
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
