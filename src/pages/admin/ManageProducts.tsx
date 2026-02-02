@@ -12,8 +12,25 @@ import IPTVPackageCard from '@/components/admin/IPTVPackageCard';
 import SubscriptionPackageCard from '@/components/admin/SubscriptionPackageCard';
 import MultilingualPackageDialog from '@/components/admin/MultilingualPackageDialog';
 import SubscriptionPackageDialog from '@/components/admin/SubscriptionPackageDialog';
+import SortablePackageCard from '@/components/admin/SortablePackageCard';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 import { SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { toast } from 'sonner';
 
 const ManageProducts = () => {
   const { data: iptvPackages, isLoading: iptvLoading } = useIPTVPackages();
@@ -28,6 +45,18 @@ const ManageProducts = () => {
   const [selectedSubscriptionPackage, setSelectedSubscriptionPackage] = useState<SubscriptionPackage | null>(null);
   const [isIPTVDialogOpen, setIsIPTVDialogOpen] = useState(false);
   const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] = useState(false);
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Filter IPTV packages by search term
   const filteredIPTVPackages = iptvPackages?.filter(pkg => {
@@ -60,6 +89,75 @@ const ManageProducts = () => {
       pkg.category === 'activation-player' && pkg.status !== 'inactive'
     ),
     all: filteredIPTVPackages
+  };
+
+  // Handle drag end for IPTV packages
+  const handleIPTVDragEnd = async (event: DragEndEvent, categoryPackages: IPTVPackage[]) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = categoryPackages.findIndex(pkg => pkg.id === active.id);
+      const newIndex = categoryPackages.findIndex(pkg => pkg.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedPackages = arrayMove(categoryPackages, oldIndex, newIndex);
+        
+        // Update sort_order for all affected packages
+        const updates = reorderedPackages.map((pkg, index) => ({
+          id: pkg.id,
+          sort_order: index + 1
+        }));
+
+        toast.loading('Updating order...');
+        
+        try {
+          // Update each package's sort_order
+          for (const update of updates) {
+            await updateIPTVPackage.mutateAsync(update);
+          }
+          toast.dismiss();
+          toast.success('Package order updated!');
+        } catch (error) {
+          toast.dismiss();
+          toast.error('Failed to update order');
+          console.error('Error updating order:', error);
+        }
+      }
+    }
+  };
+
+  // Handle drag end for subscription packages
+  const handleSubscriptionDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = filteredSubscriptionPackages.findIndex(pkg => pkg.id === active.id);
+      const newIndex = filteredSubscriptionPackages.findIndex(pkg => pkg.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedPackages = arrayMove(filteredSubscriptionPackages, oldIndex, newIndex);
+        
+        // Update sort_order for all affected packages
+        const updates = reorderedPackages.map((pkg, index) => ({
+          id: pkg.id,
+          sort_order: index + 1
+        }));
+
+        toast.loading('Updating order...');
+        
+        try {
+          for (const update of updates) {
+            await updateSubscriptionPackage.mutateAsync(update);
+          }
+          toast.dismiss();
+          toast.success('Package order updated!');
+        } catch (error) {
+          toast.dismiss();
+          toast.error('Failed to update order');
+          console.error('Error updating order:', error);
+        }
+      }
+    }
   };
 
   // IPTV Package handlers
@@ -243,7 +341,7 @@ const ManageProducts = () => {
                     <p className="text-sm text-gray-600">
                       {getCategoryDescription(category)}
                     </p>
-                    <div className="flex items-center gap-4 text-sm">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Tv size={12} />
                         Total: {categoryPackages.length}
@@ -251,6 +349,9 @@ const ManageProducts = () => {
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Crown size={12} />
                         Featured: {categoryPackages.filter(p => p.status === 'featured').length}
+                      </Badge>
+                      <Badge className="bg-yellow-100 text-yellow-700">
+                        🔄 Drag to reorder
                       </Badge>
                       {(category === 'subscription' || category === 'activationPlayer') && (
                         <Badge className="bg-blue-100 text-blue-700">
@@ -271,17 +372,29 @@ const ManageProducts = () => {
                   </CardHeader>
                   <CardContent>
                     {categoryPackages.length > 0 ? (
-                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {categoryPackages.map((pkg) => (
-                          <IPTVPackageCard
-                            key={pkg.id}
-                            package={pkg}
-                            onEdit={handleEditIPTV}
-                            onDelete={handleDeleteIPTV}
-                            onToggleFeatured={handleToggleIPTVFeatured}
-                          />
-                        ))}
-                      </div>
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={(event) => handleIPTVDragEnd(event, categoryPackages)}
+                      >
+                        <SortableContext
+                          items={categoryPackages.map(pkg => pkg.id)}
+                          strategy={rectSortingStrategy}
+                        >
+                          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {categoryPackages.map((pkg) => (
+                              <SortablePackageCard key={pkg.id} id={pkg.id}>
+                                <IPTVPackageCard
+                                  package={pkg}
+                                  onEdit={handleEditIPTV}
+                                  onDelete={handleDeleteIPTV}
+                                  onToggleFeatured={handleToggleIPTVFeatured}
+                                />
+                              </SortablePackageCard>
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     ) : (
                       <div className="text-center py-12">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -328,7 +441,7 @@ const ManageProducts = () => {
               <p className="text-sm text-gray-600">
                 Credit-based subscription packages with customizable month mappings for flexible billing
               </p>
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <CreditCard size={12} />
                   Total: {filteredSubscriptionPackages.length}
@@ -337,6 +450,9 @@ const ManageProducts = () => {
                   <Crown size={12} />
                   Featured: {filteredSubscriptionPackages.filter(p => p.status === 'featured').length}
                 </Badge>
+                <Badge className="bg-yellow-100 text-yellow-700">
+                  🔄 Drag to reorder
+                </Badge>
                 <Badge className="bg-blue-100 text-blue-700">
                   Credit-based System
                 </Badge>
@@ -344,17 +460,29 @@ const ManageProducts = () => {
             </CardHeader>
             <CardContent>
               {filteredSubscriptionPackages.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredSubscriptionPackages.map((pkg) => (
-                    <SubscriptionPackageCard
-                      key={pkg.id}
-                      package={pkg}
-                      onEdit={handleEditSubscription}
-                      onDelete={handleDeleteSubscription}
-                      onToggleFeatured={handleToggleSubscriptionFeatured}
-                    />
-                  ))}
-                </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleSubscriptionDragEnd}
+                >
+                  <SortableContext
+                    items={filteredSubscriptionPackages.map(pkg => pkg.id)}
+                    strategy={rectSortingStrategy}
+                  >
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {filteredSubscriptionPackages.map((pkg) => (
+                        <SortablePackageCard key={pkg.id} id={pkg.id}>
+                          <SubscriptionPackageCard
+                            package={pkg}
+                            onEdit={handleEditSubscription}
+                            onDelete={handleDeleteSubscription}
+                            onToggleFeatured={handleToggleSubscriptionFeatured}
+                          />
+                        </SortablePackageCard>
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               ) : (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
