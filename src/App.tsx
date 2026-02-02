@@ -127,12 +127,10 @@ function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="products" element={<ManageProducts />} />
                     <Route path="products/:id/edit" element={<EditProduct />} />
-                    <Route path="subscriptions" element={<ManageSubscriptionPackages />} />
                     <Route path="orders" element={<Orders />} />
                     <Route path="blog" element={<BlogManagement />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="content" element={<Content />} />
-                    <Route path="style-editor" element={<StyleEditor />} />
                     <Route path="communication" element={<Communication />} />
                   </Route>
                   
