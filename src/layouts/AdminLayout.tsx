@@ -31,7 +31,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Content', href: '/diza/content', icon: FileText },
     { name: 'Blog', href: '/diza/blog', icon: BookOpen },
     { name: 'Communication', href: '/diza/communication', icon: MessageSquare },
-    { name: 'Style Editor', href: '/diza/style', icon: Palette },
     { name: 'Settings', href: '/diza/settings', icon: Settings },
   ];
 
