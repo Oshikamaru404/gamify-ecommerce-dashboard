@@ -179,6 +179,44 @@ export type Database = {
         }
         Relationships: []
       }
+      iptv_credit_options: {
+        Row: {
+          created_at: string | null
+          credits: number
+          id: string
+          package_id: string
+          price: number
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits: number
+          id?: string
+          package_id: string
+          price: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits?: number
+          id?: string
+          package_id?: string
+          price?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iptv_credit_options_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "iptv_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       iptv_packages: {
         Row: {
           category: Database["public"]["Enums"]["package_category"]
