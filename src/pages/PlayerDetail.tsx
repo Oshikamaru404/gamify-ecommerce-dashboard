@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Crown, Monitor, Settings, Shield, Star } from 'lucide-react';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
-import { useLocalizedText } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 
 const PlayerDetail = () => {
@@ -17,18 +17,9 @@ const PlayerDetail = () => {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Generate slug from package name to match with URL
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
-  };
-
   // Find the package by slug
   const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
-  const pkg = playerPackages.find(p => generateSlug(p.name) === slug);
+  const pkg = playerPackages.find(p => generateProductSlug(p.name) === slug);
 
   const packageName = pkg ? useLocalizedText(pkg.name) : '';
   const packageDescription = pkg ? useLocalizedText(pkg.description) : '';
@@ -131,8 +122,8 @@ const PlayerDetail = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-2">{pkg.name}</h1>
-                  <p className="text-purple-100 text-xl">{pkg.description}</p>
+                  <h1 className="text-4xl font-bold mb-2">{packageName}</h1>
+                  <p className="text-purple-100 text-xl">{packageDescription}</p>
                   <div className="flex items-center gap-2 mt-4">
                     <Badge className="bg-white/20 text-white">
                       <Star className="w-4 h-4 mr-1 fill-current" />

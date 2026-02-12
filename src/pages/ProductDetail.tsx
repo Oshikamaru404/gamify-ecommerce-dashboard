@@ -9,8 +9,7 @@ import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from '
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { useLocalizedText, getLocalizedText } from '@/lib/multilingualUtils';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -18,26 +17,6 @@ const ProductDetail = () => {
   const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
-  const { language } = useLanguage();
-
-  // Enhanced slug generation to match all package types (handles multilingual names)
-  const generateSlug = (name: any, category: string) => {
-    const rawText = typeof name === 'string' ? name : JSON.stringify(name || '');
-    const localized = getLocalizedText(rawText, language, 'en');
-    const baseSlug = localized
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
-    
-    // Add category suffix for activation-player packages to make slug unique
-    if (category === 'activation-player') {
-      return `${baseSlug}-activation`;
-    }
-    return baseSlug;
-  };
 
   // Find the package by slug across all categories (prefer subscription variants if duplicates exist)
   let pkg: any = null;
@@ -46,7 +25,7 @@ const ProductDetail = () => {
   if (packages) {
     const matches = packages.filter((p: any) => {
       if (p.status === 'inactive') return false;
-      const generatedSlug = generateSlug(p.name, p.category);
+      const generatedSlug = generateProductSlug(p.name, p.category);
       return generatedSlug === slug;
     });
 
