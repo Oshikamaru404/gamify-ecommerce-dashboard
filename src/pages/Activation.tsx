@@ -9,10 +9,10 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
-import { generateProductSlug } from '@/lib/multilingualUtils';
+import { generateProductSlug, getLocalizedText } from '@/lib/multilingualUtils';
 
 const Activation = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -161,7 +161,8 @@ const Activation = () => {
                 {activationPackages.map((pkg, index) => {
                   const productSlug = generateProductSlug(pkg.name, pkg.category);
                   const price12Months = pkg.price_12_months || 199.99;
-                  console.log('Activation page - generating slug for:', pkg.name, 'category:', pkg.category, 'slug:', productSlug);
+                  const displayName = getLocalizedText(pkg.name, language, 'en');
+                  const displayDescription = getLocalizedText(pkg.description, language, 'en');
                   
                   return (
                     <div key={pkg.id} className="relative h-full">
@@ -182,7 +183,7 @@ const Activation = () => {
                             {pkg.icon_url && (
                               <img 
                                 src={pkg.icon_url} 
-                                alt={pkg.name}
+                                alt={displayName}
                                 className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                                 onError={(e) => {
                                   // If image fails to load, hide it and show fallback
@@ -207,7 +208,7 @@ const Activation = () => {
                         <div className="flex-1 bg-white p-6 flex flex-col">
                           {/* Package Title */}
                           <h3 className="text-lg font-bold text-gray-900 mb-3 text-center leading-tight">
-                            {pkg.name}
+                            {displayName}
                           </h3>
 
                           {/* 12-Month Pricing - Now under package name */}
@@ -227,8 +228,8 @@ const Activation = () => {
                           </div>
                           
                           {/* Package Description */}
-                          {pkg.description && (
-                            <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+                          {displayDescription && (
+                            <p className="text-gray-600 text-sm leading-relaxed mb-4">{displayDescription}</p>
                           )}
 
                           {/* Features */}

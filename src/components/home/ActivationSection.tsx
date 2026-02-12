@@ -18,9 +18,11 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { generateProductSlug } from '@/lib/multilingualUtils';
+import { generateProductSlug, getLocalizedText } from '@/lib/multilingualUtils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ActivationSection = () => {
+  const { language } = useLanguage();
   const { data: packages, isLoading } = useIPTVPackages();
 
   // Filter packages for activation-player category
@@ -127,6 +129,8 @@ const ActivationSection = () => {
               {activationPackages.map((pkg, index) => {
                 const productSlug = generateProductSlug(pkg.name, pkg.category);
                 const price12Months = pkg.price_12_months || 199.99;
+                const displayName = getLocalizedText(pkg.name, language, 'en');
+                const displayDescription = getLocalizedText(pkg.description, language, 'en');
                 
                 return (
                   <div key={pkg.id} className="relative h-full">
@@ -147,7 +151,7 @@ const ActivationSection = () => {
                           {pkg.icon_url && (
                             <img 
                               src={pkg.icon_url} 
-                              alt={pkg.name}
+                              alt={displayName}
                               className="w-24 h-24 rounded-2xl object-cover border-4 border-red-500 shadow-xl shadow-red-300/60"
                               onError={(e) => {
                                 // If image fails to load, hide it and show fallback
@@ -172,7 +176,7 @@ const ActivationSection = () => {
                       <div className="flex-1 bg-white p-6 flex flex-col">
                         {/* Package Title */}
                         <h4 className="text-lg font-bold text-gray-900 mb-3 text-center leading-tight">
-                          {pkg.name}
+                          {displayName}
                         </h4>
 
                         {/* 12-Month Pricing - Now under package name */}
@@ -192,8 +196,8 @@ const ActivationSection = () => {
                         </div>
                         
                         {/* Package Description */}
-                        {pkg.description && (
-                          <p className="text-gray-600 text-sm leading-relaxed mb-4">{pkg.description}</p>
+                        {displayDescription && (
+                          <p className="text-gray-600 text-sm leading-relaxed mb-4">{displayDescription}</p>
                         )}
 
                         {/* Features */}
