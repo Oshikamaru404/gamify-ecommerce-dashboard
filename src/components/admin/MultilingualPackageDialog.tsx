@@ -16,6 +16,8 @@ import { useCreateIPTVPackage, useUpdateIPTVPackage, IPTVPackage } from '@/hooks
 import { Globe, Plus, X, Upload, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageUploader from '@/components/admin/ImageUploader';
+import IPTVCreditOptionsManager from '@/components/admin/IPTVCreditOptionsManager';
+import { getLocalizedText } from '@/lib/multilingualUtils';
 
 const supportedLanguages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -440,76 +442,16 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
                 </div>
               )}
 
-              {isCreditBasedCategory(form.watch('category')) && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="price_10_credits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>10 Credits</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="price_25_credits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>25 Credits</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="price_50_credits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>50 Credits</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="price_100_credits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>100 Credits</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {isCreditBasedCategory(form.watch('category')) && editingPackage && (
+                <IPTVCreditOptionsManager
+                  packageId={editingPackage.id}
+                  packageName={getLocalizedText(editingPackage.name, 'en', 'en')}
+                />
+              )}
+
+              {isCreditBasedCategory(form.watch('category')) && !editingPackage && (
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                  Save the package first, then edit it to configure custom credit options.
                 </div>
               )}
             </div>

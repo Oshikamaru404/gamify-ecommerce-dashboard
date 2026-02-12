@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Crown, Shield } from 'lucide-react';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
+import { useIPTVCreditOptions } from '@/hooks/useIPTVCreditOptions';
 
 type PlanSelectorProps = {
   packageId: string;
@@ -23,8 +24,13 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 }) => {
   const {
     data: creditOptions,
-    isLoading
+    isLoading: creditLoading
   } = useSubscriptionCreditOptions(packageId);
+  const {
+    data: iptvCreditOptions,
+    isLoading: iptvCreditLoading
+  } = useIPTVCreditOptions(packageId);
+  const isLoading = creditLoading || iptvCreditLoading;
   const [selectedPlan, setSelectedPlan] = useState<string>('');
 
   const isActivationPackage = packageData?.category === 'activation-player';
@@ -182,7 +188,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   const handlePlanChange = (value: string) => {
     setSelectedPlan(value);
     let selectedOption;
-    if (creditOptions && creditOptions.length > 0) {
+    const isCreditBased = packageData?.category === 'panel-iptv' || packageData?.category === 'player';
+    if (isCreditBased && iptvCreditOptions && iptvCreditOptions.length > 0) {
+      const found = iptvCreditOptions.find(option => option.id === value);
+      selectedOption = found ? { ...found, months: 0 } : undefined;
+    } else if (creditOptions && creditOptions.length > 0) {
       selectedOption = creditOptions.find(option => option.id === value);
     } else {
       const directPlans = createPlansFromPackageData();
@@ -195,7 +205,11 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   const handleOrderNow = () => {
     let selectedOption;
-    if (creditOptions && creditOptions.length > 0) {
+    const isCreditBased = packageData?.category === 'panel-iptv' || packageData?.category === 'player';
+    if (isCreditBased && iptvCreditOptions && iptvCreditOptions.length > 0) {
+      const found = iptvCreditOptions.find(option => option.id === selectedPlan);
+      selectedOption = found ? { ...found, months: 0 } : undefined;
+    } else if (creditOptions && creditOptions.length > 0) {
       selectedOption = creditOptions.find(option => option.id === selectedPlan);
     } else {
       const directPlans = createPlansFromPackageData();
@@ -248,13 +262,15 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
 
   // Build options: for subscription category, ALWAYS use month-based options from DB and ignore creditOptions
   const directPlans = createPlansFromPackageData();
+  // Build options based on category
+  const isCreditBasedCategory = packageData?.category === 'panel-iptv' || packageData?.category === 'player';
   const availableOptions = packageData?.category === 'subscription'
     ? directPlans
-    : ((creditOptions && creditOptions.length > 0) ? creditOptions : directPlans);
-  
-  console.log('PlanSelector - Available options:', availableOptions);
-  console.log('PlanSelector - Credit options:', creditOptions);
-  
+    : isCreditBasedCategory
+      ? ((iptvCreditOptions && iptvCreditOptions.length > 0) 
+        ? iptvCreditOptions.map(opt => ({ ...opt, months: 0 })) 
+        : directPlans)
+      : ((creditOptions && creditOptions.length > 0) ? creditOptions : directPlans);
   if (!availableOptions || availableOptions.length === 0) {
     return (
       <Card>
