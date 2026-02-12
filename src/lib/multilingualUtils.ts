@@ -27,13 +27,13 @@ export const useLocalizedText = (multilingualText: string | null | undefined, fa
  * Always extracts the English text first, then slugifies.
  */
 export const generateProductSlug = (name: string | null | undefined, category?: string): string => {
-  const localized = getLocalizedText(name, 'en', 'en');
+  const localized = getLocalizedText(name, 'en', 'en').trim();
   const baseSlug = localized
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^\w-]/g, '')
     .replace(/--+/g, '-')
-    .trim();
+    .replace(/^-+|-+$/g, '');
   
   if (category === 'activation-player') {
     return `${baseSlug}-activation`;
