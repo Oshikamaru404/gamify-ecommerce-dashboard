@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Server, Settings, Shield, Star, BarChart3 } from 'lucide-react';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { useLocalizedText } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 
 const IPTVDetail = () => {
   const { slug } = useParams();
@@ -16,18 +16,9 @@ const IPTVDetail = () => {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Generate slug from package name to match with URL
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
-  };
-
   // Find the package by slug
   const panelIptvPackages = packages?.filter(pkg => pkg.category === 'panel-iptv' && pkg.status !== 'inactive') || [];
-  const pkg = panelIptvPackages.find(p => generateSlug(p.name) === slug);
+  const pkg = panelIptvPackages.find(p => generateProductSlug(p.name) === slug);
 
   // Use multilingual utility functions
   const packageName = pkg ? useLocalizedText(pkg.name) : '';

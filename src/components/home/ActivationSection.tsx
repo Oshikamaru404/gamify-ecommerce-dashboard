@@ -18,6 +18,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
+import { generateProductSlug } from '@/lib/multilingualUtils';
 
 const ActivationSection = () => {
   const { data: packages, isLoading } = useIPTVPackages();
@@ -27,20 +28,6 @@ const ActivationSection = () => {
     pkg.category === 'activation-player' && pkg.status !== 'inactive'
   ) || [];
 
-  // Enhanced slug generation to match ProductDetail page
-  const generateSlug = (name: string, category: string) => {
-    const baseSlug = name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
-    
-    // For activation-player packages, add category suffix to make slug unique
-    if (category === 'activation-player') {
-      return `${baseSlug}-activation`;
-    }
-    return baseSlug;
-  };
 
   const deviceTypes = [
     { icon: Smartphone, name: 'Mobile Devices', description: 'iOS & Android' },
@@ -138,7 +125,7 @@ const ActivationSection = () => {
           {activationPackages.length > 0 ? (
             <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
               {activationPackages.map((pkg, index) => {
-                const productSlug = generateSlug(pkg.name, pkg.category);
+                const productSlug = generateProductSlug(pkg.name, pkg.category);
                 const price12Months = pkg.price_12_months || 199.99;
                 
                 return (

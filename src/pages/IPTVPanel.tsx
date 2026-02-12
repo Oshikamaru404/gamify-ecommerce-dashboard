@@ -7,7 +7,7 @@ import { MessageCircle, Server, Settings, BarChart3, ArrowRight } from 'lucide-r
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { useLocalizedText } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 import { Link } from 'react-router-dom';
 
 const IPTVPanel = () => {
@@ -40,14 +40,6 @@ const IPTVPanel = () => {
     setSelectedPackage(null);
   };
 
-  // Generate a URL-friendly slug from the package name
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
-  };
 
   // Filter panel-iptv packages from database
   const panelIptvPackages = packages?.filter(pkg => pkg.category === 'panel-iptv' && pkg.status !== 'inactive') || [];
@@ -179,7 +171,7 @@ const IPTVPanel = () => {
                                   variant="outline" 
                                   className="w-full border-[#8f35e5] text-[#8f35e5] hover:bg-[#8f35e5] hover:text-white"
                                 >
-                                  <Link to={`/iptv-panel/${generateSlug(displayName)}`}>
+                                  <Link to={`/iptv-panel/${generateProductSlug(pkg.name)}`}>
                                     View Details
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                   </Link>

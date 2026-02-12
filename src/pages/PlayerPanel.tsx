@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Monitor, Settings, BarChart3, Crown, ArrowRight } from 'lucide-react';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
-import { useLocalizedText } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { Link } from 'react-router-dom';
@@ -38,14 +38,6 @@ const PlayerPanel = () => {
     console.log('Order submitted successfully');
   };
 
-  // Generate a URL-friendly slug from the package name
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
-  };
 
   // Filter player packages from database
   const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
@@ -175,7 +167,7 @@ const PlayerPanel = () => {
                                 variant="outline" 
                                 className="w-full border-[#8f35e5] text-[#8f35e5] hover:bg-[#8f35e5] hover:text-white"
                               >
-                                <Link to={`/player-panel/${generateSlug(pkg.name)}`}>
+                                <Link to={`/player-panel/${generateProductSlug(pkg.name)}`}>
                                   View Details
                                   <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>

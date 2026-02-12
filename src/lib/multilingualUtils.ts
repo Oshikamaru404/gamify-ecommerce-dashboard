@@ -21,3 +21,22 @@ export const useLocalizedText = (multilingualText: string | null | undefined, fa
   const { language } = useLanguage();
   return getLocalizedText(multilingualText, language, fallbackLanguage);
 };
+
+/**
+ * Generate a URL-friendly slug from a package name (handles JSON multilingual names).
+ * Always extracts the English text first, then slugifies.
+ */
+export const generateProductSlug = (name: string | null | undefined, category?: string): string => {
+  const localized = getLocalizedText(name, 'en', 'en');
+  const baseSlug = localized
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '')
+    .replace(/--+/g, '-')
+    .trim();
+  
+  if (category === 'activation-player') {
+    return `${baseSlug}-activation`;
+  }
+  return baseSlug;
+};
