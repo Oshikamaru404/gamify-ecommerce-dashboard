@@ -102,10 +102,10 @@ const IPTVCreditOptionsManager: React.FC<IPTVCreditOptionsManagerProps> = ({ pac
               <span className="font-medium text-green-600">${option.price}</span>
             </div>
             <div className="flex gap-1">
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleEdit(option)}>
+              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleEdit(option)}>
                 <Edit className="h-3 w-3" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600" onClick={() => handleDelete(option.id)}>
+              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600" onClick={() => handleDelete(option.id)}>
                 <Trash2 className="h-3 w-3" />
               </Button>
             </div>
