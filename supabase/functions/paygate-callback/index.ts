@@ -12,17 +12,34 @@ serve(async (req) => {
   }
 
   try {
-    // PayGate sends a GET request with callback parameters
+    // PayGate Callback Event - sends a GET request with all original params + payment data
+    // Docs: https://documenter.getpostman.com/view/14826208/2sA3Bj9aBi#5e5d4429-f645-4e30-9be6-e6748466d872
     const url = new URL(req.url);
-    const orderId = url.searchParams.get('order_id');
-    const valueCoin = url.searchParams.get('value_coin');
-    const coin = url.searchParams.get('coin');
-    const txidIn = url.searchParams.get('txid_in');
 
-    console.log('PayGate callback received:', { orderId, valueCoin, coin, txidIn });
+    // Original parameter we set in the callback URL
+    const orderId = url.searchParams.get('order_id');
+
+    // Payment data parameters added by PayGate per docs:
+    const valueCoin = url.searchParams.get('value_coin');           // Amount of USDC paid by the provider
+    const coin = url.searchParams.get('coin');                       // Payout coin type (e.g. polygon_usdc)
+    const txidIn = url.searchParams.get('txid_in');                 // Polygon TXID from provider to order wallet
+    const txidOut = url.searchParams.get('txid_out');               // Payout TXID from order wallet to merchant wallet
+    const addressIn = url.searchParams.get('address_in');           // Should match polygon_address_in from step 1
+    const valueForwardedCoin = url.searchParams.get('value_forwarded_coin'); // Total forwarded to merchant
+
+    console.log('PayGate callback received:', {
+      orderId,
+      valueCoin,
+      coin,
+      txidIn,
+      txidOut,
+      addressIn,
+      valueForwardedCoin,
+    });
 
     if (!orderId) {
-      throw new Error('Missing order_id in callback');
+      console.error('Missing order_id in callback');
+      return new Response('ok', { headers: { 'Content-Type': 'text/plain' } });
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -35,7 +52,6 @@ serve(async (req) => {
       .update({
         payment_status: 'paid',
         status: 'processing',
-        customer_whatsapp: undefined, // We'll append payment info
       })
       .eq('id', orderId)
       .select()
@@ -43,39 +59,20 @@ serve(async (req) => {
 
     if (error) {
       console.error('Error updating order:', error);
-      // Still return ok to prevent PayGate from retrying
     } else {
-      console.log('Order updated successfully:', data);
-
-      // Store payment details by updating the order with transaction info
-      const paymentInfo = `paygate:${valueCoin || ''}:${coin || ''}:${txidIn || ''}`;
-      
-      // Get existing whatsapp value to append
-      const { data: existingOrder } = await supabase
-        .from('orders')
-        .select('customer_whatsapp')
-        .eq('id', orderId)
-        .single();
-
-      const existingWhatsapp = existingOrder?.customer_whatsapp || '';
-      const updatedWhatsapp = existingWhatsapp ? `${existingWhatsapp}|${paymentInfo}` : paymentInfo;
-
-      await supabase
-        .from('orders')
-        .update({ customer_whatsapp: updatedWhatsapp })
-        .eq('id', orderId);
+      console.log('Order updated successfully:', data.id, '| value_coin:', valueCoin, '| txid_out:', txidOut);
     }
 
-    // PayGate expects a plain text "ok" response to confirm receipt
+    // Return plain text response - PayGate expects this to confirm receipt
     return new Response('ok', {
-      headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain' },
     });
 
   } catch (error) {
     console.error('Error in paygate-callback:', error);
-    // Return ok anyway to prevent retries
+    // Return ok anyway to prevent PayGate from retrying
     return new Response('ok', {
-      headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain' },
     });
   }
 });
