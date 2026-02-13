@@ -211,12 +211,7 @@ Order ID: ${orderData.id}`;
 
       if (paymentData?.checkoutUrl) {
         // Update order with payment tracking info
-        await supabase
-          .from('orders')
-          .update({ 
-            payment_status: 'processing',
-          })
-          .eq('id', orderData.id);
+        // Order stays as 'pending' until PayGate callback confirms payment
 
         toast.success('Redirecting to payment...');
         setTimeout(() => {
