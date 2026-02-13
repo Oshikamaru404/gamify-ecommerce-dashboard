@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,21 +19,22 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     // Build callback URL - PayGate sends GET request to this URL
     const callbackUrl = `${supabaseUrl}/functions/v1/paygate-callback?order_id=${orderId}`;
     const encodedCallback = encodeURIComponent(callbackUrl);
 
     if (paymentType === 'credit_card') {
+      // CREDIT CARD: Use process-payment.php with provider=stripe for direct card checkout
       // Step 1: Create encrypted wallet address
       const walletUrl = `https://api.paygate.to/control/wallet.php?address=${encodeURIComponent(usdcWallet)}&callback=${encodedCallback}`;
-      console.log('Creating PayGate wallet:', walletUrl);
+      console.log('Creating PayGate wallet for credit card:', walletUrl);
 
       const walletResponse = await fetch(walletUrl);
-      if (!walletResponse.ok) {
+      const contentType = walletResponse.headers.get('content-type');
+      if (!walletResponse.ok || !contentType?.includes('application/json')) {
         const errorText = await walletResponse.text();
-        console.error('PayGate wallet creation failed:', walletResponse.status, errorText);
+        console.error('PayGate wallet creation failed:', walletResponse.status, errorText.substring(0, 200));
         throw new Error(`PayGate wallet creation failed: ${walletResponse.status}`);
       }
 
@@ -45,14 +45,14 @@ serve(async (req) => {
         throw new Error('PayGate did not return an encrypted address');
       }
 
-      // Step 2: Build checkout URL (multi-provider mode so customer can choose)
+      // Step 2: Build checkout URL using process-payment.php with provider=stripe
       const amount = packageData.price.toFixed(2);
       const email = encodeURIComponent(customerInfo.customerEmail);
-      const addressIn = walletData.address_in; // already URL-encoded from PayGate
+      const addressIn = walletData.address_in;
 
-      const checkoutUrl = `https://checkout.paygate.to/pay.php?address=${addressIn}&amount=${amount}&email=${email}&currency=USD`;
+      const checkoutUrl = `https://checkout.paygate.to/process-payment.php?address=${addressIn}&amount=${amount}&provider=stripe&email=${email}&currency=USD`;
 
-      console.log('PayGate checkout URL generated for order:', orderId);
+      console.log('PayGate credit card checkout URL generated for order:', orderId);
 
       return new Response(JSON.stringify({
         success: true,
@@ -65,40 +65,47 @@ serve(async (req) => {
       });
 
     } else if (paymentType === 'crypto') {
-      // Crypto: Use the hosted multi-coin checkout page (same flow as credit card but through crypto gateway)
-      // Step 1: Create encrypted wallet for crypto
-      const walletUrl = `https://api.paygate.to/control/wallet.php?address=${encodeURIComponent(usdcWallet)}&callback=${encodedCallback}`;
-      console.log('Creating PayGate crypto wallet:', walletUrl);
+      // CRYPTO: Use the separate Crypto Payment Gateway API with hosted multi-coin mode
+      // Step 1: Create hosted multi-coin wallet via POST to multi-hosted-wallet.php
+      const amount = packageData.price;
 
-      const walletResponse = await fetch(walletUrl);
-      if (!walletResponse.ok) {
+      const cryptoPayload = {
+        evm: usdcWallet, // EVM wallet covers Polygon, ERC20, BEP20, Arbitrum, etc.
+        fiat_amount: amount,
+        fiat_currency: "USD",
+        callback: callbackUrl
+      };
+
+      console.log('Creating PayGate crypto hosted wallet for order:', orderId);
+
+      const walletResponse = await fetch('https://api.paygate.to/crypto/multi-hosted-wallet.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cryptoPayload),
+      });
+
+      const contentType = walletResponse.headers.get('content-type');
+      if (!walletResponse.ok || !contentType?.includes('application/json')) {
         const errorText = await walletResponse.text();
-        console.error('PayGate crypto wallet creation failed:', walletResponse.status, errorText);
+        console.error('PayGate crypto wallet creation failed:', walletResponse.status, errorText.substring(0, 200));
         throw new Error(`PayGate crypto wallet creation failed: ${walletResponse.status}`);
       }
 
       const walletData = await walletResponse.json();
       console.log('PayGate crypto wallet created:', walletData);
 
-      if (!walletData.address_in) {
-        throw new Error('PayGate did not return an encrypted address');
+      if (!walletData.payment_token) {
+        throw new Error('PayGate did not return a payment token');
       }
 
-      // For crypto, use the multi-coin hosted page
-      const amount = packageData.price.toFixed(2);
-      const email = encodeURIComponent(customerInfo.customerEmail);
-      const addressIn = walletData.address_in;
-
-      // Use pay.php for multi-provider/multi-coin selection
-      const checkoutUrl = `https://checkout.paygate.to/pay.php?address=${addressIn}&amount=${amount}&email=${email}&currency=USD`;
+      // Step 2: Build hosted crypto checkout URL
+      const checkoutUrl = `https://checkout.paygate.to/crypto/hosted.php?payment_token=${walletData.payment_token}&add_fees=1`;
 
       console.log('PayGate crypto checkout URL generated for order:', orderId);
 
       return new Response(JSON.stringify({
         success: true,
         checkoutUrl,
-        addressIn: walletData.address_in,
-        polygonAddress: walletData.polygon_address_in,
         ipnToken: walletData.ipn_token,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
