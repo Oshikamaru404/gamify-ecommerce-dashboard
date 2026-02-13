@@ -17,6 +17,12 @@ verify_jwt = false
 [functions.cryptomus-webhook]
 verify_jwt = false
 
+[functions.paygate-create-payment]
+verify_jwt = false
+
+[functions.paygate-callback]
+verify_jwt = false
+
 [db]
 port = 54322
 shadow_port = 54320
