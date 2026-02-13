@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home } from 'lucide-react';
+import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, Bitcoin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -162,7 +162,7 @@ Order ID: ${orderData.id}`;
     }
   };
 
-  const handleCryptoPayment = async () => {
+  const handlePayGatePayment = async (paymentType: 'credit_card' | 'crypto') => {
     if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
       toast.error('Please fill in all required fields including WhatsApp number');
       return;
@@ -191,9 +191,9 @@ Order ID: ${orderData.id}`;
 
       if (orderError) throw orderError;
 
-      // Create Cryptomus invoice through edge function
-      const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke(
-        'create-cryptomus-invoice',
+      // Create PayGate payment via edge function
+      const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
+        'paygate-create-payment',
         {
           body: {
             packageData: {
@@ -201,51 +201,33 @@ Order ID: ${orderData.id}`;
               name: displayName
             },
             customerInfo: formData,
-            orderId: orderData.id
+            orderId: orderData.id,
+            paymentType
           }
         }
       );
 
-      if (invoiceError) throw invoiceError;
+      if (paymentError) throw paymentError;
 
-      if (invoiceData.result?.url) {
-        // Update order with payment UUID
+      if (paymentData?.checkoutUrl) {
+        // Update order with payment tracking info
         await supabase
           .from('orders')
           .update({ 
             payment_status: 'processing',
-            customer_whatsapp: formData.customerWhatsapp ? 
-              `${formData.customerWhatsapp}|cryptomus:${invoiceData.result.uuid}` : 
-              `cryptomus:${invoiceData.result.uuid}`
           })
           .eq('id', orderData.id);
 
-        // Send WhatsApp notification
-        if (formData.customerWhatsapp) {
-          const notificationMessage = `✅ Payment Link Created
-
-📦 Package: ${displayName}
-💰 Amount: $${packageData.price}
-👤 Customer: ${formData.customerName}
-Order ID: ${orderData.id}
-
-Payment link has been generated. Awaiting payment confirmation.`;
-
-          // Use web.whatsapp.com as wa.me/api.whatsapp.com may be blocked in some regions
-          const whatsappUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(notificationMessage)}`;
-          window.open(whatsappUrl, '_blank');
-        }
-
         toast.success('Redirecting to payment...');
         setTimeout(() => {
-          window.location.href = invoiceData.result.url;
-        }, 1500);
+          window.location.href = paymentData.checkoutUrl;
+        }, 1000);
       } else {
-        throw new Error('Failed to create payment invoice');
+        throw new Error('Failed to create payment link');
       }
 
     } catch (error) {
-      console.error('Error creating crypto payment:', error);
+      console.error(`Error creating ${paymentType} payment:`, error);
       toast.error('Failed to create payment. Please try again.');
     } finally {
       setIsProcessing(false);
@@ -427,14 +409,21 @@ Payment link has been generated. Awaiting payment confirmation.`;
             <h3 className="font-semibold text-lg">Choose Payment Method</h3>
             
             <Tabs defaultValue="whatsapp" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="whatsapp" className="flex items-center gap-2">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="whatsapp" className="flex items-center gap-1 text-xs sm:text-sm">
                   <MessageCircle className="h-4 w-4" />
-                  WhatsApp Order
+                  <span className="hidden sm:inline">WhatsApp</span>
+                  <span className="sm:hidden">WhatsApp</span>
                 </TabsTrigger>
-                <TabsTrigger value="crypto" className="flex items-center gap-2">
+                <TabsTrigger value="credit_card" className="flex items-center gap-1 text-xs sm:text-sm">
                   <CreditCard className="h-4 w-4" />
-                  Cryptocurrency
+                  <span className="hidden sm:inline">Credit Card</span>
+                  <span className="sm:hidden">Card</span>
+                </TabsTrigger>
+                <TabsTrigger value="crypto" className="flex items-center gap-1 text-xs sm:text-sm">
+                  <Bitcoin className="h-4 w-4" />
+                  <span className="hidden sm:inline">Crypto</span>
+                  <span className="sm:hidden">Crypto</span>
                 </TabsTrigger>
               </TabsList>
               
@@ -465,29 +454,56 @@ Payment link has been generated. Awaiting payment confirmation.`;
                   </CardContent>
                 </Card>
               </TabsContent>
-              
-              <TabsContent value="crypto" className="mt-4">
+
+              <TabsContent value="credit_card" className="mt-4">
                 <Card>
                   <CardContent className="pt-6 space-y-4">
                     <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <CreditCard className="h-5 w-5 text-blue-600 mt-0.5" />
                       <div>
-                        <h4 className="font-semibold text-blue-900 mb-1">Pay with Cryptocurrency</h4>
+                        <h4 className="font-semibold text-blue-900 mb-1">Pay with Credit Card</h4>
                         <p className="text-sm text-blue-700">
-                          Secure instant payment via Cryptomus. Supports Bitcoin, USDT, and other major cryptocurrencies.
+                          Pay securely with Visa, Mastercard, Apple Pay, Google Pay, or bank transfer. You'll be redirected to a secure payment page.
                         </p>
                       </div>
                     </div>
                     <Button
-                      onClick={handleCryptoPayment}
+                      onClick={() => handlePayGatePayment('credit_card')}
                       disabled={isProcessing}
-                      className="w-full h-12"
-                      variant="default"
+                      className="w-full h-12 bg-blue-600 hover:bg-blue-700"
                     >
                       {isProcessing ? (
                         <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                       ) : (
                         <CreditCard className="h-5 w-5 mr-2" />
+                      )}
+                      Pay with Credit Card
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="crypto" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex items-start gap-3 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                      <Bitcoin className="h-5 w-5 text-orange-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-orange-900 mb-1">Pay with Cryptocurrency</h4>
+                        <p className="text-sm text-orange-700">
+                          Pay with Bitcoin, USDT, ETH, Solana, and 50+ other cryptocurrencies. Instant & anonymous.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => handlePayGatePayment('crypto')}
+                      disabled={isProcessing}
+                      className="w-full h-12 bg-orange-600 hover:bg-orange-700"
+                    >
+                      {isProcessing ? (
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      ) : (
+                        <Bitcoin className="h-5 w-5 mr-2" />
                       )}
                       Pay with Crypto
                     </Button>

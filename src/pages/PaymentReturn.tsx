@@ -24,69 +24,75 @@ const PaymentReturn = () => {
       }
 
       try {
-        // Check payment status through edge function
-        const { data: paymentData, error } = await supabase.functions.invoke(
-          'check-cryptomus-payment',
-          {
-            body: { uuid, orderId }
-          }
-        );
-
-        if (error) {
-          console.error('Error checking payment:', error);
-          setPaymentStatus('failed');
-          return;
-        }
-
-        // Get order details from database
-        let orderQuery = supabase.from('orders').select('*');
-        
+        // If we have an order_id, check directly in the database (PayGate callback may have already updated it)
         if (orderId) {
-          orderQuery = orderQuery.eq('id', orderId);
-        } else if (uuid) {
-          orderQuery = orderQuery.like('customer_whatsapp', `%cryptomus:${uuid}%`);
-        }
+          const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
 
-        const { data: orders, error: orderError } = await orderQuery.single();
+          if (orderError) {
+            console.error('Error fetching order:', orderError);
+            setPaymentStatus('failed');
+            return;
+          }
 
-        if (orderError) {
-          console.error('Error fetching order:', orderError);
-          setPaymentStatus('failed');
+          setOrderDetails(order);
+
+          if (order.payment_status === 'paid') {
+            setPaymentStatus('success');
+          } else if (order.payment_status === 'failed') {
+            setPaymentStatus('failed');
+          } else {
+            setPaymentStatus('pending');
+          }
           return;
         }
 
-        setOrderDetails(orders);
+        // Legacy Cryptomus flow
+        if (uuid) {
+          const { data: paymentData, error } = await supabase.functions.invoke(
+            'check-cryptomus-payment',
+            { body: { uuid, orderId } }
+          );
 
-        // Determine status based on Cryptomus response
-        if (paymentData?.result?.payment_status === 'paid') {
-          setPaymentStatus('success');
-          
-          // Update order status in database
-          await supabase
-            .from('orders')
-            .update({ 
-              payment_status: 'paid',
-              status: 'processing'
-            })
-            .eq('id', orders.id);
-            
-        } else if (paymentData?.result?.payment_status === 'cancel' || 
-                   paymentData?.result?.payment_status === 'fail') {
-          setPaymentStatus('failed');
-          
-          // Update order status in database
-          await supabase
-            .from('orders')
-            .update({ 
-              payment_status: 'failed',
-              status: 'cancelled'
-            })
-            .eq('id', orders.id);
-            
-        } else {
-          setPaymentStatus('pending');
+          if (error) {
+            console.error('Error checking payment:', error);
+            setPaymentStatus('failed');
+            return;
+          }
+
+          let orderQuery = supabase.from('orders').select('*');
+          orderQuery = orderQuery.like('customer_whatsapp', `%cryptomus:${uuid}%`);
+
+          const { data: orders, error: orderError } = await orderQuery.single();
+
+          if (orderError) {
+            console.error('Error fetching order:', orderError);
+            setPaymentStatus('failed');
+            return;
+          }
+
+          setOrderDetails(orders);
+
+          if (paymentData?.result?.payment_status === 'paid') {
+            setPaymentStatus('success');
+            await supabase
+              .from('orders')
+              .update({ payment_status: 'paid', status: 'processing' })
+              .eq('id', orders.id);
+          } else if (paymentData?.result?.payment_status === 'cancel' || 
+                     paymentData?.result?.payment_status === 'fail') {
+            setPaymentStatus('failed');
+            await supabase
+              .from('orders')
+              .update({ payment_status: 'failed', status: 'cancelled' })
+              .eq('id', orders.id);
+          } else {
+            setPaymentStatus('pending');
+          }
         }
-
       } catch (error) {
         console.error('Error processing payment return:', error);
         setPaymentStatus('failed');
