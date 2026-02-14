@@ -70,7 +70,7 @@ serve(async (req) => {
       // Accepts EVM wallet for all EVM chains (ERC20, BEP20, Polygon, Arbitrum, Base, Optimism, Avalanche)
       const body = {
         evm_address: usdcWallet,
-        callback_url: callbackUrl,
+        callback: callbackUrl,
         email: email,
         fiat_amount: amount,
         fiat_currency: 'USD',
