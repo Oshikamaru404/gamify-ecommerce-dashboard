@@ -72,8 +72,8 @@ serve(async (req) => {
         evm_address: usdcWallet,
         callback_url: callbackUrl,
         email: email,
-        amount: amount,
-        currency: 'USD',
+        fiat_amount: amount,
+        fiat_currency: 'USD',
       };
 
       console.log('Crypto - Creating multi-hosted wallet for order:', orderId);
