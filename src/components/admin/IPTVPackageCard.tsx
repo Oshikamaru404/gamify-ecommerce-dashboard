@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor } from 'lucide-react';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
+import { useIPTVCreditOptions } from '@/hooks/useIPTVCreditOptions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedText } from '@/lib/multilingualUtils';
 
