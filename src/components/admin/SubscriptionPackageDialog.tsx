@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X } from 'lucide-react';
 import { SubscriptionPackage, useCreateSubscriptionPackage, useUpdateSubscriptionPackage } from '@/hooks/useSubscriptionPackages';
+import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
 import CreditOptionsManager from './CreditOptionsManager';
 
