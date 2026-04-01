@@ -62,7 +62,7 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
   package: editingPackage,
 }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [newFeature, setNewFeature] = useState('');
+  
   const [showImageUploader, setShowImageUploader] = useState(false);
   const createPackage = useCreateIPTVPackage();
   const updatePackage = useUpdateIPTVPackage();
