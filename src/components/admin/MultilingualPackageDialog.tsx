@@ -340,31 +340,10 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
             </div>
 
             {/* Features Section */}
-            <div className="space-y-4">
-              <FormLabel>Features</FormLabel>
-              <div className="flex gap-2">
-                <Input
-                  value={newFeature}
-                  onChange={(e) => setNewFeature(e.target.value)}
-                  placeholder="Add a feature..."
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
-                />
-                <Button type="button" onClick={addFeature}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(form.watch('features') || []).map((feature, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                    {feature}
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-red-500" 
-                      onClick={() => removeFeature(index)}
-                    />
-                  </Badge>
-                ))}
-              </div>
-            </div>
+            <EditableFeatureList
+              features={form.watch('features') || []}
+              onChange={(features) => form.setValue('features', features)}
+            />
 
             {/* Pricing Section */}
             <div className="space-y-4">

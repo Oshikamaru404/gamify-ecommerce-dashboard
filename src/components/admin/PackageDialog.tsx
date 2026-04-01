@@ -354,30 +354,10 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
             )}
           </div>
 
-          <div>
-            <Label>Features</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                value={newFeature}
-                onChange={(e) => setNewFeature(e.target.value)}
-                placeholder="Add a feature"
-                onKeyPress={(e) => e.key === 'Enter' && addFeature()}
-              />
-              <Button type="button" onClick={addFeature}>Add</Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.features.map((feature, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {feature}
-                  <X
-                    size={12}
-                    className="cursor-pointer hover:text-red-500"
-                    onClick={() => removeFeature(index)}
-                  />
-                </Badge>
-              ))}
-            </div>
-          </div>
+          <EditableFeatureList
+            features={formData.features}
+            onChange={(features) => setFormData(prev => ({ ...prev, features }))}
+          />
 
           <div>
             <Label htmlFor="sort_order">Sort Order</Label>

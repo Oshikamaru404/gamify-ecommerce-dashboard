@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Check, GripVertical, Pencil } from 'lucide-react';
+import { Plus, X, Check, Pencil } from 'lucide-react';
 
 interface EditableFeatureListProps {
   features: string[];
