@@ -24,9 +24,9 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   onToggleFeatured,
 }) => {
   const { language } = useLanguage();
+  const { data: creditOptions } = useIPTVCreditOptions(pkg.id);
   const displayName = getLocalizedText(pkg.name, language);
   const displayDescription = getLocalizedText(pkg.description, language);
-  const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'subscription':
         return (
