@@ -62,7 +62,7 @@ export const useCreateSubscriptionCreditOption = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription-credit-options'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-credit-options'], refetchType: 'all' });
       toast.success('Credit option created successfully');
     },
     onError: (error) => {
