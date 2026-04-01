@@ -18,7 +18,7 @@ export const useIPTVCreditOptions = (packageId?: string) => {
     queryKey: ['iptv-credit-options', packageId],
     queryFn: async () => {
       let query = supabase
-        .from('iptv_credit_options' as any)
+        .from('iptv_credit_options')
         .select('*')
         .order('sort_order', { ascending: true });
       
@@ -33,7 +33,7 @@ export const useIPTVCreditOptions = (packageId?: string) => {
         throw error;
       }
       
-      return data as unknown as IPTVCreditOption[];
+      return data as IPTVCreditOption[];
     },
   });
 };
@@ -44,7 +44,7 @@ export const useCreateIPTVCreditOption = () => {
   return useMutation({
     mutationFn: async (optionData: Omit<IPTVCreditOption, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
-        .from('iptv_credit_options' as any)
+        .from('iptv_credit_options')
         .insert([optionData])
         .select()
         .single();
@@ -52,8 +52,9 @@ export const useCreateIPTVCreditOption = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'] });
+      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options', variables.package_id] });
       toast.success('Credit option created successfully');
     },
     onError: () => {
@@ -72,7 +73,7 @@ export const useUpdateIPTVCreditOption = () => {
       );
       
       const { data, error } = await supabase
-        .from('iptv_credit_options' as any)
+        .from('iptv_credit_options')
         .update(cleanData)
         .eq('id', id)
         .select()
@@ -81,8 +82,11 @@ export const useUpdateIPTVCreditOption = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'] });
+      if (data?.package_id) {
+        queryClient.invalidateQueries({ queryKey: ['iptv-credit-options', data.package_id] });
+      }
       toast.success('Credit option updated successfully');
     },
     onError: () => {
@@ -97,7 +101,7 @@ export const useDeleteIPTVCreditOption = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('iptv_credit_options' as any)
+        .from('iptv_credit_options')
         .delete()
         .eq('id', id);
       
