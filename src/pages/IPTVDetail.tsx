@@ -10,8 +10,8 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useIPTVCreditOptions } from '@/hooks/useIPTVCreditOptions';
 import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 
-const IPTVDetailPricing = ({ pkg, packageName, packageDescription, onBuyNow }: {
-  pkg: any; packageName: string; packageDescription: string;
+const IPTVDetailPricing = ({ pkg, onBuyNow }: {
+  pkg: any;
   onBuyNow: (credits: number, price: number) => void;
 }) => {
   const { data: creditOptions, isLoading } = useIPTVCreditOptions(pkg.id);
