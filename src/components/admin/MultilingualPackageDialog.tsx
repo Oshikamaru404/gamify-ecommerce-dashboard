@@ -188,18 +188,6 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
     }
   };
 
-  const addFeature = () => {
-    if (newFeature.trim()) {
-      const currentFeatures = form.getValues('features') || [];
-      form.setValue('features', [...currentFeatures, newFeature.trim()]);
-      setNewFeature('');
-    }
-  };
-
-  const removeFeature = (index: number) => {
-    const currentFeatures = form.getValues('features') || [];
-    form.setValue('features', currentFeatures.filter((_, i) => i !== index));
-  };
 
   const isMonthBasedCategory = (category: string) => {
     return category === 'subscription' || category === 'activation-player';

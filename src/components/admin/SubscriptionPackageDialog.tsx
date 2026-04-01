@@ -62,22 +62,6 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
     }
   }, [pkg, open]);
 
-  const addFeature = () => {
-    if (newFeature.trim() && !formData.features.includes(newFeature.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        features: [...prev.features, newFeature.trim()]
-      }));
-      setNewFeature('');
-    }
-  };
-
-  const removeFeature = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.filter((_, i) => i !== index)
-    }));
-  };
 
   const handleSave = () => {
     const packageData = {
