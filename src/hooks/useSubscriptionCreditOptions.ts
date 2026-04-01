@@ -18,8 +18,6 @@ export const useSubscriptionCreditOptions = (packageId?: string) => {
   return useQuery({
     queryKey: ['subscription-credit-options', packageId],
     queryFn: async () => {
-      console.log('Fetching subscription credit options from database...');
-      
       let query = supabase
         .from('subscription_credit_options')
         .select('*')
@@ -36,9 +34,9 @@ export const useSubscriptionCreditOptions = (packageId?: string) => {
         throw error;
       }
       
-      console.log('Successfully fetched subscription credit options:', data);
       return data as SubscriptionCreditOption[];
     },
+    staleTime: 0,
   });
 };
 
