@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateIPTVPackage, useUpdateIPTVPackage, IPTVPackage } from '@/hooks/useIPTVPackages';
 import { Globe, Plus, X, Upload, Image } from 'lucide-react';
+import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import { toast } from 'sonner';
 import ImageUploader from '@/components/admin/ImageUploader';
 import IPTVCreditOptionsManager from '@/components/admin/IPTVCreditOptionsManager';
