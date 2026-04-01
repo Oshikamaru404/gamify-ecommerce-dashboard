@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Edit, Trash2, Star, Tv, GamepadIcon, Crown, Monitor } from 'lucide-react';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
+import { useIPTVCreditOptions } from '@/hooks/useIPTVCreditOptions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedText } from '@/lib/multilingualUtils';
 
@@ -23,6 +24,7 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   onToggleFeatured,
 }) => {
   const { language } = useLanguage();
+  const { data: creditOptions } = useIPTVCreditOptions(pkg.id);
   const displayName = getLocalizedText(pkg.name, language);
   const displayDescription = getLocalizedText(pkg.description, language);
   const getCategoryBadge = (category: string) => {
@@ -77,107 +79,63 @@ const IPTVPackageCard: React.FC<IPTVPackageCardProps> = ({
   };
 
   const renderPricing = () => {
-    // Both subscription and activation-player categories use monthly pricing
-    // Panel IPTV uses credit-based pricing
-    // Panel Player uses special credit system (1 credit = 12 months, 2 credits = lifetime)
     const isMonthlyPricingCategory = pkg.category === 'subscription' || pkg.category === 'activation-player';
-    const isPanelPlayerCategory = pkg.category === 'player';
+    const isCreditCategory = pkg.category === 'panel-iptv' || pkg.category === 'player';
     
     if (isMonthlyPricingCategory) {
-      // Show month-based pricing for subscription and activation-player packages
       return (
         <div className="space-y-2">
           <h4 className="font-medium text-sm text-gray-900">Monthly Subscription Pricing:</h4>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            {pkg.price_1_month && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">1 Month:</span> ${pkg.price_1_month}
-              </div>
-            )}
-            {pkg.price_3_months && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">3 Months:</span> ${pkg.price_3_months}
-              </div>
-            )}
-            {pkg.price_6_months && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">6 Months:</span> ${pkg.price_6_months}
-              </div>
-            )}
-            {pkg.price_12_months && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">12 Months:</span> ${pkg.price_12_months}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    } else if (isPanelPlayerCategory) {
-      // Show panel player special pricing with disclaimer
-      return (
-        <div className="space-y-3">
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-            <h4 className="font-medium text-sm text-purple-900 mb-2">Panel Player System:</h4>
-            <div className="text-xs text-purple-700 space-y-1">
-              <p>• 1 Credit = 12 Months</p>
-              <p>• 2 Credits = Lifetime Activation</p>
-            </div>
-          </div>
-          <h4 className="font-medium text-sm text-gray-900">Available Credit Options:</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            {pkg.price_10_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">10 Credits:</span> ${pkg.price_10_credits}
-              </div>
-            )}
-            {pkg.price_25_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">25 Credits:</span> ${pkg.price_25_credits}
-              </div>
-            )}
-            {pkg.price_50_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">50 Credits:</span> ${pkg.price_50_credits}
-              </div>
-            )}
-            {pkg.price_100_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">100 Credits:</span> ${pkg.price_100_credits}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    } else {
-      // Show credit-based pricing for panel-iptv packages
-      return (
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm text-gray-900">Credit-Based Pricing:</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            {pkg.price_10_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">10 Credits:</span> ${pkg.price_10_credits}
-              </div>
-            )}
-            {pkg.price_25_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">25 Credits:</span> ${pkg.price_25_credits}
-              </div>
-            )}
-            {pkg.price_50_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">50 Credits:</span> ${pkg.price_50_credits}
-              </div>
-            )}
-            {pkg.price_100_credits && (
-              <div className="bg-gray-50 p-2 rounded">
-                <span className="font-medium">100 Credits:</span> ${pkg.price_100_credits}
-              </div>
-            )}
+            {pkg.price_1_month && <div className="bg-gray-50 p-2 rounded"><span className="font-medium">1 Month:</span> ${pkg.price_1_month}</div>}
+            {pkg.price_3_months && <div className="bg-gray-50 p-2 rounded"><span className="font-medium">3 Months:</span> ${pkg.price_3_months}</div>}
+            {pkg.price_6_months && <div className="bg-gray-50 p-2 rounded"><span className="font-medium">6 Months:</span> ${pkg.price_6_months}</div>}
+            {pkg.price_12_months && <div className="bg-gray-50 p-2 rounded"><span className="font-medium">12 Months:</span> ${pkg.price_12_months}</div>}
           </div>
         </div>
       );
     }
+
+    // For credit-based categories, show dynamic credit options from DB
+    if (isCreditCategory && creditOptions && creditOptions.length > 0) {
+      return (
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-gray-900">
+            {pkg.category === 'player' ? 'Player Credit Options:' : 'Credit-Based Pricing:'}
+          </h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {creditOptions.map(opt => (
+              <div key={opt.id} className="bg-gray-50 p-2 rounded">
+                <span className="font-medium">{opt.credits} Credits:</span> ${opt.price}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Fallback to hardcoded fields
+    const hardcodedOptions = [
+      { label: '10 Credits', price: pkg.price_10_credits },
+      { label: '25 Credits', price: pkg.price_25_credits },
+      { label: '50 Credits', price: pkg.price_50_credits },
+      { label: '100 Credits', price: pkg.price_100_credits },
+    ].filter(o => o.price);
+
+    if (hardcodedOptions.length > 0) {
+      return (
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-gray-900">Credit-Based Pricing:</h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {hardcodedOptions.map((o, i) => (
+              <div key={i} className="bg-gray-50 p-2 rounded"><span className="font-medium">{o.label}:</span> ${o.price}</div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return <p className="text-xs text-gray-500">No pricing configured.</p>;
   };
 
   const renderIcon = () => {
