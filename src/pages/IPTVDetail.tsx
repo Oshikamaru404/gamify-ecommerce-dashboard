@@ -150,7 +150,7 @@ const IPTVDetail = () => {
               </Card>
             </div>
             <div className="space-y-6">
-              <IPTVDetailPricing pkg={pkg} packageName={packageName} packageDescription={packageDescription} onBuyNow={handleBuyNow} />
+              <IPTVDetailPricing pkg={pkg} onBuyNow={handleBuyNow} />
             </div>
           </div>
         </div>

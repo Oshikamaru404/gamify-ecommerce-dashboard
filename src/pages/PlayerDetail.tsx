@@ -5,7 +5,7 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Check, Crown, Monitor, Settings, Shield, Star } from 'lucide-react';
+import { ArrowLeft, Check, Crown, Monitor, Shield, Star } from 'lucide-react';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
