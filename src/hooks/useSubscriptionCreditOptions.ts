@@ -129,7 +129,7 @@ export const useDeleteSubscriptionCreditOption = () => {
       console.log('Successfully deleted subscription credit option');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription-credit-options'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-credit-options'], refetchType: 'all' });
       toast.success('Credit option deleted successfully');
     },
     onError: (error) => {
