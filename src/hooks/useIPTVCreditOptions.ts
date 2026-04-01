@@ -35,6 +35,7 @@ export const useIPTVCreditOptions = (packageId?: string) => {
       
       return data as IPTVCreditOption[];
     },
+    staleTime: 0, // Always refetch when invalidated
   });
 };
 
@@ -52,12 +53,12 @@ export const useCreateIPTVCreditOption = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'] });
-      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options', variables.package_id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'], refetchType: 'all' });
       toast.success('Credit option created successfully');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Failed to create credit option:', error);
       toast.error('Failed to create credit option');
     },
   });
@@ -68,28 +69,36 @@ export const useUpdateIPTVCreditOption = () => {
   
   return useMutation({
     mutationFn: async ({ id, ...optionData }: Partial<IPTVCreditOption> & { id: string }) => {
-      const cleanData = Object.fromEntries(
-        Object.entries(optionData).filter(([_, value]) => value !== undefined)
-      );
+      // Only include defined, non-null fields
+      const updatePayload: Record<string, any> = {};
+      if (optionData.credits !== undefined) updatePayload.credits = optionData.credits;
+      if (optionData.price !== undefined) updatePayload.price = optionData.price;
+      if (optionData.sort_order !== undefined) updatePayload.sort_order = optionData.sort_order;
+      if (optionData.package_id !== undefined) updatePayload.package_id = optionData.package_id;
+
+      console.log('Updating IPTV credit option:', id, updatePayload);
       
       const { data, error } = await supabase
         .from('iptv_credit_options')
-        .update(cleanData)
+        .update(updatePayload)
         .eq('id', id)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating IPTV credit option:', error);
+        throw error;
+      }
+      
+      console.log('Updated IPTV credit option result:', data);
       return data;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'] });
-      if (data?.package_id) {
-        queryClient.invalidateQueries({ queryKey: ['iptv-credit-options', data.package_id] });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'], refetchType: 'all' });
       toast.success('Credit option updated successfully');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Failed to update credit option:', error);
       toast.error('Failed to update credit option');
     },
   });
@@ -108,10 +117,11 @@ export const useDeleteIPTVCreditOption = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'] });
+      queryClient.invalidateQueries({ queryKey: ['iptv-credit-options'], refetchType: 'all' });
       toast.success('Credit option deleted successfully');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Failed to delete credit option:', error);
       toast.error('Failed to delete credit option');
     },
   });
