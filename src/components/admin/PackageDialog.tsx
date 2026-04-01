@@ -45,7 +45,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     sort_order: '0',
   });
   
-  const [newFeature, setNewFeature] = useState('');
+  
 
   useEffect(() => {
     if (pkg) {

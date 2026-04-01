@@ -36,7 +36,7 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
     sort_order: '0',
   });
   
-  const [newFeature, setNewFeature] = useState('');
+  
 
   useEffect(() => {
     if (pkg) {
