@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Check, X, GripVertical, DollarSign } from 'lucide-react';
+import { Plus, Trash2, Check, X, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
 export interface CreditOptionRow {
