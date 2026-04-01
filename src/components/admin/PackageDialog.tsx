@@ -6,9 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import { IPTVPackage, useCreateIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
+import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
 
 type PackageDialogProps = {
@@ -46,7 +45,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     sort_order: '0',
   });
   
-  const [newFeature, setNewFeature] = useState('');
+  
 
   useEffect(() => {
     if (pkg) {
@@ -90,22 +89,6 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     }
   }, [pkg, open]);
 
-  const addFeature = () => {
-    if (newFeature.trim() && !formData.features.includes(newFeature.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        features: [...prev.features, newFeature.trim()]
-      }));
-      setNewFeature('');
-    }
-  };
-
-  const removeFeature = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.filter((_, i) => i !== index)
-    }));
-  };
 
   const handleSave = () => {
     const packageData = {
@@ -353,30 +336,10 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
             )}
           </div>
 
-          <div>
-            <Label>Features</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                value={newFeature}
-                onChange={(e) => setNewFeature(e.target.value)}
-                placeholder="Add a feature"
-                onKeyPress={(e) => e.key === 'Enter' && addFeature()}
-              />
-              <Button type="button" onClick={addFeature}>Add</Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.features.map((feature, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {feature}
-                  <X
-                    size={12}
-                    className="cursor-pointer hover:text-red-500"
-                    onClick={() => removeFeature(index)}
-                  />
-                </Badge>
-              ))}
-            </div>
-          </div>
+          <EditableFeatureList
+            features={formData.features}
+            onChange={(features) => setFormData(prev => ({ ...prev, features }))}
+          />
 
           <div>
             <Label htmlFor="sort_order">Sort Order</Label>

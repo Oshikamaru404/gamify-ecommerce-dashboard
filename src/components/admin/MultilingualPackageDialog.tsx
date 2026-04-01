@@ -5,15 +5,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateIPTVPackage, useUpdateIPTVPackage, IPTVPackage } from '@/hooks/useIPTVPackages';
-import { Globe, Plus, X, Upload, Image } from 'lucide-react';
+import { Globe, Upload, Image } from 'lucide-react';
+import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import { toast } from 'sonner';
 import ImageUploader from '@/components/admin/ImageUploader';
 import IPTVCreditOptionsManager from '@/components/admin/IPTVCreditOptionsManager';
@@ -61,7 +62,7 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
   package: editingPackage,
 }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [newFeature, setNewFeature] = useState('');
+  
   const [showImageUploader, setShowImageUploader] = useState(false);
   const createPackage = useCreateIPTVPackage();
   const updatePackage = useUpdateIPTVPackage();
@@ -187,18 +188,6 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
     }
   };
 
-  const addFeature = () => {
-    if (newFeature.trim()) {
-      const currentFeatures = form.getValues('features') || [];
-      form.setValue('features', [...currentFeatures, newFeature.trim()]);
-      setNewFeature('');
-    }
-  };
-
-  const removeFeature = (index: number) => {
-    const currentFeatures = form.getValues('features') || [];
-    form.setValue('features', currentFeatures.filter((_, i) => i !== index));
-  };
 
   const isMonthBasedCategory = (category: string) => {
     return category === 'subscription' || category === 'activation-player';
@@ -339,31 +328,10 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
             </div>
 
             {/* Features Section */}
-            <div className="space-y-4">
-              <FormLabel>Features</FormLabel>
-              <div className="flex gap-2">
-                <Input
-                  value={newFeature}
-                  onChange={(e) => setNewFeature(e.target.value)}
-                  placeholder="Add a feature..."
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
-                />
-                <Button type="button" onClick={addFeature}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(form.watch('features') || []).map((feature, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                    {feature}
-                    <X 
-                      className="h-3 w-3 cursor-pointer hover:text-red-500" 
-                      onClick={() => removeFeature(index)}
-                    />
-                  </Badge>
-                ))}
-              </div>
-            </div>
+            <EditableFeatureList
+              features={form.watch('features') || []}
+              onChange={(features) => form.setValue('features', features)}
+            />
 
             {/* Pricing Section */}
             <div className="space-y-4">
