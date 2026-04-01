@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { IPTVPackage, useCreateIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
+import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
 
 type PackageDialogProps = {
