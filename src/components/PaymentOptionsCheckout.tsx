@@ -523,34 +523,6 @@ Order ID: ${orderData.id}`;
               </TabsContent>
               
               <TabsContent value="crypto" className="mt-4">
-                <Card>
-                  <CardContent className="pt-6 space-y-4">
-                    <div className="flex items-start gap-3 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                      <Bitcoin className="h-5 w-5 text-orange-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-semibold text-orange-900 mb-1">Pay with Cryptocurrency</h4>
-                        <p className="text-sm text-orange-700">
-                          Pay with Bitcoin, USDT, ETH, Solana, and 50+ other cryptocurrencies. Instant & anonymous.
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => handlePayGatePayment('crypto')}
-                      disabled={isProcessing}
-                      className="w-full h-12 bg-orange-600 hover:bg-orange-700"
-                    >
-                      {isProcessing ? (
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      ) : (
-                        <Bitcoin className="h-5 w-5 mr-2" />
-                      )}
-                      Pay with Crypto
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="direct_crypto" className="mt-4">
                 <DirectCryptoPayment
                   amountUsd={packageData.price}
                   onCreateOrder={handleDirectCryptoCreateOrder}
