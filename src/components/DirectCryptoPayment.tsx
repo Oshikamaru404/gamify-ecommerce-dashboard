@@ -23,6 +23,7 @@ const buildTicker = (w: CryptoWallet): string => {
   const net = w.network.toLowerCase();
   const coin = w.coin.toLowerCase();
   if (net === 'btc' || coin === 'btc') return 'btc';
+  if ((net === 'eth' || net === 'erc20') && coin === 'eth') return 'eth';
   if (net === 'eth' || net === 'erc20') return `erc20/${coin}`;
   if (net === 'bep20' || net === 'bsc') return `bep20/${coin}`;
   if (net === 'polygon' || net === 'matic') return `polygon/${coin}`;
@@ -38,6 +39,7 @@ const buildTicker = (w: CryptoWallet): string => {
 
 export const DEFAULT_CRYPTO_WALLETS: CryptoWallet[] = [
   { network: 'BTC', coin: 'BTC', address: '1DHKvYQ8dAeJQdkQGwdBBeM7s4yrAxcMrz' },
+  { network: 'ERC20', coin: 'ETH', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
   { network: 'BEP20', coin: 'BNB', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
   { network: 'BEP20', coin: 'USDC', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
   { network: 'BEP20', coin: 'USDT', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
@@ -71,21 +73,25 @@ interface PaymentInfo {
   orderId: string;
 }
 
+// Coin/network logo URLs (color SVG icons)
+const ICON_BASE = 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color';
+const coinIcon = (symbol: string) => `${ICON_BASE}/${symbol.toLowerCase()}.svg`;
+
 // Network meta for nicer UI
-const NETWORK_META: Record<string, { label: string; emoji: string; color: string }> = {
-  BTC: { label: 'Bitcoin', emoji: '₿', color: 'bg-orange-100 text-orange-700 border-orange-300' },
-  BEP20: { label: 'BNB Smart Chain', emoji: '🟡', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  POLYGON: { label: 'Polygon', emoji: '🟣', color: 'bg-purple-100 text-purple-700 border-purple-300' },
-  BASE: { label: 'Base', emoji: '🔵', color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  SOLANA: { label: 'Solana', emoji: '🟢', color: 'bg-green-100 text-green-700 border-green-300' },
-  TRC20: { label: 'Tron (TRC20)', emoji: '🔴', color: 'bg-red-100 text-red-700 border-red-300' },
-  LINEA: { label: 'Linea', emoji: '⚫', color: 'bg-gray-100 text-gray-700 border-gray-300' },
-  ERC20: { label: 'Ethereum (ERC20)', emoji: '💎', color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+const NETWORK_META: Record<string, { label: string; logo: string; color: string }> = {
+  BTC: { label: 'Bitcoin', logo: coinIcon('btc'), color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  ERC20: { label: 'Ethereum (ERC20)', logo: coinIcon('eth'), color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+  BEP20: { label: 'BNB Smart Chain', logo: coinIcon('bnb'), color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  POLYGON: { label: 'Polygon', logo: coinIcon('matic'), color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  BASE: { label: 'Base', logo: 'https://raw.githubusercontent.com/base-org/brand-kit/main/logo/symbol/Base_Symbol_Blue.svg', color: 'bg-blue-100 text-blue-700 border-blue-300' },
+  SOLANA: { label: 'Solana', logo: coinIcon('sol'), color: 'bg-green-100 text-green-700 border-green-300' },
+  TRC20: { label: 'Tron (TRC20)', logo: coinIcon('trx'), color: 'bg-red-100 text-red-700 border-red-300' },
+  LINEA: { label: 'Linea', logo: 'https://icons.llamao.fi/icons/chains/rsz_linea.jpg', color: 'bg-gray-100 text-gray-700 border-gray-300' },
 };
 
 const getNetworkMeta = (network: string) => {
   const key = network.toUpperCase();
-  return NETWORK_META[key] || { label: network, emoji: '🔗', color: 'bg-slate-100 text-slate-700 border-slate-300' };
+  return NETWORK_META[key] || { label: network, logo: coinIcon('generic'), color: 'bg-slate-100 text-slate-700 border-slate-300' };
 };
 
 // EVM chain IDs (EIP-155) for EIP-681 deeplinks
@@ -301,8 +307,13 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                       : 'border-border hover:border-purple-300 hover:bg-muted/50'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-lg">{meta.emoji}</span>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={meta.logo}
+                      alt={meta.label}
+                      className="h-6 w-6 rounded-full bg-white object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+                    />
                     <span className="font-semibold text-sm">{meta.label}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -324,18 +335,25 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
             <div className="flex flex-wrap gap-2">
               {coinsForNetwork.map(w => {
                 const active = selectedCoin === w.coin;
+                const coinSymbol = w.coin.toLowerCase() === 'pol' ? 'matic' : w.coin.toLowerCase();
                 return (
                   <button
                     key={w.coin}
                     type="button"
                     onClick={() => setSelectedCoin(w.coin)}
                     disabled={loading}
-                    className={`px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all ${
                       active
                         ? 'border-purple-600 bg-purple-600 text-white shadow-md'
                         : 'border-border bg-background hover:border-purple-400 hover:bg-purple-50'
                     }`}
                   >
+                    <img
+                      src={coinIcon(coinSymbol)}
+                      alt={w.coin}
+                      className="h-5 w-5 rounded-full bg-white object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+                    />
                     {w.coin}
                   </button>
                 );
