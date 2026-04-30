@@ -88,7 +88,85 @@ const getNetworkMeta = (network: string) => {
   return NETWORK_META[key] || { label: network, emoji: '🔗', color: 'bg-slate-100 text-slate-700 border-slate-300' };
 };
 
-const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, onCreateOrder, onPaymentReady }) => {
+// EVM chain IDs (EIP-155) for EIP-681 deeplinks
+const EVM_CHAIN_IDS: Record<string, number> = {
+  ERC20: 1,
+  BEP20: 56,
+  POLYGON: 137,
+  BASE: 8453,
+  ARBITRUM: 42161,
+  OPTIMISM: 10,
+  LINEA: 59144,
+  'AVAX-C': 43114,
+};
+
+// ERC-20 token contracts per chain (key: NETWORK_COIN)
+const ERC20_CONTRACTS: Record<string, string> = {
+  ERC20_USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+  ERC20_USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+  BEP20_USDT: '0x55d398326f99059ff775485246999027b3197955',
+  BEP20_USDC: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+  POLYGON_USDT: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+  POLYGON_USDC: '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359',
+  BASE_USDT: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2',
+  BASE_USDC: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+  LINEA_USDT: '0xa219439258ca9da29e9cc4ce5596924745e12b93',
+  LINEA_USDC: '0x176211869ca2b568f2a7d4ee941e073a821ee1ff',
+};
+
+// Solana SPL token mints
+const SPL_MINTS: Record<string, string> = {
+  USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  USDT: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+};
+
+const toBaseUnits = (amount: string, decimals: number): string => {
+  const [whole, frac = ''] = amount.split('.');
+  const fracPadded = (frac + '0'.repeat(decimals)).slice(0, decimals);
+  const combined = (whole + fracPadded).replace(/^0+/, '') || '0';
+  return combined;
+};
+
+/**
+ * Build a wallet deeplink URI that includes the amount.
+ * Scanning the QR with most modern wallets will auto-fill the amount.
+ */
+const buildPaymentUri = (network: string, coin: string, address: string, amount: string | null): string => {
+  if (!amount) return address;
+  const net = network.toUpperCase();
+  const c = coin.toUpperCase();
+
+  // BIP-21 — Bitcoin
+  if (net === 'BTC') return `bitcoin:${address}?amount=${amount}`;
+
+  // EIP-681 — EVM chains
+  const chainId = EVM_CHAIN_IDS[net];
+  if (chainId) {
+    const nativeCoins = ['ETH', 'BNB', 'POL', 'MATIC', 'AVAX'];
+    if (nativeCoins.includes(c)) {
+      const wei = toBaseUnits(amount, 18);
+      return `ethereum:${address}@${chainId}?value=${wei}`;
+    }
+    const contract = ERC20_CONTRACTS[`${net}_${c}`];
+    if (contract) {
+      const tokenAmount = toBaseUnits(amount, 6); // USDT/USDC = 6 decimals on these chains
+      return `ethereum:${contract}@${chainId}/transfer?address=${address}&uint256=${tokenAmount}`;
+    }
+  }
+
+  // Solana Pay
+  if (net === 'SOLANA' || net === 'SOL') {
+    if (c === 'SOL') return `solana:${address}?amount=${amount}`;
+    const mint = SPL_MINTS[c];
+    if (mint) return `solana:${address}?amount=${amount}&spl-token=${mint}`;
+  }
+
+  // Tron
+  if (net === 'TRC20' || net === 'TRON') return `tron:${address}?amount=${amount}`;
+
+  return address;
+};
+
   const { data: siteSettings } = useSiteSettings();
   const [selectedNetwork, setSelectedNetwork] = useState<string>('');
   const [selectedCoin, setSelectedCoin] = useState<string>('');
