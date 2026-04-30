@@ -29,7 +29,14 @@ serve(async (req) => {
     let checkoutUrl: string;
 
     if (paymentType === 'credit_card') {
-      // ─── Credit Card: use original Instant Payment Gateway flow ───
+      // ─── Credit Card: Multi-provider Mode (hosted page) ───
+      // Per PayGate docs (https://documenter.getpostman.com/view/14826208/2sA3Bj9aBi#365839e7-152a-4839-a094-6372f44ae6b2),
+      // pay.php is a hosted checkout that auto-displays every eligible card/fiat provider
+      // (Stripe, Moonpay, Transfi, Robinhood, Bitnovo, Interac, UPI, …) based on the
+      // customer's country, amount, and currency. This gives multi-gateway redundancy
+      // instead of being locked to a single provider like `stripe`.
+      //
+      // Step 1 – create a unique encrypted receiving wallet (address_in) tied to the order.
       const encodedCallback = encodeURIComponent(callbackUrl);
       const walletUrl = `https://api.paygate.to/control/wallet.php?address=${encodeURIComponent(usdcWallet)}&callback=${encodedCallback}`;
       console.log('Credit card - Creating PayGate wallet:', walletUrl);
@@ -50,8 +57,29 @@ serve(async (req) => {
       }
 
       const addressIn = walletData.address_in;
-      checkoutUrl = `https://checkout.paygate.to/process-payment.php?address=${addressIn}&amount=${amount}&provider=stripe&email=${encodeURIComponent(email)}&currency=USD`;
-      console.log('Credit card checkout URL generated for order:', orderId);
+
+      // Step 2 – build the Multi-provider hosted checkout URL.
+      // We forward customer country (when detectable) so PayGate ranks providers correctly.
+      const ipCountry = req.headers.get('cf-ipcountry')
+        || req.headers.get('x-vercel-ip-country')
+        || req.headers.get('x-country-code')
+        || '';
+
+      const params = new URLSearchParams({
+        address: addressIn,
+        amount,
+        email,
+        currency: 'USD',
+      });
+      // Optional branding (kept minimal; PayGate accepts theme/button/background HEX or names)
+      params.set('theme', '6366f1');
+      params.set('button', '6366f1');
+
+      checkoutUrl = `https://checkout.paygate.to/pay.php?${params.toString()}`;
+      if (ipCountry) {
+        checkoutUrl += `&country=${encodeURIComponent(ipCountry)}`;
+      }
+      console.log('Credit card multi-provider checkout URL generated for order:', orderId, '| country:', ipCountry || 'auto');
 
       return new Response(JSON.stringify({
         success: true,
@@ -60,6 +88,7 @@ serve(async (req) => {
         polygonAddress: walletData.polygon_address_in,
         callbackUrl: walletData.callback_url,
         ipnToken: walletData.ipn_token,
+        mode: 'multi_provider',
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
