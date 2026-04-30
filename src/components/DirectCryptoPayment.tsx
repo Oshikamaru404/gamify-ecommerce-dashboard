@@ -335,18 +335,25 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
             <div className="flex flex-wrap gap-2">
               {coinsForNetwork.map(w => {
                 const active = selectedCoin === w.coin;
+                const coinSymbol = w.coin.toLowerCase() === 'pol' ? 'matic' : w.coin.toLowerCase();
                 return (
                   <button
                     key={w.coin}
                     type="button"
                     onClick={() => setSelectedCoin(w.coin)}
                     disabled={loading}
-                    className={`px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all ${
                       active
                         ? 'border-purple-600 bg-purple-600 text-white shadow-md'
                         : 'border-border bg-background hover:border-purple-400 hover:bg-purple-50'
                     }`}
                   >
+                    <img
+                      src={coinIcon(coinSymbol)}
+                      alt={w.coin}
+                      className="h-5 w-5 rounded-full bg-white object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+                    />
                     {w.coin}
                   </button>
                 );
