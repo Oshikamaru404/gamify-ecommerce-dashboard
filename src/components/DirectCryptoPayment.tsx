@@ -193,21 +193,70 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           </div>
         </div>
 
+        {/* Step 1: Network selection */}
         <div className="space-y-2">
-          <Label>Select Coin / Network *</Label>
-          <Select value={selectedKey} onValueChange={setSelectedKey} disabled={loading}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a coin and network" />
-            </SelectTrigger>
-            <SelectContent className="max-h-72 bg-background z-50">
-              {wallets.map((w) => (
-                <SelectItem key={`${w.network}-${w.coin}`} value={`${w.network}-${w.coin}`}>
-                  {w.coin} on {w.network}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label className="flex items-center gap-2">
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-white text-xs font-bold">1</span>
+            Choose Network
+          </Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {networks.map(([net, list]) => {
+              const meta = getNetworkMeta(net);
+              const active = selectedNetwork === net;
+              return (
+                <button
+                  key={net}
+                  type="button"
+                  onClick={() => setSelectedNetwork(net)}
+                  disabled={loading}
+                  className={`flex flex-col items-start gap-1 p-3 rounded-lg border-2 text-left transition-all ${
+                    active
+                      ? 'border-purple-600 bg-purple-50 shadow-md scale-[1.02]'
+                      : 'border-border hover:border-purple-300 hover:bg-muted/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">{meta.emoji}</span>
+                    <span className="font-semibold text-sm">{meta.label}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {list.map(l => l.coin).join(' · ')}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Step 2: Coin selection */}
+        {selectedNetwork && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <Label className="flex items-center gap-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-white text-xs font-bold">2</span>
+              Choose Coin
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {coinsForNetwork.map(w => {
+                const active = selectedCoin === w.coin;
+                return (
+                  <button
+                    key={w.coin}
+                    type="button"
+                    onClick={() => setSelectedCoin(w.coin)}
+                    disabled={loading}
+                    className={`px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all ${
+                      active
+                        ? 'border-purple-600 bg-purple-600 text-white shadow-md'
+                        : 'border-border bg-background hover:border-purple-400 hover:bg-purple-50'
+                    }`}
+                  >
+                    {w.coin}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {!payment && (
           <Button
