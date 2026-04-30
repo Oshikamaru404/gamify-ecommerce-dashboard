@@ -65,13 +65,24 @@ serve(async (req) => {
         || req.headers.get('x-country-code')
         || '';
 
+      // TEST MODE: show ALL available providers by listing them explicitly.
+      // PayGate's `providers` query param accepts a comma-separated list to force-display them
+      // regardless of country/currency auto-filtering.
+      const allProviders = [
+        'stripe', 'moonpay', 'transfi', 'robinhood', 'bitnovo', 'banxa',
+        'paypal', 'revolut', 'binance', 'interac', 'upi', 'sepa', 'ach',
+        'applepay', 'googlepay', 'klarna', 'ideal', 'sofort', 'giropay',
+        'bancontact', 'eps', 'p24', 'mybank', 'trustly', 'mercadopago',
+        'pix', 'oxxo', 'boleto', 'alipay', 'wechatpay'
+      ].join(',');
+
       const params = new URLSearchParams({
         address: addressIn,
         amount,
         email,
         currency: 'USD',
+        providers: allProviders,
       });
-      // Optional branding (kept minimal; PayGate accepts theme/button/background HEX or names)
       params.set('theme', '6366f1');
       params.set('button', '6366f1');
 
