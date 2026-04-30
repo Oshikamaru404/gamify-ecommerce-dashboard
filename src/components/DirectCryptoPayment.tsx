@@ -88,6 +88,85 @@ const getNetworkMeta = (network: string) => {
   return NETWORK_META[key] || { label: network, emoji: '🔗', color: 'bg-slate-100 text-slate-700 border-slate-300' };
 };
 
+// EVM chain IDs (EIP-155) for EIP-681 deeplinks
+const EVM_CHAIN_IDS: Record<string, number> = {
+  ERC20: 1,
+  BEP20: 56,
+  POLYGON: 137,
+  BASE: 8453,
+  ARBITRUM: 42161,
+  OPTIMISM: 10,
+  LINEA: 59144,
+  'AVAX-C': 43114,
+};
+
+// ERC-20 token contracts per chain (key: NETWORK_COIN)
+const ERC20_CONTRACTS: Record<string, string> = {
+  ERC20_USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+  ERC20_USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+  BEP20_USDT: '0x55d398326f99059ff775485246999027b3197955',
+  BEP20_USDC: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+  POLYGON_USDT: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+  POLYGON_USDC: '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359',
+  BASE_USDT: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2',
+  BASE_USDC: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+  LINEA_USDT: '0xa219439258ca9da29e9cc4ce5596924745e12b93',
+  LINEA_USDC: '0x176211869ca2b568f2a7d4ee941e073a821ee1ff',
+};
+
+// Solana SPL token mints
+const SPL_MINTS: Record<string, string> = {
+  USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  USDT: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+};
+
+const toBaseUnits = (amount: string, decimals: number): string => {
+  const [whole, frac = ''] = amount.split('.');
+  const fracPadded = (frac + '0'.repeat(decimals)).slice(0, decimals);
+  const combined = (whole + fracPadded).replace(/^0+/, '') || '0';
+  return combined;
+};
+
+/**
+ * Build a wallet deeplink URI that includes the amount.
+ * Scanning the QR with most modern wallets will auto-fill the amount.
+ */
+const buildPaymentUri = (network: string, coin: string, address: string, amount: string | null): string => {
+  if (!amount) return address;
+  const net = network.toUpperCase();
+  const c = coin.toUpperCase();
+
+  // BIP-21 — Bitcoin
+  if (net === 'BTC') return `bitcoin:${address}?amount=${amount}`;
+
+  // EIP-681 — EVM chains
+  const chainId = EVM_CHAIN_IDS[net];
+  if (chainId) {
+    const nativeCoins = ['ETH', 'BNB', 'POL', 'MATIC', 'AVAX'];
+    if (nativeCoins.includes(c)) {
+      const wei = toBaseUnits(amount, 18);
+      return `ethereum:${address}@${chainId}?value=${wei}`;
+    }
+    const contract = ERC20_CONTRACTS[`${net}_${c}`];
+    if (contract) {
+      const tokenAmount = toBaseUnits(amount, 6); // USDT/USDC = 6 decimals on these chains
+      return `ethereum:${contract}@${chainId}/transfer?address=${address}&uint256=${tokenAmount}`;
+    }
+  }
+
+  // Solana Pay
+  if (net === 'SOLANA' || net === 'SOL') {
+    if (c === 'SOL') return `solana:${address}?amount=${amount}`;
+    const mint = SPL_MINTS[c];
+    if (mint) return `solana:${address}?amount=${amount}&spl-token=${mint}`;
+  }
+
+  // Tron
+  if (net === 'TRC20' || net === 'TRON') return `tron:${address}?amount=${amount}`;
+
+  return address;
+};
+
 const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, onCreateOrder, onPaymentReady }) => {
   const { data: siteSettings } = useSiteSettings();
   const [selectedNetwork, setSelectedNetwork] = useState<string>('');
@@ -285,15 +364,18 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           </Button>
         )}
 
-        {payment && selected && (
+        {payment && selected && (() => {
+          const paymentUri = buildPaymentUri(selected.network, selected.coin, payment.addressIn, payment.cryptoAmount);
+          const hasAmountInQr = paymentUri !== payment.addressIn;
+          const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(paymentUri)}`;
+          return (
           <div className="space-y-3 p-4 border-2 border-purple-300 rounded-lg bg-purple-50/30">
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <img
-                src={payment.qrUrl}
+                src={qrSrc}
                 alt="Payment QR"
                 className="w-44 h-44 bg-white p-2 rounded border"
                 onError={(e) => {
-                  // Fallback QR if PayGate's QR fails
                   (e.target as HTMLImageElement).src =
                     `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payment.addressIn)}`;
                 }}
@@ -310,6 +392,11 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                   <p className="text-xs text-muted-foreground">Network</p>
                   <p className="font-semibold">{selected.network}</p>
                 </div>
+                {hasAmountInQr && (
+                  <p className="text-[11px] text-green-700 bg-green-50 border border-green-200 rounded px-2 py-1">
+                    📲 QR includes the amount — most wallets auto-fill it.
+                  </p>
+                )}
               </div>
             </div>
             <div>
@@ -321,6 +408,17 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                 </Button>
               </div>
             </div>
+            {payment.cryptoAmount && (
+              <div>
+                <Label className="text-xs">Exact amount</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input value={payment.cryptoAmount} readOnly className="font-mono text-xs" />
+                  <Button type="button" variant="outline" size="icon" onClick={() => handleCopy(payment.cryptoAmount!)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
               ⚠️ Send only <span className="font-bold">{selected.coin} on {selected.network}</span>. Anything below the network minimum will be lost.
             </p>
@@ -338,7 +436,8 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
               <RefreshCw className="h-3 w-3 mr-1" /> Change coin/network
             </Button>
           </div>
-        )}
+          );
+        })()}
       </CardContent>
     </Card>
   );
