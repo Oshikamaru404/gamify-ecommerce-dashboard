@@ -448,21 +448,28 @@ Order ID: ${orderData.id}`;
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Choose Payment Method</h3>
             
-            <Tabs defaultValue="whatsapp" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="whatsapp" className="flex items-center gap-1 text-xs sm:text-sm">
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">WhatsApp</span>
-                  <span className="sm:hidden">WA</span>
-                </TabsTrigger>
-                <TabsTrigger value="credit_card" className="flex items-center gap-1 text-xs sm:text-sm">
+            <Tabs defaultValue="credit_card" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/60 gap-1">
+                <TabsTrigger
+                  value="credit_card"
+                  className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold py-2.5 rounded-md border-2 border-transparent transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:border-blue-600 data-[state=active]:shadow-md data-[state=inactive]:bg-blue-50 data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-100"
+                >
                   <CreditCard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Card</span>
-                  <span className="sm:hidden">Card</span>
+                  <span>Card</span>
                 </TabsTrigger>
-                <TabsTrigger value="crypto" className="flex items-center gap-1 text-xs sm:text-sm">
+                <TabsTrigger
+                  value="crypto"
+                  className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold py-2.5 rounded-md border-2 border-transparent transition-all data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:border-orange-600 data-[state=active]:shadow-md data-[state=inactive]:bg-orange-50 data-[state=inactive]:text-orange-700 data-[state=inactive]:hover:bg-orange-100"
+                >
                   <Bitcoin className="h-4 w-4" />
                   <span>Crypto</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="whatsapp"
+                  className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold py-2.5 rounded-md border-2 border-transparent transition-all data-[state=active]:bg-green-500 data-[state=active]:text-white data-[state=active]:border-green-600 data-[state=active]:shadow-md data-[state=inactive]:bg-green-50 data-[state=inactive]:text-green-700 data-[state=inactive]:hover:bg-green-100"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  <span>WhatsApp</span>
                 </TabsTrigger>
               </TabsList>
               
