@@ -230,6 +230,46 @@ Order ID: ${orderData.id}`;
     }
   };
 
+  const handleDirectCryptoSubmit = async ({ wallet, txHash }: { wallet: CryptoWallet; txHash: string }) => {
+    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
+      toast.error('Please fill in all required fields including WhatsApp number');
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      const note = `direct_crypto:${wallet.coin}/${wallet.network}|tx:${txHash}`;
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert([{
+          customer_name: formData.customerName,
+          customer_email: formData.customerEmail,
+          customer_whatsapp: `${formData.customerWhatsapp}|${note}`,
+          package_id: packageData.id,
+          package_name: displayName,
+          package_category: packageData.category,
+          duration_months: packageData.duration,
+          amount: packageData.price,
+          order_type: 'activation',
+          status: 'pending',
+          payment_status: 'awaiting_verification'
+        }])
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      setPlacedOrderId(orderData.id);
+      setWhatsappUrl(null);
+      setOrderPlaced(true);
+      toast.success('Payment submitted! We will verify and activate your order shortly.');
+    } catch (error) {
+      console.error('Error submitting direct crypto payment:', error);
+      toast.error('Failed to submit payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Handle going back to store
   const handleBackToStore = () => {
     onSuccess();
