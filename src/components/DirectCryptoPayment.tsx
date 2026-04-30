@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Copy, Check, Loader2, Bitcoin, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -71,9 +71,27 @@ interface PaymentInfo {
   orderId: string;
 }
 
+// Network meta for nicer UI
+const NETWORK_META: Record<string, { label: string; emoji: string; color: string }> = {
+  BTC: { label: 'Bitcoin', emoji: '₿', color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  BEP20: { label: 'BNB Smart Chain', emoji: '🟡', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  POLYGON: { label: 'Polygon', emoji: '🟣', color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  BASE: { label: 'Base', emoji: '🔵', color: 'bg-blue-100 text-blue-700 border-blue-300' },
+  SOLANA: { label: 'Solana', emoji: '🟢', color: 'bg-green-100 text-green-700 border-green-300' },
+  TRC20: { label: 'Tron (TRC20)', emoji: '🔴', color: 'bg-red-100 text-red-700 border-red-300' },
+  LINEA: { label: 'Linea', emoji: '⚫', color: 'bg-gray-100 text-gray-700 border-gray-300' },
+  ERC20: { label: 'Ethereum (ERC20)', emoji: '💎', color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+};
+
+const getNetworkMeta = (network: string) => {
+  const key = network.toUpperCase();
+  return NETWORK_META[key] || { label: network, emoji: '🔗', color: 'bg-slate-100 text-slate-700 border-slate-300' };
+};
+
 const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, onCreateOrder, onPaymentReady }) => {
   const { data: siteSettings } = useSiteSettings();
-  const [selectedKey, setSelectedKey] = useState<string>('');
+  const [selectedNetwork, setSelectedNetwork] = useState<string>('');
+  const [selectedCoin, setSelectedCoin] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [payment, setPayment] = useState<PaymentInfo | null>(null);
   const [copied, setCopied] = useState(false);
@@ -88,10 +106,30 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
     return DEFAULT_CRYPTO_WALLETS;
   }, [siteSettings]);
 
-  const selected = wallets.find(w => `${w.network}-${w.coin}` === selectedKey);
+  // Group wallets by network
+  const networks = useMemo(() => {
+    const map = new Map<string, CryptoWallet[]>();
+    wallets.forEach(w => {
+      const arr = map.get(w.network) || [];
+      arr.push(w);
+      map.set(w.network, arr);
+    });
+    return Array.from(map.entries());
+  }, [wallets]);
 
-  // Reset payment when selection changes
-  useEffect(() => { setPayment(null); }, [selectedKey]);
+  const coinsForNetwork = selectedNetwork
+    ? wallets.filter(w => w.network === selectedNetwork)
+    : [];
+
+  const selected = wallets.find(w => w.network === selectedNetwork && w.coin === selectedCoin);
+
+  // Reset coin & payment when network changes
+  useEffect(() => {
+    setSelectedCoin('');
+    setPayment(null);
+  }, [selectedNetwork]);
+
+  useEffect(() => { setPayment(null); }, [selectedCoin]);
 
   const handleGenerate = async () => {
     if (!selected) {
@@ -155,21 +193,70 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           </div>
         </div>
 
+        {/* Step 1: Network selection */}
         <div className="space-y-2">
-          <Label>Select Coin / Network *</Label>
-          <Select value={selectedKey} onValueChange={setSelectedKey} disabled={loading}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a coin and network" />
-            </SelectTrigger>
-            <SelectContent className="max-h-72 bg-background z-50">
-              {wallets.map((w) => (
-                <SelectItem key={`${w.network}-${w.coin}`} value={`${w.network}-${w.coin}`}>
-                  {w.coin} on {w.network}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label className="flex items-center gap-2">
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-white text-xs font-bold">1</span>
+            Choose Network
+          </Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {networks.map(([net, list]) => {
+              const meta = getNetworkMeta(net);
+              const active = selectedNetwork === net;
+              return (
+                <button
+                  key={net}
+                  type="button"
+                  onClick={() => setSelectedNetwork(net)}
+                  disabled={loading}
+                  className={`flex flex-col items-start gap-1 p-3 rounded-lg border-2 text-left transition-all ${
+                    active
+                      ? 'border-purple-600 bg-purple-50 shadow-md scale-[1.02]'
+                      : 'border-border hover:border-purple-300 hover:bg-muted/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">{meta.emoji}</span>
+                    <span className="font-semibold text-sm">{meta.label}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {list.map(l => l.coin).join(' · ')}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Step 2: Coin selection */}
+        {selectedNetwork && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <Label className="flex items-center gap-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-white text-xs font-bold">2</span>
+              Choose Coin
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {coinsForNetwork.map(w => {
+                const active = selectedCoin === w.coin;
+                return (
+                  <button
+                    key={w.coin}
+                    type="button"
+                    onClick={() => setSelectedCoin(w.coin)}
+                    disabled={loading}
+                    className={`px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all ${
+                      active
+                        ? 'border-purple-600 bg-purple-600 text-white shadow-md'
+                        : 'border-border bg-background hover:border-purple-400 hover:bg-purple-50'
+                    }`}
+                  >
+                    {w.coin}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {!payment && (
           <Button
