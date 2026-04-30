@@ -307,8 +307,13 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                       : 'border-border hover:border-purple-300 hover:bg-muted/50'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-lg">{meta.emoji}</span>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={meta.logo}
+                      alt={meta.label}
+                      className="h-6 w-6 rounded-full bg-white object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+                    />
                     <span className="font-semibold text-sm">{meta.label}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
