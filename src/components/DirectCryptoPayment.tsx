@@ -436,7 +436,8 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
               <RefreshCw className="h-3 w-3 mr-1" /> Change coin/network
             </Button>
           </div>
-        )}
+          );
+        })()}
       </CardContent>
     </Card>
   );
