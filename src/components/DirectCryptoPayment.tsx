@@ -265,6 +265,12 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           </div>
         )}
 
+        {errorMsg && !payment && (
+          <div className="p-3 rounded-lg border-2 border-red-300 bg-red-50 text-sm text-red-800">
+            ⚠️ {errorMsg}
+          </div>
+        )}
+
         {!payment && (
           <Button
             onClick={handleGenerate}
