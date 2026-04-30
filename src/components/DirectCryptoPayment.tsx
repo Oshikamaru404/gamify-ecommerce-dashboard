@@ -364,15 +364,18 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           </Button>
         )}
 
-        {payment && selected && (
+        {payment && selected && (() => {
+          const paymentUri = buildPaymentUri(selected.network, selected.coin, payment.addressIn, payment.cryptoAmount);
+          const hasAmountInQr = paymentUri !== payment.addressIn;
+          const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(paymentUri)}`;
+          return (
           <div className="space-y-3 p-4 border-2 border-purple-300 rounded-lg bg-purple-50/30">
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <img
-                src={payment.qrUrl}
+                src={qrSrc}
                 alt="Payment QR"
                 className="w-44 h-44 bg-white p-2 rounded border"
                 onError={(e) => {
-                  // Fallback QR if PayGate's QR fails
                   (e.target as HTMLImageElement).src =
                     `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payment.addressIn)}`;
                 }}
@@ -389,6 +392,11 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                   <p className="text-xs text-muted-foreground">Network</p>
                   <p className="font-semibold">{selected.network}</p>
                 </div>
+                {hasAmountInQr && (
+                  <p className="text-[11px] text-green-700 bg-green-50 border border-green-200 rounded px-2 py-1">
+                    📲 QR includes the amount — most wallets auto-fill it.
+                  </p>
+                )}
               </div>
             </div>
             <div>
@@ -400,6 +408,17 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                 </Button>
               </div>
             </div>
+            {payment.cryptoAmount && (
+              <div>
+                <Label className="text-xs">Exact amount</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input value={payment.cryptoAmount} readOnly className="font-mono text-xs" />
+                  <Button type="button" variant="outline" size="icon" onClick={() => handleCopy(payment.cryptoAmount!)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
               ⚠️ Send only <span className="font-bold">{selected.coin} on {selected.network}</span>. Anything below the network minimum will be lost.
             </p>
