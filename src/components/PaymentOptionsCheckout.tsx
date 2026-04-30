@@ -559,8 +559,7 @@ Order ID: ${orderData.id}`;
               <TabsContent value="direct_crypto" className="mt-4">
                 <DirectCryptoPayment
                   amountUsd={packageData.price}
-                  isProcessing={isProcessing}
-                  onSubmit={handleDirectCryptoSubmit}
+                  onCreateOrder={handleDirectCryptoCreateOrder}
                 />
               </TabsContent>
             </Tabs>
