@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
-import { useLocalizedText } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
 
 interface SubscriptionPackageCardProps {
   package: SubscriptionPackage;
@@ -19,15 +19,8 @@ const SubscriptionPackageCard: React.FC<SubscriptionPackageCardProps> = ({
   const packageName = useLocalizedText(pkg.name);
   const packageDescription = useLocalizedText(pkg.description);
 
-  const generateSlug = (name: string) => {
-    return name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '')
-      .replace(/--+/g, '-')
-      .trim();
-  };
-
-  const productSlug = generateSlug(packageName);
+  // Always derive canonical slug from the English name so URLs are language-stable
+  const productSlug = generateProductSlug(pkg.name);
   const oneMonthPrice = pkg.price_3_credits || pkg.price_6_credits || pkg.price_12_credits || 0;
 
   // Calculate yearly savings percentage
