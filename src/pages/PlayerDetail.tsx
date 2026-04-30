@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Check, Crown, Monitor, Shield, Star } from 'lucide-react';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
-import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug, getAllProductSlugs } from '@/lib/multilingualUtils';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useIPTVCreditOptions } from '@/hooks/useIPTVCreditOptions';
 
@@ -60,7 +60,7 @@ const PlayerDetail = () => {
   const [showCheckout, setShowCheckout] = useState(false);
 
   const playerPackages = packages?.filter(pkg => pkg.category === 'player' && pkg.status !== 'inactive') || [];
-  const pkg = playerPackages.find(p => generateProductSlug(p.name) === slug);
+  const pkg = playerPackages.find(p => getAllProductSlugs(p.name).includes(slug || ''));
 
   const packageName = pkg ? useLocalizedText(pkg.name) : '';
   const packageDescription = pkg ? useLocalizedText(pkg.description) : '';
