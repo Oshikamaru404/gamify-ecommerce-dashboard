@@ -8,7 +8,7 @@ import { ArrowLeft, Check, Server, Settings, Shield, Star } from 'lucide-react';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useIPTVCreditOptions } from '@/hooks/useIPTVCreditOptions';
-import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug, getAllProductSlugs } from '@/lib/multilingualUtils';
 
 const IPTVDetailPricing = ({ pkg, onBuyNow }: {
   pkg: any;
@@ -60,7 +60,7 @@ const IPTVDetail = () => {
   const [showCheckout, setShowCheckout] = useState(false);
 
   const panelIptvPackages = packages?.filter(pkg => pkg.category === 'panel-iptv' && pkg.status !== 'inactive') || [];
-  const pkg = panelIptvPackages.find(p => generateProductSlug(p.name) === slug);
+  const pkg = panelIptvPackages.find(p => getAllProductSlugs(p.name).includes(slug || ''));
 
   const packageName = pkg ? useLocalizedText(pkg.name) : '';
   const packageDescription = pkg ? useLocalizedText(pkg.description) : '';
