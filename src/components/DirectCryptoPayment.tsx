@@ -71,9 +71,27 @@ interface PaymentInfo {
   orderId: string;
 }
 
+// Network meta for nicer UI
+const NETWORK_META: Record<string, { label: string; emoji: string; color: string }> = {
+  BTC: { label: 'Bitcoin', emoji: '₿', color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  BEP20: { label: 'BNB Smart Chain', emoji: '🟡', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  POLYGON: { label: 'Polygon', emoji: '🟣', color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  BASE: { label: 'Base', emoji: '🔵', color: 'bg-blue-100 text-blue-700 border-blue-300' },
+  SOLANA: { label: 'Solana', emoji: '🟢', color: 'bg-green-100 text-green-700 border-green-300' },
+  TRC20: { label: 'Tron (TRC20)', emoji: '🔴', color: 'bg-red-100 text-red-700 border-red-300' },
+  LINEA: { label: 'Linea', emoji: '⚫', color: 'bg-gray-100 text-gray-700 border-gray-300' },
+  ERC20: { label: 'Ethereum (ERC20)', emoji: '💎', color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+};
+
+const getNetworkMeta = (network: string) => {
+  const key = network.toUpperCase();
+  return NETWORK_META[key] || { label: network, emoji: '🔗', color: 'bg-slate-100 text-slate-700 border-slate-300' };
+};
+
 const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, onCreateOrder, onPaymentReady }) => {
   const { data: siteSettings } = useSiteSettings();
-  const [selectedKey, setSelectedKey] = useState<string>('');
+  const [selectedNetwork, setSelectedNetwork] = useState<string>('');
+  const [selectedCoin, setSelectedCoin] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [payment, setPayment] = useState<PaymentInfo | null>(null);
   const [copied, setCopied] = useState(false);
@@ -88,10 +106,30 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
     return DEFAULT_CRYPTO_WALLETS;
   }, [siteSettings]);
 
-  const selected = wallets.find(w => `${w.network}-${w.coin}` === selectedKey);
+  // Group wallets by network
+  const networks = useMemo(() => {
+    const map = new Map<string, CryptoWallet[]>();
+    wallets.forEach(w => {
+      const arr = map.get(w.network) || [];
+      arr.push(w);
+      map.set(w.network, arr);
+    });
+    return Array.from(map.entries());
+  }, [wallets]);
 
-  // Reset payment when selection changes
-  useEffect(() => { setPayment(null); }, [selectedKey]);
+  const coinsForNetwork = selectedNetwork
+    ? wallets.filter(w => w.network === selectedNetwork)
+    : [];
+
+  const selected = wallets.find(w => w.network === selectedNetwork && w.coin === selectedCoin);
+
+  // Reset coin & payment when network changes
+  useEffect(() => {
+    setSelectedCoin('');
+    setPayment(null);
+  }, [selectedNetwork]);
+
+  useEffect(() => { setPayment(null); }, [selectedCoin]);
 
   const handleGenerate = async () => {
     if (!selected) {
