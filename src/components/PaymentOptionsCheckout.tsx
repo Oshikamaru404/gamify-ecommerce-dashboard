@@ -445,21 +445,26 @@ Order ID: ${orderData.id}`;
             <h3 className="font-semibold text-lg">Choose Payment Method</h3>
             
             <Tabs defaultValue="whatsapp" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="whatsapp" className="flex items-center gap-1 text-xs sm:text-sm">
                   <MessageCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">WhatsApp</span>
-                  <span className="sm:hidden">WhatsApp</span>
+                  <span className="sm:hidden">WA</span>
                 </TabsTrigger>
                 <TabsTrigger value="credit_card" className="flex items-center gap-1 text-xs sm:text-sm">
                   <CreditCard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Credit Card</span>
+                  <span className="hidden sm:inline">Card</span>
                   <span className="sm:hidden">Card</span>
                 </TabsTrigger>
                 <TabsTrigger value="crypto" className="flex items-center gap-1 text-xs sm:text-sm">
                   <Bitcoin className="h-4 w-4" />
                   <span className="hidden sm:inline">Crypto</span>
                   <span className="sm:hidden">Crypto</span>
+                </TabsTrigger>
+                <TabsTrigger value="direct_crypto" className="flex items-center gap-1 text-xs sm:text-sm">
+                  <Wallet className="h-4 w-4" />
+                  <span className="hidden sm:inline">Wallet</span>
+                  <span className="sm:hidden">Wallet</span>
                 </TabsTrigger>
               </TabsList>
               
