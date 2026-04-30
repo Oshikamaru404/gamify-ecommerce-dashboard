@@ -495,7 +495,8 @@ const Settings = () => {
           <HomepageCMSEditor />
         </TabsContent>
         
-        <TabsContent value="payment">
+        <TabsContent value="payment" className="space-y-6">
+          <CryptoWalletsManager />
           <Card>
             <CardHeader>
               <CardTitle>Payment Settings</CardTitle>
