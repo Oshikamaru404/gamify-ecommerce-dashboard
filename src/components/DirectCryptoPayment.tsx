@@ -167,6 +167,7 @@ const buildPaymentUri = (network: string, coin: string, address: string, amount:
   return address;
 };
 
+const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, onCreateOrder, onPaymentReady }) => {
   const { data: siteSettings } = useSiteSettings();
   const [selectedNetwork, setSelectedNetwork] = useState<string>('');
   const [selectedCoin, setSelectedCoin] = useState<string>('');
