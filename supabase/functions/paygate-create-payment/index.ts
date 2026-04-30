@@ -58,39 +58,23 @@ serve(async (req) => {
 
       const addressIn = walletData.address_in;
 
-      // Step 2 – build the Multi-provider hosted checkout URL.
-      // We forward customer country (when detectable) so PayGate ranks providers correctly.
-      const ipCountry = req.headers.get('cf-ipcountry')
-        || req.headers.get('x-vercel-ip-country')
-        || req.headers.get('x-country-code')
-        || '';
-
-      // TEST MODE: show ALL available providers by listing them explicitly.
-      // PayGate's `providers` query param accepts a comma-separated list to force-display them
-      // regardless of country/currency auto-filtering.
-      const allProviders = [
-        'stripe', 'moonpay', 'transfi', 'robinhood', 'bitnovo', 'banxa',
-        'paypal', 'revolut', 'binance', 'interac', 'upi', 'sepa', 'ach',
-        'applepay', 'googlepay', 'klarna', 'ideal', 'sofort', 'giropay',
-        'bancontact', 'eps', 'p24', 'mybank', 'trustly', 'mercadopago',
-        'pix', 'oxxo', 'boleto', 'alipay', 'wechatpay'
-      ].join(',');
-
+      // Step 2 – build the Multi-provider hosted checkout URL (pay.php).
+      // Per PayGate official docs, ONLY these parameters are accepted:
+      //   address, amount, email, currency, domain, logo, background, theme, button
+      // There is NO `providers` parameter — PayGate auto-displays eligible providers
+      // based on customer's geo-IP country, amount, and currency. Adding unknown
+      // params causes PayGate to reject the request with "wallet not allowed" errors.
       const params = new URLSearchParams({
         address: addressIn,
         amount,
         email,
         currency: 'USD',
-        providers: allProviders,
       });
       params.set('theme', '6366f1');
       params.set('button', '6366f1');
 
       checkoutUrl = `https://checkout.paygate.to/pay.php?${params.toString()}`;
-      if (ipCountry) {
-        checkoutUrl += `&country=${encodeURIComponent(ipCountry)}`;
-      }
-      console.log('Credit card multi-provider checkout URL generated for order:', orderId, '| country:', ipCountry || 'auto');
+      console.log('Credit card multi-provider checkout URL generated for order:', orderId);
 
       return new Response(JSON.stringify({
         success: true,
