@@ -131,8 +131,12 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
 
   useEffect(() => { setPayment(null); }, [selectedCoin]);
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const handleGenerate = async () => {
+    setErrorMsg(null);
     if (!selected) {
+      setErrorMsg('Please select a network and coin first.');
       toast.error('Please select a coin/network');
       return;
     }
@@ -141,6 +145,7 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
       const ticker = buildTicker(selected);
       const orderId = await onCreateOrder({ wallet: selected, ticker });
       if (!orderId) {
+        setErrorMsg('Please fill in your Name, Email and WhatsApp number above before generating the payment address.');
         setLoading(false);
         return;
       }
@@ -155,7 +160,7 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
       });
 
       if (error) throw error;
-      if (!data?.addressIn) throw new Error('No address returned');
+      if (!data?.addressIn) throw new Error(data?.error || 'No address returned');
 
       setPayment({
         addressIn: data.addressIn,
@@ -165,9 +170,11 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
       });
       onPaymentReady?.();
       toast.success('Payment address generated. Send the exact amount to confirm.');
-    } catch (e) {
+    } catch (e: any) {
       console.error('Generate payment error:', e);
-      toast.error('Failed to generate payment address. Please try again.');
+      const msg = e?.message || 'Failed to generate payment address. Please try again.';
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -255,6 +262,12 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {errorMsg && !payment && (
+          <div className="p-3 rounded-lg border-2 border-red-300 bg-red-50 text-sm text-red-800">
+            ⚠️ {errorMsg}
           </div>
         )}
 

@@ -462,7 +462,7 @@ Order ID: ${orderData.id}`;
                 </TabsTrigger>
                 <TabsTrigger value="crypto" className="flex items-center gap-1 text-xs sm:text-sm">
                   <Bitcoin className="h-4 w-4" />
-                  <span>Bitcoin</span>
+                  <span>Crypto</span>
                 </TabsTrigger>
               </TabsList>
               
