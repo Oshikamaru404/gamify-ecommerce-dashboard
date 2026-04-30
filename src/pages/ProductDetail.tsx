@@ -9,7 +9,7 @@ import { ArrowLeft, Check, Shield, Star, Crown, CheckCircle, Zap, Clock } from '
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
-import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
+import { useLocalizedText, generateProductSlug, getAllProductSlugs } from '@/lib/multilingualUtils';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -25,8 +25,8 @@ const ProductDetail = () => {
   if (packages) {
     const matches = packages.filter((p: any) => {
       if (p.status === 'inactive') return false;
-      const generatedSlug = generateProductSlug(p.name, p.category);
-      return generatedSlug === slug;
+      // Match canonical English slug OR any translated-name slug (back-compat)
+      return getAllProductSlugs(p.name, p.category).includes(slug || '');
     });
 
     if (matches.length > 0) {
