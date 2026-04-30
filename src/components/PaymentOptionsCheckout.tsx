@@ -230,14 +230,13 @@ Order ID: ${orderData.id}`;
     }
   };
 
-  const handleDirectCryptoSubmit = async ({ wallet, txHash }: { wallet: CryptoWallet; txHash: string }) => {
+  const handleDirectCryptoCreateOrder = async ({ ticker }: { wallet: CryptoWallet; ticker: string }): Promise<string | null> => {
     if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
       toast.error('Please fill in all required fields including WhatsApp number');
-      return;
+      return null;
     }
-    setIsProcessing(true);
     try {
-      const note = `direct_crypto:${wallet.coin}/${wallet.network}|tx:${txHash}`;
+      const note = `paygate_direct:${ticker}`;
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert([{
@@ -251,24 +250,21 @@ Order ID: ${orderData.id}`;
           amount: packageData.price,
           order_type: 'activation',
           status: 'pending',
-          payment_status: 'awaiting_verification'
+          payment_status: 'pending'
         }])
         .select()
         .single();
 
       if (orderError) throw orderError;
-
       setPlacedOrderId(orderData.id);
-      setWhatsappUrl(null);
-      setOrderPlaced(true);
-      toast.success('Payment submitted! We will verify and activate your order shortly.');
+      return orderData.id as string;
     } catch (error) {
-      console.error('Error submitting direct crypto payment:', error);
-      toast.error('Failed to submit payment. Please try again.');
-    } finally {
-      setIsProcessing(false);
+      console.error('Error creating direct crypto order:', error);
+      toast.error('Failed to create order. Please try again.');
+      return null;
     }
   };
+
 
   // Handle going back to store
   const handleBackToStore = () => {
