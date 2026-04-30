@@ -67,13 +67,18 @@ serve(async (req) => {
       // the query string. Other params are still safely encoded.
       const safeAmount = encodeURIComponent(amount);
       const safeEmail = encodeURIComponent(email);
+      // Per PayGate docs, theme/button accept a urlencoded HEX color (with the # sign).
+      // Sending "6366f1" without the encoded "#" is silently ignored, leaving the
+      // default blue "Pay Now" button. We must send "%236366f1".
+      const themeColor = encodeURIComponent('#6366f1'); // -> %236366f1
+      const buttonColor = encodeURIComponent('#6366f1');
       checkoutUrl =
         `https://checkout.paygate.to/pay.php?address=${addressIn}` +
         `&amount=${safeAmount}` +
         `&email=${safeEmail}` +
         `&currency=USD` +
-        `&theme=6366f1` +
-        `&button=6366f1`;
+        `&theme=${themeColor}` +
+        `&button=${buttonColor}`;
       console.log('Credit card multi-provider checkout URL generated for order:', orderId);
 
       return new Response(JSON.stringify({
