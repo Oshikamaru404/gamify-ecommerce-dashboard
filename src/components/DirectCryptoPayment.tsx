@@ -23,6 +23,7 @@ const buildTicker = (w: CryptoWallet): string => {
   const net = w.network.toLowerCase();
   const coin = w.coin.toLowerCase();
   if (net === 'btc' || coin === 'btc') return 'btc';
+  if ((net === 'eth' || net === 'erc20') && coin === 'eth') return 'eth';
   if (net === 'eth' || net === 'erc20') return `erc20/${coin}`;
   if (net === 'bep20' || net === 'bsc') return `bep20/${coin}`;
   if (net === 'polygon' || net === 'matic') return `polygon/${coin}`;
