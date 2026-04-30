@@ -44,6 +44,7 @@ import WhatsAppTemplateEditor from '@/components/admin/WhatsAppTemplateEditor';
 import TranslationEditor from '@/components/admin/TranslationEditor';
 import HomepageCMSEditor from '@/components/admin/HomepageCMSEditor';
 import TwoFactorSetup from '@/components/admin/TwoFactorSetup';
+import CryptoWalletsManager from '@/components/admin/CryptoWalletsManager';
 
 const generalSettingsSchema = z.object({
   storeName: z.string().min(1, 'Store name is required'),
@@ -495,7 +496,8 @@ const Settings = () => {
           <HomepageCMSEditor />
         </TabsContent>
         
-        <TabsContent value="payment">
+        <TabsContent value="payment" className="space-y-6">
+          <CryptoWalletsManager />
           <Card>
             <CardHeader>
               <CardTitle>Payment Settings</CardTitle>

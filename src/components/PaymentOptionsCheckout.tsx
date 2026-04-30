@@ -4,11 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, Bitcoin } from 'lucide-react';
+import { ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, Bitcoin, Wallet } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useLocalizedText } from '@/lib/multilingualUtils';
+import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPayment';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
@@ -229,6 +230,46 @@ Order ID: ${orderData.id}`;
     }
   };
 
+  const handleDirectCryptoSubmit = async ({ wallet, txHash }: { wallet: CryptoWallet; txHash: string }) => {
+    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
+      toast.error('Please fill in all required fields including WhatsApp number');
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      const note = `direct_crypto:${wallet.coin}/${wallet.network}|tx:${txHash}`;
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert([{
+          customer_name: formData.customerName,
+          customer_email: formData.customerEmail,
+          customer_whatsapp: `${formData.customerWhatsapp}|${note}`,
+          package_id: packageData.id,
+          package_name: displayName,
+          package_category: packageData.category,
+          duration_months: packageData.duration,
+          amount: packageData.price,
+          order_type: 'activation',
+          status: 'pending',
+          payment_status: 'awaiting_verification'
+        }])
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      setPlacedOrderId(orderData.id);
+      setWhatsappUrl(null);
+      setOrderPlaced(true);
+      toast.success('Payment submitted! We will verify and activate your order shortly.');
+    } catch (error) {
+      console.error('Error submitting direct crypto payment:', error);
+      toast.error('Failed to submit payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Handle going back to store
   const handleBackToStore = () => {
     onSuccess();
@@ -270,9 +311,15 @@ Order ID: ${orderData.id}`;
             </div>
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <p className="text-sm text-green-800">
-                📱 Redirecting to WhatsApp in <span className="font-bold">{countdown}s</span>
-              </p>
+              {whatsappUrl ? (
+                <p className="text-sm text-green-800">
+                  📱 Redirecting to WhatsApp in <span className="font-bold">{countdown}s</span>
+                </p>
+              ) : (
+                <p className="text-sm text-green-800">
+                  ✅ Your payment is being verified. We'll contact you on WhatsApp/email once confirmed.
+                </p>
+              )}
             </div>
 
             <div className="flex gap-2 pt-1">
@@ -285,14 +332,16 @@ Order ID: ${orderData.id}`;
                 <Home className="h-4 w-4 mr-1" />
                 Store
               </Button>
-              <Button 
-                size="sm"
-                onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank')}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                <MessageCircle className="h-4 w-4 mr-1" />
-                WhatsApp
-              </Button>
+              {whatsappUrl && (
+                <Button 
+                  size="sm"
+                  onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank')}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  WhatsApp
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -404,21 +453,26 @@ Order ID: ${orderData.id}`;
             <h3 className="font-semibold text-lg">Choose Payment Method</h3>
             
             <Tabs defaultValue="whatsapp" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="whatsapp" className="flex items-center gap-1 text-xs sm:text-sm">
                   <MessageCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">WhatsApp</span>
-                  <span className="sm:hidden">WhatsApp</span>
+                  <span className="sm:hidden">WA</span>
                 </TabsTrigger>
                 <TabsTrigger value="credit_card" className="flex items-center gap-1 text-xs sm:text-sm">
                   <CreditCard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Credit Card</span>
+                  <span className="hidden sm:inline">Card</span>
                   <span className="sm:hidden">Card</span>
                 </TabsTrigger>
                 <TabsTrigger value="crypto" className="flex items-center gap-1 text-xs sm:text-sm">
                   <Bitcoin className="h-4 w-4" />
                   <span className="hidden sm:inline">Crypto</span>
                   <span className="sm:hidden">Crypto</span>
+                </TabsTrigger>
+                <TabsTrigger value="direct_crypto" className="flex items-center gap-1 text-xs sm:text-sm">
+                  <Wallet className="h-4 w-4" />
+                  <span className="hidden sm:inline">Wallet</span>
+                  <span className="sm:hidden">Wallet</span>
                 </TabsTrigger>
               </TabsList>
               
@@ -504,6 +558,14 @@ Order ID: ${orderData.id}`;
                     </Button>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="direct_crypto" className="mt-4">
+                <DirectCryptoPayment
+                  amountUsd={packageData.price}
+                  isProcessing={isProcessing}
+                  onSubmit={handleDirectCryptoSubmit}
+                />
               </TabsContent>
             </Tabs>
           </div>
