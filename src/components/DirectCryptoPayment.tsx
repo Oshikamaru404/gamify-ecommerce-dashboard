@@ -78,15 +78,16 @@ const ICON_BASE = 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1
 const coinIcon = (symbol: string) => `${ICON_BASE}/${symbol.toLowerCase()}.svg`;
 
 // Network meta for nicer UI
+const chainIcon = (slug: string) => `https://icons.llamao.fi/icons/chains/rsz_${slug}.jpg`;
 const NETWORK_META: Record<string, { label: string; logo: string; color: string }> = {
-  BTC: { label: 'Bitcoin', logo: coinIcon('btc'), color: 'bg-orange-100 text-orange-700 border-orange-300' },
-  ERC20: { label: 'Ethereum (ERC20)', logo: coinIcon('eth'), color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
-  BEP20: { label: 'BNB Smart Chain', logo: coinIcon('bnb'), color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  POLYGON: { label: 'Polygon', logo: coinIcon('matic'), color: 'bg-purple-100 text-purple-700 border-purple-300' },
-  BASE: { label: 'Base', logo: 'https://raw.githubusercontent.com/base-org/brand-kit/main/logo/symbol/Base_Symbol_Blue.svg', color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  SOLANA: { label: 'Solana', logo: coinIcon('sol'), color: 'bg-green-100 text-green-700 border-green-300' },
-  TRC20: { label: 'Tron (TRC20)', logo: coinIcon('trx'), color: 'bg-red-100 text-red-700 border-red-300' },
-  LINEA: { label: 'Linea', logo: 'https://icons.llamao.fi/icons/chains/rsz_linea.jpg', color: 'bg-gray-100 text-gray-700 border-gray-300' },
+  BTC: { label: 'Bitcoin', logo: chainIcon('bitcoin'), color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  ERC20: { label: 'Ethereum (ERC20)', logo: chainIcon('ethereum'), color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+  BEP20: { label: 'BNB Smart Chain', logo: chainIcon('binance'), color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  POLYGON: { label: 'Polygon', logo: chainIcon('polygon'), color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  BASE: { label: 'Base', logo: chainIcon('base'), color: 'bg-blue-100 text-blue-700 border-blue-300' },
+  SOLANA: { label: 'Solana', logo: chainIcon('solana'), color: 'bg-green-100 text-green-700 border-green-300' },
+  TRC20: { label: 'Tron (TRC20)', logo: chainIcon('tron'), color: 'bg-red-100 text-red-700 border-red-300' },
+  LINEA: { label: 'Linea', logo: chainIcon('linea'), color: 'bg-gray-100 text-gray-700 border-gray-300' },
 };
 
 const getNetworkMeta = (network: string) => {
