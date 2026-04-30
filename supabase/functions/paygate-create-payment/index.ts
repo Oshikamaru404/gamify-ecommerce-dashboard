@@ -59,21 +59,21 @@ serve(async (req) => {
       const addressIn = walletData.address_in;
 
       // Step 2 – build the Multi-provider hosted checkout URL (pay.php).
-      // Per PayGate official docs, ONLY these parameters are accepted:
-      //   address, amount, email, currency, domain, logo, background, theme, button
-      // There is NO `providers` parameter — PayGate auto-displays eligible providers
-      // based on customer's geo-IP country, amount, and currency. Adding unknown
-      // params causes PayGate to reject the request with "wallet not allowed" errors.
-      const params = new URLSearchParams({
-        address: addressIn,
-        amount,
-        email,
-        currency: 'USD',
-      });
-      params.set('theme', '6366f1');
-      params.set('button', '6366f1');
-
-      checkoutUrl = `https://checkout.paygate.to/pay.php?${params.toString()}`;
+      // CRITICAL: PayGate's `address_in` is returned ALREADY URL-encoded
+      // (e.g. contains %2B, %2F, %3D). Using URLSearchParams here would
+      // double-encode it (% becomes %25), producing %252F / %252B / %253D
+      // and triggering "Provided wallet address is not allowed" errors.
+      // We must concatenate the raw, pre-encoded address_in directly into
+      // the query string. Other params are still safely encoded.
+      const safeAmount = encodeURIComponent(amount);
+      const safeEmail = encodeURIComponent(email);
+      checkoutUrl =
+        `https://checkout.paygate.to/pay.php?address=${addressIn}` +
+        `&amount=${safeAmount}` +
+        `&email=${safeEmail}` +
+        `&currency=USD` +
+        `&theme=6366f1` +
+        `&button=6366f1`;
       console.log('Credit card multi-provider checkout URL generated for order:', orderId);
 
       return new Response(JSON.stringify({
