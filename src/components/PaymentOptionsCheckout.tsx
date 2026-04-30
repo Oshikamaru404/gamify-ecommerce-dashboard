@@ -311,9 +311,15 @@ Order ID: ${orderData.id}`;
             </div>
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <p className="text-sm text-green-800">
-                📱 Redirecting to WhatsApp in <span className="font-bold">{countdown}s</span>
-              </p>
+              {whatsappUrl ? (
+                <p className="text-sm text-green-800">
+                  📱 Redirecting to WhatsApp in <span className="font-bold">{countdown}s</span>
+                </p>
+              ) : (
+                <p className="text-sm text-green-800">
+                  ✅ Your payment is being verified. We'll contact you on WhatsApp/email once confirmed.
+                </p>
+              )}
             </div>
 
             <div className="flex gap-2 pt-1">
@@ -326,14 +332,16 @@ Order ID: ${orderData.id}`;
                 <Home className="h-4 w-4 mr-1" />
                 Store
               </Button>
-              <Button 
-                size="sm"
-                onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank')}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                <MessageCircle className="h-4 w-4 mr-1" />
-                WhatsApp
-              </Button>
+              {whatsappUrl && (
+                <Button 
+                  size="sm"
+                  onClick={() => whatsappUrl && window.open(whatsappUrl, '_blank')}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  WhatsApp
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
