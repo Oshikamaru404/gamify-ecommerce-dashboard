@@ -38,6 +38,7 @@ const buildTicker = (w: CryptoWallet): string => {
 
 export const DEFAULT_CRYPTO_WALLETS: CryptoWallet[] = [
   { network: 'BTC', coin: 'BTC', address: '1DHKvYQ8dAeJQdkQGwdBBeM7s4yrAxcMrz' },
+  { network: 'ERC20', coin: 'ETH', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
   { network: 'BEP20', coin: 'BNB', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
   { network: 'BEP20', coin: 'USDC', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
   { network: 'BEP20', coin: 'USDT', address: '0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a' },
