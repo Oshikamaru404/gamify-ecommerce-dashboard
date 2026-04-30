@@ -73,21 +73,25 @@ interface PaymentInfo {
   orderId: string;
 }
 
+// Coin/network logo URLs (color SVG icons)
+const ICON_BASE = 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color';
+const coinIcon = (symbol: string) => `${ICON_BASE}/${symbol.toLowerCase()}.svg`;
+
 // Network meta for nicer UI
-const NETWORK_META: Record<string, { label: string; emoji: string; color: string }> = {
-  BTC: { label: 'Bitcoin', emoji: '₿', color: 'bg-orange-100 text-orange-700 border-orange-300' },
-  BEP20: { label: 'BNB Smart Chain', emoji: '🟡', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  POLYGON: { label: 'Polygon', emoji: '🟣', color: 'bg-purple-100 text-purple-700 border-purple-300' },
-  BASE: { label: 'Base', emoji: '🔵', color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  SOLANA: { label: 'Solana', emoji: '🟢', color: 'bg-green-100 text-green-700 border-green-300' },
-  TRC20: { label: 'Tron (TRC20)', emoji: '🔴', color: 'bg-red-100 text-red-700 border-red-300' },
-  LINEA: { label: 'Linea', emoji: '⚫', color: 'bg-gray-100 text-gray-700 border-gray-300' },
-  ERC20: { label: 'Ethereum (ERC20)', emoji: '💎', color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+const NETWORK_META: Record<string, { label: string; logo: string; color: string }> = {
+  BTC: { label: 'Bitcoin', logo: coinIcon('btc'), color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  ERC20: { label: 'Ethereum (ERC20)', logo: coinIcon('eth'), color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+  BEP20: { label: 'BNB Smart Chain', logo: coinIcon('bnb'), color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  POLYGON: { label: 'Polygon', logo: coinIcon('matic'), color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  BASE: { label: 'Base', logo: 'https://raw.githubusercontent.com/base-org/brand-kit/main/logo/symbol/Base_Symbol_Blue.svg', color: 'bg-blue-100 text-blue-700 border-blue-300' },
+  SOLANA: { label: 'Solana', logo: coinIcon('sol'), color: 'bg-green-100 text-green-700 border-green-300' },
+  TRC20: { label: 'Tron (TRC20)', logo: coinIcon('trx'), color: 'bg-red-100 text-red-700 border-red-300' },
+  LINEA: { label: 'Linea', logo: 'https://icons.llamao.fi/icons/chains/rsz_linea.jpg', color: 'bg-gray-100 text-gray-700 border-gray-300' },
 };
 
 const getNetworkMeta = (network: string) => {
   const key = network.toUpperCase();
-  return NETWORK_META[key] || { label: network, emoji: '🔗', color: 'bg-slate-100 text-slate-700 border-slate-300' };
+  return NETWORK_META[key] || { label: network, logo: coinIcon('generic'), color: 'bg-slate-100 text-slate-700 border-slate-300' };
 };
 
 // EVM chain IDs (EIP-155) for EIP-681 deeplinks
