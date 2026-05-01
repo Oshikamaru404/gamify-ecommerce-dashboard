@@ -188,10 +188,10 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
     status: string; confirmations: number; min_confirmations: number; tx_hash: string | null;
   } | null>(null);
 
-  // Provider toggle (defaults to PayGate to keep backward compatibility)
+  // Provider toggle (defaults to self_hosted = direct-to-wallet, zero fees)
   const provider: 'paygate' | 'self_hosted' = useMemo(() => {
     const v = siteSettings?.find(s => s.setting_key === 'crypto_provider')?.setting_value;
-    return v === 'self_hosted' ? 'self_hosted' : 'paygate';
+    return v === 'paygate' ? 'paygate' : 'self_hosted';
   }, [siteSettings]);
 
   const wallets: CryptoWallet[] = useMemo(() => {
