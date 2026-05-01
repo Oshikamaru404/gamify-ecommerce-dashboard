@@ -4,10 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Copy, Check, Loader2, Bitcoin, RefreshCw } from 'lucide-react';
+import { Copy, Check, Loader2, Bitcoin, RefreshCw, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { supabase } from '@/integrations/supabase/client';
+import { useCryptoPrice } from '@/hooks/useCryptoPrice';
 
 export interface CryptoWallet {
   network: string;
@@ -71,6 +72,8 @@ interface PaymentInfo {
   cryptoAmount: string | null;
   qrUrl: string;
   orderId: string;
+  intentId?: string;        // self-hosted only
+  provider?: 'paygate' | 'self_hosted';
 }
 
 // Coin/network logo URLs (color SVG icons)
@@ -181,6 +184,15 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
   const [loading, setLoading] = useState(false);
   const [payment, setPayment] = useState<PaymentInfo | null>(null);
   const [copied, setCopied] = useState(false);
+  const [intentStatus, setIntentStatus] = useState<{
+    status: string; confirmations: number; min_confirmations: number; tx_hash: string | null;
+  } | null>(null);
+
+  // Provider toggle (defaults to PayGate to keep backward compatibility)
+  const provider: 'paygate' | 'self_hosted' = useMemo(() => {
+    const v = siteSettings?.find(s => s.setting_key === 'crypto_provider')?.setting_value;
+    return v === 'self_hosted' ? 'self_hosted' : 'paygate';
+  }, [siteSettings]);
 
   const wallets: CryptoWallet[] = useMemo(() => {
     const raw = siteSettings?.find(s => s.setting_key === 'crypto_wallets')?.setting_value;
@@ -209,13 +221,46 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
 
   const selected = wallets.find(w => w.network === selectedNetwork && w.coin === selectedCoin);
 
+  // Live USD -> crypto converter (only when a coin is selected, no payment yet)
+  const { data: priceData, loading: priceLoading, refresh: refreshPrice } = useCryptoPrice(
+    selected?.coin,
+    amountUsd,
+    selected?.network,
+    { enabled: !!selected && !payment }
+  );
+
   // Reset coin & payment when network changes
   useEffect(() => {
     setSelectedCoin('');
     setPayment(null);
+    setIntentStatus(null);
   }, [selectedNetwork]);
 
-  useEffect(() => { setPayment(null); }, [selectedCoin]);
+  useEffect(() => { setPayment(null); setIntentStatus(null); }, [selectedCoin]);
+
+  // Poll status for self-hosted intents
+  useEffect(() => {
+    if (!payment?.intentId || payment.provider !== 'self_hosted') return;
+    let stopped = false;
+    const poll = async () => {
+      try {
+        const { data } = await supabase.functions.invoke(
+          `crypto-payment-status?intentId=${payment.intentId}`,
+          { method: 'GET' }
+        );
+        if (stopped || !data) return;
+        setIntentStatus(data);
+        if (data.status === 'confirmed') {
+          toast.success('Payment confirmed! Your order is now active.');
+        }
+      } catch (e) {
+        console.warn('status poll failed', e);
+      }
+    };
+    poll();
+    const id = window.setInterval(poll, 8000);
+    return () => { stopped = true; window.clearInterval(id); };
+  }, [payment?.intentId, payment?.provider]);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -236,26 +281,47 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('paygate-create-direct-payment', {
-        body: {
-          ticker,
-          merchantAddress: selected.address,
-          amountUsd,
+      if (provider === 'self_hosted') {
+        // ─── Self-hosted: send directly to your wallet ───
+        const { data, error } = await supabase.functions.invoke('crypto-create-payment', {
+          body: {
+            orderId,
+            network: selected.network,
+            coin: selected.coin,
+            address: selected.address,
+            amountUsd,
+          },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'No address returned');
+
+        setPayment({
+          addressIn: data.address,
+          cryptoAmount: String(data.expectedAmount),
+          qrUrl: data.qrUrl,
           orderId,
-        },
-      });
-
-      if (error) throw error;
-      if (!data?.addressIn) throw new Error(data?.error || 'No address returned');
-
-      setPayment({
-        addressIn: data.addressIn,
-        cryptoAmount: data.cryptoAmount,
-        qrUrl: data.qrUrl,
-        orderId,
-      });
-      onPaymentReady?.();
-      toast.success('Payment address generated. Send the exact amount to confirm.');
+          intentId: data.intentId,
+          provider: 'self_hosted',
+        });
+        onPaymentReady?.();
+        toast.success('Payment address ready. Send the exact amount — auto-confirmation enabled.');
+      } else {
+        // ─── PayGate (default) ───
+        const { data, error } = await supabase.functions.invoke('paygate-create-direct-payment', {
+          body: { ticker, merchantAddress: selected.address, amountUsd, orderId },
+        });
+        if (error) throw error;
+        if (!data?.addressIn) throw new Error(data?.error || 'No address returned');
+        setPayment({
+          addressIn: data.addressIn,
+          cryptoAmount: data.cryptoAmount,
+          qrUrl: data.qrUrl,
+          orderId,
+          provider: 'paygate',
+        });
+        onPaymentReady?.();
+        toast.success('Payment address generated. Send the exact amount to confirm.');
+      }
     } catch (e: any) {
       console.error('Generate payment error:', e);
       const msg = e?.message || 'Failed to generate payment address. Please try again.';
@@ -369,6 +435,30 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           </div>
         )}
 
+        {!payment && selected && priceData && (
+          <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-purple-200 bg-purple-50/50 text-sm">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-purple-600" />
+              <span>
+                <span className="font-semibold">${amountUsd.toFixed(2)}</span>
+                <span className="text-muted-foreground"> ≈ </span>
+                <span className="font-mono font-semibold text-purple-700">
+                  {priceData.cryptoAmount.toFixed(8).replace(/0+$/, '').replace(/\.$/, '')} {selected.coin}
+                </span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={refreshPrice}
+              className="text-xs text-purple-600 hover:underline flex items-center gap-1"
+              title={`Source: ${priceData.source} · ${new Date(priceData.updatedAt).toLocaleTimeString()}`}
+            >
+              <RefreshCw className={`h-3 w-3 ${priceLoading ? 'animate-spin' : ''}`} />
+              live
+            </button>
+          </div>
+        )}
+
         {!payment && (
           <Button
             onClick={handleGenerate}
@@ -446,6 +536,26 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
               <p>Your order will activate automatically once the blockchain confirms your payment. You can close this page.</p>
               <p className="font-mono text-[10px] mt-1">Order: {payment.orderId.slice(0, 8)}</p>
             </div>
+
+            {/* Self-hosted live status pill */}
+            {payment.provider === 'self_hosted' && intentStatus && (
+              <div className={`rounded p-3 text-xs border space-y-1 ${
+                intentStatus.status === 'confirmed' ? 'bg-green-50 border-green-300 text-green-800' :
+                intentStatus.status === 'detected' ? 'bg-amber-50 border-amber-300 text-amber-800' :
+                intentStatus.status === 'expired' ? 'bg-red-50 border-red-300 text-red-800' :
+                'bg-slate-50 border-slate-200 text-slate-700'
+              }`}>
+                <p className="font-semibold capitalize flex items-center gap-2">
+                  {intentStatus.status === 'pending' && <><Loader2 className="h-3 w-3 animate-spin" /> Waiting for payment…</>}
+                  {intentStatus.status === 'detected' && <>🔎 Payment detected — confirming ({intentStatus.confirmations}/{intentStatus.min_confirmations})</>}
+                  {intentStatus.status === 'confirmed' && <><Check className="h-3 w-3" /> Payment confirmed</>}
+                  {intentStatus.status === 'expired' && <>⏱ Payment window expired</>}
+                </p>
+                {intentStatus.tx_hash && (
+                  <p className="font-mono text-[10px] truncate">TX: {intentStatus.tx_hash}</p>
+                )}
+              </div>
+            )}
             <Button
               variant="outline"
               size="sm"

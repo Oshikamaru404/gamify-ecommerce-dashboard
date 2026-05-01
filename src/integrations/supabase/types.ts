@@ -95,6 +95,69 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_payment_intents: {
+        Row: {
+          amount_usd: number
+          coin: string
+          confirmations: number
+          confirmed_at: string | null
+          created_at: string
+          detected_amount: number | null
+          expected_amount: number
+          expires_at: string
+          id: string
+          last_checked_at: string | null
+          min_confirmations: number
+          network: string
+          order_id: string
+          receiving_address: string
+          status: string
+          tolerance_pct: number
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_usd: number
+          coin: string
+          confirmations?: number
+          confirmed_at?: string | null
+          created_at?: string
+          detected_amount?: number | null
+          expected_amount: number
+          expires_at: string
+          id?: string
+          last_checked_at?: string | null
+          min_confirmations?: number
+          network: string
+          order_id: string
+          receiving_address: string
+          status?: string
+          tolerance_pct?: number
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_usd?: number
+          coin?: string
+          confirmations?: number
+          confirmed_at?: string | null
+          created_at?: string
+          detected_amount?: number | null
+          expected_amount?: number
+          expires_at?: string
+          id?: string
+          last_checked_at?: string | null
+          min_confirmations?: number
+          network?: string
+          order_id?: string
+          receiving_address?: string
+          status?: string
+          tolerance_pct?: number
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dashboard_metrics: {
         Row: {
           created_at: string | null
