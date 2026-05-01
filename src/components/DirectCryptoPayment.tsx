@@ -4,10 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Copy, Check, Loader2, Bitcoin, RefreshCw } from 'lucide-react';
+import { Copy, Check, Loader2, Bitcoin, RefreshCw, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { supabase } from '@/integrations/supabase/client';
+import { useCryptoPrice } from '@/hooks/useCryptoPrice';
 
 export interface CryptoWallet {
   network: string;
