@@ -221,13 +221,46 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
 
   const selected = wallets.find(w => w.network === selectedNetwork && w.coin === selectedCoin);
 
+  // Live USD -> crypto converter (only when a coin is selected, no payment yet)
+  const { data: priceData, loading: priceLoading, refresh: refreshPrice } = useCryptoPrice(
+    selected?.coin,
+    amountUsd,
+    selected?.network,
+    { enabled: !!selected && !payment }
+  );
+
   // Reset coin & payment when network changes
   useEffect(() => {
     setSelectedCoin('');
     setPayment(null);
+    setIntentStatus(null);
   }, [selectedNetwork]);
 
-  useEffect(() => { setPayment(null); }, [selectedCoin]);
+  useEffect(() => { setPayment(null); setIntentStatus(null); }, [selectedCoin]);
+
+  // Poll status for self-hosted intents
+  useEffect(() => {
+    if (!payment?.intentId || payment.provider !== 'self_hosted') return;
+    let stopped = false;
+    const poll = async () => {
+      try {
+        const { data } = await supabase.functions.invoke(
+          `crypto-payment-status?intentId=${payment.intentId}`,
+          { method: 'GET' }
+        );
+        if (stopped || !data) return;
+        setIntentStatus(data);
+        if (data.status === 'confirmed') {
+          toast.success('Payment confirmed! Your order is now active.');
+        }
+      } catch (e) {
+        console.warn('status poll failed', e);
+      }
+    };
+    poll();
+    const id = window.setInterval(poll, 8000);
+    return () => { stopped = true; window.clearInterval(id); };
+  }, [payment?.intentId, payment?.provider]);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -248,26 +281,47 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('paygate-create-direct-payment', {
-        body: {
-          ticker,
-          merchantAddress: selected.address,
-          amountUsd,
+      if (provider === 'self_hosted') {
+        // ─── Self-hosted: send directly to your wallet ───
+        const { data, error } = await supabase.functions.invoke('crypto-create-payment', {
+          body: {
+            orderId,
+            network: selected.network,
+            coin: selected.coin,
+            address: selected.address,
+            amountUsd,
+          },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'No address returned');
+
+        setPayment({
+          addressIn: data.address,
+          cryptoAmount: String(data.expectedAmount),
+          qrUrl: data.qrUrl,
           orderId,
-        },
-      });
-
-      if (error) throw error;
-      if (!data?.addressIn) throw new Error(data?.error || 'No address returned');
-
-      setPayment({
-        addressIn: data.addressIn,
-        cryptoAmount: data.cryptoAmount,
-        qrUrl: data.qrUrl,
-        orderId,
-      });
-      onPaymentReady?.();
-      toast.success('Payment address generated. Send the exact amount to confirm.');
+          intentId: data.intentId,
+          provider: 'self_hosted',
+        });
+        onPaymentReady?.();
+        toast.success('Payment address ready. Send the exact amount — auto-confirmation enabled.');
+      } else {
+        // ─── PayGate (default) ───
+        const { data, error } = await supabase.functions.invoke('paygate-create-direct-payment', {
+          body: { ticker, merchantAddress: selected.address, amountUsd, orderId },
+        });
+        if (error) throw error;
+        if (!data?.addressIn) throw new Error(data?.error || 'No address returned');
+        setPayment({
+          addressIn: data.addressIn,
+          cryptoAmount: data.cryptoAmount,
+          qrUrl: data.qrUrl,
+          orderId,
+          provider: 'paygate',
+        });
+        onPaymentReady?.();
+        toast.success('Payment address generated. Send the exact amount to confirm.');
+      }
     } catch (e: any) {
       console.error('Generate payment error:', e);
       const msg = e?.message || 'Failed to generate payment address. Please try again.';
