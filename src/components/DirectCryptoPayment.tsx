@@ -72,6 +72,8 @@ interface PaymentInfo {
   cryptoAmount: string | null;
   qrUrl: string;
   orderId: string;
+  intentId?: string;        // self-hosted only
+  provider?: 'paygate' | 'self_hosted';
 }
 
 // Coin/network logo URLs (color SVG icons)
