@@ -45,6 +45,7 @@ import TranslationEditor from '@/components/admin/TranslationEditor';
 import HomepageCMSEditor from '@/components/admin/HomepageCMSEditor';
 import TwoFactorSetup from '@/components/admin/TwoFactorSetup';
 import CryptoWalletsManager from '@/components/admin/CryptoWalletsManager';
+import CryptoProviderToggle from '@/components/admin/CryptoProviderToggle';
 
 const generalSettingsSchema = z.object({
   storeName: z.string().min(1, 'Store name is required'),
@@ -497,6 +498,7 @@ const Settings = () => {
         </TabsContent>
         
         <TabsContent value="payment" className="space-y-6">
+          <CryptoProviderToggle />
           <CryptoWalletsManager />
           <Card>
             <CardHeader>
