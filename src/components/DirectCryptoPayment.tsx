@@ -435,6 +435,30 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           </div>
         )}
 
+        {!payment && selected && priceData && (
+          <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-purple-200 bg-purple-50/50 text-sm">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-purple-600" />
+              <span>
+                <span className="font-semibold">${amountUsd.toFixed(2)}</span>
+                <span className="text-muted-foreground"> ≈ </span>
+                <span className="font-mono font-semibold text-purple-700">
+                  {priceData.cryptoAmount.toFixed(8).replace(/0+$/, '').replace(/\.$/, '')} {selected.coin}
+                </span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={refreshPrice}
+              className="text-xs text-purple-600 hover:underline flex items-center gap-1"
+              title={`Source: ${priceData.source} · ${new Date(priceData.updatedAt).toLocaleTimeString()}`}
+            >
+              <RefreshCw className={`h-3 w-3 ${priceLoading ? 'animate-spin' : ''}`} />
+              live
+            </button>
+          </div>
+        )}
+
         {!payment && (
           <Button
             onClick={handleGenerate}
