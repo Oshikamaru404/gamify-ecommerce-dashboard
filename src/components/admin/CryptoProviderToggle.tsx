@@ -8,7 +8,7 @@ import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 const CryptoProviderToggle: React.FC = () => {
   const { data: settings } = useSiteSettings();
   const update = useUpdateSiteSetting();
-  const [provider, setProvider] = useState<'self_hosted' | 'paygate'>('paygate');
+  const [provider, setProvider] = useState<'self_hosted' | 'paygate'>('self_hosted');
 
   useEffect(() => {
     const v = settings?.find(s => s.setting_key === 'crypto_provider')?.setting_value;
