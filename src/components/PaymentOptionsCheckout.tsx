@@ -197,6 +197,7 @@ Order ID: ${orderData.id}`;
 
       triggerOrderEmails({
         ...orderData,
+        package_image_url: packageData.icon_url,
         paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayBwivox)' : 'Crypto (PayBwivox)',
       });
 
