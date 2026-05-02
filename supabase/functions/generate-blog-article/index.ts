@@ -300,13 +300,14 @@ Deno.serve(async (req) => {
     const forcedTopicId: string | undefined = body?.topic_id;
     const forcedLanguages: string[] | undefined = body?.languages;
 
-    // Pick a topic
+    // Pick topics (respect articles_per_run unless a specific topic_id is forced)
+    const limit = forcedTopicId ? 1 : Math.max(1, Math.min(10, config.articles_per_run || 1));
     let topicQuery = supabase
       .from("blog_topics_queue")
       .select("*")
       .eq("status", "pending")
       .order("sort_order", { ascending: true })
-      .limit(1);
+      .limit(limit);
     if (forcedTopicId) {
       topicQuery = supabase
         .from("blog_topics_queue")
@@ -314,58 +315,58 @@ Deno.serve(async (req) => {
         .eq("id", forcedTopicId)
         .limit(1);
     }
-    const { data: topics } = await topicQuery;
-    const topic = topics?.[0];
+    const { data: topicsToProcess } = await topicQuery;
 
-    if (!topic) {
+    if (!topicsToProcess || topicsToProcess.length === 0) {
       return new Response(
         JSON.stringify({ ok: false, message: "No pending topic" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Mark as processing
-    await supabase
-      .from("blog_topics_queue")
-      .update({ status: "processing", last_attempted_at: new Date().toISOString() })
-      .eq("id", topic.id);
-
     const langs: string[] = forcedLanguages || config.languages || ["en"];
-    const results: Record<string, any> = {};
-    const succeededLangs: string[] = [];
+    const allResults: any[] = [];
 
-    for (const lang of langs) {
-      try {
-        const articleId = await processLanguage(supabase, topic, lang, config);
-        results[lang] = { success: true, article_id: articleId };
-        succeededLangs.push(lang);
-      } catch (err: any) {
-        console.error(`Failed ${lang}:`, err);
-        results[lang] = { success: false, error: String(err?.message || err) };
-        await supabase.from("blog_generation_logs").insert({
-          topic_id: topic.id,
-          language: lang,
-          status: "failed",
-          error_message: String(err?.message || err),
-        });
+    for (const topic of topicsToProcess) {
+      // Mark as processing
+      await supabase
+        .from("blog_topics_queue")
+        .update({ status: "processing", last_attempted_at: new Date().toISOString() })
+        .eq("id", topic.id);
+
+      const results: Record<string, any> = {};
+      const succeededLangs: string[] = [];
+
+      for (const lang of langs) {
+        try {
+          const articleId = await processLanguage(supabase, topic, lang, config);
+          results[lang] = { success: true, article_id: articleId };
+          succeededLangs.push(lang);
+        } catch (err: any) {
+          console.error(`Failed ${lang}:`, err);
+          results[lang] = { success: false, error: String(err?.message || err) };
+          await supabase.from("blog_generation_logs").insert({
+            topic_id: topic.id,
+            language: lang,
+            status: "failed",
+            error_message: String(err?.message || err),
+          });
+        }
+        await new Promise((r) => setTimeout(r, 2000));
       }
-      // Throttle to avoid rate limits
-      await new Promise((r) => setTimeout(r, 2000));
-    }
 
-    // Update topic
-    const allLangs = Array.from(
-      new Set([...(topic.published_languages || []), ...succeededLangs])
-    );
-    const finalStatus =
-      succeededLangs.length === langs.length ? "published" : "pending";
-    await supabase
-      .from("blog_topics_queue")
-      .update({
-        status: finalStatus,
-        published_languages: allLangs,
-      })
-      .eq("id", topic.id);
+      const allLangs = Array.from(
+        new Set([...(topic.published_languages || []), ...succeededLangs])
+      );
+      const finalStatus =
+        succeededLangs.length === langs.length ? "published" : "pending";
+      await supabase
+        .from("blog_topics_queue")
+        .update({ status: finalStatus, published_languages: allLangs })
+        .eq("id", topic.id);
+
+      allResults.push({ topic_id: topic.id, results });
+    }
 
     await supabase
       .from("blog_automation_config")
@@ -373,7 +374,7 @@ Deno.serve(async (req) => {
       .eq("id", config.id);
 
     return new Response(
-      JSON.stringify({ ok: true, topic_id: topic.id, results }),
+      JSON.stringify({ ok: true, processed: allResults.length, results: allResults }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err: any) {

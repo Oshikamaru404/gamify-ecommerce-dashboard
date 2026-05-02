@@ -70,7 +70,7 @@ const BlogAutoPublishingPanel = () => {
 
   // Mutations
   const updateConfig = useMutation({
-    mutationFn: async (patch: Partial<{ is_active: boolean; languages: string[]; auto_publish: boolean }>) => {
+    mutationFn: async (patch: Partial<{ is_active: boolean; languages: string[]; auto_publish: boolean; articles_per_run: number; ai_model: string }>) => {
       if (!config?.id) return;
       const { error } = await supabase
         .from('blog_automation_config')
@@ -84,6 +84,31 @@ const BlogAutoPublishingPanel = () => {
     },
     onError: (err: any) => toast.error(`Update failed: ${err.message}`),
   });
+
+  const updateSchedule = useMutation({
+    mutationFn: async (newSchedule: string) => {
+      const { error } = await supabase.rpc('update_blog_cron_schedule', { new_schedule: newSchedule });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blog-automation-config'] });
+      toast.success('Publishing schedule updated');
+    },
+    onError: (err: any) => toast.error(`Schedule update failed: ${err.message}`),
+  });
+
+  const [customCron, setCustomCron] = useState('');
+  React.useEffect(() => {
+    if (config?.cron_schedule) setCustomCron(config.cron_schedule);
+  }, [config?.cron_schedule]);
+
+  const SCHEDULE_PRESETS = [
+    { label: 'Daily at 09:00 UTC', value: '0 9 * * *' },
+    { label: 'Mon/Wed/Fri at 09:00 UTC', value: '0 9 * * 1,3,5' },
+    { label: 'Twice daily (09:00 & 21:00)', value: '0 9,21 * * *' },
+    { label: 'Weekly (Monday 09:00 UTC)', value: '0 9 * * 1' },
+    { label: 'Every 6 hours', value: '0 */6 * * *' },
+  ];
 
   const addTopic = useMutation({
     mutationFn: async () => {
@@ -219,7 +244,10 @@ const BlogAutoPublishingPanel = () => {
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
           <CardDescription>
-            Auto-publishing IA — runs Mon/Wed/Fri at 09:00 UTC (cron)
+            Current schedule:{' '}
+            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+              {config?.cron_schedule || '0 9 * * 1,3,5'}
+            </code>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -266,6 +294,58 @@ const BlogAutoPublishingPanel = () => {
                 );
               })}
             </div>
+          </div>
+
+          <div className="space-y-2 pt-4 border-t">
+            <Label className="text-base">Publishing schedule (cron)</Label>
+            <p className="text-sm text-muted-foreground">
+              Pick a preset or enter a custom cron expression (UTC).
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {SCHEDULE_PRESETS.map((p) => (
+                <Button
+                  key={p.value}
+                  variant={config?.cron_schedule === p.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => updateSchedule.mutate(p.value)}
+                  disabled={updateSchedule.isPending}
+                >
+                  {p.label}
+                </Button>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <Input
+                value={customCron}
+                onChange={(e) => setCustomCron(e.target.value)}
+                placeholder="0 9 * * 1,3,5"
+                className="font-mono"
+              />
+              <Button
+                variant="secondary"
+                onClick={() => updateSchedule.mutate(customCron)}
+                disabled={updateSchedule.isPending || !customCron.trim()}
+              >
+                Apply
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-4 border-t">
+            <Label className="text-base">Articles per run</Label>
+            <p className="text-sm text-muted-foreground">
+              How many topics to process each scheduled execution.
+            </p>
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={config?.articles_per_run ?? 1}
+              onChange={(e) =>
+                updateConfig.mutate({ articles_per_run: Math.max(1, parseInt(e.target.value) || 1) })
+              }
+              className="w-32"
+            />
           </div>
 
           <div className="pt-4 border-t">
