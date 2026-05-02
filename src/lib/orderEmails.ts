@@ -5,6 +5,7 @@ interface OrderEmailInput {
   customer_name: string;
   customer_email: string;
   customer_whatsapp?: string | null;
+  package_id?: string | null;
   package_name: string;
   package_category?: string;
   package_image_url?: string | null;
@@ -15,6 +16,32 @@ interface OrderEmailInput {
   payment_status?: string;
   paymentMethodLabel?: string;
   adminEmail?: string;
+}
+
+/**
+ * Resolve a package's image URL from the database when the caller didn't
+ * pass one. Tries iptv_packages first, then subscription_packages.
+ */
+async function resolvePackageImageUrl(packageId?: string | null): Promise<string | null> {
+  if (!packageId) return null;
+  try {
+    const { data: iptv } = await supabase
+      .from('iptv_packages')
+      .select('icon_url')
+      .eq('id', packageId)
+      .maybeSingle();
+    if (iptv?.icon_url) return iptv.icon_url;
+
+    const { data: sub } = await supabase
+      .from('subscription_packages')
+      .select('icon_url')
+      .eq('id', packageId)
+      .maybeSingle();
+    if (sub?.icon_url) return sub.icon_url;
+  } catch (e) {
+    console.error('resolvePackageImageUrl failed', e);
+  }
+  return null;
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
