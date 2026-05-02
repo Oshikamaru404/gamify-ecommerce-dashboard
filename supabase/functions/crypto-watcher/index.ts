@@ -617,7 +617,8 @@ serve(async (req) => {
     }
     if (wantsAll || only === 'tron') {
       try {
-        const txs = await fetchTrxNativeTxs('TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9', sinceTs);
+        // Binance large hot wallet — receives constant TRX inflows
+        const txs = await fetchTrxNativeTxs('TWd4WrZ9wn84f5x1hZhL4DHvk738ns5jwb', sinceTs);
         results['tron'] = { ok: txs.length > 0, source: 'trongrid', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
       } catch (e) { results['tron'] = { ok: false, error: (e as Error).message }; }
     }
