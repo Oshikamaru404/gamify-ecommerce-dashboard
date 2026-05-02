@@ -480,19 +480,18 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
         {payment && selected && (() => {
           const paymentUri = buildPaymentUri(selected.network, selected.coin, payment.addressIn, payment.cryptoAmount);
           const hasAmountInQr = paymentUri !== payment.addressIn;
-          const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(paymentUri)}`;
+          const networkMeta = getNetworkMeta(selected.network);
           return (
           <div className="space-y-3 p-4 border-2 border-purple-300 rounded-lg bg-purple-50/30">
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <img
-                src={qrSrc}
-                alt="Payment QR"
-                className="w-44 h-44 bg-white p-2 rounded border"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payment.addressIn)}`;
-                }}
-              />
+              <div className="bg-white p-2 rounded border">
+                <QrWithLogo
+                  value={paymentUri}
+                  logoUrl={networkMeta.logo}
+                  size={176}
+                  alt={`${selected.network} payment QR`}
+                />
+              </div>
               <div className="flex-1 w-full space-y-2 text-sm">
                 <div>
                   <p className="text-xs text-muted-foreground">Send exactly</p>
