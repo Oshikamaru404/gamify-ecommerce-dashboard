@@ -78,7 +78,7 @@ const OrderConfirmationEmail = ({
   currency = 'EUR',
   paymentMethod,
 }: Props) => {
-  const greeting = customerName ? `Hello ${customerName} 👋` : 'Hello 👋'
+  const greeting = customerName ? `Hello ${customerName}!` : 'Hello!'
   const priceLabel = formatPrice(amount, currency)
   const categoryLabel = prettyCategory(packageCategory)
 
