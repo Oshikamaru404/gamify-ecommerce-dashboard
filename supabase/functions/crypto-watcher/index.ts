@@ -711,9 +711,11 @@ const SOLANA_SPL_MINTS: Record<string, string> = {
   usdt: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
 };
 
-// Solana RPC pool — try multiple public endpoints with rotation + retry on 429.
+// Solana RPC pool — Helius (with API key) as primary, public RPCs as fallbacks.
 // NodeReal MegaNode does NOT cover Solana on the standard {chain}-{network} format.
+const HELIUS_KEY = Deno.env.get('HELIUS_API_KEY') || '';
 const SOLANA_RPCS: string[] = [
+  ...(HELIUS_KEY ? [`https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`] : []),
   'https://solana-rpc.publicnode.com',
   'https://api.mainnet-beta.solana.com',
   'https://solana.drpc.org',
