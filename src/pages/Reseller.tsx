@@ -23,6 +23,7 @@ const Reseller = () => {
 
   return (
     <StoreLayout>
+      <SEO page="reseller" />
       <div className="bg-white">
         <div className="container py-16">
           <section className="mb-20 text-center">

@@ -23,6 +23,7 @@ const Support = () => {
 
   return (
     <StoreLayout>
+      <SEO page="support" />
       <div className="bg-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">

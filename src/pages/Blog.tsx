@@ -168,6 +168,7 @@ const Blog = () => {
   // Default blog listing view
   return (
     <StoreLayout>
+      <SEO page="blog" />
       <div className="bg-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">

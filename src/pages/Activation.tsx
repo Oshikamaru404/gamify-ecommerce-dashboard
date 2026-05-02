@@ -81,6 +81,7 @@ const Activation = () => {
 
   return (
     <StoreLayout>
+      <SEO page="activation" />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">

@@ -90,6 +90,7 @@ const Products = () => {
 
   return (
     <StoreLayout>
+      <SEO page="products" />
       <div className="container py-8">
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold">All Games</h1>
