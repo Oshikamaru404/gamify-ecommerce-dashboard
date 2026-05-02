@@ -50,6 +50,7 @@ interface Props {
   amount?: string | number
   currency?: string
   paymentMethod?: string
+  __overrides?: Record<string, string>
 }
 
 const formatPrice = (amount?: string | number, currency = 'EUR') => {

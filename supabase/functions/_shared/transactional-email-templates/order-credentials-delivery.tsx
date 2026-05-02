@@ -47,6 +47,7 @@ interface Props {
   xtreamPassword?: string
   expiration?: string
   notes?: string
+  __overrides?: Record<string, string>
 }
 
 const OrderCredentialsDeliveryEmail = (props: Props) => {
