@@ -8,7 +8,6 @@ import {
   Html,
   Img,
   Link,
-  Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
@@ -74,9 +73,10 @@ const OrderConfirmationEmail = ({
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>
-        Your {SITE_NAME} order {orderId ? `#${orderId}` : ''} is confirmed
-      </Preview>
+      {/* Plain preview text — no invisible padding chars (Gmail spam signal) */}
+      <div style={{ display: 'none', overflow: 'hidden', lineHeight: '1px', opacity: 0, maxHeight: 0, maxWidth: 0 }}>
+        Your {SITE_NAME} order {orderId ? `#${orderId}` : ''} is confirmed — payment details inside.
+      </div>
       <Body style={main}>
         <Container style={outerContainer}>
           {/* ===== Hero band — wordmark only, no logo image ===== */}
