@@ -195,6 +195,7 @@ export type Database = {
       }
       blog_topics_queue: {
         Row: {
+          angle: string
           category: string
           created_at: string
           id: string
@@ -208,6 +209,7 @@ export type Database = {
           topic_fr: string | null
         }
         Insert: {
+          angle?: string
           category?: string
           created_at?: string
           id?: string
@@ -221,6 +223,7 @@ export type Database = {
           topic_fr?: string | null
         }
         Update: {
+          angle?: string
           category?: string
           created_at?: string
           id?: string
