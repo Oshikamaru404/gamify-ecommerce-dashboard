@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
     await client.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: effectiveRecipient,
-      replyTo: `BWIVOX Support <bwivox@gmail.com>`,
+      replyTo: `BWIVOX Support <support@bwivox.com>`,
       subject: resolvedSubject,
       content: plainText,
       html,
