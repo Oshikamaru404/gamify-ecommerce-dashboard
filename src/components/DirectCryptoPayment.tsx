@@ -550,8 +550,8 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
               </div>
             )}
 
-            <div className="flex flex-row gap-3 sm:gap-4 items-center">
-              <div className="relative w-28 h-28 sm:w-44 sm:h-44 bg-white p-1.5 sm:p-2 rounded border shrink-0">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="relative w-44 h-44 bg-white p-2 rounded border shrink-0">
                 <img
                   src={qrSrc}
                   alt="Payment QR"
@@ -563,13 +563,13 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                 />
                 {/* Network/coin logo centered on the QR for branding */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-white rounded-full p-0.5 sm:p-1 shadow-md ring-2 ring-white">
+                  <div className="bg-white rounded-full p-1 shadow-md ring-2 ring-white">
                     <img
                       src={getNetworkMeta(selected.network).logo}
                       alt={selected.network}
                       crossOrigin="anonymous"
                       referrerPolicy="no-referrer"
-                      className="h-6 w-6 sm:h-9 sm:w-9 rounded-full object-contain"
+                      className="h-9 w-9 rounded-full object-contain"
                       onError={(e) => {
                         const img = e.target as HTMLImageElement;
                         // Fallback to coin icon (jsdelivr — CORS-friendly) if chain icon fails
