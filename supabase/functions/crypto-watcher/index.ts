@@ -115,7 +115,6 @@ async function fetchBscAssetTransfers(opts: {
     maxCount: '0x32', // 50
     order: 'desc',
     excludeZeroValue: true,
-    withMetadata: true,
   };
   if (opts.contractAddress) rpcParams.contractAddresses = [opts.contractAddress];
 
@@ -123,24 +122,15 @@ async function fetchBscAssetTransfers(opts: {
     console.warn('[bsc] nr_getAssetTransfers failed:', e.message);
     return null;
   });
-  console.log('[bsc] nr_getAssetTransfers raw:', JSON.stringify(result).slice(0, 600));
   const transfers = result?.transfers || [];
 
-  // Map to Etherscan-like shape
+  // Map to Etherscan-like shape. NodeReal response fields:
+  //   hash, to, from, blockNum (hex), blockTimeStamp (unix sec),
+  //   value (hex wei), receiptsStatus (1=ok), decimal ("18"), category ("20"|"external")
   return transfers.map((t: any) => {
     const blockNum = parseInt(t.blockNum || '0x0', 16);
-    const tsIso = t.metadata?.blockTimestamp;
-    const ts = tsIso ? Math.floor(new Date(tsIso).getTime() / 1000) : 0;
-    // value: decimal string for native, raw token units for BEP20 in `rawContract.value` (hex)
-    let valueRaw: string;
-    if (opts.category === 'external') {
-      // native BNB — `value` is decimal in BNB, convert back to wei-equivalent string
-      const bnb = parseFloat(t.value || '0');
-      valueRaw = Math.floor(bnb * 1e18).toString();
-    } else {
-      const hex = t.rawContract?.value || '0x0';
-      valueRaw = BigInt(hex).toString();
-    }
+    const ts = typeof t.blockTimeStamp === 'number' ? t.blockTimeStamp : 0;
+    const valueRaw = t.value ? BigInt(t.value).toString() : '0';
     return {
       hash: t.hash,
       to: t.to,
@@ -148,7 +138,8 @@ async function fetchBscAssetTransfers(opts: {
       value: valueRaw,
       timeStamp: String(ts),
       confirmations: String(Math.max(0, latest - blockNum)),
-      isError: '0',
+      isError: t.receiptsStatus === 1 ? '0' : '1',
+      tokenDecimal: t.decimal || '18',
     };
   });
 }
