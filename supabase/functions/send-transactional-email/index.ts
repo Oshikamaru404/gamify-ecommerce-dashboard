@@ -105,6 +105,12 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Merge admin overrides into templateData under __overrides
+  const overrides = await loadOverrides(templateName)
+  if (overrides) {
+    templateData = { ...templateData, __overrides: overrides }
+  }
+
   // Render template
   let html: string
   let plainText: string
