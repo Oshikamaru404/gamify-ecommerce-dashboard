@@ -502,11 +502,15 @@ export type Database = {
         Row: {
           amount: number
           created_at: string | null
+          credentials_delivered_at: string | null
+          credentials_expiration: string | null
+          credentials_notes: string | null
           customer_email: string
           customer_name: string
           customer_whatsapp: string | null
           duration_months: number
           id: string
+          m3u_url: string | null
           order_type: string
           package_category: string
           package_id: string | null
@@ -514,15 +518,23 @@ export type Database = {
           payment_status: string
           status: string
           updated_at: string | null
+          xtream_host: string | null
+          xtream_password: string | null
+          xtream_port: string | null
+          xtream_username: string | null
         }
         Insert: {
           amount: number
           created_at?: string | null
+          credentials_delivered_at?: string | null
+          credentials_expiration?: string | null
+          credentials_notes?: string | null
           customer_email: string
           customer_name: string
           customer_whatsapp?: string | null
           duration_months: number
           id?: string
+          m3u_url?: string | null
           order_type?: string
           package_category: string
           package_id?: string | null
@@ -530,15 +542,23 @@ export type Database = {
           payment_status?: string
           status?: string
           updated_at?: string | null
+          xtream_host?: string | null
+          xtream_password?: string | null
+          xtream_port?: string | null
+          xtream_username?: string | null
         }
         Update: {
           amount?: number
           created_at?: string | null
+          credentials_delivered_at?: string | null
+          credentials_expiration?: string | null
+          credentials_notes?: string | null
           customer_email?: string
           customer_name?: string
           customer_whatsapp?: string | null
           duration_months?: number
           id?: string
+          m3u_url?: string | null
           order_type?: string
           package_category?: string
           package_id?: string | null
@@ -546,6 +566,10 @@ export type Database = {
           payment_status?: string
           status?: string
           updated_at?: string | null
+          xtream_host?: string | null
+          xtream_password?: string | null
+          xtream_port?: string | null
+          xtream_username?: string | null
         }
         Relationships: [
           {
