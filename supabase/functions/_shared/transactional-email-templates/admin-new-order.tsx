@@ -28,7 +28,20 @@ const AdminNewOrderEmail = (p: Props) => (
           {p.orderId && <Text style={row}><strong>Order:</strong> {p.orderId}</Text>}
           {p.packageName && <Text style={row}><strong>Package:</strong> {p.packageName}{p.packageCategory ? ` (${p.packageCategory})` : ''}</Text>}
           {p.amount && <Text style={amount}>€{p.amount}</Text>}
-          {p.paymentMethod && <Text style={row}><strong>Payment:</strong> {p.paymentMethod}</Text>}
+          {p.paymentMethod && (() => {
+            const icon = getPaymentMethodIcon(p.paymentMethod)
+            return (
+              <Text style={row}>
+                <strong>Payment:</strong>{' '}
+                {icon ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, verticalAlign: 'middle' }}>
+                    <Img src={icon} width="18" height="18" alt="" style={{ display: 'inline-block', verticalAlign: 'middle', borderRadius: 4 }} />
+                    <span style={{ verticalAlign: 'middle' }}>{p.paymentMethod}</span>
+                  </span>
+                ) : p.paymentMethod}
+              </Text>
+            )
+          })()}
         </Section>
         <Section style={card}>
           {p.customerName && <Text style={row}><strong>Customer:</strong> {p.customerName}</Text>}
