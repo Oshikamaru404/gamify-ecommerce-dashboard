@@ -72,6 +72,22 @@ export const useCreateFeedback = () => {
       }
       
       console.log('Successfully created feedback:', data);
+
+      // Notify admin
+      supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'admin-new-feedback',
+          recipientEmail: 'bwivox@gmail.com',
+          idempotencyKey: `admin-feedback-${data.id}`,
+          templateData: {
+            customerName: (data as any).customer_name || (data as any).name,
+            email: (data as any).email,
+            rating: (data as any).rating,
+            comment: (data as any).comment || (data as any).message,
+          },
+        },
+      }).catch((e) => console.error('admin feedback email failed', e));
+
       return data;
     },
     onSuccess: () => {

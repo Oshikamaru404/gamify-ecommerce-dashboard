@@ -32,6 +32,7 @@ import Subscription from "./pages/Subscription";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import NotFound from "./pages/NotFound";
+import Unsubscribe from "./pages/Unsubscribe";
 import Home from "./pages/Home";
 import AdminLogin from "./pages/admin/AdminLogin";
 import ResetAdminPassword from "./pages/admin/ResetAdminPassword";
@@ -113,6 +114,7 @@ function App() {
                   <Route path="/subscription" element={<Subscription />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/refund-policy" element={<RefundPolicy />} />
+                  <Route path="/unsubscribe" element={<Unsubscribe />} />
                   
                   {/* Admin routes */}
                   <Route path="/diza/login" element={<AdminLogin />} />
