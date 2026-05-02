@@ -550,41 +550,34 @@ serve(async (req) => {
       { network: 'linea',    contract: '0xA219439258ca9da29E9Cc4cE5596924745e12B93' },
     ];
     const results: Record<string, unknown> = {
-      bsctrace_configured: !!BSCTRACE_BASE,
+      meganode_configured: !!MEGANODE_BSC_RPC,
       etherscan_configured: !!ETHERSCAN_KEY,
       meganode_key_len: (Deno.env.get('MEGANODE_API_KEY') || '').length,
     };
+
+    // Binance hot wallet — high constant USDT traffic on every chain (great probe target)
+    const BINANCE_HOT = '0xF977814e90dA44bFA03b6295A0616a897441aceC';
+    const sinceTs = Math.floor(Date.now() / 1000) - 7 * 24 * 3600; // last 7 days
+
     for (const p of probes) {
-      const urls = buildExplorerUrls(p.network, {
-        module: 'account',
-        action: 'tokentx',
-        contractaddress: p.contract,
-        page: '1',
-        offset: '1',
-        sort: 'desc',
-      });
-      const sourceResults: Array<{ source: string; ok: boolean; status?: string; sample?: string }> = [];
-      for (const u of urls) {
-        const host = new URL(u).host;
-        try {
-          const r = await fetch(u);
-          const body: any = await r.json().catch(() => ({}));
-          const isOk = Array.isArray(body?.result) && body.result.length > 0;
-          sourceResults.push({
-            source: host,
-            ok: isOk,
-            status: String(body?.status ?? r.status),
-            sample: isOk ? body.result[0]?.hash?.slice(0, 12) : (body?.message || '').slice(0, 60),
-          });
-        } catch (e) {
-          sourceResults.push({ source: host, ok: false, status: 'fetch-error', sample: (e as Error).message });
-        }
+      try {
+        const txs = await fetchEvmTokenTxs(p.network, 'usdt', BINANCE_HOT, sinceTs);
+        results[p.network] = {
+          ok: txs.length > 0,
+          tx_count: txs.length,
+          sample: txs[0] ? { hash: txs[0].txHash.slice(0, 12), amount: txs[0].amount, conf: txs[0].confirmations } : null,
+        };
+      } catch (e) {
+        results[p.network] = { ok: false, error: (e as Error).message };
       }
-      results[p.network] = {
-        sources_tried: sourceResults.length,
-        any_success: sourceResults.some(s => s.ok),
-        details: sourceResults,
-      };
+    }
+
+    // Extra: explicit BSC RPC sanity check (eth_blockNumber)
+    try {
+      const blk = await meganodeRpc('eth_blockNumber', []);
+      results['_bsc_rpc_block'] = parseInt(blk, 16);
+    } catch (e) {
+      results['_bsc_rpc_block'] = `error: ${(e as Error).message}`;
     }
     return new Response(JSON.stringify(results, null, 2), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
