@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, ArrowLeft, Clock } from 'lucide-react';
@@ -7,6 +8,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedText } from '@/lib/multilingualUtils';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import RelatedArticles from '@/components/RelatedArticles';
+import { buildArticleSchema, buildFaqSchema } from '@/lib/seoSchemas';
+import { SITE_URL } from '@/lib/seoTranslations';
 
 interface BlogArticleDetailProps {
   category: 'iptv' | 'player';
@@ -65,9 +68,42 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
   }
 
   const articleTitle = getLocalizedText(article.title, language);
+  const articleExcerpt = article.excerpt ? getLocalizedText(article.excerpt, language) : '';
+  const metaDesc = (article as any).meta_description || articleExcerpt || articleTitle;
+  const articleUrl = `${SITE_URL}${backPath}/${article.slug}`;
+  const lang = (article as any).language_code || language || 'en';
+  const faqArr: any[] = Array.isArray((article as any).faq) ? (article as any).faq : [];
+
+  const articleSchema = buildArticleSchema({
+    headline: articleTitle,
+    description: metaDesc,
+    image: article.featured_image_url || undefined,
+    datePublished: article.created_at,
+    dateModified: article.updated_at,
+    author: article.author,
+    url: articleUrl,
+    inLanguage: lang,
+  });
+  const faqSchema = faqArr.length > 0 ? buildFaqSchema(faqArr) : null;
 
   return (
     <StoreLayout>
+      <Helmet>
+        <title>{articleTitle} | BWIVOX</title>
+        <meta name="description" content={metaDesc} />
+        <link rel="canonical" href={articleUrl} />
+        <meta property="og:title" content={articleTitle} />
+        <meta property="og:description" content={metaDesc} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={articleUrl} />
+        {article.featured_image_url && (
+          <meta property="og:image" content={article.featured_image_url} />
+        )}
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        {faqSchema && (
+          <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+        )}
+      </Helmet>
       <Breadcrumbs
         items={[
           { label: 'Blog', href: backPath },
@@ -133,6 +169,26 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
                 dangerouslySetInnerHTML={{ __html: getLocalizedText(article.content, language) }}
               />
             </div>
+
+            {faqArr.length > 0 && (
+              <section className="mt-12 pt-8 border-t border-gray-200">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">FAQ</h2>
+                <div className="space-y-4">
+                  {faqArr.map((item, idx) => (
+                    <details
+                      key={idx}
+                      className="group bg-gray-50 rounded-lg p-5 border border-gray-200 hover:border-red-500 transition-colors"
+                    >
+                      <summary className="font-semibold text-gray-900 cursor-pointer list-none flex justify-between items-center">
+                        <span>{item.question}</span>
+                        <span className="text-red-600 group-open:rotate-180 transition-transform">▼</span>
+                      </summary>
+                      <p className="mt-3 text-gray-700 leading-relaxed">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <footer className="mt-12 pt-8 border-t border-gray-200">
               <div className="bg-red-50 rounded-lg p-6 text-center">
