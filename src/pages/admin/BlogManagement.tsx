@@ -14,7 +14,7 @@ const BlogManagement = () => {
   const [editingArticle, setEditingArticle] = useState(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [tab, setTab] = useState<'articles' | 'automation'>('articles');
-  const { data: articles, isLoading, error } = useBlogArticles();
+  const { data: articles, isLoading, error } = useAllBlogArticles();
   const deleteArticle = useDeleteBlogArticle();
 
   useEffect(() => {
