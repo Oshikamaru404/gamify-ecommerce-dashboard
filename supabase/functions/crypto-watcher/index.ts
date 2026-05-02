@@ -367,15 +367,18 @@ async function fetchEvmNativeTxs(network: string, address: string, sinceTs: numb
 
 // -- EVM token (USDT/USDC on EVM chains) — uses Etherscan V2 → Blockscout fallback
 async function fetchEvmTokenTxs(network: string, coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  const contract = TOKEN_CONTRACTS[network.toLowerCase()]?.[coin.toLowerCase()];
-  if (!contract || !isEvmSupported(network)) return [];
-  const result = await fetchWithFallback(network, {
-    module: 'account',
-    action: 'tokentx',
-    contractaddress: contract,
-    address,
-    sort: 'desc',
-  });
+  const n = network.toLowerCase();
+  const contract = TOKEN_CONTRACTS[n]?.[coin.toLowerCase()];
+  if (!contract) return [];
+  let result: any[];
+  if ((n === 'bsc' || n === 'bep20') && MEGANODE_BSC_RPC) {
+    result = await fetchBscAssetTransfers({ toAddress: address, category: '20', contractAddress: contract });
+  } else {
+    if (!isEvmSupported(network)) return [];
+    result = await fetchWithFallback(network, {
+      module: 'account', action: 'tokentx', contractaddress: contract, address, sort: 'desc',
+    });
+  }
   const dec = decimalsFor(network, coin);
   const out: IncomingTx[] = [];
   for (const tx of result) {
