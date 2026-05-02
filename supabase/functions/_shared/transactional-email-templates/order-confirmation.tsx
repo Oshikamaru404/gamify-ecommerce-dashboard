@@ -84,7 +84,7 @@ const OrderConfirmationEmail = ({
               <tr>
                 <td align="center" style={{ padding: '40px 24px 32px' }}>
                   <Text style={brandWord}>{SITE_NAME}</Text>
-                  <Text style={tagline}>Order confirmation</Text>
+                  <Text style={tagline}>Premium IPTV Streaming</Text>
                 </td>
               </tr>
             </table>
