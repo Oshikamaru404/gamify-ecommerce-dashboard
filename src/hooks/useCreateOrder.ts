@@ -34,10 +34,51 @@ export const useCreateOrder = () => {
       }
 
       console.log('Order created successfully:', data);
+
+      // Fire-and-forget: client confirmation + admin notification
+      const shortId = String(data.id).slice(0, 8).toUpperCase();
+      const paymentMethod =
+        orderData.payment_status === 'pending' ? 'Pending' :
+        orderData.order_type || 'Online';
+
+      if (orderData.customer_email) {
+        supabase.functions.invoke('send-transactional-email', {
+          body: {
+            templateName: 'order-confirmation',
+            recipientEmail: orderData.customer_email,
+            idempotencyKey: `order-confirm-${data.id}`,
+            templateData: {
+              customerName: orderData.customer_name,
+              orderId: shortId,
+              packageName: orderData.package_name,
+              amount: orderData.amount,
+              paymentMethod,
+            },
+          },
+        }).catch((e) => console.error('client confirmation email failed', e));
+      }
+
+      supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'admin-new-order',
+          recipientEmail: 'bwivox@gmail.com',
+          idempotencyKey: `admin-new-order-${data.id}`,
+          templateData: {
+            orderId: shortId,
+            customerName: orderData.customer_name,
+            customerEmail: orderData.customer_email,
+            customerWhatsapp: orderData.customer_whatsapp,
+            packageName: orderData.package_name,
+            packageCategory: orderData.package_category,
+            amount: orderData.amount,
+            paymentMethod,
+          },
+        },
+      }).catch((e) => console.error('admin order email failed', e));
+
       return data;
     },
     onSuccess: () => {
-      // Invalidate and refetch recent orders
       queryClient.invalidateQueries({ queryKey: ['recent-orders'] });
     },
   });
