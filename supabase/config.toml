@@ -56,3 +56,15 @@ pop3_port = 54327
 enabled = true
 port = 54326
 file_size_limit = "50MiB"
+
+[functions.send-transactional-email]
+verify_jwt = true
+
+[functions.preview-transactional-email]
+verify_jwt = false
+
+[functions.handle-email-unsubscribe]
+verify_jwt = false
+
+[functions.handle-email-suppression]
+verify_jwt = false
