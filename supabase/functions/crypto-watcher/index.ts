@@ -61,22 +61,16 @@ const BLOCKSCOUT_BASES: Record<string, string> = {
   bep20: 'https://api.bscscan.com/api',
 };
 
-// BSCTrace by NodeReal MegaNode — Etherscan-compatible, official BNB Chain replacement
+// NodeReal MegaNode — JSON-RPC 2.0 endpoint for BSC (replaces deprecated BscScan V1)
+// Uses Enhanced API `nr_getAssetTransfers` which mirrors Etherscan's `tokentx` / `txlist`.
 const MEGANODE_KEY = Deno.env.get('MEGANODE_API_KEY') ?? '';
-const BSCTRACE_BASE = MEGANODE_KEY
-  ? `https://open-platform.nodereal.io/${MEGANODE_KEY}/bsctrace`
+const MEGANODE_BSC_RPC = MEGANODE_KEY
+  ? `https://bsc-mainnet.nodereal.io/v1/${MEGANODE_KEY}`
   : '';
 
 function buildExplorerUrls(network: string, params: Record<string, string>): string[] {
   const n = network.toLowerCase();
   const urls: string[] = [];
-
-  // Priority 1 for BSC: BSCTrace (NodeReal MegaNode) — Etherscan-compatible
-  if ((n === 'bsc' || n === 'bep20') && BSCTRACE_BASE) {
-    const qs = new URLSearchParams(params);
-    urls.push(`${BSCTRACE_BASE}?${qs.toString()}`);
-  }
-
   const chainId = CHAIN_IDS[n];
   if (chainId && ETHERSCAN_KEY) {
     const qs = new URLSearchParams({ chainid: String(chainId), ...params, apikey: ETHERSCAN_KEY });
@@ -88,6 +82,65 @@ function buildExplorerUrls(network: string, params: Record<string, string>): str
     urls.push(`${bs}?${qs.toString()}`);
   }
   return urls;
+}
+
+// MegaNode JSON-RPC call helper
+async function meganodeRpc(method: string, params: unknown[]): Promise<any> {
+  if (!MEGANODE_BSC_RPC) throw new Error('MEGANODE_API_KEY not configured');
+  const res = await fetch(MEGANODE_BSC_RPC, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`MegaNode RPC error: ${JSON.stringify(data.error)}`);
+  return data.result;
+}
+
+// Fetch BSC asset transfers (native BNB or BEP20 token) via NodeReal Enhanced API.
+// Returns the same shape as Etherscan's tokentx/txlist for downstream parsing.
+async function fetchBscAssetTransfers(opts: {
+  toAddress: string;
+  category: 'external' | '20'; // 'external' = native BNB, '20' = BEP20
+  contractAddress?: string;
+}): Promise<any[]> {
+  if (!MEGANODE_BSC_RPC) return [];
+  // Get latest block once for confirmations math
+  const latestHex: string = await meganodeRpc('eth_blockNumber', []).catch(() => '0x0');
+  const latest = parseInt(latestHex, 16) || 0;
+
+  const rpcParams: Record<string, unknown> = {
+    category: [opts.category],
+    toAddress: opts.toAddress,
+    maxCount: '0x32', // 50
+    order: 'desc',
+  };
+  if (opts.contractAddress) rpcParams.contractAddresses = [opts.contractAddress];
+
+  const result = await meganodeRpc('nr_getAssetTransfers', [rpcParams]).catch((e) => {
+    console.warn('[bsc] nr_getAssetTransfers failed:', e.message);
+    return null;
+  });
+  const transfers = result?.transfers || [];
+
+  // Map to Etherscan-like shape. NodeReal response fields:
+  //   hash, to, from, blockNum (hex), blockTimeStamp (unix sec),
+  //   value (hex wei), receiptsStatus (1=ok), decimal ("18"), category ("20"|"external")
+  return transfers.map((t: any) => {
+    const blockNum = parseInt(t.blockNum || '0x0', 16);
+    const ts = typeof t.blockTimeStamp === 'number' ? t.blockTimeStamp : 0;
+    const valueRaw = t.value ? BigInt(t.value).toString() : '0';
+    return {
+      hash: t.hash,
+      to: t.to,
+      from: t.from,
+      value: valueRaw,
+      timeStamp: String(ts),
+      confirmations: String(Math.max(0, latest - blockNum)),
+      isError: t.receiptsStatus === 1 ? '0' : '1',
+      tokenDecimal: t.decimal || '18',
+    };
+  });
 }
 
 async function fetchWithFallback(network: string, params: Record<string, string>): Promise<any[]> {
@@ -274,15 +327,18 @@ async function fetchTrxNativeTxs(address: string, sinceTs: number): Promise<Inco
 
 
 async function fetchEvmNativeTxs(network: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  if (!isEvmSupported(network)) return [];
-  const result = await fetchWithFallback(network, {
-    module: 'account',
-    action: 'txlist',
-    address,
-    startblock: '0',
-    endblock: '99999999',
-    sort: 'desc',
-  });
+  const n = network.toLowerCase();
+  // Use NodeReal MegaNode for BSC (BscScan V1 is deprecated, Etherscan V2 free plan excludes BSC)
+  let result: any[];
+  if ((n === 'bsc' || n === 'bep20') && MEGANODE_BSC_RPC) {
+    result = await fetchBscAssetTransfers({ toAddress: address, category: 'external' });
+  } else {
+    if (!isEvmSupported(network)) return [];
+    result = await fetchWithFallback(network, {
+      module: 'account', action: 'txlist', address,
+      startblock: '0', endblock: '99999999', sort: 'desc',
+    });
+  }
   const out: IncomingTx[] = [];
   for (const tx of result) {
     const ts = parseInt(tx.timeStamp || '0');
@@ -302,15 +358,18 @@ async function fetchEvmNativeTxs(network: string, address: string, sinceTs: numb
 
 // -- EVM token (USDT/USDC on EVM chains) — uses Etherscan V2 → Blockscout fallback
 async function fetchEvmTokenTxs(network: string, coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  const contract = TOKEN_CONTRACTS[network.toLowerCase()]?.[coin.toLowerCase()];
-  if (!contract || !isEvmSupported(network)) return [];
-  const result = await fetchWithFallback(network, {
-    module: 'account',
-    action: 'tokentx',
-    contractaddress: contract,
-    address,
-    sort: 'desc',
-  });
+  const n = network.toLowerCase();
+  const contract = TOKEN_CONTRACTS[n]?.[coin.toLowerCase()];
+  if (!contract) return [];
+  let result: any[];
+  if ((n === 'bsc' || n === 'bep20') && MEGANODE_BSC_RPC) {
+    result = await fetchBscAssetTransfers({ toAddress: address, category: '20', contractAddress: contract });
+  } else {
+    if (!isEvmSupported(network)) return [];
+    result = await fetchWithFallback(network, {
+      module: 'account', action: 'tokentx', contractaddress: contract, address, sort: 'desc',
+    });
+  }
   const dec = decimalsFor(network, coin);
   const out: IncomingTx[] = [];
   for (const tx of result) {
@@ -467,6 +526,56 @@ async function getIncomingTxs(network: string, coin: string, address: string, si
 // ---------- Main ----------
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+
+  // ===== Self-test mode: GET ?selftest=1 — validates explorer connectivity per chain =====
+  const url = new URL(req.url);
+  if (url.searchParams.get('selftest') === '1') {
+    const only = (url.searchParams.get('chain') || '').toLowerCase();
+    // USDT contracts per chain (high-volume → guaranteed recent tx)
+    const allProbes: Array<{ network: string; contract: string }> = [
+      { network: 'eth',      contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+      { network: 'bep20',    contract: '0x55d398326f99059fF775485246999027B3197955' },
+      { network: 'polygon',  contract: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F' },
+      { network: 'base',     contract: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' },
+      { network: 'arbitrum', contract: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9' },
+      { network: 'optimism', contract: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58' },
+      { network: 'linea',    contract: '0xA219439258ca9da29E9Cc4cE5596924745e12B93' },
+    ];
+    const probes = only ? allProbes.filter(p => p.network === only) : allProbes;
+    const results: Record<string, unknown> = {
+      meganode_configured: !!MEGANODE_BSC_RPC,
+      etherscan_configured: !!ETHERSCAN_KEY,
+      meganode_key_len: (Deno.env.get('MEGANODE_API_KEY') || '').length,
+    };
+
+    // Binance hot wallet — high constant USDT traffic on every chain (great probe target)
+    const BINANCE_HOT = '0xF977814e90dA44bFA03b6295A0616a897441aceC';
+    const sinceTs = Math.floor(Date.now() / 1000) - 7 * 24 * 3600; // last 7 days
+
+    for (const p of probes) {
+      try {
+        const txs = await fetchEvmTokenTxs(p.network, 'usdt', BINANCE_HOT, sinceTs);
+        results[p.network] = {
+          ok: txs.length > 0,
+          tx_count: txs.length,
+          sample: txs[0] ? { hash: txs[0].txHash.slice(0, 12), amount: txs[0].amount, conf: txs[0].confirmations } : null,
+        };
+      } catch (e) {
+        results[p.network] = { ok: false, error: (e as Error).message };
+      }
+    }
+
+    // BSC RPC sanity check
+    try {
+      const blk = await meganodeRpc('eth_blockNumber', []);
+      results['_bsc_rpc_block'] = parseInt(blk, 16);
+    } catch (e) {
+      results['_bsc_rpc_block'] = `error: ${(e as Error).message}`;
+    }
+    return new Response(JSON.stringify(results, null, 2), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 
   const sb = createClient(
     Deno.env.get('SUPABASE_URL')!,
