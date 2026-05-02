@@ -533,7 +533,7 @@ serve(async (req) => {
     const only = (url.searchParams.get('chain') || '').toLowerCase();
     // USDT contracts per chain (high-volume → guaranteed recent tx)
     const allProbes: Array<{ network: string; contract: string }> = [
-      { network: 'eth',      contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+      { network: 'erc20',    contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
       { network: 'bep20',    contract: '0x55d398326f99059fF775485246999027B3197955' },
       { network: 'polygon',  contract: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F' },
       { network: 'base',     contract: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' },
@@ -548,17 +548,43 @@ serve(async (req) => {
       meganode_key_len: (Deno.env.get('MEGANODE_API_KEY') || '').length,
     };
 
-    // Binance hot wallet — high constant USDT traffic on every chain (great probe target)
-    const BINANCE_HOT = '0xF977814e90dA44bFA03b6295A0616a897441aceC';
-    const sinceTs = Math.floor(Date.now() / 1000) - 7 * 24 * 3600; // last 7 days
-
+    // Connectivity probe: query each chain's USDT contract for any recent transfer.
+    // No address filter — pure source connectivity test.
     for (const p of probes) {
       try {
-        const txs = await fetchEvmTokenTxs(p.network, 'usdt', BINANCE_HOT, sinceTs);
+        let rawCount = 0;
+        let sampleHash: string | undefined;
+        let source: string | undefined;
+
+        if (p.network === 'bep20') {
+          // BSC via NodeReal Enhanced API
+          const txs = await fetchBscAssetTransfers({
+            toAddress: '0xF977814e90dA44bFA03b6295A0616a897441aceC', // Binance hot
+            category: '20',
+            contractAddress: p.contract,
+          });
+          rawCount = txs.length;
+          sampleHash = txs[0]?.hash;
+          source = 'nodereal-meganode';
+        } else {
+          // Etherscan V2 + Blockscout fallback — raw fetch via fetchWithFallback
+          const result = await fetchWithFallback(p.network, {
+            module: 'account',
+            action: 'tokentx',
+            contractaddress: p.contract,
+            page: '1',
+            offset: '5',
+            sort: 'desc',
+          });
+          rawCount = result.length;
+          sampleHash = result[0]?.hash;
+          source = ETHERSCAN_KEY ? 'etherscan-v2 or blockscout' : 'blockscout';
+        }
         results[p.network] = {
-          ok: txs.length > 0,
-          tx_count: txs.length,
-          sample: txs[0] ? { hash: txs[0].txHash.slice(0, 12), amount: txs[0].amount, conf: txs[0].confirmations } : null,
+          ok: rawCount > 0,
+          source,
+          tx_count: rawCount,
+          sample_hash: sampleHash?.slice(0, 12),
         };
       } catch (e) {
         results[p.network] = { ok: false, error: (e as Error).message };
