@@ -5,10 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 interface CreateOrderData {
   package_name: string;
   package_category: string;
+  package_image_url?: string | null;
   customer_name: string;
   customer_email: string;
   customer_whatsapp?: string;
   amount: number;
+  currency?: string;
   duration_months: number;
   order_type: string;
   status: string;
