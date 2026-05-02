@@ -109,18 +109,35 @@ Deno.serve(async (req) => {
     },
   })
 
+  // Build a stable Message-ID — helps inbox grouping and reduces "looks like spam" score
+  const domain = FROM_EMAIL.split('@')[1] || 'bwivox.com'
+  const messageId = `<${crypto.randomUUID()}@${domain}>`
+  const unsubscribeMailto = `mailto:unsubscribe@${domain}?subject=unsubscribe`
+  const unsubscribeUrl = `https://${domain}/unsubscribe?email=${encodeURIComponent(effectiveRecipient)}`
+
   try {
     await client.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: effectiveRecipient,
+      replyTo: `BWIVOX Support <bwivox@gmail.com>`,
       subject: resolvedSubject,
       content: plainText,
       html,
+      headers: {
+        'Message-ID': messageId,
+        'List-Unsubscribe': `<${unsubscribeMailto}>, <${unsubscribeUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        'Precedence': 'transactional',
+        'X-Auto-Response-Suppress': 'OOF, AutoReply',
+        'X-Entity-Ref-ID': `${templateName}-${Date.now()}`,
+        'X-Mailer': 'BWIVOX Mailer 1.0',
+        'MIME-Version': '1.0',
+      },
     })
     await client.close()
-    console.log('Email sent', { templateName, to: effectiveRecipient })
+    console.log('Email sent', { templateName, to: effectiveRecipient, messageId })
     return new Response(
-      JSON.stringify({ success: true, sent: true }),
+      JSON.stringify({ success: true, sent: true, messageId }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
