@@ -8,6 +8,7 @@ import { X, CreditCard, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { createCryptomusInvoice } from '@/services/cryptomusService';
+import { triggerOrderEmails } from '@/lib/orderEmails';
 
 interface CryptomusCheckoutProps {
   packageData: {
@@ -71,6 +72,8 @@ const CryptomusCheckout: React.FC<CryptomusCheckoutProps> = ({
       if (orderError) {
         throw orderError;
       }
+
+      triggerOrderEmails({ ...orderData, paymentMethodLabel: 'Crypto (Cryptomus)' });
 
       // Create Cryptomus invoice through edge function
       const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke(

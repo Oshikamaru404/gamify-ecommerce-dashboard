@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPayment';
+import { triggerOrderEmails } from '@/lib/orderEmails';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
@@ -132,6 +133,8 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       // Store order ID for success screen
       setPlacedOrderId(orderData.id);
 
+      triggerOrderEmails({ ...orderData, paymentMethodLabel: 'WhatsApp' });
+
       // Create WhatsApp message
       const message = `🛒 New Order Request
 
@@ -191,6 +194,11 @@ Order ID: ${orderData.id}`;
         .single();
 
       if (orderError) throw orderError;
+
+      triggerOrderEmails({
+        ...orderData,
+        paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayGate)' : 'Crypto (PayGate)',
+      });
 
       // Create PayGate payment via edge function
       const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
@@ -257,6 +265,7 @@ Order ID: ${orderData.id}`;
 
       if (orderError) throw orderError;
       setPlacedOrderId(orderData.id);
+      triggerOrderEmails({ ...orderData, paymentMethodLabel: `Crypto Direct (${ticker})` });
       return orderData.id as string;
     } catch (error) {
       console.error('Error creating direct crypto order:', error);
