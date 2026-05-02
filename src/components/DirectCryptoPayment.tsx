@@ -77,29 +77,29 @@ interface PaymentInfo {
   provider?: 'paygate' | 'self_hosted';
 }
 
-// Network meta for nicer UI — logos come from a CORS-enabled CDN so they
-// render both in <img> tags and inside the QR canvas.
-import { getNetworkLogoUrl } from '@/lib/networkLogos';
+// Coin/network logo URLs (color SVG icons)
+const ICON_BASE = 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color';
+const coinIcon = (symbol: string) => `${ICON_BASE}/${symbol.toLowerCase()}.svg`;
 
-const logo = (net: string) => getNetworkLogoUrl(net) ?? '';
-
+// Network meta for nicer UI
+const chainIcon = (slug: string) => `https://icons.llamao.fi/icons/chains/rsz_${slug}.jpg`;
 const NETWORK_META: Record<string, { label: string; logo: string; color: string }> = {
-  BTC: { label: 'Bitcoin', logo: logo('BTC'), color: 'bg-orange-100 text-orange-700 border-orange-300' },
-  ERC20: { label: 'Ethereum (ERC20)', logo: logo('ETH'), color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
-  BEP20: { label: 'BNB Smart Chain', logo: logo('BNB'), color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  POLYGON: { label: 'Polygon', logo: logo('POLYGON'), color: 'bg-purple-100 text-purple-700 border-purple-300' },
-  BASE: { label: 'Base', logo: logo('BASE'), color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  SOLANA: { label: 'Solana', logo: logo('SOLANA'), color: 'bg-green-100 text-green-700 border-green-300' },
-  TRC20: { label: 'Tron (TRC20)', logo: logo('TRC20'), color: 'bg-red-100 text-red-700 border-red-300' },
-  LINEA: { label: 'Linea', logo: logo('LINEA'), color: 'bg-gray-100 text-gray-700 border-gray-300' },
-  ARBITRUM: { label: 'Arbitrum', logo: logo('ARBITRUM'), color: 'bg-sky-100 text-sky-700 border-sky-300' },
-  OPTIMISM: { label: 'Optimism', logo: logo('OPTIMISM'), color: 'bg-rose-100 text-rose-700 border-rose-300' },
-  BCH: { label: 'Bitcoin Cash', logo: logo('BCH'), color: 'bg-green-100 text-green-700 border-green-300' },
+  BTC: { label: 'Bitcoin', logo: chainIcon('bitcoin'), color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  ERC20: { label: 'Ethereum (ERC20)', logo: chainIcon('ethereum'), color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+  BEP20: { label: 'BNB Smart Chain', logo: chainIcon('binance'), color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  POLYGON: { label: 'Polygon', logo: chainIcon('polygon'), color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  BASE: { label: 'Base', logo: chainIcon('base'), color: 'bg-blue-100 text-blue-700 border-blue-300' },
+  SOLANA: { label: 'Solana', logo: chainIcon('solana'), color: 'bg-green-100 text-green-700 border-green-300' },
+  TRC20: { label: 'Tron (TRC20)', logo: chainIcon('tron'), color: 'bg-red-100 text-red-700 border-red-300' },
+  LINEA: { label: 'Linea', logo: chainIcon('linea'), color: 'bg-gray-100 text-gray-700 border-gray-300' },
+  ARBITRUM: { label: 'Arbitrum', logo: chainIcon('arbitrum'), color: 'bg-sky-100 text-sky-700 border-sky-300' },
+  OPTIMISM: { label: 'Optimism', logo: chainIcon('optimism'), color: 'bg-rose-100 text-rose-700 border-rose-300' },
+  BCH: { label: 'Bitcoin Cash', logo: coinIcon('bch'), color: 'bg-green-100 text-green-700 border-green-300' },
 };
 
 const getNetworkMeta = (network: string) => {
   const key = network.toUpperCase();
-  return NETWORK_META[key] || { label: network, logo: '', color: 'bg-slate-100 text-slate-700 border-slate-300' };
+  return NETWORK_META[key] || { label: network, logo: coinIcon('generic'), color: 'bg-slate-100 text-slate-700 border-slate-300' };
 };
 
 // EVM chain IDs (EIP-155) for EIP-681 deeplinks
@@ -420,7 +420,7 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                     }`}
                   >
                     <img
-                      src={`https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/svg/color/${coinSymbol.toLowerCase()}.svg`}
+                      src={coinIcon(coinSymbol)}
                       alt={w.coin}
                       className="h-5 w-5 rounded-full bg-white object-contain"
                       onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}

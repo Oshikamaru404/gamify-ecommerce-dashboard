@@ -104,9 +104,7 @@ export const QrWithLogo = ({
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    // Only set crossOrigin for remote http(s) URLs — data: URIs don't need it
-    // and some browsers reject them when crossOrigin is set.
-    if (/^https?:/i.test(src)) img.crossOrigin = 'anonymous';
+    img.crossOrigin = 'anonymous';
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
