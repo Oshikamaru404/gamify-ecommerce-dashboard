@@ -420,7 +420,7 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
                     }`}
                   >
                     <img
-                      src={coinIcon(coinSymbol)}
+                      src={`https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/svg/color/${coinSymbol.toLowerCase()}.svg`}
                       alt={w.coin}
                       className="h-5 w-5 rounded-full bg-white object-contain"
                       onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
