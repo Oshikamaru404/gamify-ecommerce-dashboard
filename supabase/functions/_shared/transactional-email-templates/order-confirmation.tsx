@@ -23,18 +23,6 @@ const WHATSAPP_URL = 'https://wa.me/212600000000'
 const BRAND_RED = '#dc2626'
 const BRAND_RED_DARK = '#991b1b'
 
-// Inline SVG logo — same "B on red rounded square" mark used in the site header.
-// Encoded as data-URI so it renders in every email client without external host.
-const LOGO_SVG = encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
-    <rect width="56" height="56" rx="12" fill="#dc2626"/>
-    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central"
-          font-family="Inter, Arial, sans-serif" font-weight="800"
-          font-size="32" fill="#ffffff">B</text>
-  </svg>`,
-)
-const LOGO_DATA_URI = `data:image/svg+xml;utf8,${LOGO_SVG}`
-
 interface Props {
   customerName?: string
   orderId?: string
@@ -91,18 +79,11 @@ const OrderConfirmationEmail = ({
       </Preview>
       <Body style={main}>
         <Container style={outerContainer}>
-          {/* ===== Hero band with logo ===== */}
+          {/* ===== Hero band — wordmark only, no logo image ===== */}
           <Section style={heroBand}>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
               <tr>
-                <td align="center" style={{ padding: '32px 24px 24px' }}>
-                  <Img
-                    src={LOGO_DATA_URI}
-                    width="56"
-                    height="56"
-                    alt={`${SITE_NAME} logo`}
-                    style={{ borderRadius: 12, display: 'block' }}
-                  />
+                <td align="center" style={{ padding: '40px 24px 32px' }}>
                   <Text style={brandWord}>{SITE_NAME}</Text>
                   <Text style={tagline}>Premium IPTV & Streaming</Text>
                 </td>
@@ -293,11 +274,12 @@ const heroBand = {
 
 const brandWord = {
   color: '#ffffff',
-  fontSize: '24px',
-  fontWeight: 800,
-  letterSpacing: '2px',
-  margin: '12px 0 2px',
+  fontSize: '36px',
+  fontWeight: 900,
+  letterSpacing: '4px',
+  margin: '0 0 6px',
   textAlign: 'center' as const,
+  textShadow: '0 2px 8px rgba(0,0,0,0.15)',
 }
 
 const tagline = {
