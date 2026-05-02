@@ -197,7 +197,7 @@ Order ID: ${orderData.id}`;
 
       triggerOrderEmails({
         ...orderData,
-        paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayGate)' : 'Crypto (PayGate)',
+        paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayBwivox)' : 'Crypto (PayBwivox)',
       });
 
       // Create PayGate payment via edge function
@@ -244,7 +244,7 @@ Order ID: ${orderData.id}`;
       return null;
     }
     try {
-      const note = `paygate_direct:${ticker}`;
+      const note = `paybwivox_direct:${ticker}`;
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert([{
