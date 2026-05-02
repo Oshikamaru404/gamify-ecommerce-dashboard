@@ -18,6 +18,7 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = 'BWIVOX'
 const SITE_URL = 'https://bwivox.com'
 const SUPPORT_EMAIL = 'bwivox@gmail.com'
+const NOREPLY_EMAIL = 'noreply@bwivox.com'
 const WHATSAPP_URL = 'https://wa.me/212600000000'
 const BRAND_RED = '#dc2626'
 const BRAND_RED_DARK = '#991b1b'
@@ -235,6 +236,11 @@ const OrderConfirmationEmail = ({
               {'  •  '}
               <Link href={`mailto:${SUPPORT_EMAIL}`} style={footerLink}>{SUPPORT_EMAIL}</Link>
             </Text>
+            <Text style={footerNoreply}>
+              This is an automated message sent from{' '}
+              <Link href={`mailto:${NOREPLY_EMAIL}`} style={footerLink}>{NOREPLY_EMAIL}</Link>
+              {' '}— please do not reply directly.
+            </Text>
             <Text style={footerCopy}>
               © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
             </Text>
@@ -276,13 +282,13 @@ const main = {
 const outerContainer = {
   maxWidth: '600px',
   margin: '0 auto',
-  padding: '0',
+  padding: '24px 16px',
 }
 
 const heroBand = {
   background: `linear-gradient(135deg, ${BRAND_RED} 0%, ${BRAND_RED_DARK} 100%)`,
-  borderRadius: '0 0 24px 24px',
-  margin: '0 0 -28px',
+  borderRadius: '20px 20px 0 0',
+  margin: 0,
 }
 
 const brandWord = {
@@ -306,11 +312,13 @@ const tagline = {
 
 const card = {
   backgroundColor: '#ffffff',
-  borderRadius: '20px',
+  borderRadius: '0 0 20px 20px',
   padding: '32px 28px 28px',
-  margin: '0 16px',
+  margin: 0,
+  borderLeft: '1px solid #eef2f7',
+  borderRight: '1px solid #eef2f7',
+  borderBottom: '1px solid #eef2f7',
   boxShadow: '0 10px 40px rgba(15, 23, 42, 0.08)',
-  position: 'relative' as const,
 }
 
 const successBadge = {
@@ -447,7 +455,7 @@ const inlineLink = {
 }
 
 const infoStrip = {
-  margin: '24px 16px 0',
+  margin: '20px 0 0',
   padding: '24px 20px',
   backgroundColor: '#0f172a',
   borderRadius: '16px',
@@ -498,7 +506,7 @@ const stepText = {
 }
 
 const footerBlock = {
-  margin: '24px 16px 32px',
+  margin: '20px 0 0',
   padding: '20px 0 0',
   textAlign: 'center' as const,
 }
@@ -526,4 +534,11 @@ const footerCopy = {
   fontSize: '11px',
   color: '#cbd5e1',
   margin: '8px 0 0',
+}
+
+const footerNoreply = {
+  fontSize: '11px',
+  color: '#94a3b8',
+  margin: '10px 0 0',
+  lineHeight: 1.5,
 }

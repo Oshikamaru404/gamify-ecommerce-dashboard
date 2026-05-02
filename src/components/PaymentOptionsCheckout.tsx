@@ -133,7 +133,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       // Store order ID for success screen
       setPlacedOrderId(orderData.id);
 
-      triggerOrderEmails({ ...orderData, paymentMethodLabel: 'WhatsApp' });
+      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'WhatsApp' });
 
       // Create WhatsApp message
       const message = `🛒 New Order Request
@@ -197,6 +197,7 @@ Order ID: ${orderData.id}`;
 
       triggerOrderEmails({
         ...orderData,
+        package_image_url: packageData.icon_url,
         paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayBwivox)' : 'Crypto (PayBwivox)',
       });
 
@@ -265,7 +266,7 @@ Order ID: ${orderData.id}`;
 
       if (orderError) throw orderError;
       setPlacedOrderId(orderData.id);
-      triggerOrderEmails({ ...orderData, paymentMethodLabel: `Crypto Direct (${ticker})` });
+      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: `Crypto Direct (${ticker})` });
       return orderData.id as string;
     } catch (error) {
       console.error('Error creating direct crypto order:', error);
