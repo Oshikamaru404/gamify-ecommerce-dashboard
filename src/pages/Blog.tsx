@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, ArrowLeft, Clock } from 'lucide-react';
 import { useBlogArticles } from '@/hooks/useBlogArticles';
+import SEO from '@/components/SEO';
 
 const Blog = () => {
   const { data: articles, isLoading, error } = useBlogArticles();
@@ -167,6 +168,7 @@ const Blog = () => {
   // Default blog listing view
   return (
     <StoreLayout>
+      <SEO page="blog" />
       <div className="bg-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">

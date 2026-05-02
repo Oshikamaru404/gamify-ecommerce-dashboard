@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, Users, TrendingUp, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import SEO from '@/components/SEO';
 
 const Reseller = () => {
   const { t } = useLanguage();
@@ -22,6 +23,7 @@ const Reseller = () => {
 
   return (
     <StoreLayout>
+      <SEO page="reseller" />
       <div className="bg-white">
         <div className="container py-16">
           <section className="mb-20 text-center">

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, Mail, Phone, Clock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import SEO from '@/components/SEO';
 
 const Support = () => {
   const { t } = useLanguage();
@@ -22,6 +23,7 @@ const Support = () => {
 
   return (
     <StoreLayout>
+      <SEO page="support" />
       <div className="bg-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">

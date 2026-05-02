@@ -11,6 +11,7 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card } from '@/components/ui/card';
+import SEO from '@/components/SEO';
 
 const Subscription = () => {
   const { t } = useLanguage();
@@ -74,6 +75,7 @@ const Subscription = () => {
 
   return (
     <StoreLayout>
+      <SEO page="subscription" />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Header Section */}
         <div className="relative bg-gradient-to-r from-red-600 to-red-700 text-white overflow-hidden">

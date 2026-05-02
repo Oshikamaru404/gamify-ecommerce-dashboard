@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, CreditCard, Download, Play } from 'lucide-react';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import SEO from '@/components/SEO';
 
 const HowToBuy = () => {
   const { data: siteSettings } = useSiteSettings();
@@ -42,6 +43,7 @@ const HowToBuy = () => {
 
   return (
     <StoreLayout>
+      <SEO page="howToBuy" />
       <div className="bg-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">

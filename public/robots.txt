@@ -1,8 +1,25 @@
+User-agent: *
+Allow: /
+Disallow: /diza
+Disallow: /diza/
+Disallow: /checkout
+Disallow: /cart
+Disallow: /payment-return
+Disallow: /iptv-panel
+Disallow: /player-panel
+Disallow: /unsubscribe
+
 User-agent: Googlebot
 Allow: /
+Disallow: /diza
+Disallow: /checkout
+Disallow: /payment-return
 
 User-agent: Bingbot
 Allow: /
+Disallow: /diza
+Disallow: /checkout
+Disallow: /payment-return
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +27,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+Sitemap: https://bwivox.com/sitemap.xml

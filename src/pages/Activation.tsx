@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { generateProductSlug, getLocalizedText } from '@/lib/multilingualUtils';
+import SEO from '@/components/SEO';
 
 const Activation = () => {
   const { t, language } = useLanguage();
@@ -80,6 +81,7 @@ const Activation = () => {
 
   return (
     <StoreLayout>
+      <SEO page="activation" />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
