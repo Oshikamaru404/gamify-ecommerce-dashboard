@@ -7,7 +7,10 @@ interface OrderEmailInput {
   customer_whatsapp?: string | null;
   package_name: string;
   package_category?: string;
+  package_image_url?: string | null;
+  duration_months?: number | null;
   amount: number;
+  currency?: string;
   order_type?: string;
   payment_status?: string;
   paymentMethodLabel?: string;
@@ -53,6 +56,11 @@ export async function triggerOrderEmails(order: OrderEmailInput) {
     (order.payment_status === 'pending' ? 'Pending' : order.order_type || 'Online');
   const adminEmail = order.adminEmail || 'bwivox@gmail.com';
 
+  const months = Number(order.duration_months || 0);
+  const durationLabel = months > 0
+    ? months === 1 ? '1 month' : months === 12 ? '12 months (1 year)' : `${months} months`
+    : undefined;
+
   const tasks: Array<Promise<unknown> | undefined> = [];
 
   if (order.customer_email) {
@@ -65,7 +73,11 @@ export async function triggerOrderEmails(order: OrderEmailInput) {
           customerName: order.customer_name,
           orderId: shortId,
           packageName: order.package_name,
+          packageCategory: order.package_category,
+          packageImageUrl: order.package_image_url || undefined,
+          durationLabel,
           amount: order.amount,
+          currency: order.currency || 'EUR',
           paymentMethod,
         },
       }),
