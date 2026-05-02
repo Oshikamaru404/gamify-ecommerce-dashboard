@@ -115,33 +115,39 @@ export type Database = {
           ai_model: string
           articles_per_run: number
           auto_publish: boolean
+          cron_schedule: string
           id: string
           image_model: string
           is_active: boolean
           languages: string[]
           last_run_at: string | null
+          schedule_description: string | null
           updated_at: string
         }
         Insert: {
           ai_model?: string
           articles_per_run?: number
           auto_publish?: boolean
+          cron_schedule?: string
           id?: string
           image_model?: string
           is_active?: boolean
           languages?: string[]
           last_run_at?: string | null
+          schedule_description?: string | null
           updated_at?: string
         }
         Update: {
           ai_model?: string
           articles_per_run?: number
           auto_publish?: boolean
+          cron_schedule?: string
           id?: string
           image_model?: string
           is_active?: boolean
           languages?: string[]
           last_run_at?: string | null
+          schedule_description?: string | null
           updated_at?: string
         }
         Relationships: []
