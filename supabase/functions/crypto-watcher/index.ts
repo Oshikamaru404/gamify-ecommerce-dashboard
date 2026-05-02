@@ -56,7 +56,9 @@ const BLOCKSCOUT_BASES: Record<string, string> = {
   arb: 'https://arbitrum.blockscout.com/api',
   optimism: 'https://optimism.blockscout.com/api',
   op: 'https://optimism.blockscout.com/api',
-  // BSC: no reliable free Blockscout — V2 only
+  // BSC: BscScan V1 still works for read-only queries without a key (rate-limited)
+  bsc: 'https://api.bscscan.com/api',
+  bep20: 'https://api.bscscan.com/api',
 };
 
 function buildExplorerUrls(network: string, params: Record<string, string>): string[] {
