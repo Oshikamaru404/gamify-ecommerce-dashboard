@@ -88,6 +88,12 @@ export async function triggerOrderEmails(order: OrderEmailInput) {
     ? months === 1 ? '1 month' : months === 12 ? '12 months (1 year)' : `${months} months`
     : undefined;
 
+  // Make sure we always have an image URL — resolve from DB if missing.
+  let imageUrl = order.package_image_url || null;
+  if (!imageUrl) {
+    imageUrl = await resolvePackageImageUrl(order.package_id);
+  }
+
   const tasks: Array<Promise<unknown> | undefined> = [];
 
   if (order.customer_email) {
