@@ -120,7 +120,7 @@ const FullReviews = () => {
   return (
     <StoreLayout>
       <SEO page="fullReviews" />
-      <Breadcrumbs items={[{ label: t.customerReviews || 'Customer Reviews', href: '/full-reviews' }]} />
+      <Breadcrumbs items={[{ label: 'Reviews', href: '/full-reviews' }]} />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Header Section */}
         <div className="relative bg-gradient-to-r from-red-600 to-red-700 text-white overflow-hidden">
