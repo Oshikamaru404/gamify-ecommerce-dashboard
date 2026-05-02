@@ -598,10 +598,6 @@ serve(async (req) => {
     } catch (e) {
       results['_bsc_rpc_block'] = `error: ${(e as Error).message}`;
     }
-    return new Response(JSON.stringify(results, null, 2), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-    }
 
     // ===== Non-EVM probes =====
     const wantsAll = !only;
@@ -637,6 +633,11 @@ serve(async (req) => {
         results['solana'] = { ok: txs.length > 0, source: 'solana-rpc', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
       } catch (e) { results['solana'] = { ok: false, error: (e as Error).message }; }
     }
+
+    return new Response(JSON.stringify(results, null, 2), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 
   const sb = createClient(
     Deno.env.get('SUPABASE_URL')!,
