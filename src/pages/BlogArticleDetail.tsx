@@ -5,6 +5,8 @@ import { Calendar, User, ArrowLeft, Clock } from 'lucide-react';
 import { useBlogArticleBySlug } from '@/hooks/useBlogArticles';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedText } from '@/lib/multilingualUtils';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import RelatedArticles from '@/components/RelatedArticles';
 
 interface BlogArticleDetailProps {
   category: 'iptv' | 'player';
@@ -62,8 +64,16 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
     );
   }
 
+  const articleTitle = getLocalizedText(article.title, language);
+
   return (
     <StoreLayout>
+      <Breadcrumbs
+        items={[
+          { label: 'Blog', href: backPath },
+          { label: articleTitle },
+        ]}
+      />
       <div className="bg-white min-h-screen">
         <div className="container py-8">
           <Button
@@ -144,6 +154,11 @@ const BlogArticleDetail = ({ category, backPath, backLabel }: BlogArticleDetailP
           </article>
         </div>
       </div>
+      <RelatedArticles
+        currentSlug={article.slug}
+        category={article.category}
+        basePath={backPath}
+      />
     </StoreLayout>
   );
 };

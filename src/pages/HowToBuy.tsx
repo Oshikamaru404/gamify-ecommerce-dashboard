@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, CreditCard, Download, Play } from 'lucide-react';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import SEO from '@/components/SEO';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import InternalLinksSection from '@/components/InternalLinksSection';
 
 const HowToBuy = () => {
   const { data: siteSettings } = useSiteSettings();
@@ -44,6 +46,7 @@ const HowToBuy = () => {
   return (
     <StoreLayout>
       <SEO page="howToBuy" />
+      <Breadcrumbs items={[{ label: 'How to Buy', href: '/how-to-buy' }]} />
       <div className="bg-gray-50 min-h-screen">
         <div className="container py-16">
           <section className="mb-20 text-center">
@@ -94,10 +97,11 @@ const HowToBuy = () => {
             >
               <MessageCircle className="mr-3" size={24} />
               Commencer l'achat
-            </Button>
+          </Button>
           </div>
         </div>
       </div>
+      <InternalLinksSection />
     </StoreLayout>
   );
 };

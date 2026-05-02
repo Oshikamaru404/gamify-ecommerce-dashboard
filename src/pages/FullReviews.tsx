@@ -6,6 +6,8 @@ import StoreLayout from '@/components/store/StoreLayout';
 import { useApprovedFeedbacks } from '@/hooks/useFeedback';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SEO from '@/components/SEO';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import InternalLinksSection from '@/components/InternalLinksSection';
 
 const FullReviews = () => {
   const { t } = useLanguage();
@@ -118,6 +120,7 @@ const FullReviews = () => {
   return (
     <StoreLayout>
       <SEO page="fullReviews" />
+      <Breadcrumbs items={[{ label: t.customerReviews || 'Customer Reviews', href: '/full-reviews' }]} />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Header Section */}
         <div className="relative bg-gradient-to-r from-red-600 to-red-700 text-white overflow-hidden">
@@ -256,6 +259,7 @@ const FullReviews = () => {
           </div>
         </div>
       </div>
+      <InternalLinksSection exclude={['reviews']} />
     </StoreLayout>
   );
 };
