@@ -84,7 +84,7 @@ const OrderConfirmationEmail = ({
               <tr>
                 <td align="center" style={{ padding: '40px 24px 32px' }}>
                   <Text style={brandWord}>{SITE_NAME}</Text>
-                  <Text style={tagline}>Order confirmation</Text>
+                  <Text style={tagline}>Premium IPTV Streaming</Text>
                 </td>
               </tr>
             </table>
@@ -102,8 +102,8 @@ const OrderConfirmationEmail = ({
 
             <Heading style={h1}>{greeting}</Heading>
             <Text style={lead}>
-              Thanks for your order. We've received your request and it is now being reviewed.
-              You'll receive a follow-up email once everything is ready.
+              Thanks for your IPTV streaming order. We've received your request and your channels
+              will be activated shortly. You'll receive your login details by email once ready.
             </Text>
 
             {/* ===== Order summary box ===== */}
@@ -224,8 +224,8 @@ export const template = {
   component: OrderConfirmationEmail,
   subject: (data: Record<string, any>) =>
     data?.orderId
-      ? `Receipt for order #${data.orderId}`
-      : `Your ${SITE_NAME} receipt`,
+      ? `Your IPTV Streaming order #${data.orderId} is confirmed`
+      : `Your ${SITE_NAME} IPTV Streaming order is confirmed`,
   displayName: 'Client • Order confirmation',
   previewData: {
     customerName: 'John Doe',
