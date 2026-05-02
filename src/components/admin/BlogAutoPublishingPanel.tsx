@@ -470,6 +470,7 @@ const BlogAutoPublishingPanel = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Topic</TableHead>
+                    <TableHead>Angle</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Languages</TableHead>
@@ -486,6 +487,11 @@ const BlogAutoPublishingPanel = () => {
                         <div className="text-xs text-muted-foreground truncate">
                           {(t.target_keywords || []).join(', ')}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={(t as any).angle === 'direct' ? 'default' : 'secondary'}>
+                          {(t as any).angle === 'direct' ? 'Direct' : 'Indirect'}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{t.category}</Badge>
