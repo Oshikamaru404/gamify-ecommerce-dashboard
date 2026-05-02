@@ -114,7 +114,6 @@ async function fetchBscAssetTransfers(opts: {
     toAddress: opts.toAddress,
     maxCount: '0x32', // 50
     order: 'desc',
-    excludeZeroValue: true,
   };
   if (opts.contractAddress) rpcParams.contractAddresses = [opts.contractAddress];
 
