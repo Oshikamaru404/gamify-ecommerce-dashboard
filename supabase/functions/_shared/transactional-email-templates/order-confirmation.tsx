@@ -501,7 +501,7 @@ const stepText = {
 }
 
 const footerBlock = {
-  margin: '24px 16px 32px',
+  margin: '20px 0 0',
   padding: '20px 0 0',
   textAlign: 'center' as const,
 }
