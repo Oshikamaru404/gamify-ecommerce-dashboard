@@ -12,6 +12,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { getPaymentMethodIcon } from './payment-method-icon.ts'
 
 // Brand constants — baked in at scaffold time
 const SITE_NAME = 'BWIVOX'
