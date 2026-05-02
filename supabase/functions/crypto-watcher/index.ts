@@ -277,7 +277,7 @@ async function getIncomingTxs(network: string, coin: string, address: string, si
     if (n === 'btc' || c === 'btc') return await fetchBtcTxs(address, sinceTs);
     if (n === 'trc20' || n === 'tron') return await fetchTronTxs(c, address, sinceTs);
     if (n === 'solana' || n === 'sol') return await fetchSolanaTxs(c, address, sinceTs);
-    if (ETHERSCAN_BASES[n]) {
+    if (isEvmSupported(n)) {
       // Stablecoin on EVM => token; else native
       if (TOKEN_CONTRACTS[n]?.[c]) return await fetchEvmTokenTxs(network, coin, address, sinceTs);
       return await fetchEvmNativeTxs(network, address, sinceTs);
