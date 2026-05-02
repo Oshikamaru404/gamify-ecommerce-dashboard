@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPayment';
+import { triggerOrderEmails } from '@/lib/orderEmails';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
