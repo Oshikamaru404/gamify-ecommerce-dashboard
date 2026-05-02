@@ -954,7 +954,7 @@ serve(async (req) => {
     if (wantsAll || only === 'solana') {
       try {
         const txs = await fetchSolanaTxs('sol', '5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9', sinceTs);
-        results['solana'] = { ok: txs.length > 0, source: 'solana-rpc', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+        results['solana'] = { ok: txs.length > 0, source: HELIUS_KEY ? 'helius→public-rpc' : 'public-rpc', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
       } catch (e) { results['solana'] = { ok: false, error: (e as Error).message }; }
     }
 
