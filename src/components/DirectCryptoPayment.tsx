@@ -497,55 +497,53 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
             {/* Prominent live tracking banner — always visible above the QR */}
             {payment.provider === 'self_hosted' && (
               <div className={`relative overflow-hidden rounded-xl border-2 ${statusStyles.split(' ')[2]} bg-gradient-to-r ${statusStyles.split(' ').slice(0,2).join(' ')} text-white shadow-lg`}>
-                <div className="p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+                  <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-3">
+                    <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                       {status === 'pending' && (
-                        <div className="relative">
-                          <Loader2 className="h-7 w-7 animate-spin" />
+                        <div className="relative shrink-0 mt-0.5 sm:mt-0">
+                          <Loader2 className="h-6 w-6 sm:h-7 sm:w-7 animate-spin" />
                           <span className="absolute inset-0 rounded-full animate-ping bg-white/30" />
                         </div>
                       )}
-                      {status === 'detected' && <span className="text-2xl animate-pulse">🔎</span>}
+                      {status === 'detected' && <span className="text-xl sm:text-2xl animate-pulse shrink-0">🔎</span>}
                       {status === 'confirmed' && (
-                        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-                          <Check className="h-5 w-5" />
+                        <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                          <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                         </div>
                       )}
-                      {status === 'expired' && <span className="text-2xl">⏱️</span>}
-                      <div>
-                        <p className="font-bold text-base leading-tight">
+                      {status === 'expired' && <span className="text-xl sm:text-2xl shrink-0">⏱️</span>}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-sm sm:text-base leading-tight">
                           {status === 'pending' && 'Waiting for your payment…'}
                           {status === 'detected' && 'Payment detected!'}
                           {status === 'confirmed' && 'Payment confirmed ✓'}
                           {status === 'expired' && 'Payment window expired'}
                         </p>
-                        <p className="text-xs text-white/90">
-                          {status === 'pending' && 'Send the exact amount below — we auto-detect it on-chain.'}
-                          {status === 'detected' && `Confirming on the blockchain (${conf}/${minConf} confirmations)`}
-                          {status === 'confirmed' && 'Your order is now active. Check your email.'}
+                        <p className="text-[11px] sm:text-xs text-white/90 mt-0.5">
+                          {status === 'pending' && 'Send the exact amount — auto-detected on-chain.'}
+                          {status === 'detected' && `Confirming (${conf}/${minConf} confirmations)`}
+                          {status === 'confirmed' && 'Your order is active. Check your email.'}
                           {status === 'expired' && 'Generate a new payment to retry.'}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 text-[10px] font-semibold uppercase tracking-wider">
-                        <span className={`h-1.5 w-1.5 rounded-full ${status === 'pending' ? 'bg-white animate-pulse' : 'bg-white'}`} />
-                        Live
-                      </span>
-                    </div>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider shrink-0">
+                      <span className={`h-1.5 w-1.5 rounded-full bg-white ${status === 'pending' ? 'animate-pulse' : ''}`} />
+                      Live
+                    </span>
                   </div>
                   {/* Progress bar */}
-                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-1.5 sm:h-2 w-full bg-white/20 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-white transition-all duration-700 ease-out rounded-full"
                       style={{ width: `${progressPct}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-white/90">
-                    <span>{status === 'pending' ? 'Awaiting transaction' : status === 'detected' ? `${conf}/${minConf} confirmations` : status === 'confirmed' ? 'Complete' : 'Expired'}</span>
+                  <div className="flex items-center justify-between gap-2 text-[10px] sm:text-[11px] text-white/90">
+                    <span className="shrink-0">{status === 'pending' ? 'Awaiting tx' : status === 'detected' ? `${conf}/${minConf} conf.` : status === 'confirmed' ? 'Complete' : 'Expired'}</span>
                     {intentStatus?.tx_hash && (
-                      <span className="font-mono truncate max-w-[180px]">TX: {intentStatus.tx_hash}</span>
+                      <span className="font-mono truncate min-w-0">TX: {intentStatus.tx_hash}</span>
                     )}
                   </div>
                 </div>
