@@ -480,8 +480,78 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           const paymentUri = buildPaymentUri(selected.network, selected.coin, payment.addressIn, payment.cryptoAmount);
           const hasAmountInQr = paymentUri !== payment.addressIn;
           const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&ecc=H&margin=2&data=${encodeURIComponent(paymentUri)}`;
+          const status = intentStatus?.status ?? 'pending';
+          const conf = intentStatus?.confirmations ?? 0;
+          const minConf = intentStatus?.min_confirmations ?? 1;
+          const progressPct = status === 'confirmed' ? 100
+            : status === 'detected' ? Math.min(95, 30 + (conf / Math.max(1, minConf)) * 60)
+            : status === 'pending' ? 10
+            : 0;
+          const statusStyles =
+            status === 'confirmed' ? 'from-green-500 to-emerald-600 border-green-400' :
+            status === 'detected' ? 'from-amber-400 to-orange-500 border-amber-400' :
+            status === 'expired' ? 'from-red-500 to-rose-600 border-red-400' :
+            'from-purple-500 to-indigo-600 border-purple-400';
           return (
           <div className="space-y-3 p-4 border-2 border-purple-300 rounded-lg bg-purple-50/30">
+            {/* Prominent live tracking banner — always visible above the QR */}
+            {payment.provider === 'self_hosted' && (
+              <div className={`relative overflow-hidden rounded-xl border-2 ${statusStyles.split(' ')[2]} bg-gradient-to-r ${statusStyles.split(' ').slice(0,2).join(' ')} text-white shadow-lg`}>
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {status === 'pending' && (
+                        <div className="relative">
+                          <Loader2 className="h-7 w-7 animate-spin" />
+                          <span className="absolute inset-0 rounded-full animate-ping bg-white/30" />
+                        </div>
+                      )}
+                      {status === 'detected' && <span className="text-2xl animate-pulse">🔎</span>}
+                      {status === 'confirmed' && (
+                        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+                          <Check className="h-5 w-5" />
+                        </div>
+                      )}
+                      {status === 'expired' && <span className="text-2xl">⏱️</span>}
+                      <div>
+                        <p className="font-bold text-base leading-tight">
+                          {status === 'pending' && 'Waiting for your payment…'}
+                          {status === 'detected' && 'Payment detected!'}
+                          {status === 'confirmed' && 'Payment confirmed ✓'}
+                          {status === 'expired' && 'Payment window expired'}
+                        </p>
+                        <p className="text-xs text-white/90">
+                          {status === 'pending' && 'Send the exact amount below — we auto-detect it on-chain.'}
+                          {status === 'detected' && `Confirming on the blockchain (${conf}/${minConf} confirmations)`}
+                          {status === 'confirmed' && 'Your order is now active. Check your email.'}
+                          {status === 'expired' && 'Generate a new payment to retry.'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/20 text-[10px] font-semibold uppercase tracking-wider">
+                        <span className={`h-1.5 w-1.5 rounded-full ${status === 'pending' ? 'bg-white animate-pulse' : 'bg-white'}`} />
+                        Live
+                      </span>
+                    </div>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-white transition-all duration-700 ease-out rounded-full"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-white/90">
+                    <span>{status === 'pending' ? 'Awaiting transaction' : status === 'detected' ? `${conf}/${minConf} confirmations` : status === 'confirmed' ? 'Complete' : 'Expired'}</span>
+                    {intentStatus?.tx_hash && (
+                      <span className="font-mono truncate max-w-[180px]">TX: {intentStatus.tx_hash}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="relative w-44 h-44 bg-white p-2 rounded border shrink-0">
                 <img
