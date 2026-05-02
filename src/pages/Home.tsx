@@ -8,6 +8,8 @@ import FeedbackCards from '@/components/home/FeedbackCards';
 import NewsletterSubscription from '@/components/home/NewsletterSubscription';
 import ActivationSection from '@/components/home/ActivationSection';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
+import SEO from '@/components/SEO';
+import { buildOrganizationSchema, buildWebsiteSchema, buildFaqSchema } from '@/lib/seoSchemas';
 import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
@@ -71,8 +73,37 @@ const Home = () => {
     );
   }
 
+  // FAQ schema for rich snippets — multilingual content
+  const faqByLang: Record<string, { question: string; answer: string }[]> = {
+    en: [
+      { question: 'What is BWIVOX IPTV?', answer: 'BWIVOX IPTV is a premium 4K IPTV service offering 20,000+ live channels and full VOD library worldwide.' },
+      { question: 'Do you offer a free trial?', answer: 'Yes, we offer a free 24-hour IPTV trial with no payment required.' },
+      { question: 'Is there a money-back guarantee?', answer: 'Yes, all our IPTV subscriptions include a 30-day money-back guarantee.' },
+      { question: 'Which devices are supported?', answer: 'BWIVOX IPTV works on Smart TVs, Firestick, Android, iOS, MAG boxes, Enigma2 and most IPTV players.' },
+    ],
+    fr: [
+      { question: "Qu'est-ce que BWIVOX IPTV ?", answer: 'BWIVOX IPTV est un service IPTV premium 4K avec plus de 20 000 chaînes en direct et une VOD complète, disponible dans le monde entier.' },
+      { question: 'Proposez-vous un essai gratuit ?', answer: 'Oui, nous offrons un essai IPTV gratuit de 24 heures sans aucun paiement requis.' },
+      { question: 'Y a-t-il une garantie de remboursement ?', answer: 'Oui, tous nos abonnements IPTV incluent une garantie satisfait ou remboursé de 30 jours.' },
+      { question: 'Quels appareils sont compatibles ?', answer: 'BWIVOX IPTV fonctionne sur Smart TV, Firestick, Android, iOS, boîtiers MAG, Enigma2 et la plupart des lecteurs IPTV.' },
+    ],
+    ar: [
+      { question: 'ما هو BWIVOX IPTV؟', answer: 'BWIVOX IPTV هي خدمة IPTV بريميوم بدقة 4K تقدم أكثر من 20,000 قناة مباشرة ومكتبة VOD كاملة في جميع أنحاء العالم.' },
+      { question: 'هل تقدمون تجربة مجانية؟', answer: 'نعم، نقدم تجربة IPTV مجانية لمدة 24 ساعة دون الحاجة إلى أي دفع.' },
+      { question: 'هل هناك ضمان لاسترداد المال؟', answer: 'نعم، جميع اشتراكات IPTV لدينا تتضمن ضمان استرداد المال خلال 30 يومًا.' },
+      { question: 'ما هي الأجهزة المدعومة؟', answer: 'يعمل BWIVOX IPTV على أجهزة Smart TV و Firestick و Android و iOS وصناديق MAG و Enigma2 ومعظم مشغلات IPTV.' },
+    ],
+  };
+  const faqLang = (['en', 'fr', 'ar'].includes(language) ? language : 'en') as 'en' | 'fr' | 'ar';
+  const homeJsonLd = [
+    buildOrganizationSchema(),
+    buildWebsiteSchema(),
+    buildFaqSchema(faqByLang[faqLang]),
+  ];
+
   return (
     <StoreLayout>
+      <SEO page="home" jsonLd={homeJsonLd} />
       <div className="bg-gray-50 min-h-screen">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-red-600 to-red-800 text-white py-20">
