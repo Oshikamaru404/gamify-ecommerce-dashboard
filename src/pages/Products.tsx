@@ -11,6 +11,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import SEO from '@/components/SEO';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import InternalLinksSection from '@/components/InternalLinksSection';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,6 +93,7 @@ const Products = () => {
   return (
     <StoreLayout>
       <SEO page="products" />
+      <Breadcrumbs items={[{ label: 'Products', href: '/products' }]} />
       <div className="container py-8">
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold">All Games</h1>
@@ -164,6 +167,7 @@ const Products = () => {
           </div>
         )}
       </div>
+      <InternalLinksSection />
     </StoreLayout>
   );
 };

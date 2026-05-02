@@ -7,6 +7,8 @@ import { MessageCircle, Users, TrendingUp, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import SEO from '@/components/SEO';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import InternalLinksSection from '@/components/InternalLinksSection';
 
 const Reseller = () => {
   const { t } = useLanguage();
@@ -24,6 +26,7 @@ const Reseller = () => {
   return (
     <StoreLayout>
       <SEO page="reseller" />
+      <Breadcrumbs items={[{ label: t.becomeReseller || 'Reseller', href: '/reseller' }]} />
       <div className="bg-white">
         <div className="container py-16">
           <section className="mb-20 text-center">
@@ -89,6 +92,7 @@ const Reseller = () => {
           </div>
         </div>
       </div>
+      <InternalLinksSection exclude={['reseller']} />
     </StoreLayout>
   );
 };

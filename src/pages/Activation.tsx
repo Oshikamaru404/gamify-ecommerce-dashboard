@@ -11,6 +11,8 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { generateProductSlug, getLocalizedText } from '@/lib/multilingualUtils';
 import SEO from '@/components/SEO';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import InternalLinksSection from '@/components/InternalLinksSection';
 
 const Activation = () => {
   const { t, language } = useLanguage();
@@ -82,6 +84,7 @@ const Activation = () => {
   return (
     <StoreLayout>
       <SEO page="activation" />
+      <Breadcrumbs items={[{ label: language === 'fr' ? "Packages d'Activation" : language === 'ar' ? 'باقات التفعيل' : 'Activation Packages', href: '/activation' }]} />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
@@ -349,6 +352,7 @@ const Activation = () => {
           onSuccess={handleOrderSuccess}
         />
       )}
+      <InternalLinksSection exclude={['activation']} />
     </StoreLayout>
   );
 };

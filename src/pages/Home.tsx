@@ -9,6 +9,7 @@ import NewsletterSubscription from '@/components/home/NewsletterSubscription';
 import ActivationSection from '@/components/home/ActivationSection';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import SEO from '@/components/SEO';
+import InternalLinksSection from '@/components/InternalLinksSection';
 import { buildOrganizationSchema, buildWebsiteSchema, buildFaqSchema } from '@/lib/seoSchemas';
 import { Zap, Star, Check, MessageCircle, MessageSquarePlus, Shield, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -299,6 +300,7 @@ const Home = () => {
           />
         )}
       </div>
+      <InternalLinksSection />
     </StoreLayout>
   );
 };
