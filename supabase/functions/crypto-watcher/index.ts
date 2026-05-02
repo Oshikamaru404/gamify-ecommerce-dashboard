@@ -334,20 +334,102 @@ async function fetchBchFromBlockchair(address: string, sinceTs: number): Promise
   return out;
 }
 
+// FullStack.cash / Cashrain bch-api — REST endpoints, JSON, no key required for low volume.
+// Both expose the same surface: POST /electrumx/transactions with { addresses: [..] }
+// then per-tx details via /electrumx/tx/data/{txid}. To stay light, we use the
+// simpler /electrumx/balance + transaction history endpoint.
+async function fetchBchFromFullstack(
+  address: string,
+  sinceTs: number,
+  base: string,
+  label: string,
+): Promise<IncomingTx[] | null> {
+  // GET /electrumx/transactions/{address} returns { success, transactions: [{ height, tx_hash }] }
+  const histUrl = `${base}/electrumx/transactions/${address}`;
+  const histRes = await fetchWithTimeout(histUrl, 10000, {
+    headers: { 'Accept': 'application/json', 'User-Agent': 'BwivoxBot/1.0' },
+  });
+  if (!histRes.ok) {
+    console.warn(`BCH ${label} history ${histRes.status}`);
+    return null;
+  }
+  const histData = await histRes.json();
+  const items: any[] = histData?.transactions || [];
+  if (!items.length) return [];
+
+  // Get current block height for confirmations
+  let tipHeight = 0;
+  try {
+    const tipRes = await fetchWithTimeout(`${base}/blockchain/getBlockCount`, 6000, {
+      headers: { 'Accept': 'application/json' },
+    });
+    if (tipRes.ok) {
+      const t = await tipRes.json();
+      tipHeight = Number(t?.blockCount || t || 0);
+    }
+  } catch (_) { /* ignore */ }
+
+  // Look at the last ~20 txs (newest first by reversing if needed)
+  const recent = items.slice(-20).reverse();
+  const out: IncomingTx[] = [];
+
+  for (const it of recent) {
+    const txid = it.tx_hash;
+    const height = Number(it.height || 0);
+    if (!txid) continue;
+
+    // Per-tx details
+    try {
+      const dRes = await fetchWithTimeout(`${base}/electrumx/tx/data/${txid}`, 8000, {
+        headers: { 'Accept': 'application/json' },
+      });
+      if (!dRes.ok) continue;
+      const dJson = await dRes.json();
+      const details = dJson?.details || dJson;
+      const ts = Number(details?.time || details?.blocktime || 0);
+      if (sinceTs && ts && ts < sinceTs) continue;
+
+      let received = 0;
+      for (const o of (details?.vout || [])) {
+        const spk = o?.scriptPubKey || {};
+        const addrs: string[] = spk.addresses || (spk.address ? [spk.address] : []);
+        // FullStack returns cashaddr without prefix sometimes — match by suffix
+        const match = addrs.some((a) => a === address || address.endsWith(a) || a.endsWith(address.split(':').pop() || ''));
+        if (match) received += Number(o.value || 0);
+      }
+      if (received <= 0) continue;
+      const conf = height > 0 && tipHeight > 0 ? Math.max(1, tipHeight - height + 1) : 0;
+      out.push({ txHash: txid, amount: received, confirmations: conf, timestamp: ts });
+    } catch (_) { continue; }
+  }
+  return out;
+}
+
 async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
-  // Try Trezor Blockbook first (reliable, no rate limits), fallback to Blockchair
+  // 1. FullStack.cash (primary, free, BCH-specialized)
+  try {
+    const r = await fetchBchFromFullstack(address, sinceTs, 'https://api.fullstack.cash/v5', 'fullstack');
+    if (r !== null && r.length >= 0) return r;
+  } catch (e) { console.warn('BCH fullstack failed:', (e as Error).message); }
+
+  // 2. Cashrain / bchn.fullstack.cash (community mirror, same API)
+  try {
+    const r = await fetchBchFromFullstack(address, sinceTs, 'https://bchn.fullstack.cash/v5', 'bchn');
+    if (r !== null && r.length >= 0) return r;
+  } catch (e) { console.warn('BCH bchn failed:', (e as Error).message); }
+
+  // 3. Trezor Blockbook (datacenter IPs sometimes blocked)
   try {
     const r = await fetchBchFromBlockbook(address, sinceTs);
     if (r !== null) return r;
-  } catch (e) {
-    console.warn('BCH blockbook failed:', (e as Error).message);
-  }
+  } catch (e) { console.warn('BCH blockbook failed:', (e as Error).message); }
+
+  // 4. Blockchair (rate-limited without key)
   try {
     const r = await fetchBchFromBlockchair(address, sinceTs);
     if (r !== null) return r;
-  } catch (e) {
-    console.warn('BCH blockchair failed:', (e as Error).message);
-  }
+  } catch (e) { console.warn('BCH blockchair failed:', (e as Error).message); }
+
   return [];
 }
 
