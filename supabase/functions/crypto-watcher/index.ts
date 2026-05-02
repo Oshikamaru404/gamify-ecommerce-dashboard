@@ -426,18 +426,36 @@ const SOLANA_SPL_MINTS: Record<string, string> = {
   usdt: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
 };
 
-const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
+// Prefer NodeReal Solana RPC (authenticated, no public rate limits) when key is set;
+// fallback to public mainnet-beta RPC otherwise.
+const SOLANA_RPC = MEGANODE_KEY
+  ? `https://open-api.nodereal.io/v1/${MEGANODE_KEY}/solana-mainnet`
+  : 'https://api.mainnet-beta.solana.com';
 
 async function rpc(method: string, params: any[]): Promise<any> {
-  const res = await fetch(SOLANA_RPC, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
-  });
-  if (!res.ok) throw new Error(`Solana RPC ${res.status}`);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.result;
+  // simple retry on 429 / network blips
+  let lastErr: unknown = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetchWithTimeout(SOLANA_RPC, 12000, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+      });
+      if (res.status === 429) {
+        await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+        continue;
+      }
+      if (!res.ok) throw new Error(`Solana RPC ${res.status}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      return data.result;
+    } catch (e) {
+      lastErr = e;
+      await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error('Solana RPC failed');
 }
 
 async function fetchSolanaTxs(coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
