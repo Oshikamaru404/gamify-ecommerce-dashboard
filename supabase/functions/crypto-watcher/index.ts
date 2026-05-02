@@ -286,13 +286,19 @@ serve(async (req) => {
         if (match.confirmations >= intent.min_confirmations) {
           update.status = 'confirmed';
           update.confirmed_at = new Date().toISOString();
-          // Mark order paid and fetch updated row
-          const { data: paidOrder } = await sb
+          // Mark order paid and fetch updated row.
+          // NOTE: orders.status check constraint allows: pending|processing|shipped|delivered|cancelled
+          const { data: paidOrder, error: orderUpdErr } = await sb
             .from('orders')
-            .update({ payment_status: 'paid', status: 'confirmed' })
+            .update({ payment_status: 'paid', status: 'processing' })
             .eq('id', intent.order_id)
             .select()
             .single();
+          if (orderUpdErr) {
+            console.error(`Order update failed for ${intent.order_id}:`, orderUpdErr);
+          } else {
+            console.log(`Order ${intent.order_id} marked paid/processing`);
+          }
           // Best-effort WhatsApp notification
           try {
             await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-whatsapp-notification`, {
