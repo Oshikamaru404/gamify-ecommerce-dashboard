@@ -395,7 +395,7 @@ async function fetchTronTxs(coin: string, address: string, sinceTs: number): Pro
   const data = await res.json();
   const out: IncomingTx[] = [];
   for (const tx of (data?.data || [])) {
-    if ((tx.to || '').toLowerCase() !== address.toLowerCase()) continue;
+    if ((tx.to || '') !== address) continue;
     if ((tx.token_info?.symbol || '').toLowerCase() !== coin.toLowerCase()) continue;
     const dec = tx.token_info?.decimals ?? 6;
     out.push({
