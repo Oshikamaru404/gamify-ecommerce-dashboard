@@ -277,13 +277,13 @@ const main = {
 const outerContainer = {
   maxWidth: '600px',
   margin: '0 auto',
-  padding: '0',
+  padding: '24px 16px',
 }
 
 const heroBand = {
   background: `linear-gradient(135deg, ${BRAND_RED} 0%, ${BRAND_RED_DARK} 100%)`,
-  borderRadius: '0 0 24px 24px',
-  margin: '0 0 -28px',
+  borderRadius: '20px 20px 0 0',
+  margin: 0,
 }
 
 const brandWord = {
@@ -307,11 +307,13 @@ const tagline = {
 
 const card = {
   backgroundColor: '#ffffff',
-  borderRadius: '20px',
+  borderRadius: '0 0 20px 20px',
   padding: '32px 28px 28px',
-  margin: '0 16px',
+  margin: 0,
+  borderLeft: '1px solid #eef2f7',
+  borderRight: '1px solid #eef2f7',
+  borderBottom: '1px solid #eef2f7',
   boxShadow: '0 10px 40px rgba(15, 23, 42, 0.08)',
-  position: 'relative' as const,
 }
 
 const successBadge = {
