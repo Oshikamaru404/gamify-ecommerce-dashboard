@@ -123,6 +123,7 @@ async function fetchBscAssetTransfers(opts: {
     console.warn('[bsc] nr_getAssetTransfers failed:', e.message);
     return null;
   });
+  console.log('[bsc] nr_getAssetTransfers raw:', JSON.stringify(result).slice(0, 600));
   const transfers = result?.transfers || [];
 
   // Map to Etherscan-like shape
