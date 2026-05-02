@@ -539,8 +539,9 @@ serve(async (req) => {
   // ===== Self-test mode: GET ?selftest=1 — validates explorer connectivity per chain =====
   const url = new URL(req.url);
   if (url.searchParams.get('selftest') === '1') {
+    const only = (url.searchParams.get('chain') || '').toLowerCase();
     // USDT contracts per chain (high-volume → guaranteed recent tx)
-    const probes: Array<{ network: string; contract: string }> = [
+    const allProbes: Array<{ network: string; contract: string }> = [
       { network: 'eth',      contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
       { network: 'bsc',      contract: '0x55d398326f99059fF775485246999027B3197955' },
       { network: 'polygon',  contract: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F' },
@@ -549,6 +550,7 @@ serve(async (req) => {
       { network: 'optimism', contract: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58' },
       { network: 'linea',    contract: '0xA219439258ca9da29E9Cc4cE5596924745e12B93' },
     ];
+    const probes = only ? allProbes.filter(p => p.network === only) : allProbes;
     const results: Record<string, unknown> = {
       meganode_configured: !!MEGANODE_BSC_RPC,
       etherscan_configured: !!ETHERSCAN_KEY,
