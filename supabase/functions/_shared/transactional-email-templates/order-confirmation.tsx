@@ -164,19 +164,8 @@ const OrderConfirmationEmail = ({
               </table>
             </Section>
 
-            {/* ===== CTA ===== */}
-            <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const, margin: '8px 0 4px' }}>
-              <tr>
-                <td align="center">
-                  <Link href={WHATSAPP_URL} style={ctaButton}>
-                    Need help? Chat on WhatsApp
-                  </Link>
-                </td>
-              </tr>
-            </table>
-
             <Text style={fineprint}>
-              We typically reply within minutes. You can also reach us at{' '}
+              If you have questions about this order, you can reach us at{' '}
               <Link href={`mailto:${SUPPORT_EMAIL}`} style={inlineLink}>
                 {SUPPORT_EMAIL}
               </Link>
