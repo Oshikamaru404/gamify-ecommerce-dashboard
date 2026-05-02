@@ -224,8 +224,8 @@ export const template = {
   component: OrderConfirmationEmail,
   subject: (data: Record<string, any>) =>
     data?.orderId
-      ? `Receipt for order #${data.orderId}`
-      : `Your ${SITE_NAME} receipt`,
+      ? `Your IPTV Streaming order #${data.orderId} is confirmed`
+      : `Your ${SITE_NAME} IPTV Streaming order is confirmed`,
   displayName: 'Client • Order confirmation',
   previewData: {
     customerName: 'John Doe',
