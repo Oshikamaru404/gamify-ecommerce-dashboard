@@ -354,7 +354,9 @@ async function getIncomingTxs(network: string, coin: string, address: string, si
   const n = network.toLowerCase();
   const c = coin.toLowerCase();
   try {
-    if (n === 'btc' || c === 'btc') return await fetchBtcTxs(address, sinceTs);
+    if (n === 'btc' && c === 'btc') return await fetchBtcTxs(address, sinceTs);
+    if (n === 'bch' || c === 'bch') return await fetchBchTxs(address, sinceTs);
+    if ((n === 'trc20' || n === 'tron') && c === 'trx') return await fetchTrxNativeTxs(address, sinceTs);
     if (n === 'trc20' || n === 'tron') return await fetchTronTxs(c, address, sinceTs);
     if (n === 'solana' || n === 'sol') return await fetchSolanaTxs(c, address, sinceTs);
     if (isEvmSupported(n)) {
