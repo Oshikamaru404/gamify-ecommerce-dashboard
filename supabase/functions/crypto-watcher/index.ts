@@ -429,7 +429,7 @@ const SOLANA_SPL_MINTS: Record<string, string> = {
 // Prefer NodeReal Solana RPC (authenticated, no public rate limits) when key is set;
 // fallback to public mainnet-beta RPC otherwise.
 const SOLANA_RPC = MEGANODE_KEY
-  ? `https://open-api.nodereal.io/v1/${MEGANODE_KEY}/solana-mainnet`
+  ? `https://solana-mainnet.nodereal.io/v1/${MEGANODE_KEY}`
   : 'https://api.mainnet-beta.solana.com';
 
 async function rpc(method: string, params: any[]): Promise<any> {
