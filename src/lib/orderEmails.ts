@@ -107,7 +107,7 @@ export async function triggerOrderEmails(order: OrderEmailInput) {
           orderId: shortId,
           packageName: order.package_name,
           packageCategory: order.package_category,
-          packageImageUrl: order.package_image_url || undefined,
+          packageImageUrl: imageUrl || undefined,
           durationLabel,
           amount: order.amount,
           currency: order.currency || 'EUR',
