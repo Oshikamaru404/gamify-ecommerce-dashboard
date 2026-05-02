@@ -70,6 +70,13 @@ const BSCTRACE_BASE = MEGANODE_KEY
 function buildExplorerUrls(network: string, params: Record<string, string>): string[] {
   const n = network.toLowerCase();
   const urls: string[] = [];
+
+  // Priority 1 for BSC: BSCTrace (NodeReal MegaNode) — Etherscan-compatible
+  if ((n === 'bsc' || n === 'bep20') && BSCTRACE_BASE) {
+    const qs = new URLSearchParams(params);
+    urls.push(`${BSCTRACE_BASE}?${qs.toString()}`);
+  }
+
   const chainId = CHAIN_IDS[n];
   if (chainId && ETHERSCAN_KEY) {
     const qs = new URLSearchParams({ chainid: String(chainId), ...params, apikey: ETHERSCAN_KEY });
