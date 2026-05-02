@@ -90,7 +90,8 @@ serve(async (req) => {
       });
     }
 
-    const cacheKey = `${coin}`;
+    // Cache key includes network because PayGate rates differ per chain (erc20 vs bep20, etc.)
+    const cacheKey = `${network}:${coin}`;
     const now = Date.now();
     const cached = cache.get(cacheKey);
     let usdPerCoin: number | null = null;
@@ -99,11 +100,14 @@ serve(async (req) => {
     if (cached && now - cached.ts < CACHE_TTL_MS) {
       usdPerCoin = cached.price;
     } else {
-      usdPerCoin = await fetchFromCoinGecko(coin);
-      source = 'coingecko';
+      // PRIMARY: PayGate convert.php — matches the rate PayGate will actually settle at,
+      // so the user pays the exact expected amount (critical for direct-to-wallet flow).
+      usdPerCoin = await fetchFromPayGate(network, coin, amountUsd > 0 ? amountUsd : 1);
+      source = 'paygate';
+      // FALLBACK: CoinGecko spot price if PayGate is unavailable.
       if (!usdPerCoin) {
-        usdPerCoin = await fetchFromPayGate(network, coin, amountUsd > 0 ? amountUsd : 1);
-        source = 'paygate';
+        usdPerCoin = await fetchFromCoinGecko(coin);
+        source = 'coingecko';
       }
       if (usdPerCoin) cache.set(cacheKey, { price: usdPerCoin, ts: now });
     }
