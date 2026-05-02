@@ -266,7 +266,7 @@ Order ID: ${orderData.id}`;
 
       if (orderError) throw orderError;
       setPlacedOrderId(orderData.id);
-      triggerOrderEmails({ ...orderData, paymentMethodLabel: `Crypto Direct (${ticker})` });
+      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: `Crypto Direct (${ticker})` });
       return orderData.id as string;
     } catch (error) {
       console.error('Error creating direct crypto order:', error);
