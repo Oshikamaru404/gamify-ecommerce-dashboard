@@ -533,7 +533,7 @@ serve(async (req) => {
     const only = (url.searchParams.get('chain') || '').toLowerCase();
     // USDT contracts per chain (high-volume → guaranteed recent tx)
     const allProbes: Array<{ network: string; contract: string }> = [
-      { network: 'eth',      contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+      { network: 'erc20',    contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
       { network: 'bep20',    contract: '0x55d398326f99059fF775485246999027B3197955' },
       { network: 'polygon',  contract: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F' },
       { network: 'base',     contract: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' },
