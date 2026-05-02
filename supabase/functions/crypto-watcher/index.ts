@@ -125,6 +125,24 @@ const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
     usdc: '0x176211869cA2b568f2A7D4EE941E073a821EE1ff',
     usdt: '0xA219439258ca9da29E9Cc4cE5596924745e12B93',
   },
+  arbitrum: {
+    usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', // native USDC
+    usdt: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+  },
+  arb: {
+    usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+    usdt: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+  },
+  optimism: {
+    usdc: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85', // native USDC
+    usdt: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+    op:   '0x4200000000000000000000000000000000000042',
+  },
+  op: {
+    usdc: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
+    usdt: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+    op:   '0x4200000000000000000000000000000000000042',
+  },
 };
 
 const COIN_DECIMALS: Record<string, number> = {
@@ -170,7 +188,69 @@ async function fetchBtcTxs(address: string, sinceTs: number): Promise<IncomingTx
   return out;
 }
 
-// -- EVM native (ETH/BNB/POL/etc.) — uses Etherscan V2 → Blockscout fallback
+// -- BCH (Bitcoin Cash) via blockchair public API
+async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
+  try {
+    const res = await fetch(`https://api.blockchair.com/bitcoin-cash/dashboards/address/${address}?limit=20`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    const addrData = data?.data?.[address];
+    if (!addrData) return [];
+    const txHashes: string[] = addrData.transactions || [];
+    const out: IncomingTx[] = [];
+    for (const txid of txHashes.slice(0, 10)) {
+      try {
+        const txRes = await fetch(`https://api.blockchair.com/bitcoin-cash/dashboards/transaction/${txid}`);
+        if (!txRes.ok) continue;
+        const txData = await txRes.json();
+        const tx = txData?.data?.[txid];
+        if (!tx) continue;
+        const ts = tx.transaction?.time ? Math.floor(new Date(tx.transaction.time).getTime() / 1000) : 0;
+        if (ts < sinceTs) continue;
+        let received = 0;
+        for (const o of tx.outputs || []) {
+          if (o.recipient === address) received += o.value;
+        }
+        if (received === 0) continue;
+        out.push({
+          txHash: txid,
+          amount: received / 1e8,
+          confirmations: (tx.transaction?.block_id ?? 0) > 0 ? 6 : 0,
+          timestamp: ts,
+        });
+      } catch (_) { /* skip */ }
+    }
+    return out;
+  } catch (e) {
+    console.warn('BCH fetch failed:', (e as Error).message);
+    return [];
+  }
+}
+
+// -- TRX native via TronGrid
+async function fetchTrxNativeTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
+  const minTs = sinceTs * 1000;
+  const url = `https://api.trongrid.io/v1/accounts/${address}/transactions?limit=50&min_timestamp=${minTs}&only_to=true`;
+  const res = await fetch(url);
+  if (!res.ok) return [];
+  const data = await res.json();
+  const out: IncomingTx[] = [];
+  for (const tx of (data?.data || [])) {
+    const contract = tx.raw_data?.contract?.[0];
+    if (contract?.type !== 'TransferContract') continue;
+    const value = contract.parameter?.value;
+    if (!value) continue;
+    out.push({
+      txHash: tx.txID,
+      amount: (value.amount || 0) / 1e6,
+      confirmations: tx.ret?.[0]?.contractRet === 'SUCCESS' ? 20 : 0,
+      timestamp: Math.floor((tx.block_timestamp || 0) / 1000),
+    });
+  }
+  return out;
+}
+
+
 async function fetchEvmNativeTxs(network: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
   if (!isEvmSupported(network)) return [];
   const result = await fetchWithFallback(network, {
@@ -274,7 +354,9 @@ async function getIncomingTxs(network: string, coin: string, address: string, si
   const n = network.toLowerCase();
   const c = coin.toLowerCase();
   try {
-    if (n === 'btc' || c === 'btc') return await fetchBtcTxs(address, sinceTs);
+    if (n === 'btc' && c === 'btc') return await fetchBtcTxs(address, sinceTs);
+    if (n === 'bch' || c === 'bch') return await fetchBchTxs(address, sinceTs);
+    if ((n === 'trc20' || n === 'tron') && c === 'trx') return await fetchTrxNativeTxs(address, sinceTs);
     if (n === 'trc20' || n === 'tron') return await fetchTronTxs(c, address, sinceTs);
     if (n === 'solana' || n === 'sol') return await fetchSolanaTxs(c, address, sinceTs);
     if (isEvmSupported(n)) {
