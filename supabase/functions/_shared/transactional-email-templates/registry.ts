@@ -15,6 +15,7 @@ import { template as paymentConfirmed } from './payment-confirmed.tsx'
 import { template as adminNewOrder } from './admin-new-order.tsx'
 import { template as adminPaymentReceived } from './admin-payment-received.tsx'
 import { template as adminNewFeedback } from './admin-new-feedback.tsx'
+import { template as orderCredentialsDelivery } from './order-credentials-delivery.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'order-confirmation': orderConfirmation,
@@ -23,4 +24,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-new-order': adminNewOrder,
   'admin-payment-received': adminPaymentReceived,
   'admin-new-feedback': adminNewFeedback,
+  'order-credentials-delivery': orderCredentialsDelivery,
 }
