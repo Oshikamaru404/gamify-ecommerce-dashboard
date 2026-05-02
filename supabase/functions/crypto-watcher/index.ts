@@ -582,6 +582,25 @@ serve(async (req) => {
     } catch (e) {
       results['_bsc_rpc_block'] = `error: ${(e as Error).message}`;
     }
+    // Direct probe of nr_getAssetTransfers (raw response, no parsing)
+    try {
+      const raw = await meganodeRpc('nr_getAssetTransfers', [{
+        category: ['20'],
+        toAddress: '0xF977814e90dA44bFA03b6295A0616a897441aceC',
+        contractAddresses: ['0x55d398326f99059fF775485246999027B3197955'],
+        maxCount: '0xa',
+        order: 'desc',
+      }]);
+      results['_bsc_enhanced_raw'] = {
+        type: typeof raw,
+        keys: raw && typeof raw === 'object' ? Object.keys(raw) : null,
+        transferCount: raw?.transfers?.length ?? null,
+        firstTransfer: raw?.transfers?.[0] ?? null,
+        sample: JSON.stringify(raw).slice(0, 400),
+      };
+    } catch (e) {
+      results['_bsc_enhanced_raw'] = `error: ${(e as Error).message}`;
+    }
     return new Response(JSON.stringify(results, null, 2), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
