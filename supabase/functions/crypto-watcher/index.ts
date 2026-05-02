@@ -274,43 +274,77 @@ async function fetchWithTimeout(url: string, ms = 8000, init?: RequestInit): Pro
   }
 }
 
-async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
-  // ?transaction_details=true returns per-tx details inline => 1 HTTP call instead of N+1
-  const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${address}?limit=20&transaction_details=true`;
-  try {
-    const res = await fetchWithTimeout(url, 10000);
-    if (!res.ok) {
-      console.warn(`BCH blockchair ${res.status}`);
-      return [];
-    }
-    const data = await res.json();
-    const addrData = data?.data?.[address];
-    if (!addrData) return [];
-    const txs: any[] = addrData.transactions || [];
-    const ctx = data?.context || {};
-    const latestBlock: number = ctx.state || 0;
-    const out: IncomingTx[] = [];
-    for (const tx of txs.slice(0, 20)) {
-      // tx may be string (hash only) or object with details
-      if (typeof tx === 'string') continue;
-      const ts = tx.time ? Math.floor(new Date(tx.time).getTime() / 1000) : 0;
-      if (ts && ts < sinceTs) continue;
-      const received = Number(tx.balance_change || 0); // satoshis received by this address
-      if (received <= 0) continue;
-      const block = Number(tx.block_id || 0);
-      const conf = block > 0 && latestBlock > 0 ? Math.max(1, latestBlock - block + 1) : 0;
-      out.push({
-        txHash: tx.hash,
-        amount: received / 1e8,
-        confirmations: conf,
-        timestamp: ts,
-      });
-    }
-    return out;
-  } catch (e) {
-    console.warn('BCH fetch failed:', (e as Error).message);
-    return [];
+async function fetchBchFromBlockbook(address: string, sinceTs: number): Promise<IncomingTx[] | null> {
+  // Trezor Blockbook public BCH instance — no auth, generally not rate-limited
+  const url = `https://bch1.trezor.io/api/v2/address/${address}?details=txs&pageSize=20`;
+  const res = await fetchWithTimeout(url, 10000);
+  if (!res.ok) {
+    console.warn(`BCH blockbook ${res.status}`);
+    return null;
   }
+  const data = await res.json();
+  const txs: any[] = data?.transactions || [];
+  const out: IncomingTx[] = [];
+  for (const tx of txs) {
+    const ts = Number(tx.blockTime || 0);
+    if (ts && ts < sinceTs) continue;
+    let received = 0n;
+    for (const o of (tx.vout || [])) {
+      const addrs: string[] = o.addresses || [];
+      if (addrs.includes(address)) received += BigInt(o.value || '0');
+    }
+    if (received <= 0n) continue;
+    out.push({
+      txHash: tx.txid,
+      amount: Number(received) / 1e8,
+      confirmations: Number(tx.confirmations || 0),
+      timestamp: ts,
+    });
+  }
+  return out;
+}
+
+async function fetchBchFromBlockchair(address: string, sinceTs: number): Promise<IncomingTx[] | null> {
+  const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${address}?limit=20&transaction_details=true`;
+  const res = await fetchWithTimeout(url, 10000);
+  if (!res.ok) {
+    console.warn(`BCH blockchair ${res.status}`);
+    return null;
+  }
+  const data = await res.json();
+  const addrData = data?.data?.[address];
+  if (!addrData) return [];
+  const txs: any[] = addrData.transactions || [];
+  const latestBlock: number = data?.context?.state || 0;
+  const out: IncomingTx[] = [];
+  for (const tx of txs.slice(0, 20)) {
+    if (typeof tx === 'string') continue;
+    const ts = tx.time ? Math.floor(new Date(tx.time).getTime() / 1000) : 0;
+    if (ts && ts < sinceTs) continue;
+    const received = Number(tx.balance_change || 0);
+    if (received <= 0) continue;
+    const block = Number(tx.block_id || 0);
+    const conf = block > 0 && latestBlock > 0 ? Math.max(1, latestBlock - block + 1) : 0;
+    out.push({ txHash: tx.hash, amount: received / 1e8, confirmations: conf, timestamp: ts });
+  }
+  return out;
+}
+
+async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
+  // Try Trezor Blockbook first (reliable, no rate limits), fallback to Blockchair
+  try {
+    const r = await fetchBchFromBlockbook(address, sinceTs);
+    if (r !== null) return r;
+  } catch (e) {
+    console.warn('BCH blockbook failed:', (e as Error).message);
+  }
+  try {
+    const r = await fetchBchFromBlockchair(address, sinceTs);
+    if (r !== null) return r;
+  } catch (e) {
+    console.warn('BCH blockchair failed:', (e as Error).message);
+  }
+  return [];
 }
 
 // -- TRX native via TronGrid
