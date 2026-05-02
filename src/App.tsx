@@ -48,6 +48,7 @@ import Settings from "./pages/admin/Settings";
 import Content from "./pages/admin/Content";
 import StyleEditor from "./pages/admin/StyleEditor";
 import Communication from "./pages/admin/Communication";
+import EmailTemplates from "./pages/admin/EmailTemplates";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -134,6 +135,7 @@ function App() {
                     <Route path="settings" element={<Settings />} />
                     <Route path="content" element={<Content />} />
                     <Route path="communication" element={<Communication />} />
+                    <Route path="emails" element={<EmailTemplates />} />
                   </Route>
                   
                   {/* Catch all route */}
