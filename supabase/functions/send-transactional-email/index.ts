@@ -1,15 +1,11 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
-import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 
 const SITE_NAME = 'BWIVOX'
-const FROM_EMAIL = 'no-reply@bwivox.com'
-const FROM_NAME = 'BWIVOX'
-
-const SMTP_HOST = 'smtp.hostinger.com'
-const SMTP_PORT = 465
-const SMTP_USER = 'no-reply@bwivox.com'
+const PRIMARY_FROM = 'BWIVOX <no-reply@bwivox.com>'
+const FALLBACK_FROM = 'BWIVOX <onboarding@resend.dev>'
+const REPLY_TO = 'BWIVOX Support <support@bwivox.com>'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,14 +13,29 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
+async function sendViaResend(apiKey: string, payload: Record<string, unknown>) {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  })
+  const text = await res.text()
+  let json: any = null
+  try { json = text ? JSON.parse(text) : null } catch { /* ignore */ }
+  return { ok: res.ok, status: res.status, json, text }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
-  const smtpPassword = Deno.env.get('HOSTINGER_SMTP_PASSWORD')
-  if (!smtpPassword) {
-    console.error('HOSTINGER_SMTP_PASSWORD is not set')
+  const resendKey = Deno.env.get('RESEND_API_KEY')
+  if (!resendKey) {
+    console.error('RESEND_API_KEY is not set')
     return new Response(
       JSON.stringify({ error: 'Email service not configured' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -96,47 +107,54 @@ Deno.serve(async (req) => {
       ? template.subject(templateData)
       : template.subject
 
-  // Send via Hostinger SMTP
-  const client = new SMTPClient({
-    connection: {
-      hostname: SMTP_HOST,
-      port: SMTP_PORT,
-      tls: true,
-      auth: {
-        username: SMTP_USER,
-        password: smtpPassword,
-      },
-    },
-  })
+  // Try primary "from" first; if Resend rejects (e.g. domain not verified), fall back.
+  const basePayload = {
+    to: [effectiveRecipient],
+    subject: resolvedSubject,
+    html,
+    text: plainText,
+    reply_to: REPLY_TO,
+  }
 
-  // Build a stable Message-ID — helps inbox grouping and reduces "looks like spam" score
-  const domain = FROM_EMAIL.split('@')[1] || 'bwivox.com'
-  const messageId = `<${crypto.randomUUID()}@${domain}>`
-  try {
-    await client.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
-      to: effectiveRecipient,
-      replyTo: `BWIVOX Support <support@bwivox.com>`,
-      subject: resolvedSubject,
-      content: plainText,
-      html,
-      headers: {
-        'Message-ID': messageId,
-        'X-Auto-Response-Suppress': 'OOF, AutoReply',
-      },
-    })
-    await client.close()
-    console.log('Email sent', { templateName, to: effectiveRecipient, messageId })
+  let result = await sendViaResend(resendKey, { ...basePayload, from: PRIMARY_FROM })
+  let usedFrom = PRIMARY_FROM
+
+  if (!result.ok) {
+    const msg = (result.json?.message || result.text || '').toString().toLowerCase()
+    const looksLikeDomainIssue =
+      result.status === 403 ||
+      msg.includes('domain') ||
+      msg.includes('verify') ||
+      msg.includes('not verified') ||
+      msg.includes('from address')
+
+    if (looksLikeDomainIssue) {
+      console.warn('Primary from rejected, falling back to resend.dev', {
+        status: result.status,
+        message: result.json?.message,
+      })
+      result = await sendViaResend(resendKey, { ...basePayload, from: FALLBACK_FROM })
+      usedFrom = FALLBACK_FROM
+    }
+  }
+
+  if (!result.ok) {
+    console.error('Resend send failed', { status: result.status, body: result.json || result.text })
     return new Response(
-      JSON.stringify({ success: true, sent: true, messageId }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-  } catch (error) {
-    console.error('SMTP send failed', error)
-    try { await client.close() } catch {}
-    return new Response(
-      JSON.stringify({ error: 'Failed to send email', details: String(error) }),
+      JSON.stringify({ error: 'Failed to send email', details: result.json || result.text }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
+
+  console.log('Email sent via Resend', {
+    templateName,
+    to: effectiveRecipient,
+    from: usedFrom,
+    id: result.json?.id,
+  })
+
+  return new Response(
+    JSON.stringify({ success: true, sent: true, id: result.json?.id, from: usedFrom }),
+    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
 })
