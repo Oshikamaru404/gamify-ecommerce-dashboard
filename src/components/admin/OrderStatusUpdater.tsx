@@ -5,12 +5,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { sendWhatsAppMessage } from '@/services/whatsappService';
 import { useWhatsAppTemplates } from '@/hooks/useWhatsAppTemplates';
+import { supabase } from '@/integrations/supabase/client';
 import { MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface OrderStatusUpdaterProps {
   orderId: string;
   customerName: string;
+  customerEmail?: string;
   customerWhatsapp?: string;
   packageName: string;
   currentStatus: string;
@@ -21,6 +23,7 @@ interface OrderStatusUpdaterProps {
 const OrderStatusUpdater = ({
   orderId,
   customerName,
+  customerEmail,
   customerWhatsapp,
   packageName,
   currentStatus,
