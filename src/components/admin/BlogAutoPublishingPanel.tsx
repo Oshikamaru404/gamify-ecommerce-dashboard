@@ -296,6 +296,58 @@ const BlogAutoPublishingPanel = () => {
             </div>
           </div>
 
+          <div className="space-y-2 pt-4 border-t">
+            <Label className="text-base">Publishing schedule (cron)</Label>
+            <p className="text-sm text-muted-foreground">
+              Pick a preset or enter a custom cron expression (UTC).
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {SCHEDULE_PRESETS.map((p) => (
+                <Button
+                  key={p.value}
+                  variant={config?.cron_schedule === p.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => updateSchedule.mutate(p.value)}
+                  disabled={updateSchedule.isPending}
+                >
+                  {p.label}
+                </Button>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <Input
+                value={customCron}
+                onChange={(e) => setCustomCron(e.target.value)}
+                placeholder="0 9 * * 1,3,5"
+                className="font-mono"
+              />
+              <Button
+                variant="secondary"
+                onClick={() => updateSchedule.mutate(customCron)}
+                disabled={updateSchedule.isPending || !customCron.trim()}
+              >
+                Apply
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-4 border-t">
+            <Label className="text-base">Articles per run</Label>
+            <p className="text-sm text-muted-foreground">
+              How many topics to process each scheduled execution.
+            </p>
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={config?.articles_per_run ?? 1}
+              onChange={(e) =>
+                updateConfig.mutate({ articles_per_run: Math.max(1, parseInt(e.target.value) || 1) })
+              }
+              className="w-32"
+            />
+          </div>
+
           <div className="pt-4 border-t">
             <Button onClick={() => runNow()} disabled={isRunning} size="lg">
               {isRunning ? (
