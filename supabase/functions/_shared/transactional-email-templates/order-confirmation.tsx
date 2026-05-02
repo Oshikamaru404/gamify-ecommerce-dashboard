@@ -147,7 +147,7 @@ const OrderConfirmationEmail = ({
                     ) : null}
                     <Text style={productTitle}>{packageName || 'Your subscription'}</Text>
                     {durationLabel ? (
-                      <Text style={productMeta}>⏱ {durationLabel}</Text>
+                      <Text style={productMeta}>Duration: {durationLabel}</Text>
                     ) : null}
                   </td>
                 </tr>
