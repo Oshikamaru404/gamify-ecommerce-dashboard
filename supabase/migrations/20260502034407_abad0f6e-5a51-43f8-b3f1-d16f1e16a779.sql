@@ -1,0 +1,31 @@
+UPDATE public.site_settings
+SET setting_value = '[
+  {"network":"BTC","coin":"BTC","address":"1DHKvYQ8dAeJQdkQGwdBBeM7s4yrAxcMrz"},
+  {"network":"BCH","coin":"BCH","address":"1DHKvYQ8dAeJQdkQGwdBBeM7s4yrAxcMrz"},
+  {"network":"ERC20","coin":"ETH","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"ERC20","coin":"USDC","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"ERC20","coin":"USDT","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"BEP20","coin":"BNB","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"BEP20","coin":"USDC","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"BEP20","coin":"USDT","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Polygon","coin":"POL","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Polygon","coin":"USDC","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Polygon","coin":"USDT","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Base","coin":"USDC","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Base","coin":"USDT","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Linea","coin":"USDC","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Linea","coin":"USDT","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Arbitrum","coin":"USDC","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Arbitrum","coin":"USDT","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Optimism","coin":"USDC","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Optimism","coin":"USDT","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Optimism","coin":"OP","address":"0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a"},
+  {"network":"Solana","coin":"SOL","address":"Du6QGDqUaC4EW2iDNFPVpyMbBgBEY52vrHvb4ztJpVWk"},
+  {"network":"Solana","coin":"USDC","address":"Du6QGDqUaC4EW2iDNFPVpyMbBgBEY52vrHvb4ztJpVWk"},
+  {"network":"Solana","coin":"USDT","address":"Du6QGDqUaC4EW2iDNFPVpyMbBgBEY52vrHvb4ztJpVWk"},
+  {"network":"TRC20","coin":"TRX","address":"TSZ5dFZR7FK5mpQ8AyfeRLs5crhtS6soZW"},
+  {"network":"TRC20","coin":"USDT","address":"TSZ5dFZR7FK5mpQ8AyfeRLs5crhtS6soZW"},
+  {"network":"TRC20","coin":"USDC","address":"TSZ5dFZR7FK5mpQ8AyfeRLs5crhtS6soZW"}
+]'::text,
+updated_at = now()
+WHERE setting_key = 'crypto_wallets';
