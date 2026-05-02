@@ -24,6 +24,7 @@ const BlogAutoPublishingPanel = () => {
     topic_ar: '',
     target_keywords: '',
     category: 'iptv',
+    angle: 'indirect' as 'indirect' | 'direct',
   });
 
   // Config
