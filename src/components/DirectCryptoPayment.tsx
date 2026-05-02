@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { useCryptoPrice } from '@/hooks/useCryptoPrice';
+import { QrWithLogo } from '@/components/QrWithLogo';
 
 export interface CryptoWallet {
   network: string;
