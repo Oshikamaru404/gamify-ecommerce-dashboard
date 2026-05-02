@@ -277,7 +277,9 @@ async function fetchWithTimeout(url: string, ms = 8000, init?: RequestInit): Pro
 async function fetchBchFromBlockbook(address: string, sinceTs: number): Promise<IncomingTx[] | null> {
   // Trezor Blockbook public BCH instance — no auth, generally not rate-limited
   const url = `https://bch1.trezor.io/api/v2/address/${address}?details=txs&pageSize=20`;
-  const res = await fetchWithTimeout(url, 10000);
+  const res = await fetchWithTimeout(url, 10000, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BwivoxBot/1.0)', 'Accept': 'application/json' },
+  });
   if (!res.ok) {
     console.warn(`BCH blockbook ${res.status}`);
     return null;
