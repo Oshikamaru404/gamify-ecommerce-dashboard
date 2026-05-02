@@ -74,7 +74,7 @@ const CryptomusCheckout: React.FC<CryptomusCheckoutProps> = ({
         throw orderError;
       }
 
-      triggerOrderEmails({ ...orderData, paymentMethodLabel: 'Crypto (Cryptomus)' });
+      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'Crypto (Cryptomus)' });
 
       // Create Cryptomus invoice through edge function
       const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke(
