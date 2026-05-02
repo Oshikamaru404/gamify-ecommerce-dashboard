@@ -79,18 +79,11 @@ const OrderConfirmationEmail = ({
       </Preview>
       <Body style={main}>
         <Container style={outerContainer}>
-          {/* ===== Hero band with logo ===== */}
+          {/* ===== Hero band — wordmark only, no logo image ===== */}
           <Section style={heroBand}>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
               <tr>
-                <td align="center" style={{ padding: '32px 24px 24px' }}>
-                  <Img
-                    src={LOGO_DATA_URI}
-                    width="56"
-                    height="56"
-                    alt={`${SITE_NAME} logo`}
-                    style={{ borderRadius: 12, display: 'block' }}
-                  />
+                <td align="center" style={{ padding: '40px 24px 32px' }}>
                   <Text style={brandWord}>{SITE_NAME}</Text>
                   <Text style={tagline}>Premium IPTV & Streaming</Text>
                 </td>
