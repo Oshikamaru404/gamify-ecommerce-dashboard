@@ -336,15 +336,18 @@ async function fetchTrxNativeTxs(address: string, sinceTs: number): Promise<Inco
 
 
 async function fetchEvmNativeTxs(network: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  if (!isEvmSupported(network)) return [];
-  const result = await fetchWithFallback(network, {
-    module: 'account',
-    action: 'txlist',
-    address,
-    startblock: '0',
-    endblock: '99999999',
-    sort: 'desc',
-  });
+  const n = network.toLowerCase();
+  // Use NodeReal MegaNode for BSC (BscScan V1 is deprecated, Etherscan V2 free plan excludes BSC)
+  let result: any[];
+  if ((n === 'bsc' || n === 'bep20') && MEGANODE_BSC_RPC) {
+    result = await fetchBscAssetTransfers({ toAddress: address, category: 'external' });
+  } else {
+    if (!isEvmSupported(network)) return [];
+    result = await fetchWithFallback(network, {
+      module: 'account', action: 'txlist', address,
+      startblock: '0', endblock: '99999999', sort: 'desc',
+    });
+  }
   const out: IncomingTx[] = [];
   for (const tx of result) {
     const ts = parseInt(tx.timeStamp || '0');
