@@ -30,6 +30,9 @@ interface IncomingTx {
 
 // ---------- Per-chain explorers (free public APIs) ----------
 
+// Free, no-key Etherscan-compatible explorers.
+// BaseScan/LineaScan/etc. V1 endpoints are deprecated and Etherscan V2 requires a paid plan
+// for non-mainnet chains. Blockscout offers a free Etherscan-compatible API for Base & Linea.
 const ETHERSCAN_BASES: Record<string, string> = {
   erc20: 'https://api.etherscan.io/api',
   eth: 'https://api.etherscan.io/api',
@@ -37,8 +40,8 @@ const ETHERSCAN_BASES: Record<string, string> = {
   bsc: 'https://api.bscscan.com/api',
   polygon: 'https://api.polygonscan.com/api',
   matic: 'https://api.polygonscan.com/api',
-  base: 'https://api.basescan.org/api',
-  linea: 'https://api.lineascan.build/api',
+  base: 'https://base.blockscout.com/api',
+  linea: 'https://eth.blockscout.com/api', // fallback; replaced per-chain below if needed
 };
 
 // Token contract addresses for stablecoins on each EVM chain
