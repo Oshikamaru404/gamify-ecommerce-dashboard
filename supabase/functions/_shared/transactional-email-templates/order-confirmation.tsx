@@ -102,8 +102,8 @@ const OrderConfirmationEmail = ({
 
             <Heading style={h1}>{greeting}</Heading>
             <Text style={lead}>
-              Thanks for your order. We've received your request and it is now being reviewed.
-              You'll receive a follow-up email once everything is ready.
+              Thanks for your IPTV streaming order. We've received your request and your channels
+              will be activated shortly. You'll receive your login details by email once ready.
             </Text>
 
             {/* ===== Order summary box ===== */}
