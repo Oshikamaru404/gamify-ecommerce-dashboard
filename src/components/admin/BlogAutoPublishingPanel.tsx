@@ -70,7 +70,7 @@ const BlogAutoPublishingPanel = () => {
 
   // Mutations
   const updateConfig = useMutation({
-    mutationFn: async (patch: Partial<{ is_active: boolean; languages: string[]; auto_publish: boolean }>) => {
+    mutationFn: async (patch: Partial<{ is_active: boolean; languages: string[]; auto_publish: boolean; articles_per_run: number; ai_model: string }>) => {
       if (!config?.id) return;
       const { error } = await supabase
         .from('blog_automation_config')
@@ -84,6 +84,31 @@ const BlogAutoPublishingPanel = () => {
     },
     onError: (err: any) => toast.error(`Update failed: ${err.message}`),
   });
+
+  const updateSchedule = useMutation({
+    mutationFn: async (newSchedule: string) => {
+      const { error } = await supabase.rpc('update_blog_cron_schedule', { new_schedule: newSchedule });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blog-automation-config'] });
+      toast.success('Publishing schedule updated');
+    },
+    onError: (err: any) => toast.error(`Schedule update failed: ${err.message}`),
+  });
+
+  const [customCron, setCustomCron] = useState('');
+  React.useEffect(() => {
+    if (config?.cron_schedule) setCustomCron(config.cron_schedule);
+  }, [config?.cron_schedule]);
+
+  const SCHEDULE_PRESETS = [
+    { label: 'Daily at 09:00 UTC', value: '0 9 * * *' },
+    { label: 'Mon/Wed/Fri at 09:00 UTC', value: '0 9 * * 1,3,5' },
+    { label: 'Twice daily (09:00 & 21:00)', value: '0 9,21 * * *' },
+    { label: 'Weekly (Monday 09:00 UTC)', value: '0 9 * * 1' },
+    { label: 'Every 6 hours', value: '0 */6 * * *' },
+  ];
 
   const addTopic = useMutation({
     mutationFn: async () => {

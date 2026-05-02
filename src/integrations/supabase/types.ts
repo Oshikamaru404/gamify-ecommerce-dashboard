@@ -819,6 +819,10 @@ export type Database = {
       delete_all_published_feedback: { Args: never; Returns: number }
       is_admin_user: { Args: never; Returns: boolean }
       reset_product_sales: { Args: never; Returns: number }
+      update_blog_cron_schedule: {
+        Args: { new_schedule: string }
+        Returns: undefined
+      }
       upsert_site_setting: {
         Args: { p_setting_key: string; p_setting_value: string }
         Returns: {
