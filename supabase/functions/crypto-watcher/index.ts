@@ -623,7 +623,8 @@ serve(async (req) => {
     }
     if (wantsAll || only === 'trc20') {
       try {
-        const txs = await fetchTronTxs('usdt', 'TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9', sinceTs);
+        // Tether treasury TRON — receives all USDT minted on TRON (constant traffic)
+        const txs = await fetchTronTxs('usdt', 'TKHuVq1oKVruCGLvqVexFs6dawKv6fQgFs', sinceTs);
         results['trc20'] = { ok: txs.length > 0, source: 'trongrid', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
       } catch (e) { results['trc20'] = { ok: false, error: (e as Error).message }; }
     }
