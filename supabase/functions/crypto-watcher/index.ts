@@ -56,10 +56,16 @@ const BLOCKSCOUT_BASES: Record<string, string> = {
   arb: 'https://arbitrum.blockscout.com/api',
   optimism: 'https://optimism.blockscout.com/api',
   op: 'https://optimism.blockscout.com/api',
-  // BSC: BscScan V1 still works for read-only queries without a key (rate-limited)
+  // BSC fallback (deprecated BscScan V1, kept as last resort)
   bsc: 'https://api.bscscan.com/api',
   bep20: 'https://api.bscscan.com/api',
 };
+
+// BSCTrace by NodeReal MegaNode — Etherscan-compatible, official BNB Chain replacement
+const MEGANODE_KEY = Deno.env.get('MEGANODE_API_KEY') ?? '';
+const BSCTRACE_BASE = MEGANODE_KEY
+  ? `https://open-platform.nodereal.io/${MEGANODE_KEY}/bsctrace`
+  : '';
 
 function buildExplorerUrls(network: string, params: Record<string, string>): string[] {
   const n = network.toLowerCase();
