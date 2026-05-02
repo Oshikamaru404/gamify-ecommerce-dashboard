@@ -635,25 +635,6 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
               <p className="font-mono text-[10px] mt-1">Order: {payment.orderId.slice(0, 8)}</p>
             </div>
 
-            {/* Self-hosted live status pill */}
-            {payment.provider === 'self_hosted' && intentStatus && (
-              <div className={`rounded p-3 text-xs border space-y-1 ${
-                intentStatus.status === 'confirmed' ? 'bg-green-50 border-green-300 text-green-800' :
-                intentStatus.status === 'detected' ? 'bg-amber-50 border-amber-300 text-amber-800' :
-                intentStatus.status === 'expired' ? 'bg-red-50 border-red-300 text-red-800' :
-                'bg-slate-50 border-slate-200 text-slate-700'
-              }`}>
-                <p className="font-semibold capitalize flex items-center gap-2">
-                  {intentStatus.status === 'pending' && <><Loader2 className="h-3 w-3 animate-spin" /> Waiting for payment…</>}
-                  {intentStatus.status === 'detected' && <>🔎 Payment detected — confirming ({intentStatus.confirmations}/{intentStatus.min_confirmations})</>}
-                  {intentStatus.status === 'confirmed' && <><Check className="h-3 w-3" /> Payment confirmed</>}
-                  {intentStatus.status === 'expired' && <>⏱ Payment window expired</>}
-                </p>
-                {intentStatus.tx_hash && (
-                  <p className="font-mono text-[10px] truncate">TX: {intentStatus.tx_hash}</p>
-                )}
-              </div>
-            )}
             <Button
               variant="outline"
               size="sm"
