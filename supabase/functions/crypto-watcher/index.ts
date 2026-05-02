@@ -395,7 +395,7 @@ async function fetchTronTxs(coin: string, address: string, sinceTs: number): Pro
   const data = await res.json();
   const out: IncomingTx[] = [];
   for (const tx of (data?.data || [])) {
-    if ((tx.to || '').toLowerCase() !== address.toLowerCase()) continue;
+    if ((tx.to || '') !== address) continue;
     if ((tx.token_info?.symbol || '').toLowerCase() !== coin.toLowerCase()) continue;
     const dec = tx.token_info?.decimals ?? 6;
     out.push({
@@ -598,6 +598,45 @@ serve(async (req) => {
     } catch (e) {
       results['_bsc_rpc_block'] = `error: ${(e as Error).message}`;
     }
+
+    // ===== Non-EVM probes =====
+    const wantsAll = !only;
+    const sinceTs = Math.floor(Date.now() / 1000) - 30 * 24 * 3600;
+
+    if (wantsAll || only === 'btc') {
+      try {
+        const txs = await fetchBtcTxs('bc1qm34lsc65zpw79lxes69zkqmk6ee3ewf0j77s3h', sinceTs);
+        results['btc'] = { ok: txs.length > 0, source: 'blockstream', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['btc'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'bch') {
+      try {
+        // High-traffic BCH donation address
+        const txs = await fetchBchTxs('qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a', sinceTs);
+        results['bch'] = { ok: txs.length > 0, source: 'blockchair', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['bch'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'tron') {
+      try {
+        // Binance large hot wallet — receives constant TRX inflows
+        const txs = await fetchTrxNativeTxs('TWd4WrZ9wn84f5x1hZhL4DHvk738ns5jwb', sinceTs);
+        results['tron'] = { ok: txs.length > 0, source: 'trongrid', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['tron'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'trc20') {
+      try {
+        // Tether treasury TRON — receives all USDT minted on TRON (constant traffic)
+        const txs = await fetchTronTxs('usdt', 'TKHuVq1oKVruCGLvqVexFs6dawKv6fQgFs', sinceTs);
+        results['trc20'] = { ok: txs.length > 0, source: 'trongrid', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['trc20'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'solana') {
+      try {
+        const txs = await fetchSolanaTxs('sol', '5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9', sinceTs);
+        results['solana'] = { ok: txs.length > 0, source: 'solana-rpc', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['solana'] = { ok: false, error: (e as Error).message }; }
+    }
+
     return new Response(JSON.stringify(results, null, 2), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
