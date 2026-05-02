@@ -430,6 +430,30 @@ const BlogAutoPublishingPanel = () => {
                   </select>
                 </div>
               </div>
+              <div>
+                <Label>SEO angle (80/20 strategy)</Label>
+                <div className="flex gap-2 mt-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={newTopic.angle === 'indirect' ? 'default' : 'outline'}
+                    onClick={() => setNewTopic({ ...newTopic, angle: 'indirect' })}
+                  >
+                    Indirect (no "IPTV" in title)
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={newTopic.angle === 'direct' ? 'default' : 'outline'}
+                    onClick={() => setNewTopic({ ...newTopic, angle: 'direct' })}
+                  >
+                    Direct (IPTV in title)
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Aim for ~80% indirect (broad audience) and ~20% direct (intentional search).
+                </p>
+              </div>
               <Button
                 onClick={() => addTopic.mutate()}
                 disabled={!newTopic.topic_en && !newTopic.topic_fr && !newTopic.topic_ar}
