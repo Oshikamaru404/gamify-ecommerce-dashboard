@@ -307,7 +307,9 @@ async function fetchBchFromBlockbook(address: string, sinceTs: number): Promise<
 }
 
 async function fetchBchFromBlockchair(address: string, sinceTs: number): Promise<IncomingTx[] | null> {
-  const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${address}?limit=20&transaction_details=true`;
+  const key = Deno.env.get('BLOCKCHAIR_API_KEY') || '';
+  const auth = key ? `&key=${encodeURIComponent(key)}` : '';
+  const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${address}?limit=20&transaction_details=true${auth}`;
   const res = await fetchWithTimeout(url, 10000);
   if (!res.ok) {
     console.warn(`BCH blockchair ${res.status}`);
