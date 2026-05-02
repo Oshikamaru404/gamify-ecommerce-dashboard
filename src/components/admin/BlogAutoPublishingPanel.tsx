@@ -24,6 +24,7 @@ const BlogAutoPublishingPanel = () => {
     topic_ar: '',
     target_keywords: '',
     category: 'iptv',
+    angle: 'indirect' as 'indirect' | 'direct',
   });
 
   // Config
@@ -122,13 +123,14 @@ const BlogAutoPublishingPanel = () => {
         topic_ar: newTopic.topic_ar || null,
         target_keywords: keywords,
         category: newTopic.category,
+        angle: newTopic.angle,
         sort_order: 1000,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-topics-queue'] });
-      setNewTopic({ topic_en: '', topic_fr: '', topic_ar: '', target_keywords: '', category: 'iptv' });
+      setNewTopic({ topic_en: '', topic_fr: '', topic_ar: '', target_keywords: '', category: 'iptv', angle: 'indirect' });
       toast.success('Topic added');
     },
     onError: (err: any) => toast.error(`Add failed: ${err.message}`),
@@ -428,6 +430,30 @@ const BlogAutoPublishingPanel = () => {
                   </select>
                 </div>
               </div>
+              <div>
+                <Label>SEO angle (80/20 strategy)</Label>
+                <div className="flex gap-2 mt-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={newTopic.angle === 'indirect' ? 'default' : 'outline'}
+                    onClick={() => setNewTopic({ ...newTopic, angle: 'indirect' })}
+                  >
+                    Indirect (no "IPTV" in title)
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={newTopic.angle === 'direct' ? 'default' : 'outline'}
+                    onClick={() => setNewTopic({ ...newTopic, angle: 'direct' })}
+                  >
+                    Direct (IPTV in title)
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Aim for ~80% indirect (broad audience) and ~20% direct (intentional search).
+                </p>
+              </div>
               <Button
                 onClick={() => addTopic.mutate()}
                 disabled={!newTopic.topic_en && !newTopic.topic_fr && !newTopic.topic_ar}
@@ -444,6 +470,7 @@ const BlogAutoPublishingPanel = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Topic</TableHead>
+                    <TableHead>Angle</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Languages</TableHead>
@@ -460,6 +487,11 @@ const BlogAutoPublishingPanel = () => {
                         <div className="text-xs text-muted-foreground truncate">
                           {(t.target_keywords || []).join(', ')}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={(t as any).angle === 'direct' ? 'default' : 'secondary'}>
+                          {(t as any).angle === 'direct' ? 'Direct' : 'Indirect'}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{t.category}</Badge>
