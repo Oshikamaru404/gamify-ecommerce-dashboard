@@ -283,11 +283,13 @@ serve(async (req) => {
         if (match.confirmations >= intent.min_confirmations) {
           update.status = 'confirmed';
           update.confirmed_at = new Date().toISOString();
-          // Mark order paid
-          await sb
+          // Mark order paid and fetch updated row
+          const { data: paidOrder } = await sb
             .from('orders')
             .update({ payment_status: 'paid', status: 'confirmed' })
-            .eq('id', intent.order_id);
+            .eq('id', intent.order_id)
+            .select()
+            .single();
           // Best-effort WhatsApp notification
           try {
             await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-whatsapp-notification`, {
@@ -299,6 +301,39 @@ serve(async (req) => {
               body: JSON.stringify({ orderId: intent.order_id, event: 'payment_confirmed' }),
             });
           } catch (e) { console.warn('WhatsApp notify failed:', e); }
+          // Send email notifications (client + admin)
+          if (paidOrder) {
+            const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+            const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+            const shortId = String(paidOrder.id).slice(0, 8).toUpperCase();
+            const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}`, apikey: serviceKey };
+            const method = `Crypto (${intent.coin.toUpperCase()} on ${intent.network.toUpperCase()})`;
+            try {
+              if (paidOrder.customer_email) {
+                await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+                  method: 'POST', headers,
+                  body: JSON.stringify({
+                    templateName: 'payment-confirmed',
+                    recipientEmail: paidOrder.customer_email,
+                    idempotencyKey: `payment-confirmed-${paidOrder.id}`,
+                    templateData: { customerName: paidOrder.customer_name, orderId: shortId, packageName: paidOrder.package_name, amount: paidOrder.amount },
+                  }),
+                });
+              }
+              await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+                method: 'POST', headers,
+                body: JSON.stringify({
+                  templateName: 'admin-payment-received',
+                  recipientEmail: 'bwivox@gmail.com',
+                  idempotencyKey: `admin-payment-${paidOrder.id}`,
+                  templateData: {
+                    orderId: shortId, customerName: paidOrder.customer_name, customerEmail: paidOrder.customer_email,
+                    packageName: paidOrder.package_name, amount: paidOrder.amount, paymentMethod: method, txHash: match.txHash,
+                  },
+                }),
+              });
+            } catch (e) { console.warn('Email notify failed:', e); }
+          }
           confirmed++;
         } else if (intent.status === 'pending') {
           update.status = 'detected';
