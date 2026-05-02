@@ -711,9 +711,11 @@ const SOLANA_SPL_MINTS: Record<string, string> = {
   usdt: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
 };
 
-// Solana RPC pool — try multiple public endpoints with rotation + retry on 429.
+// Solana RPC pool — Helius (with API key) as primary, public RPCs as fallbacks.
 // NodeReal MegaNode does NOT cover Solana on the standard {chain}-{network} format.
+const HELIUS_KEY = Deno.env.get('HELIUS_API_KEY') || '';
 const SOLANA_RPCS: string[] = [
+  ...(HELIUS_KEY ? [`https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`] : []),
   'https://solana-rpc.publicnode.com',
   'https://api.mainnet-beta.solana.com',
   'https://solana.drpc.org',
@@ -952,7 +954,7 @@ serve(async (req) => {
     if (wantsAll || only === 'solana') {
       try {
         const txs = await fetchSolanaTxs('sol', '5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9', sinceTs);
-        results['solana'] = { ok: txs.length > 0, source: 'solana-rpc', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+        results['solana'] = { ok: txs.length > 0, source: HELIUS_KEY ? 'helius→public-rpc' : 'public-rpc', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
       } catch (e) { results['solana'] = { ok: false, error: (e as Error).message }; }
     }
 
