@@ -77,24 +77,24 @@ interface PaymentInfo {
   provider?: 'paygate' | 'self_hosted';
 }
 
-// Coin/network logo URLs (color SVG icons)
-const ICON_BASE = 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color';
-const coinIcon = (symbol: string) => `${ICON_BASE}/${symbol.toLowerCase()}.svg`;
+// Network meta for nicer UI — logos are inline SVG data URIs (no CORS, work in canvas/QR).
+import { NETWORK_LOGOS } from '@/lib/networkLogos';
 
-// Network meta for nicer UI
-const chainIcon = (slug: string) => `https://icons.llamao.fi/icons/chains/rsz_${slug}.jpg`;
+const coinIcon = (symbol: string) =>
+  `https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/${symbol.toLowerCase()}.svg`;
+
 const NETWORK_META: Record<string, { label: string; logo: string; color: string }> = {
-  BTC: { label: 'Bitcoin', logo: chainIcon('bitcoin'), color: 'bg-orange-100 text-orange-700 border-orange-300' },
-  ERC20: { label: 'Ethereum (ERC20)', logo: chainIcon('ethereum'), color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
-  BEP20: { label: 'BNB Smart Chain', logo: chainIcon('binance'), color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  POLYGON: { label: 'Polygon', logo: chainIcon('polygon'), color: 'bg-purple-100 text-purple-700 border-purple-300' },
-  BASE: { label: 'Base', logo: chainIcon('base'), color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  SOLANA: { label: 'Solana', logo: chainIcon('solana'), color: 'bg-green-100 text-green-700 border-green-300' },
-  TRC20: { label: 'Tron (TRC20)', logo: chainIcon('tron'), color: 'bg-red-100 text-red-700 border-red-300' },
-  LINEA: { label: 'Linea', logo: chainIcon('linea'), color: 'bg-gray-100 text-gray-700 border-gray-300' },
-  ARBITRUM: { label: 'Arbitrum', logo: chainIcon('arbitrum'), color: 'bg-sky-100 text-sky-700 border-sky-300' },
-  OPTIMISM: { label: 'Optimism', logo: chainIcon('optimism'), color: 'bg-rose-100 text-rose-700 border-rose-300' },
-  BCH: { label: 'Bitcoin Cash', logo: coinIcon('bch'), color: 'bg-green-100 text-green-700 border-green-300' },
+  BTC: { label: 'Bitcoin', logo: NETWORK_LOGOS.BTC, color: 'bg-orange-100 text-orange-700 border-orange-300' },
+  ERC20: { label: 'Ethereum (ERC20)', logo: NETWORK_LOGOS.ERC20, color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+  BEP20: { label: 'BNB Smart Chain', logo: NETWORK_LOGOS.BEP20, color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  POLYGON: { label: 'Polygon', logo: NETWORK_LOGOS.POLYGON, color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  BASE: { label: 'Base', logo: NETWORK_LOGOS.BASE, color: 'bg-blue-100 text-blue-700 border-blue-300' },
+  SOLANA: { label: 'Solana', logo: NETWORK_LOGOS.SOLANA, color: 'bg-green-100 text-green-700 border-green-300' },
+  TRC20: { label: 'Tron (TRC20)', logo: NETWORK_LOGOS.TRC20, color: 'bg-red-100 text-red-700 border-red-300' },
+  LINEA: { label: 'Linea', logo: NETWORK_LOGOS.LINEA, color: 'bg-gray-100 text-gray-700 border-gray-300' },
+  ARBITRUM: { label: 'Arbitrum', logo: NETWORK_LOGOS.ARBITRUM, color: 'bg-sky-100 text-sky-700 border-sky-300' },
+  OPTIMISM: { label: 'Optimism', logo: NETWORK_LOGOS.OPTIMISM, color: 'bg-rose-100 text-rose-700 border-rose-300' },
+  BCH: { label: 'Bitcoin Cash', logo: NETWORK_LOGOS.BCH, color: 'bg-green-100 text-green-700 border-green-300' },
 };
 
 const getNetworkMeta = (network: string) => {
