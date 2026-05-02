@@ -274,11 +274,12 @@ const heroBand = {
 
 const brandWord = {
   color: '#ffffff',
-  fontSize: '24px',
-  fontWeight: 800,
-  letterSpacing: '2px',
-  margin: '12px 0 2px',
+  fontSize: '36px',
+  fontWeight: 900,
+  letterSpacing: '4px',
+  margin: '0 0 6px',
   textAlign: 'center' as const,
+  textShadow: '0 2px 8px rgba(0,0,0,0.15)',
 }
 
 const tagline = {
