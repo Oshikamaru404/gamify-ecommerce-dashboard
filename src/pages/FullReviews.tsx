@@ -5,6 +5,7 @@ import { ArrowLeft, Star, Shield, Check, Smile, MessageSquare, Calendar, Frown, 
 import StoreLayout from '@/components/store/StoreLayout';
 import { useApprovedFeedbacks } from '@/hooks/useFeedback';
 import { useLanguage } from '@/contexts/LanguageContext';
+import SEO from '@/components/SEO';
 
 const FullReviews = () => {
   const { t } = useLanguage();

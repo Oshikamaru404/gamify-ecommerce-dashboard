@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import { generateProductSlug, getLocalizedText } from '@/lib/multilingualUtils';
+import SEO from '@/components/SEO';
 
 const Activation = () => {
   const { t, language } = useLanguage();

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, ArrowLeft, Clock } from 'lucide-react';
 import { useBlogArticles } from '@/hooks/useBlogArticles';
+import SEO from '@/components/SEO';
 
 const Blog = () => {
   const { data: articles, isLoading, error } = useBlogArticles();

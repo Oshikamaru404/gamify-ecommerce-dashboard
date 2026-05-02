@@ -11,6 +11,7 @@ import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText } from '@/lib/multilingualUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card } from '@/components/ui/card';
+import SEO from '@/components/SEO';
 
 const Subscription = () => {
   const { t } = useLanguage();
