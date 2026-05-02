@@ -601,7 +601,42 @@ serve(async (req) => {
     return new Response(JSON.stringify(results, null, 2), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  }
+    }
+
+    // ===== Non-EVM probes =====
+    const wantsAll = !only;
+    const sinceTs = Math.floor(Date.now() / 1000) - 30 * 24 * 3600;
+
+    if (wantsAll || only === 'btc') {
+      try {
+        const txs = await fetchBtcTxs('bc1qm34lsc65zpw79lxes69zkqmk6ee3ewf0j77s3h', sinceTs);
+        results['btc'] = { ok: txs.length > 0, source: 'blockstream', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['btc'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'bch') {
+      try {
+        const txs = await fetchBchTxs('qrnk5pugwx2lmds04hyswlt5d030ej5dcvmal0lf3y', sinceTs);
+        results['bch'] = { ok: txs.length > 0, source: 'fullstack/blockchair', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['bch'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'tron') {
+      try {
+        const txs = await fetchTrxNativeTxs('TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9', sinceTs);
+        results['tron'] = { ok: txs.length > 0, source: 'trongrid', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['tron'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'trc20') {
+      try {
+        const txs = await fetchTronTxs('usdt', 'TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9', sinceTs);
+        results['trc20'] = { ok: txs.length > 0, source: 'trongrid', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['trc20'] = { ok: false, error: (e as Error).message }; }
+    }
+    if (wantsAll || only === 'solana') {
+      try {
+        const txs = await fetchSolanaTxs('sol', '5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9', sinceTs);
+        results['solana'] = { ok: txs.length > 0, source: 'solana-rpc', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+      } catch (e) { results['solana'] = { ok: false, error: (e as Error).message }; }
+    }
 
   const sb = createClient(
     Deno.env.get('SUPABASE_URL')!,
