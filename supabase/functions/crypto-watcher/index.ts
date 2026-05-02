@@ -406,30 +406,15 @@ async function fetchBchFromFullstack(
 }
 
 async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
-  // 1. FullStack.cash (primary, free, BCH-specialized)
-  try {
-    const r = await fetchBchFromFullstack(address, sinceTs, 'https://api.fullstack.cash/v5', 'fullstack');
-    if (r !== null && r.length >= 0) return r;
-  } catch (e) { console.warn('BCH fullstack failed:', (e as Error).message); }
-
-  // 2. Cashrain / bchn.fullstack.cash (community mirror, same API)
-  try {
-    const r = await fetchBchFromFullstack(address, sinceTs, 'https://bchn.fullstack.cash/v5', 'bchn');
-    if (r !== null && r.length >= 0) return r;
-  } catch (e) { console.warn('BCH bchn failed:', (e as Error).message); }
-
-  // 3. Trezor Blockbook (datacenter IPs sometimes blocked)
+  // Trezor Blockbook (primary), Blockchair (fallback)
   try {
     const r = await fetchBchFromBlockbook(address, sinceTs);
     if (r !== null) return r;
   } catch (e) { console.warn('BCH blockbook failed:', (e as Error).message); }
-
-  // 4. Blockchair (rate-limited without key)
   try {
     const r = await fetchBchFromBlockchair(address, sinceTs);
     if (r !== null) return r;
   } catch (e) { console.warn('BCH blockchair failed:', (e as Error).message); }
-
   return [];
 }
 
