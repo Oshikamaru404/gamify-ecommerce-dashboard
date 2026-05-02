@@ -7,10 +7,10 @@ const TEST_ADDRESS = "0x2d72c5dcfa5cea3a64181e4e3b2097a7a1bf7c7a";
 
 const CHAINS: { name: string; chainId: number; blockscout?: string }[] = [
   { name: "ethereum", chainId: 1, blockscout: "https://eth.blockscout.com/api" },
-  { name: "bsc", chainId: 56 },
+  { name: "bsc", chainId: 56, blockscout: "https://api.bscscan.com/api" },
   { name: "polygon", chainId: 137, blockscout: "https://polygon.blockscout.com/api" },
   { name: "base", chainId: 8453, blockscout: "https://base.blockscout.com/api" },
-  { name: "linea", chainId: 59144, blockscout: "https://explorer.linea.build/api" },
+  { name: "linea", chainId: 59144, blockscout: "https://api-explorer.linea.build/api" },
   { name: "arbitrum", chainId: 42161, blockscout: "https://arbitrum.blockscout.com/api" },
   { name: "optimism", chainId: 10, blockscout: "https://optimism.blockscout.com/api" },
 ];
