@@ -197,7 +197,7 @@ Order ID: ${orderData.id}`;
 
       triggerOrderEmails({
         ...orderData,
-        paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayGate)' : 'Crypto (PayGate)',
+        paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayBwivox)' : 'Crypto (PayBwivox)',
       });
 
       // Create PayGate payment via edge function
