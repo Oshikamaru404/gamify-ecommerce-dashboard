@@ -28,21 +28,78 @@ interface IncomingTx {
   timestamp: number;    // unix sec
 }
 
-// ---------- Per-chain explorers (free public APIs) ----------
+// ---------- Per-chain explorers (Etherscan V2 unified + Blockscout fallback) ----------
 
-// Free, no-key Etherscan-compatible explorers.
-// BaseScan/LineaScan/etc. V1 endpoints are deprecated and Etherscan V2 requires a paid plan
-// for non-mainnet chains. Blockscout offers a free Etherscan-compatible API for Base & Linea.
-const ETHERSCAN_BASES: Record<string, string> = {
-  erc20: 'https://api.etherscan.io/api',
-  eth: 'https://api.etherscan.io/api',
-  bep20: 'https://api.bscscan.com/api',
-  bsc: 'https://api.bscscan.com/api',
-  polygon: 'https://api.polygonscan.com/api',
-  matic: 'https://api.polygonscan.com/api',
-  base: 'https://base.blockscout.com/api',
-  linea: 'https://eth.blockscout.com/api', // fallback; replaced per-chain below if needed
+const ETHERSCAN_V2 = 'https://api.etherscan.io/v2/api';
+const ETHERSCAN_KEY = Deno.env.get('ETHERSCAN_API_KEY') || '';
+
+// Etherscan V2 chain IDs (one unified API + key for 60+ chains)
+const CHAIN_IDS: Record<string, number> = {
+  eth: 1, erc20: 1,
+  bsc: 56, bep20: 56,
+  polygon: 137, matic: 137,
+  base: 8453,
+  linea: 59144,
+  arbitrum: 42161, arb: 42161,
+  optimism: 10, op: 10,
 };
+
+// Free Blockscout fallbacks (no key required) — Etherscan-compatible API
+const BLOCKSCOUT_BASES: Record<string, string> = {
+  eth: 'https://eth.blockscout.com/api',
+  erc20: 'https://eth.blockscout.com/api',
+  base: 'https://base.blockscout.com/api',
+  polygon: 'https://polygon.blockscout.com/api',
+  matic: 'https://polygon.blockscout.com/api',
+  linea: 'https://explorer.linea.build/api',
+  arbitrum: 'https://arbitrum.blockscout.com/api',
+  arb: 'https://arbitrum.blockscout.com/api',
+  optimism: 'https://optimism.blockscout.com/api',
+  op: 'https://optimism.blockscout.com/api',
+  // BSC: no reliable free Blockscout — V2 only
+};
+
+function buildExplorerUrls(network: string, params: Record<string, string>): string[] {
+  const n = network.toLowerCase();
+  const urls: string[] = [];
+  const chainId = CHAIN_IDS[n];
+  if (chainId && ETHERSCAN_KEY) {
+    const qs = new URLSearchParams({ chainid: String(chainId), ...params, apikey: ETHERSCAN_KEY });
+    urls.push(`${ETHERSCAN_V2}?${qs.toString()}`);
+  }
+  const bs = BLOCKSCOUT_BASES[n];
+  if (bs) {
+    const qs = new URLSearchParams(params);
+    urls.push(`${bs}?${qs.toString()}`);
+  }
+  return urls;
+}
+
+async function fetchWithFallback(network: string, params: Record<string, string>): Promise<any[]> {
+  const urls = buildExplorerUrls(network, params);
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.warn(`[${network}] HTTP ${res.status} on ${url.split('?')[0]}`);
+        continue;
+      }
+      const data = await res.json();
+      if (Array.isArray(data?.result)) return data.result;
+      // status="0" with empty message often means "no transactions found" — treat as success
+      if (data?.status === '0' && /no transactions/i.test(data?.message || '')) return [];
+      console.warn(`[${network}] Unexpected response from ${url.split('?')[0]}: ${JSON.stringify(data).slice(0, 200)}`);
+    } catch (e) {
+      console.warn(`[${network}] Fetch failed on ${url.split('?')[0]}:`, (e as Error).message);
+    }
+  }
+  return [];
+}
+
+function isEvmSupported(network: string): boolean {
+  const n = network.toLowerCase();
+  return CHAIN_IDS[n] !== undefined || BLOCKSCOUT_BASES[n] !== undefined;
+}
 
 // Token contract addresses for stablecoins on each EVM chain
 const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
