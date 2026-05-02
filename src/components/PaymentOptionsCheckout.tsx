@@ -133,7 +133,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       // Store order ID for success screen
       setPlacedOrderId(orderData.id);
 
-      triggerOrderEmails({ ...orderData, paymentMethodLabel: 'WhatsApp' });
+      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'WhatsApp' });
 
       // Create WhatsApp message
       const message = `🛒 New Order Request
