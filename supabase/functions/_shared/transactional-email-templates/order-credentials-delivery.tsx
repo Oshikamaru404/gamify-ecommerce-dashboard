@@ -11,6 +11,22 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { ov } from './overrides.ts'
+
+const DEFAULTS = {
+  subject: '🎉 Your IPTV access is ready — order #{orderId}',
+  preview: 'Your BWIVOX IPTV credentials are ready{orderIdSuffix}.',
+  tagline: 'Your IPTV Access is Ready',
+  badge: '✓ ACCESS DELIVERED',
+  greeting: 'Hello {name}!',
+  lead: "Your IPTV subscription is now active. Below are your access credentials — keep this email safe, you'll need it to set up your player.",
+  m3uLabel: '📺 M3U Playlist URL',
+  m3uHint: 'Paste this link into any IPTV player (Smart IPTV, IPTV Smarters, TiviMate, etc.)',
+  xtreamLabel: '🔐 Xtream Codes API',
+  xtreamHint: 'Use these credentials in players that support Xtream Codes login.',
+  notesLabel: '📝 Notes from our team',
+  finePrint: 'Need help setting up? Contact us.',
+}
 
 const SITE_NAME = 'BWIVOX'
 const SITE_URL = 'https://bwivox.com'
