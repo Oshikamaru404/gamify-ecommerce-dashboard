@@ -328,26 +328,97 @@ async function fetchTronTxs(coin: string, address: string, sinceTs: number): Pro
 }
 
 // -- Solana
-async function fetchSolanaTxs(coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  // Use public solscan; native SOL only for now; SPL tokens (USDC/USDT) skipped (would need indexer)
-  if (coin.toLowerCase() !== 'sol') return [];
-  const res = await fetch(`https://public-api.solscan.io/account/transactions?account=${address}&limit=20`);
-  if (!res.ok) return [];
+// SPL token mints on Solana
+const SOLANA_SPL_MINTS: Record<string, string> = {
+  usdc: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  usdt: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+};
+
+const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
+
+async function rpc(method: string, params: any[]): Promise<any> {
+  const res = await fetch(SOLANA_RPC, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+  });
+  if (!res.ok) throw new Error(`Solana RPC ${res.status}`);
   const data = await res.json();
-  const out: IncomingTx[] = [];
-  for (const tx of (Array.isArray(data) ? data : [])) {
-    const ts = tx.blockTime || 0;
-    if (ts < sinceTs) continue;
-    const lamportChange = tx.lamport ?? 0;
-    if (lamportChange <= 0) continue;
-    out.push({
-      txHash: tx.txHash,
-      amount: lamportChange / 1e9,
-      confirmations: 1,
-      timestamp: ts,
-    });
+  if (data.error) throw new Error(data.error.message);
+  return data.result;
+}
+
+async function fetchSolanaTxs(coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
+  const c = coin.toLowerCase();
+  try {
+    // For SPL tokens (USDC/USDT), find the Associated Token Account first
+    let monitorAddress = address;
+    let isSpl = false;
+    let mint = '';
+    if (c === 'usdc' || c === 'usdt') {
+      mint = SOLANA_SPL_MINTS[c];
+      isSpl = true;
+      // Find token accounts owned by this wallet for this mint
+      const tokenAccounts = await rpc('getTokenAccountsByOwner', [
+        address,
+        { mint },
+        { encoding: 'jsonParsed' },
+      ]);
+      const accounts = tokenAccounts?.value || [];
+      if (accounts.length === 0) return []; // no token account => no transfers possible
+      monitorAddress = accounts[0].pubkey;
+    }
+
+    // Get recent signatures for the monitored address
+    const sigs = await rpc('getSignaturesForAddress', [monitorAddress, { limit: 20 }]);
+    const out: IncomingTx[] = [];
+
+    for (const sig of (sigs || [])) {
+      const ts = sig.blockTime || 0;
+      if (ts < sinceTs) continue;
+      if (sig.err) continue;
+
+      const tx = await rpc('getTransaction', [
+        sig.signature,
+        { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0 },
+      ]);
+      if (!tx) continue;
+
+      let amount = 0;
+      if (isSpl) {
+        // Compare pre/post token balances for our token account
+        const pre = tx.meta?.preTokenBalances || [];
+        const post = tx.meta?.postTokenBalances || [];
+        const findBal = (arr: any[]) => arr.find((b: any) =>
+          b.owner === address && b.mint === mint
+        );
+        const preBal = parseFloat(findBal(pre)?.uiTokenAmount?.uiAmountString || '0');
+        const postBal = parseFloat(findBal(post)?.uiTokenAmount?.uiAmountString || '0');
+        amount = postBal - preBal;
+      } else {
+        // Native SOL: compare pre/post lamports for our address
+        const accountKeys = tx.transaction?.message?.accountKeys || [];
+        const idx = accountKeys.findIndex((k: any) => (k.pubkey || k) === address);
+        if (idx >= 0) {
+          const pre = tx.meta?.preBalances?.[idx] ?? 0;
+          const post = tx.meta?.postBalances?.[idx] ?? 0;
+          amount = (post - pre) / 1e9;
+        }
+      }
+      if (amount <= 0) continue;
+
+      out.push({
+        txHash: sig.signature,
+        amount,
+        confirmations: sig.confirmationStatus === 'finalized' ? 32 : sig.confirmationStatus === 'confirmed' ? 1 : 0,
+        timestamp: ts,
+      });
+    }
+    return out;
+  } catch (e) {
+    console.warn(`Solana fetch failed [${c}]:`, (e as Error).message);
+    return [];
   }
-  return out;
 }
 
 async function getIncomingTxs(network: string, coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
