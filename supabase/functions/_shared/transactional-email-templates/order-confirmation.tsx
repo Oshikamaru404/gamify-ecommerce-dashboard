@@ -17,8 +17,7 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = 'BWIVOX'
 const SITE_URL = 'https://bwivox.com'
 const SUPPORT_EMAIL = 'support@bwivox.com'
-const NOREPLY_EMAIL = 'noreply@bwivox.com'
-const WHATSAPP_URL = 'https://wa.me/212600000000'
+const NOREPLY_EMAIL = 'no-reply@bwivox.com'
 const BRAND_RED = '#dc2626'
 const BRAND_RED_DARK = '#991b1b'
 
@@ -85,7 +84,7 @@ const OrderConfirmationEmail = ({
               <tr>
                 <td align="center" style={{ padding: '40px 24px 32px' }}>
                   <Text style={brandWord}>{SITE_NAME}</Text>
-                  <Text style={tagline}>Premium IPTV & Streaming</Text>
+                  <Text style={tagline}>Order confirmation</Text>
                 </td>
               </tr>
             </table>
@@ -103,8 +102,8 @@ const OrderConfirmationEmail = ({
 
             <Heading style={h1}>{greeting}</Heading>
             <Text style={lead}>
-              Thanks for your order! We've received it and your subscription is being prepared.
-              You'll get another email the moment payment is confirmed and your service is activated.
+              Thanks for your order. We've received your request and it is now being reviewed.
+              You'll receive a follow-up email once everything is ready.
             </Text>
 
             {/* ===== Order summary box ===== */}
@@ -193,17 +192,17 @@ const OrderConfirmationEmail = ({
                 <td style={stepCell}>
                   <Text style={stepNumber}>1</Text>
                   <Text style={stepTitle}>Payment confirmed</Text>
-                  <Text style={stepText}>We verify your payment within minutes.</Text>
+                  <Text style={stepText}>We verify your payment details.</Text>
                 </td>
                 <td style={stepCell}>
                   <Text style={stepNumber}>2</Text>
-                  <Text style={stepTitle}>Service activated</Text>
-                  <Text style={stepText}>Credentials sent straight to your inbox.</Text>
+                  <Text style={stepTitle}>Order prepared</Text>
+                  <Text style={stepText}>Your order information is prepared securely.</Text>
                 </td>
                 <td style={stepCell}>
                   <Text style={stepNumber}>3</Text>
-                  <Text style={stepTitle}>Start streaming</Text>
-                  <Text style={stepText}>Enjoy thousands of channels in 4K.</Text>
+                  <Text style={stepTitle}>Details sent</Text>
+                  <Text style={stepText}>You receive the next steps by email.</Text>
                 </td>
               </tr>
             </table>
