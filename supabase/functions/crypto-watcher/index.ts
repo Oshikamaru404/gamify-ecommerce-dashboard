@@ -263,7 +263,7 @@ async function fetchBtcTxs(address: string, sinceTs: number): Promise<IncomingTx
   return out;
 }
 
-// -- BCH (Bitcoin Cash) via blockchair (single dashboard call, no per-tx fetch)
+// -- BCH (Bitcoin Cash) via FullStack.cash → Cashrain (bchn) → Blockbook → Blockchair
 async function fetchWithTimeout(url: string, ms = 8000, init?: RequestInit): Promise<Response> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
