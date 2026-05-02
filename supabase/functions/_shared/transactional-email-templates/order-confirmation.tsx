@@ -12,6 +12,24 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { ov } from './overrides.ts'
+
+const DEFAULTS = {
+  subject: 'Your IPTV Streaming order #{orderId} is confirmed',
+  preview: 'Your BWIVOX order {orderIdHash} is confirmed — payment details inside.',
+  tagline: 'Premium IPTV Streaming',
+  badge: '✓ ORDER CONFIRMED',
+  greeting: 'Hello {name}!',
+  lead: "Thanks for your IPTV streaming order. We've received your request and your channels will be activated shortly. You'll receive your login details by email once ready.",
+  nextHeading: 'What happens next?',
+  step1Title: 'Payment confirmed',
+  step1Text: 'We verify your payment details.',
+  step2Title: 'Order prepared',
+  step2Text: 'Your order information is prepared securely.',
+  step3Title: 'Details sent',
+  step3Text: 'You receive the next steps by email.',
+  finePrint: 'If you have questions about this order, you can reach us.',
+}
 import { getPaymentMethodIcon } from './payment-method-icon.ts'
 
 // Brand constants — baked in at scaffold time
@@ -32,6 +50,7 @@ interface Props {
   amount?: string | number
   currency?: string
   paymentMethod?: string
+  __overrides?: Record<string, string>
 }
 
 const formatPrice = (amount?: string | number, currency = 'EUR') => {
@@ -55,61 +74,66 @@ const prettyCategory = (cat?: string) => {
   return map[k] || cat.charAt(0).toUpperCase() + cat.slice(1)
 }
 
-const OrderConfirmationEmail = ({
-  customerName,
-  orderId,
-  packageName,
-  packageCategory,
-  packageImageUrl,
-  durationLabel,
-  amount,
-  currency = 'EUR',
-  paymentMethod,
-}: Props) => {
-  const greeting = customerName ? `Hello ${customerName}!` : 'Hello!'
+const OrderConfirmationEmail = (props: Props) => {
+  const {
+    customerName,
+    orderId,
+    packageName,
+    packageCategory,
+    packageImageUrl,
+    durationLabel,
+    amount,
+    currency = 'EUR',
+    paymentMethod,
+  } = props
+  const greeting = ov(props, 'greeting', DEFAULTS.greeting).replace('{name}', customerName || '')
+  const tagline = ov(props, 'tagline', DEFAULTS.tagline)
+  const badgeText = ov(props, 'badge', DEFAULTS.badge)
+  const leadText = ov(props, 'lead', DEFAULTS.lead)
+  const nextHeading = ov(props, 'nextHeading', DEFAULTS.nextHeading)
+  const step1T = ov(props, 'step1Title', DEFAULTS.step1Title)
+  const step1X = ov(props, 'step1Text', DEFAULTS.step1Text)
+  const step2T = ov(props, 'step2Title', DEFAULTS.step2Title)
+  const step2X = ov(props, 'step2Text', DEFAULTS.step2Text)
+  const step3T = ov(props, 'step3Title', DEFAULTS.step3Title)
+  const step3X = ov(props, 'step3Text', DEFAULTS.step3Text)
+  const finePrintText = ov(props, 'finePrint', DEFAULTS.finePrint)
+  const previewText = ov(props, 'preview', DEFAULTS.preview).replace('{orderIdHash}', orderId ? `#${orderId}` : '')
   const priceLabel = formatPrice(amount, currency)
   const categoryLabel = prettyCategory(packageCategory)
 
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      {/* Plain preview text — no invisible padding chars (Gmail spam signal) */}
       <div style={{ display: 'none', overflow: 'hidden', lineHeight: '1px', opacity: 0, maxHeight: 0, maxWidth: 0 }}>
-        Your {SITE_NAME} order {orderId ? `#${orderId}` : ''} is confirmed — payment details inside.
+        {previewText}
       </div>
       <Body style={main}>
         <Container style={outerContainer}>
-          {/* ===== Hero band — wordmark only, no logo image ===== */}
           <Section style={heroBand}>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
               <tr>
                 <td align="center" style={{ padding: '40px 24px 32px' }}>
                   <Text style={brandWord}>{SITE_NAME}</Text>
-                  <Text style={tagline}>Premium IPTV Streaming</Text>
+                  <Text style={taglineStyle}>{tagline}</Text>
                 </td>
               </tr>
             </table>
           </Section>
 
-          {/* ===== Confirmation card ===== */}
           <Section style={card}>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
               <tr>
                 <td align="center" style={{ padding: '0 0 8px' }}>
-                  <Text style={successBadge}>✓ ORDER CONFIRMED</Text>
+                  <Text style={successBadge}>{badgeText}</Text>
                 </td>
               </tr>
             </table>
 
             <Heading style={h1}>{greeting}</Heading>
-            <Text style={lead}>
-              Thanks for your IPTV streaming order. We've received your request and your channels
-              will be activated shortly. You'll receive your login details by email once ready.
-            </Text>
+            <Text style={lead}>{leadText}</Text>
 
-            {/* ===== Order summary box ===== */}
             <Section style={summaryBox}>
-              {/* Product header with image */}
               <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
                 <tr>
                   {packageImageUrl ? (
@@ -135,10 +159,8 @@ const OrderConfirmationEmail = ({
                 </tr>
               </table>
 
-              {/* Divider */}
               <div style={dashedDivider} />
 
-              {/* Detail rows */}
               <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
                 {orderId ? (
                   <tr>
@@ -176,39 +198,36 @@ const OrderConfirmationEmail = ({
             </Section>
 
             <Text style={fineprint}>
-              If you have questions about this order, you can reach us at{' '}
+              {finePrintText}{' '}
               <Link href={`mailto:${SUPPORT_EMAIL}`} style={inlineLink}>
                 {SUPPORT_EMAIL}
               </Link>
-              .
             </Text>
           </Section>
 
-          {/* ===== What's next ===== */}
           <Section style={infoStrip}>
-            <Heading style={h2}>What happens next?</Heading>
+            <Heading style={h2}>{nextHeading}</Heading>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
               <tr>
                 <td style={stepCell}>
                   <Text style={stepNumber}>1</Text>
-                  <Text style={stepTitle}>Payment confirmed</Text>
-                  <Text style={stepText}>We verify your payment details.</Text>
+                  <Text style={stepTitle}>{step1T}</Text>
+                  <Text style={stepText}>{step1X}</Text>
                 </td>
                 <td style={stepCell}>
                   <Text style={stepNumber}>2</Text>
-                  <Text style={stepTitle}>Order prepared</Text>
-                  <Text style={stepText}>Your order information is prepared securely.</Text>
+                  <Text style={stepTitle}>{step2T}</Text>
+                  <Text style={stepText}>{step2X}</Text>
                 </td>
                 <td style={stepCell}>
                   <Text style={stepNumber}>3</Text>
-                  <Text style={stepTitle}>Details sent</Text>
-                  <Text style={stepText}>You receive the next steps by email.</Text>
+                  <Text style={stepTitle}>{step3T}</Text>
+                  <Text style={stepText}>{step3X}</Text>
                 </td>
               </tr>
             </table>
           </Section>
 
-          {/* ===== Footer ===== */}
           <Section style={footerBlock}>
             <Text style={footerBrand}>{SITE_NAME}</Text>
             <Text style={footerText}>
@@ -234,9 +253,7 @@ const OrderConfirmationEmail = ({
 export const template = {
   component: OrderConfirmationEmail,
   subject: (data: Record<string, any>) =>
-    data?.orderId
-      ? `Your IPTV Streaming order #${data.orderId} is confirmed`
-      : `Your ${SITE_NAME} IPTV Streaming order is confirmed`,
+    ov(data, 'subject', DEFAULTS.subject).replace('{orderId}', data?.orderId ? String(data.orderId) : ''),
   displayName: 'Client • Order confirmation',
   previewData: {
     customerName: 'John Doe',
@@ -248,6 +265,23 @@ export const template = {
     currency: 'EUR',
     paymentMethod: 'Credit Card',
   },
+  defaults: DEFAULTS,
+  editableFields: [
+    { key: 'subject', label: 'Email subject (use {orderId})', type: 'text' },
+    { key: 'preview', label: 'Inbox preview text (use {orderIdHash})', type: 'text' },
+    { key: 'tagline', label: 'Hero tagline', type: 'text' },
+    { key: 'badge', label: 'Confirmation badge', type: 'text' },
+    { key: 'greeting', label: 'Greeting (use {name})', type: 'text' },
+    { key: 'lead', label: 'Lead paragraph', type: 'textarea' },
+    { key: 'finePrint', label: 'Fine print (before support email)', type: 'textarea' },
+    { key: 'nextHeading', label: '"What\'s next" heading', type: 'text' },
+    { key: 'step1Title', label: 'Step 1 title', type: 'text' },
+    { key: 'step1Text', label: 'Step 1 text', type: 'text' },
+    { key: 'step2Title', label: 'Step 2 title', type: 'text' },
+    { key: 'step2Text', label: 'Step 2 text', type: 'text' },
+    { key: 'step3Title', label: 'Step 3 title', type: 'text' },
+    { key: 'step3Text', label: 'Step 3 text', type: 'text' },
+  ],
 } satisfies TemplateEntry
 
 /* ============== Styles ============== */
@@ -280,7 +314,7 @@ const brandWord = {
   textShadow: '0 2px 8px rgba(0,0,0,0.15)',
 }
 
-const tagline = {
+const taglineStyle = {
   color: 'rgba(255,255,255,0.85)',
   fontSize: '12px',
   fontWeight: 500,

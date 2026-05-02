@@ -10,6 +10,7 @@ import {
   Palette,
   BookOpen,
   MessageSquare,
+  Mail,
   LogOut,
   Menu,
   X
@@ -31,6 +32,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Content', href: '/diza/content', icon: FileText },
     { name: 'Blog', href: '/diza/blog', icon: BookOpen },
     { name: 'Communication', href: '/diza/communication', icon: MessageSquare },
+    { name: 'Email Templates', href: '/diza/emails', icon: Mail },
     { name: 'Settings', href: '/diza/settings', icon: Settings },
   ];
 

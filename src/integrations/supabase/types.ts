@@ -316,6 +316,30 @@ export type Database = {
         }
         Relationships: []
       }
+      email_template_overrides: {
+        Row: {
+          enabled: boolean
+          overrides: Json
+          template_name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          overrides?: Json
+          template_name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          overrides?: Json
+          template_name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       feedbacks: {
         Row: {
           comment: string

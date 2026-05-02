@@ -8,6 +8,7 @@ import Content from '@/pages/admin/Content';
 import Settings from '@/pages/admin/Settings';
 import BlogManagement from '@/pages/admin/BlogManagement';
 import Communication from '@/pages/admin/Communication';
+import EmailTemplates from '@/pages/admin/EmailTemplates';
 
 const AdminRoutes = () => {
   return (
@@ -21,6 +22,7 @@ const AdminRoutes = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/blog" element={<BlogManagement />} />
         <Route path="/communication" element={<Communication />} />
+        <Route path="/emails" element={<EmailTemplates />} />
       </Routes>
     </AdminLayout>
   );

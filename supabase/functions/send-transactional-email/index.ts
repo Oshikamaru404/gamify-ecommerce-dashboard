@@ -1,6 +1,26 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+
+async function loadOverrides(templateName: string): Promise<Record<string, string> | null> {
+  try {
+    const url = Deno.env.get('SUPABASE_URL')
+    const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY')
+    if (!url || !key) return null
+    const supabase = createClient(url, key)
+    const { data, error } = await supabase
+      .from('email_template_overrides')
+      .select('overrides, enabled')
+      .eq('template_name', templateName)
+      .maybeSingle()
+    if (error || !data || !data.enabled) return null
+    return (data.overrides as Record<string, string>) || null
+  } catch (e) {
+    console.warn('Failed to load overrides', e)
+    return null
+  }
+}
 
 const SITE_NAME = 'BWIVOX'
 const PRIMARY_FROM = 'BWIVOX <no-reply@bwivox.com>'
@@ -83,6 +103,12 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: 'recipientEmail is required' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
+  }
+
+  // Merge admin overrides into templateData under __overrides
+  const overrides = await loadOverrides(templateName)
+  if (overrides) {
+    templateData = { ...templateData, __overrides: overrides }
   }
 
   // Render template

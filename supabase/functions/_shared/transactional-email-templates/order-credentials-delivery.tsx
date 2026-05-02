@@ -11,6 +11,22 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { ov } from './overrides.ts'
+
+const DEFAULTS = {
+  subject: '🎉 Your IPTV access is ready — order #{orderId}',
+  preview: 'Your BWIVOX IPTV credentials are ready{orderIdSuffix}.',
+  tagline: 'Your IPTV Access is Ready',
+  badge: '✓ ACCESS DELIVERED',
+  greeting: 'Hello {name}!',
+  lead: "Your IPTV subscription is now active. Below are your access credentials — keep this email safe, you'll need it to set up your player.",
+  m3uLabel: '📺 M3U Playlist URL',
+  m3uHint: 'Paste this link into any IPTV player (Smart IPTV, IPTV Smarters, TiviMate, etc.)',
+  xtreamLabel: '🔐 Xtream Codes API',
+  xtreamHint: 'Use these credentials in players that support Xtream Codes login.',
+  notesLabel: '📝 Notes from our team',
+  finePrint: 'Need help setting up? Contact us.',
+}
 
 const SITE_NAME = 'BWIVOX'
 const SITE_URL = 'https://bwivox.com'
@@ -31,22 +47,34 @@ interface Props {
   xtreamPassword?: string
   expiration?: string
   notes?: string
+  __overrides?: Record<string, string>
 }
 
-const OrderCredentialsDeliveryEmail = ({
-  customerName,
-  orderId,
-  packageName,
-  durationLabel,
-  m3uUrl,
-  xtreamHost,
-  xtreamPort,
-  xtreamUsername,
-  xtreamPassword,
-  expiration,
-  notes,
-}: Props) => {
-  const greeting = customerName ? `Hello ${customerName}!` : 'Hello!'
+const OrderCredentialsDeliveryEmail = (props: Props) => {
+  const {
+    customerName,
+    orderId,
+    packageName,
+    durationLabel,
+    m3uUrl,
+    xtreamHost,
+    xtreamPort,
+    xtreamUsername,
+    xtreamPassword,
+    expiration,
+    notes,
+  } = props
+  const greeting = ov(props, 'greeting', DEFAULTS.greeting).replace('{name}', customerName || '')
+  const taglineText = ov(props, 'tagline', DEFAULTS.tagline)
+  const badgeText = ov(props, 'badge', DEFAULTS.badge)
+  const leadText = ov(props, 'lead', DEFAULTS.lead)
+  const m3uLabelText = ov(props, 'm3uLabel', DEFAULTS.m3uLabel)
+  const m3uHintText = ov(props, 'm3uHint', DEFAULTS.m3uHint)
+  const xtreamLabelText = ov(props, 'xtreamLabel', DEFAULTS.xtreamLabel)
+  const xtreamHintText = ov(props, 'xtreamHint', DEFAULTS.xtreamHint)
+  const notesLabelText = ov(props, 'notesLabel', DEFAULTS.notesLabel)
+  const finePrintText = ov(props, 'finePrint', DEFAULTS.finePrint)
+  const previewText = ov(props, 'preview', DEFAULTS.preview).replace('{orderIdSuffix}', orderId ? ` — order #${orderId}` : '')
   const hasXtream = xtreamHost || xtreamUsername || xtreamPassword
   const xtreamFullHost = xtreamHost
     ? xtreamPort ? `${xtreamHost}:${xtreamPort}` : xtreamHost
@@ -56,39 +84,33 @@ const OrderCredentialsDeliveryEmail = ({
     <Html lang="en" dir="ltr">
       <Head />
       <div style={{ display: 'none', overflow: 'hidden', lineHeight: '1px', opacity: 0, maxHeight: 0, maxWidth: 0 }}>
-        Your {SITE_NAME} IPTV credentials are ready{orderId ? ` — order #${orderId}` : ''}.
+        {previewText}
       </div>
       <Body style={main}>
         <Container style={outerContainer}>
-          {/* Hero */}
           <Section style={heroBand}>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
               <tr>
                 <td align="center" style={{ padding: '40px 24px 32px' }}>
                   <Text style={brandWord}>{SITE_NAME}</Text>
-                  <Text style={tagline}>Your IPTV Access is Ready</Text>
+                  <Text style={tagline}>{taglineText}</Text>
                 </td>
               </tr>
             </table>
           </Section>
 
-          {/* Card */}
           <Section style={card}>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
               <tr>
                 <td align="center" style={{ padding: '0 0 8px' }}>
-                  <Text style={successBadge}>✓ ACCESS DELIVERED</Text>
+                  <Text style={successBadge}>{badgeText}</Text>
                 </td>
               </tr>
             </table>
 
             <Heading style={h1}>{greeting}</Heading>
-            <Text style={lead}>
-              Your IPTV subscription is now active. Below are your access credentials —
-              keep this email safe, you'll need it to set up your player.
-            </Text>
+            <Text style={lead}>{leadText}</Text>
 
-            {/* Order info */}
             {(orderId || packageName || durationLabel) && (
               <Section style={summaryBox}>
                 <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const }}>
@@ -120,26 +142,20 @@ const OrderCredentialsDeliveryEmail = ({
               </Section>
             )}
 
-            {/* M3U */}
             {m3uUrl ? (
               <Section style={credentialBox}>
-                <Text style={credentialLabel}>📺 M3U Playlist URL</Text>
-                <Text style={credentialHint}>
-                  Paste this link into any IPTV player (Smart IPTV, IPTV Smarters, TiviMate, etc.)
-                </Text>
+                <Text style={credentialLabel}>{m3uLabelText}</Text>
+                <Text style={credentialHint}>{m3uHintText}</Text>
                 <div style={codeBlock}>
                   <Link href={m3uUrl} style={codeLink}>{m3uUrl}</Link>
                 </div>
               </Section>
             ) : null}
 
-            {/* Xtream */}
             {hasXtream ? (
               <Section style={credentialBox}>
-                <Text style={credentialLabel}>🔐 Xtream Codes API</Text>
-                <Text style={credentialHint}>
-                  Use these credentials in players that support Xtream Codes login.
-                </Text>
+                <Text style={credentialLabel}>{xtreamLabelText}</Text>
+                <Text style={credentialHint}>{xtreamHintText}</Text>
                 <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ borderCollapse: 'collapse' as const, marginTop: 8 }}>
                   {xtreamFullHost ? (
                     <tr>
@@ -163,21 +179,19 @@ const OrderCredentialsDeliveryEmail = ({
               </Section>
             ) : null}
 
-            {/* Notes */}
             {notes ? (
               <Section style={notesBox}>
-                <Text style={notesLabel}>📝 Notes from our team</Text>
+                <Text style={notesLabel}>{notesLabelText}</Text>
                 <Text style={notesText}>{notes}</Text>
               </Section>
             ) : null}
 
             <Text style={fineprint}>
-              Need help setting up? Contact us at{' '}
-              <Link href={`mailto:${SUPPORT_EMAIL}`} style={inlineLink}>{SUPPORT_EMAIL}</Link>.
+              {finePrintText}{' '}
+              <Link href={`mailto:${SUPPORT_EMAIL}`} style={inlineLink}>{SUPPORT_EMAIL}</Link>
             </Text>
           </Section>
 
-          {/* Footer */}
           <Section style={footerBlock}>
             <Text style={footerBrand}>{SITE_NAME}</Text>
             <Text style={footerText}>
@@ -203,9 +217,7 @@ const OrderCredentialsDeliveryEmail = ({
 export const template = {
   component: OrderCredentialsDeliveryEmail,
   subject: (data: Record<string, any>) =>
-    data?.orderId
-      ? `🎉 Your IPTV access is ready — order #${data.orderId}`
-      : `🎉 Your ${SITE_NAME} IPTV access is ready`,
+    ov(data, 'subject', DEFAULTS.subject).replace('{orderId}', data?.orderId ? String(data.orderId) : ''),
   displayName: 'Client • Credentials delivery',
   previewData: {
     customerName: 'John Doe',
@@ -220,6 +232,21 @@ export const template = {
     expiration: '2026-05-01',
     notes: 'Welcome aboard! Restart your app after entering the credentials.',
   },
+  defaults: DEFAULTS,
+  editableFields: [
+    { key: 'subject', label: 'Email subject (use {orderId})', type: 'text' },
+    { key: 'preview', label: 'Inbox preview text (use {orderIdSuffix})', type: 'text' },
+    { key: 'tagline', label: 'Hero tagline', type: 'text' },
+    { key: 'badge', label: 'Top badge', type: 'text' },
+    { key: 'greeting', label: 'Greeting (use {name})', type: 'text' },
+    { key: 'lead', label: 'Lead paragraph', type: 'textarea' },
+    { key: 'm3uLabel', label: 'M3U section label', type: 'text' },
+    { key: 'm3uHint', label: 'M3U hint text', type: 'textarea' },
+    { key: 'xtreamLabel', label: 'Xtream section label', type: 'text' },
+    { key: 'xtreamHint', label: 'Xtream hint text', type: 'textarea' },
+    { key: 'notesLabel', label: 'Notes section label', type: 'text' },
+    { key: 'finePrint', label: 'Fine print (before support email)', type: 'text' },
+  ],
 } satisfies TemplateEntry
 
 /* ============== Styles ============== */

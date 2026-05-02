@@ -4,39 +4,61 @@ import {
   Body, Container, Head, Heading, Html, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { ov } from './overrides.ts'
 
 interface Props {
   customerName?: string
   rating?: number | string
   comment?: string
   email?: string
+  __overrides?: Record<string, string>
 }
 
-const AdminFeedbackEmail = (p: Props) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>⭐ New feedback received</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>⭐ New Customer Feedback</Heading>
-        <Section style={card}>
-          {p.customerName && <Text style={row}><strong>From:</strong> {p.customerName}</Text>}
-          {p.email && <Text style={row}><strong>Email:</strong> {p.email}</Text>}
-          {p.rating && <Text style={rating}>{'⭐'.repeat(Number(p.rating) || 0)} ({p.rating}/5)</Text>}
-          {p.comment && <Text style={comment}>"{p.comment}"</Text>}
-        </Section>
-        <Text style={footer}>Review and approve in the admin panel.</Text>
-      </Container>
-    </Body>
-  </Html>
-)
+const DEFAULTS = {
+  subject: '⭐ New feedback ({rating}/5)',
+  preview: '⭐ New feedback received',
+  heading: '⭐ New Customer Feedback',
+  footerNote: 'Review and approve in the admin panel.',
+}
+
+const AdminFeedbackEmail = (p: Props) => {
+  const heading = ov(p, 'heading', DEFAULTS.heading)
+  const footerNote = ov(p, 'footerNote', DEFAULTS.footerNote)
+  const preview = ov(p, 'preview', DEFAULTS.preview)
+  return (
+    <Html lang="en" dir="ltr">
+      <Head />
+      <Preview>{preview}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Heading style={h1}>{heading}</Heading>
+          <Section style={card}>
+            {p.customerName && <Text style={row}><strong>From:</strong> {p.customerName}</Text>}
+            {p.email && <Text style={row}><strong>Email:</strong> {p.email}</Text>}
+            {p.rating && <Text style={rating}>{'⭐'.repeat(Number(p.rating) || 0)} ({p.rating}/5)</Text>}
+            {p.comment && <Text style={comment}>"{p.comment}"</Text>}
+          </Section>
+          <Text style={footer}>{footerNote}</Text>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
 
 export const template = {
   component: AdminFeedbackEmail,
-  subject: (d: Record<string, any>) => `⭐ New feedback${d?.rating ? ` (${d.rating}/5)` : ''}`,
+  subject: (d: Record<string, any>) =>
+    ov(d, 'subject', DEFAULTS.subject).replace('{rating}', d?.rating ? String(d.rating) : '?'),
   to: 'bwivox@gmail.com',
   displayName: 'Admin • New feedback',
   previewData: { customerName: 'Jane', email: 'jane@example.com', rating: 5, comment: 'Great service!' },
+  defaults: DEFAULTS,
+  editableFields: [
+    { key: 'subject', label: 'Email subject (use {rating})', type: 'text' },
+    { key: 'preview', label: 'Inbox preview text', type: 'text' },
+    { key: 'heading', label: 'Main heading', type: 'text' },
+    { key: 'footerNote', label: 'Footer note', type: 'text' },
+  ],
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
