@@ -61,22 +61,16 @@ const BLOCKSCOUT_BASES: Record<string, string> = {
   bep20: 'https://api.bscscan.com/api',
 };
 
-// BSCTrace by NodeReal MegaNode — Etherscan-compatible, official BNB Chain replacement
+// NodeReal MegaNode — JSON-RPC 2.0 endpoint for BSC (replaces deprecated BscScan V1)
+// Uses Enhanced API `nr_getAssetTransfers` which mirrors Etherscan's `tokentx` / `txlist`.
 const MEGANODE_KEY = Deno.env.get('MEGANODE_API_KEY') ?? '';
-const BSCTRACE_BASE = MEGANODE_KEY
-  ? `https://open-platform.nodereal.io/${MEGANODE_KEY}/bsctrace`
+const MEGANODE_BSC_RPC = MEGANODE_KEY
+  ? `https://bsc-mainnet.nodereal.io/v1/${MEGANODE_KEY}`
   : '';
 
 function buildExplorerUrls(network: string, params: Record<string, string>): string[] {
   const n = network.toLowerCase();
   const urls: string[] = [];
-
-  // Priority 1 for BSC: BSCTrace (NodeReal MegaNode) — Etherscan-compatible
-  if ((n === 'bsc' || n === 'bep20') && BSCTRACE_BASE) {
-    const qs = new URLSearchParams(params);
-    urls.push(`${BSCTRACE_BASE}?${qs.toString()}`);
-  }
-
   const chainId = CHAIN_IDS[n];
   if (chainId && ETHERSCAN_KEY) {
     const qs = new URLSearchParams({ chainid: String(chainId), ...params, apikey: ETHERSCAN_KEY });
@@ -88,6 +82,74 @@ function buildExplorerUrls(network: string, params: Record<string, string>): str
     urls.push(`${bs}?${qs.toString()}`);
   }
   return urls;
+}
+
+// MegaNode JSON-RPC call helper
+async function meganodeRpc(method: string, params: unknown[]): Promise<any> {
+  if (!MEGANODE_BSC_RPC) throw new Error('MEGANODE_API_KEY not configured');
+  const res = await fetch(MEGANODE_BSC_RPC, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`MegaNode RPC error: ${JSON.stringify(data.error)}`);
+  return data.result;
+}
+
+// Fetch BSC asset transfers (native BNB or BEP20 token) via NodeReal Enhanced API.
+// Returns the same shape as Etherscan's tokentx/txlist for downstream parsing.
+async function fetchBscAssetTransfers(opts: {
+  toAddress: string;
+  category: 'external' | '20'; // 'external' = native BNB, '20' = BEP20
+  contractAddress?: string;
+}): Promise<any[]> {
+  if (!MEGANODE_BSC_RPC) return [];
+  // Get latest block once for confirmations math
+  const latestHex: string = await meganodeRpc('eth_blockNumber', []).catch(() => '0x0');
+  const latest = parseInt(latestHex, 16) || 0;
+
+  const rpcParams: Record<string, unknown> = {
+    category: [opts.category],
+    toAddress: opts.toAddress,
+    maxCount: '0x32', // 50
+    order: 'desc',
+    excludeZeroValue: true,
+    withMetadata: true,
+  };
+  if (opts.contractAddress) rpcParams.contractAddresses = [opts.contractAddress];
+
+  const result = await meganodeRpc('nr_getAssetTransfers', [rpcParams]).catch((e) => {
+    console.warn('[bsc] nr_getAssetTransfers failed:', e.message);
+    return null;
+  });
+  const transfers = result?.transfers || [];
+
+  // Map to Etherscan-like shape
+  return transfers.map((t: any) => {
+    const blockNum = parseInt(t.blockNum || '0x0', 16);
+    const tsIso = t.metadata?.blockTimestamp;
+    const ts = tsIso ? Math.floor(new Date(tsIso).getTime() / 1000) : 0;
+    // value: decimal string for native, raw token units for BEP20 in `rawContract.value` (hex)
+    let valueRaw: string;
+    if (opts.category === 'external') {
+      // native BNB — `value` is decimal in BNB, convert back to wei-equivalent string
+      const bnb = parseFloat(t.value || '0');
+      valueRaw = Math.floor(bnb * 1e18).toString();
+    } else {
+      const hex = t.rawContract?.value || '0x0';
+      valueRaw = BigInt(hex).toString();
+    }
+    return {
+      hash: t.hash,
+      to: t.to,
+      from: t.from,
+      value: valueRaw,
+      timeStamp: String(ts),
+      confirmations: String(Math.max(0, latest - blockNum)),
+      isError: '0',
+    };
+  });
 }
 
 async function fetchWithFallback(network: string, params: Record<string, string>): Promise<any[]> {
