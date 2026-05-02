@@ -364,7 +364,6 @@ async function fetchEvmTokenTxs(network: string, coin: string, address: string, 
   let result: any[];
   if ((n === 'bsc' || n === 'bep20') && MEGANODE_BSC_RPC) {
     result = await fetchBscAssetTransfers({ toAddress: address, category: '20', contractAddress: contract });
-    console.log(`[bep20-token] mapped ${result.length} txs for ${address.slice(0, 10)} (first ts=${result[0]?.timeStamp}, to=${result[0]?.to?.slice(0, 10)})`);
   } else {
     if (!isEvmSupported(network)) return [];
     result = await fetchWithFallback(network, {
