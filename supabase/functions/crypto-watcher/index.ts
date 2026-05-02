@@ -125,6 +125,24 @@ const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
     usdc: '0x176211869cA2b568f2A7D4EE941E073a821EE1ff',
     usdt: '0xA219439258ca9da29E9Cc4cE5596924745e12B93',
   },
+  arbitrum: {
+    usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', // native USDC
+    usdt: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+  },
+  arb: {
+    usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+    usdt: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+  },
+  optimism: {
+    usdc: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85', // native USDC
+    usdt: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+    op:   '0x4200000000000000000000000000000000000042',
+  },
+  op: {
+    usdc: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
+    usdt: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+    op:   '0x4200000000000000000000000000000000000042',
+  },
 };
 
 const COIN_DECIMALS: Record<string, number> = {
