@@ -580,11 +580,17 @@ async function fetchBchFromBlockchair(address: string, sinceTs: number): Promise
 }
 
 async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
-  // Trezor Blockbook (primary), Blockchair (fallback)
+  // 1. ElectrumX WSS pool (no key, decentralized, BCH-native protocol)
+  try {
+    const r = await fetchBchFromElectrumX(address, sinceTs);
+    if (r !== null) return r;
+  } catch (e) { console.warn('BCH electrumx failed:', (e as Error).message); }
+  // 2. Trezor Blockbook
   try {
     const r = await fetchBchFromBlockbook(address, sinceTs);
     if (r !== null) return r;
   } catch (e) { console.warn('BCH blockbook failed:', (e as Error).message); }
+  // 3. Blockchair (rate-limited safety net)
   try {
     const r = await fetchBchFromBlockchair(address, sinceTs);
     if (r !== null) return r;
