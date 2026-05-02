@@ -1,0 +1,60 @@
+-- Seed automation config (singleton)
+INSERT INTO public.blog_automation_config (is_active, languages, articles_per_run, auto_publish, ai_model, image_model)
+SELECT true, ARRAY['en','fr','ar'], 1, true, 'google/gemini-3-flash-preview', 'google/gemini-2.5-flash-image'
+WHERE NOT EXISTS (SELECT 1 FROM public.blog_automation_config);
+
+-- Seed 50 SEO-optimized topics
+INSERT INTO public.blog_topics_queue (topic_en, topic_fr, topic_ar, target_keywords, category, sort_order) VALUES
+-- EN-only seeds (25)
+('Best IPTV Subscription 2026: Top 10 Premium Services Compared', NULL, NULL, ARRAY['best iptv subscription','iptv 2026','premium iptv'], 'iptv', 10),
+('How to Install IPTV on Samsung Smart TV (Step-by-Step Guide)', NULL, NULL, ARRAY['iptv samsung smart tv','install iptv samsung','smart tv iptv'], 'iptv', 20),
+('How to Install IPTV on LG Smart TV with WebOS', NULL, NULL, ARRAY['iptv lg smart tv','webos iptv','lg iptv app'], 'iptv', 30),
+('Best IPTV Player Apps for Firestick in 2026', NULL, NULL, ARRAY['iptv firestick','best firestick iptv app','amazon fire tv iptv'], 'player', 40),
+('IPTV vs Netflix: Which is Better for Your TV?', NULL, NULL, ARRAY['iptv vs netflix','iptv comparison','streaming services'], 'iptv', 50),
+('How to Set Up IPTV on Amazon Fire TV Stick', NULL, NULL, ARRAY['iptv fire tv stick','setup iptv firestick','amazon fire tv iptv'], 'iptv', 60),
+('Top 5 IPTV Apps for Android TV Box', NULL, NULL, ARRAY['android tv iptv','iptv android box','best iptv android'], 'player', 70),
+('IPTV Buffering Issues: Complete Troubleshooting Guide', NULL, NULL, ARRAY['iptv buffering','fix iptv buffering','iptv lag'], 'iptv', 80),
+('What is IPTV M3U? Complete Beginner Guide', NULL, NULL, ARRAY['iptv m3u','m3u playlist','what is m3u'], 'iptv', 90),
+('How to Watch Sports Live with IPTV (NFL, NBA, Premier League)', NULL, NULL, ARRAY['iptv sports','watch nfl iptv','premier league iptv'], 'iptv', 100),
+('Best 4K IPTV Services with EPG Guide', NULL, NULL, ARRAY['4k iptv','iptv epg','best 4k iptv service'], 'iptv', 110),
+('How to Use VLC Player as an IPTV Player', NULL, NULL, ARRAY['vlc iptv','vlc m3u player','iptv on vlc'], 'player', 120),
+('Smart IPTV vs IPTV Smarters Pro: Which to Choose?', NULL, NULL, ARRAY['smart iptv','iptv smarters pro','best iptv app'], 'player', 130),
+('IPTV on iPhone & iPad: Best Apps and Setup', NULL, NULL, ARRAY['iptv iphone','iptv ipad','ios iptv app'], 'player', 140),
+('How to Install IPTV on MAG Box (250, 322, 524)', NULL, NULL, ARRAY['iptv mag box','mag 322 iptv','mag 524 setup'], 'iptv', 150),
+('Free IPTV Trial: How to Test Before You Buy', NULL, NULL, ARRAY['free iptv trial','iptv test','try iptv free'], 'iptv', 160),
+('Best IPTV for International Channels (Arabic, French, Latin)', NULL, NULL, ARRAY['international iptv','arabic iptv','french iptv'], 'iptv', 170),
+('IPTV Reseller Business: How to Start in 2026', NULL, NULL, ARRAY['iptv reseller','start iptv business','iptv panel reseller'], 'iptv', 180),
+('How to Avoid IPTV Scams: 7 Red Flags to Watch', NULL, NULL, ARRAY['iptv scams','avoid iptv fraud','safe iptv provider'], 'iptv', 190),
+('IPTV on Roku: Best Apps and Workarounds', NULL, NULL, ARRAY['iptv roku','roku iptv app','iptv on roku tv'], 'player', 200),
+('Xtream Codes IPTV: Complete Setup Tutorial', NULL, NULL, ARRAY['xtream codes','xtream iptv','xtream player'], 'iptv', 210),
+('How to Record IPTV Channels (DVR Guide)', NULL, NULL, ARRAY['record iptv','iptv dvr','iptv recording software'], 'iptv', 220),
+('IPTV vs Cable TV: 8 Reasons to Switch in 2026', NULL, NULL, ARRAY['iptv vs cable','cord cutting','switch from cable'], 'iptv', 230),
+('Best IPTV for Football: Premier League, La Liga, Serie A', NULL, NULL, ARRAY['football iptv','soccer iptv','premier league streaming'], 'iptv', 240),
+('How to Fix IPTV Not Working on Smart TV', NULL, NULL, ARRAY['iptv not working','fix smart tv iptv','iptv troubleshooting'], 'iptv', 250),
+-- FR-only seeds (15)
+(NULL, 'Meilleur Abonnement IPTV 2026 : Comparatif des 10 Services Premium', NULL, ARRAY['meilleur abonnement iptv','iptv 2026','iptv premium'], 'iptv', 260),
+(NULL, 'Comment Installer IPTV sur Smart TV Samsung (Guide Étape par Étape)', NULL, ARRAY['iptv samsung smart tv','installer iptv samsung','smart tv iptv'], 'iptv', 270),
+(NULL, 'Comment Installer IPTV sur Smart TV LG avec WebOS', NULL, ARRAY['iptv lg smart tv','webos iptv','lg iptv'], 'iptv', 280),
+(NULL, 'Meilleures Applications IPTV pour Firestick en 2026', NULL, ARRAY['iptv firestick','meilleure app firestick','amazon fire tv iptv'], 'player', 290),
+(NULL, 'IPTV vs Netflix : Quel est le Meilleur pour Votre TV ?', NULL, ARRAY['iptv vs netflix','comparatif iptv netflix','streaming'], 'iptv', 300),
+(NULL, 'Comment Configurer IPTV sur Amazon Fire TV Stick', NULL, ARRAY['iptv fire tv stick','configurer iptv firestick','amazon fire tv iptv'], 'iptv', 310),
+(NULL, 'Top 5 Applications IPTV pour Box Android TV', NULL, ARRAY['android tv iptv','iptv android box','meilleure app iptv android'], 'player', 320),
+(NULL, 'Problèmes de Mise en Mémoire IPTV : Guide de Dépannage Complet', NULL, ARRAY['iptv buffering','résoudre buffering iptv','iptv lag'], 'iptv', 330),
+(NULL, 'Qu''est-ce qu''IPTV M3U ? Guide Complet pour Débutants', NULL, ARRAY['iptv m3u','playlist m3u','c''est quoi m3u'], 'iptv', 340),
+(NULL, 'Comment Regarder le Sport en Direct avec IPTV (Ligue 1, Champions League)', NULL, ARRAY['iptv sport','ligue 1 iptv','champions league iptv'], 'iptv', 350),
+(NULL, 'Meilleurs Services IPTV 4K avec Guide EPG', NULL, ARRAY['iptv 4k','iptv epg','meilleur iptv 4k'], 'iptv', 360),
+(NULL, 'IPTV sur iPhone & iPad : Meilleures Applications', NULL, ARRAY['iptv iphone','iptv ipad','app ios iptv'], 'player', 370),
+(NULL, 'Comment Installer IPTV sur Box MAG (250, 322, 524)', NULL, ARRAY['iptv mag box','mag 322 iptv','mag 524 configuration'], 'iptv', 380),
+(NULL, 'Essai IPTV Gratuit : Comment Tester Avant d''Acheter', NULL, ARRAY['essai iptv gratuit','test iptv','iptv gratuit'], 'iptv', 390),
+(NULL, 'Devenir Revendeur IPTV : Comment Démarrer en 2026', NULL, ARRAY['revendeur iptv','panel revendeur','business iptv'], 'iptv', 400),
+-- AR-only seeds (10)
+(NULL, NULL, 'أفضل اشتراك IPTV 2026: مقارنة بين أفضل 10 خدمات بريميوم', ARRAY['أفضل اشتراك iptv','iptv 2026','iptv بريميوم'], 'iptv', 410),
+(NULL, NULL, 'كيفية تثبيت IPTV على تلفزيون Samsung الذكي (دليل خطوة بخطوة)', ARRAY['iptv samsung','تثبيت iptv','smart tv iptv'], 'iptv', 420),
+(NULL, NULL, 'كيفية تثبيت IPTV على Smart TV من LG', ARRAY['iptv lg','lg smart tv','webos iptv'], 'iptv', 430),
+(NULL, NULL, 'أفضل تطبيقات IPTV لجهاز Firestick في 2026', ARRAY['iptv firestick','أفضل تطبيق firestick','fire tv iptv'], 'player', 440),
+(NULL, NULL, 'IPTV مقابل Netflix: أيهما أفضل لتلفزيونك؟', ARRAY['iptv vs netflix','مقارنة iptv','بث مباشر'], 'iptv', 450),
+(NULL, NULL, 'كيفية إعداد IPTV على Amazon Fire TV Stick', ARRAY['iptv fire tv stick','إعداد iptv','amazon fire tv'], 'iptv', 460),
+(NULL, NULL, 'مشاكل التخزين المؤقت في IPTV: دليل استكشاف الأخطاء', ARRAY['iptv buffering','حل مشاكل iptv','تأخر iptv'], 'iptv', 470),
+(NULL, NULL, 'ما هو IPTV M3U؟ دليل كامل للمبتدئين', ARRAY['iptv m3u','قائمة m3u','شرح m3u'], 'iptv', 480),
+(NULL, NULL, 'كيفية مشاهدة الرياضة المباشرة مع IPTV (دوري أبطال أوروبا)', ARRAY['iptv رياضة','مشاهدة كرة قدم','دوري أبطال أوروبا iptv'], 'iptv', 490),
+(NULL, NULL, 'أفضل خدمات IPTV 4K بدقة عالية', ARRAY['iptv 4k','أفضل iptv','جودة عالية'], 'iptv', 500);
