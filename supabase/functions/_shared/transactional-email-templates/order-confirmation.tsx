@@ -17,7 +17,7 @@ import type { TemplateEntry } from './registry.ts'
 // Brand constants — baked in at scaffold time
 const SITE_NAME = 'BWIVOX'
 const SITE_URL = 'https://bwivox.com'
-const SUPPORT_EMAIL = 'bwivox@gmail.com'
+const SUPPORT_EMAIL = 'support@bwivox.com'
 const NOREPLY_EMAIL = 'noreply@bwivox.com'
 const WHATSAPP_URL = 'https://wa.me/212600000000'
 const BRAND_RED = '#dc2626'
