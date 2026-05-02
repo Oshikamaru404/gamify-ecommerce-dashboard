@@ -450,7 +450,7 @@ const inlineLink = {
 }
 
 const infoStrip = {
-  margin: '24px 16px 0',
+  margin: '20px 0 0',
   padding: '24px 20px',
   backgroundColor: '#0f172a',
   borderRadius: '16px',
