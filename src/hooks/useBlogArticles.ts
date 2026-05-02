@@ -38,15 +38,23 @@ export type UpdateBlogArticleData = {
   published?: boolean;
 };
 
-// Hook to fetch published blog articles (public)
+import { useLanguage } from '@/contexts/LanguageContext';
+
+const resolveLang = (lang: string): 'en' | 'fr' | 'ar' =>
+  (['en', 'fr', 'ar'].includes(lang) ? lang : 'en') as 'en' | 'fr' | 'ar';
+
+// Hook to fetch published blog articles (public) - filtered by current site language
 export const useBlogArticles = () => {
+  const { language } = useLanguage();
+  const lang = resolveLang(language);
   return useQuery({
-    queryKey: ['blog-articles'],
+    queryKey: ['blog-articles', lang],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('blog_articles')
         .select('*')
         .eq('published', true)
+        .eq('language_code', lang)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -58,16 +66,19 @@ export const useBlogArticles = () => {
   });
 };
 
-// Hook to fetch published blog articles by category (public)
+// Hook to fetch published blog articles by category (public) - filtered by current site language
 export const useBlogArticlesByCategory = (category: 'iptv' | 'player') => {
+  const { language } = useLanguage();
+  const lang = resolveLang(language);
   return useQuery({
-    queryKey: ['blog-articles', category],
+    queryKey: ['blog-articles', category, lang],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('blog_articles')
         .select('*')
         .eq('published', true)
         .eq('category', category)
+        .eq('language_code', lang)
         .order('created_at', { ascending: false });
 
       if (error) {

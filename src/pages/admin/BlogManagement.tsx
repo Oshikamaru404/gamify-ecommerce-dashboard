@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Plus, BookOpen, Sparkles } from 'lucide-react';
-import { useBlogArticles, useDeleteBlogArticle } from '@/hooks/useBlogArticles';
+import { useAllBlogArticles, useDeleteBlogArticle } from '@/hooks/useBlogArticles';
 import MultilingualBlogDialog from '@/components/admin/MultilingualBlogDialog';
 import { toast } from 'sonner';
 import MultilingualBlogCard from '@/components/admin/MultilingualBlogCard';
@@ -14,7 +14,7 @@ const BlogManagement = () => {
   const [editingArticle, setEditingArticle] = useState(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [tab, setTab] = useState<'articles' | 'automation'>('articles');
-  const { data: articles, isLoading, error } = useBlogArticles();
+  const { data: articles, isLoading, error } = useAllBlogArticles();
   const deleteArticle = useDeleteBlogArticle();
 
   useEffect(() => {
