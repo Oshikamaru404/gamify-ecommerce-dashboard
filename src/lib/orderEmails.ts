@@ -7,7 +7,10 @@ interface OrderEmailInput {
   customer_whatsapp?: string | null;
   package_name: string;
   package_category?: string;
+  package_image_url?: string | null;
+  duration_months?: number | null;
   amount: number;
+  currency?: string;
   order_type?: string;
   payment_status?: string;
   paymentMethodLabel?: string;
