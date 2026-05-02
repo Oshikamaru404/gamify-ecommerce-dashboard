@@ -28,21 +28,78 @@ interface IncomingTx {
   timestamp: number;    // unix sec
 }
 
-// ---------- Per-chain explorers (free public APIs) ----------
+// ---------- Per-chain explorers (Etherscan V2 unified + Blockscout fallback) ----------
 
-// Free, no-key Etherscan-compatible explorers.
-// BaseScan/LineaScan/etc. V1 endpoints are deprecated and Etherscan V2 requires a paid plan
-// for non-mainnet chains. Blockscout offers a free Etherscan-compatible API for Base & Linea.
-const ETHERSCAN_BASES: Record<string, string> = {
-  erc20: 'https://api.etherscan.io/api',
-  eth: 'https://api.etherscan.io/api',
-  bep20: 'https://api.bscscan.com/api',
-  bsc: 'https://api.bscscan.com/api',
-  polygon: 'https://api.polygonscan.com/api',
-  matic: 'https://api.polygonscan.com/api',
-  base: 'https://base.blockscout.com/api',
-  linea: 'https://eth.blockscout.com/api', // fallback; replaced per-chain below if needed
+const ETHERSCAN_V2 = 'https://api.etherscan.io/v2/api';
+const ETHERSCAN_KEY = Deno.env.get('ETHERSCAN_API_KEY') || '';
+
+// Etherscan V2 chain IDs (one unified API + key for 60+ chains)
+const CHAIN_IDS: Record<string, number> = {
+  eth: 1, erc20: 1,
+  bsc: 56, bep20: 56,
+  polygon: 137, matic: 137,
+  base: 8453,
+  linea: 59144,
+  arbitrum: 42161, arb: 42161,
+  optimism: 10, op: 10,
 };
+
+// Free Blockscout fallbacks (no key required) — Etherscan-compatible API
+const BLOCKSCOUT_BASES: Record<string, string> = {
+  eth: 'https://eth.blockscout.com/api',
+  erc20: 'https://eth.blockscout.com/api',
+  base: 'https://base.blockscout.com/api',
+  polygon: 'https://polygon.blockscout.com/api',
+  matic: 'https://polygon.blockscout.com/api',
+  linea: 'https://explorer.linea.build/api',
+  arbitrum: 'https://arbitrum.blockscout.com/api',
+  arb: 'https://arbitrum.blockscout.com/api',
+  optimism: 'https://optimism.blockscout.com/api',
+  op: 'https://optimism.blockscout.com/api',
+  // BSC: no reliable free Blockscout — V2 only
+};
+
+function buildExplorerUrls(network: string, params: Record<string, string>): string[] {
+  const n = network.toLowerCase();
+  const urls: string[] = [];
+  const chainId = CHAIN_IDS[n];
+  if (chainId && ETHERSCAN_KEY) {
+    const qs = new URLSearchParams({ chainid: String(chainId), ...params, apikey: ETHERSCAN_KEY });
+    urls.push(`${ETHERSCAN_V2}?${qs.toString()}`);
+  }
+  const bs = BLOCKSCOUT_BASES[n];
+  if (bs) {
+    const qs = new URLSearchParams(params);
+    urls.push(`${bs}?${qs.toString()}`);
+  }
+  return urls;
+}
+
+async function fetchWithFallback(network: string, params: Record<string, string>): Promise<any[]> {
+  const urls = buildExplorerUrls(network, params);
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.warn(`[${network}] HTTP ${res.status} on ${url.split('?')[0]}`);
+        continue;
+      }
+      const data = await res.json();
+      if (Array.isArray(data?.result)) return data.result;
+      // status="0" with empty message often means "no transactions found" — treat as success
+      if (data?.status === '0' && /no transactions/i.test(data?.message || '')) return [];
+      console.warn(`[${network}] Unexpected response from ${url.split('?')[0]}: ${JSON.stringify(data).slice(0, 200)}`);
+    } catch (e) {
+      console.warn(`[${network}] Fetch failed on ${url.split('?')[0]}:`, (e as Error).message);
+    }
+  }
+  return [];
+}
+
+function isEvmSupported(network: string): boolean {
+  const n = network.toLowerCase();
+  return CHAIN_IDS[n] !== undefined || BLOCKSCOUT_BASES[n] !== undefined;
+}
 
 // Token contract addresses for stablecoins on each EVM chain
 const TOKEN_CONTRACTS: Record<string, Record<string, string>> = {
@@ -113,15 +170,17 @@ async function fetchBtcTxs(address: string, sinceTs: number): Promise<IncomingTx
   return out;
 }
 
-// -- EVM native (ETH/BNB/POL/etc.)
+// -- EVM native (ETH/BNB/POL/etc.) — uses Etherscan V2 → Blockscout fallback
 async function fetchEvmNativeTxs(network: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  const base = ETHERSCAN_BASES[network.toLowerCase()];
-  if (!base) return [];
-  const url = `${base}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data = await res.json();
-  const result = Array.isArray(data?.result) ? data.result : [];
+  if (!isEvmSupported(network)) return [];
+  const result = await fetchWithFallback(network, {
+    module: 'account',
+    action: 'txlist',
+    address,
+    startblock: '0',
+    endblock: '99999999',
+    sort: 'desc',
+  });
   const out: IncomingTx[] = [];
   for (const tx of result) {
     const ts = parseInt(tx.timeStamp || '0');
@@ -139,16 +198,17 @@ async function fetchEvmNativeTxs(network: string, address: string, sinceTs: numb
   return out;
 }
 
-// -- EVM token (USDT/USDC on EVM chains)
+// -- EVM token (USDT/USDC on EVM chains) — uses Etherscan V2 → Blockscout fallback
 async function fetchEvmTokenTxs(network: string, coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  const base = ETHERSCAN_BASES[network.toLowerCase()];
   const contract = TOKEN_CONTRACTS[network.toLowerCase()]?.[coin.toLowerCase()];
-  if (!base || !contract) return [];
-  const url = `${base}?module=account&action=tokentx&contractaddress=${contract}&address=${address}&sort=desc`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data = await res.json();
-  const result = Array.isArray(data?.result) ? data.result : [];
+  if (!contract || !isEvmSupported(network)) return [];
+  const result = await fetchWithFallback(network, {
+    module: 'account',
+    action: 'tokentx',
+    contractaddress: contract,
+    address,
+    sort: 'desc',
+  });
   const dec = decimalsFor(network, coin);
   const out: IncomingTx[] = [];
   for (const tx of result) {
@@ -217,7 +277,7 @@ async function getIncomingTxs(network: string, coin: string, address: string, si
     if (n === 'btc' || c === 'btc') return await fetchBtcTxs(address, sinceTs);
     if (n === 'trc20' || n === 'tron') return await fetchTronTxs(c, address, sinceTs);
     if (n === 'solana' || n === 'sol') return await fetchSolanaTxs(c, address, sinceTs);
-    if (ETHERSCAN_BASES[n]) {
+    if (isEvmSupported(n)) {
       // Stablecoin on EVM => token; else native
       if (TOKEN_CONTRACTS[n]?.[c]) return await fetchEvmTokenTxs(network, coin, address, sinceTs);
       return await fetchEvmNativeTxs(network, address, sinceTs);
