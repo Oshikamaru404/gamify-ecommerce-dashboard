@@ -121,7 +121,8 @@ async function generateArticleContent(
   keywords: string[],
   category: string,
   lang: string,
-  model: string
+  model: string,
+  angle: 'indirect' | 'direct'
 ) {
   const resp = await fetch(
     "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -134,7 +135,7 @@ async function generateArticleContent(
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: buildSystemPrompt(lang) },
+          { role: "system", content: buildSystemPrompt(lang, angle) },
           {
             role: "user",
             content: `Write a complete SEO-optimized article on this topic: "${topic}"
@@ -230,12 +231,14 @@ async function processLanguage(
 
   if (!topicText) throw new Error(`No topic text for language ${lang}`);
 
+  const angle: 'indirect' | 'direct' = topic.angle === 'direct' ? 'direct' : 'indirect';
   const article = await generateArticleContent(
     topicText,
     topic.target_keywords || [],
     topic.category || "iptv",
     lang,
-    config.ai_model
+    config.ai_model,
+    angle
   );
 
   // Build language-prefixed slug to avoid collisions
