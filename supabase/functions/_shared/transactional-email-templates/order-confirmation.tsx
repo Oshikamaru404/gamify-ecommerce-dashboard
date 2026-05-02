@@ -535,3 +535,10 @@ const footerCopy = {
   color: '#cbd5e1',
   margin: '8px 0 0',
 }
+
+const footerNoreply = {
+  fontSize: '11px',
+  color: '#94a3b8',
+  margin: '10px 0 0',
+  lineHeight: 1.5,
+}
