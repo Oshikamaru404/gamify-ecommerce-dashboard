@@ -263,7 +263,7 @@ async function fetchBtcTxs(address: string, sinceTs: number): Promise<IncomingTx
   return out;
 }
 
-// -- BCH (Bitcoin Cash) via blockchair (single dashboard call, no per-tx fetch)
+// -- BCH (Bitcoin Cash) via Trezor Blockbook → Blockchair fallback
 async function fetchWithTimeout(url: string, ms = 8000, init?: RequestInit): Promise<Response> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
@@ -335,19 +335,15 @@ async function fetchBchFromBlockchair(address: string, sinceTs: number): Promise
 }
 
 async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
-  // Try Trezor Blockbook first (reliable, no rate limits), fallback to Blockchair
+  // Trezor Blockbook (primary), Blockchair (fallback)
   try {
     const r = await fetchBchFromBlockbook(address, sinceTs);
     if (r !== null) return r;
-  } catch (e) {
-    console.warn('BCH blockbook failed:', (e as Error).message);
-  }
+  } catch (e) { console.warn('BCH blockbook failed:', (e as Error).message); }
   try {
     const r = await fetchBchFromBlockchair(address, sinceTs);
     if (r !== null) return r;
-  } catch (e) {
-    console.warn('BCH blockchair failed:', (e as Error).message);
-  }
+  } catch (e) { console.warn('BCH blockchair failed:', (e as Error).message); }
   return [];
 }
 
