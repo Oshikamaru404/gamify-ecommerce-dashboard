@@ -224,19 +224,18 @@ export const template = {
   component: OrderConfirmationEmail,
   subject: (data: Record<string, any>) =>
     data?.orderId
-      ? `Order #${data.orderId} confirmed — ${SITE_NAME}`
-      : `Your ${SITE_NAME} order is confirmed`,
+      ? `Receipt for order #${data.orderId}`
+      : `Your ${SITE_NAME} receipt`,
   displayName: 'Client • Order confirmation',
   previewData: {
     customerName: 'John Doe',
     orderId: 'A1B2C3D4',
-    packageName: '12 Months Premium IPTV',
-    packageCategory: 'iptv',
-    packageImageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=200&h=200&fit=crop',
+    packageName: 'Tivione',
+    packageCategory: 'subscription',
     durationLabel: '12 months',
     amount: 49.99,
     currency: 'EUR',
-    paymentMethod: 'Crypto (USDT)',
+    paymentMethod: 'Credit Card',
   },
 } satisfies TemplateEntry
 
@@ -395,19 +394,6 @@ const detailValueCellTotal = {
   padding: '8px 0',
   textAlign: 'right' as const,
   fontWeight: 800,
-}
-
-const ctaButton = {
-  display: 'inline-block',
-  backgroundColor: BRAND_RED,
-  color: '#ffffff',
-  fontSize: '14px',
-  fontWeight: 700,
-  textDecoration: 'none',
-  padding: '14px 28px',
-  borderRadius: '10px',
-  letterSpacing: '0.3px',
-  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)',
 }
 
 const fineprint = {
