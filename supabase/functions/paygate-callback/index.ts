@@ -6,6 +6,53 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
+async function sendPaymentEmails(supabaseUrl: string, serviceKey: string, order: any, paymentMethod: string, txHash?: string) {
+  const shortId = String(order.id).slice(0, 8).toUpperCase();
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${serviceKey}`,
+    apikey: serviceKey,
+  };
+  const calls: Promise<any>[] = [];
+
+  if (order.customer_email) {
+    calls.push(fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        templateName: 'payment-confirmed',
+        recipientEmail: order.customer_email,
+        idempotencyKey: `payment-confirmed-${order.id}`,
+        templateData: {
+          customerName: order.customer_name,
+          orderId: shortId,
+          packageName: order.package_name,
+          amount: order.amount,
+        },
+      }),
+    }).catch((e) => console.warn('client payment email failed', e)));
+  }
+
+  calls.push(fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+    method: 'POST', headers,
+    body: JSON.stringify({
+      templateName: 'admin-payment-received',
+      recipientEmail: 'bwivox@gmail.com',
+      idempotencyKey: `admin-payment-${order.id}`,
+      templateData: {
+        orderId: shortId,
+        customerName: order.customer_name,
+        customerEmail: order.customer_email,
+        packageName: order.package_name,
+        amount: order.amount,
+        paymentMethod,
+        txHash,
+      },
+    }),
+  }).catch((e) => console.warn('admin payment email failed', e)));
+
+  await Promise.all(calls);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
