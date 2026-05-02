@@ -91,6 +91,9 @@ const NETWORK_META: Record<string, { label: string; logo: string; color: string 
   SOLANA: { label: 'Solana', logo: chainIcon('solana'), color: 'bg-green-100 text-green-700 border-green-300' },
   TRC20: { label: 'Tron (TRC20)', logo: chainIcon('tron'), color: 'bg-red-100 text-red-700 border-red-300' },
   LINEA: { label: 'Linea', logo: chainIcon('linea'), color: 'bg-gray-100 text-gray-700 border-gray-300' },
+  ARBITRUM: { label: 'Arbitrum', logo: chainIcon('arbitrum'), color: 'bg-sky-100 text-sky-700 border-sky-300' },
+  OPTIMISM: { label: 'Optimism', logo: chainIcon('optimism'), color: 'bg-rose-100 text-rose-700 border-rose-300' },
+  BCH: { label: 'Bitcoin Cash', logo: coinIcon('bch'), color: 'bg-green-100 text-green-700 border-green-300' },
 };
 
 const getNetworkMeta = (network: string) => {
