@@ -56,42 +56,176 @@ export type Database = {
       blog_articles: {
         Row: {
           author: string
+          auto_generated: boolean
           category: string
           content: string
           created_at: string
           excerpt: string | null
+          faq: Json | null
           featured_image_url: string | null
           id: string
+          language_code: string
+          meta_description: string | null
           published: boolean
           slug: string
+          tags: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
           author?: string
+          auto_generated?: boolean
           category?: string
           content: string
           created_at?: string
           excerpt?: string | null
+          faq?: Json | null
           featured_image_url?: string | null
           id?: string
+          language_code?: string
+          meta_description?: string | null
           published?: boolean
           slug: string
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
         Update: {
           author?: string
+          auto_generated?: boolean
           category?: string
           content?: string
           created_at?: string
           excerpt?: string | null
+          faq?: Json | null
           featured_image_url?: string | null
           id?: string
+          language_code?: string
+          meta_description?: string | null
           published?: boolean
           slug?: string
+          tags?: string[] | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      blog_automation_config: {
+        Row: {
+          ai_model: string
+          articles_per_run: number
+          auto_publish: boolean
+          id: string
+          image_model: string
+          is_active: boolean
+          languages: string[]
+          last_run_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_model?: string
+          articles_per_run?: number
+          auto_publish?: boolean
+          id?: string
+          image_model?: string
+          is_active?: boolean
+          languages?: string[]
+          last_run_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_model?: string
+          articles_per_run?: number
+          auto_publish?: boolean
+          id?: string
+          image_model?: string
+          is_active?: boolean
+          languages?: string[]
+          last_run_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blog_generation_logs: {
+        Row: {
+          article_id: string | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          language: string
+          status: string
+          topic_id: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          language: string
+          status: string
+          topic_id?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          language?: string
+          status?: string
+          topic_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_generation_logs_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "blog_topics_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_topics_queue: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          last_attempted_at: string | null
+          published_languages: string[] | null
+          sort_order: number
+          status: string
+          target_keywords: string[] | null
+          topic_ar: string | null
+          topic_en: string | null
+          topic_fr: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          last_attempted_at?: string | null
+          published_languages?: string[] | null
+          sort_order?: number
+          status?: string
+          target_keywords?: string[] | null
+          topic_ar?: string | null
+          topic_en?: string | null
+          topic_fr?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          last_attempted_at?: string | null
+          published_languages?: string[] | null
+          sort_order?: number
+          status?: string
+          target_keywords?: string[] | null
+          topic_ar?: string | null
+          topic_en?: string | null
+          topic_fr?: string | null
         }
         Relationships: []
       }
