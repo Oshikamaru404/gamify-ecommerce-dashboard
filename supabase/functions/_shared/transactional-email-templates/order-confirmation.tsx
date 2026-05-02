@@ -149,7 +149,17 @@ const OrderConfirmationEmail = ({
                 {paymentMethod ? (
                   <tr>
                     <td style={detailLabelCell}>Payment Method</td>
-                    <td style={detailValueCell}>{paymentMethod}</td>
+                    <td style={detailValueCell}>
+                      {(() => {
+                        const icon = getPaymentMethodIcon(paymentMethod)
+                        return icon ? (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                            <Img src={icon} width="20" height="20" alt="" style={{ display: 'inline-block', verticalAlign: 'middle', borderRadius: 4 }} />
+                            <span style={{ verticalAlign: 'middle' }}>{paymentMethod}</span>
+                          </span>
+                        ) : paymentMethod
+                      })()}
+                    </td>
                   </tr>
                 ) : null}
                 {priceLabel ? (
