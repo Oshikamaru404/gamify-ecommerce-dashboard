@@ -1,12 +1,23 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
 
+export interface EditableField {
+  key: string
+  label: string
+  type: 'text' | 'textarea'
+  helpText?: string
+}
+
 export interface TemplateEntry {
   component: React.ComponentType<any>
   subject: string | ((data: Record<string, any>) => string)
   to?: string
   displayName?: string
   previewData?: Record<string, any>
+  // Fields the admin can override from the dashboard.
+  editableFields?: EditableField[]
+  // Default values for those fields (so the editor can show them as placeholders).
+  defaults?: Record<string, string>
 }
 
 import { template as orderConfirmation } from './order-confirmation.tsx'
