@@ -43,6 +43,11 @@ export const useCreateOrder = () => {
         orderData.payment_status === 'pending' ? 'Pending' :
         orderData.order_type || 'Online';
 
+      const months = Number(orderData.duration_months || 0);
+      const durationLabel = months > 0
+        ? months === 1 ? '1 month' : months === 12 ? '12 months (1 year)' : `${months} months`
+        : undefined;
+
       if (orderData.customer_email) {
         supabase.functions.invoke('send-transactional-email', {
           body: {
@@ -53,7 +58,11 @@ export const useCreateOrder = () => {
               customerName: orderData.customer_name,
               orderId: shortId,
               packageName: orderData.package_name,
+              packageCategory: orderData.package_category,
+              packageImageUrl: orderData.package_image_url || undefined,
+              durationLabel,
               amount: orderData.amount,
+              currency: orderData.currency || 'EUR',
               paymentMethod,
             },
           },
