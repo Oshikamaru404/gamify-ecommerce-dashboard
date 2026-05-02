@@ -263,37 +263,48 @@ async function fetchBtcTxs(address: string, sinceTs: number): Promise<IncomingTx
   return out;
 }
 
-// -- BCH (Bitcoin Cash) via blockchair public API
-async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
+// -- BCH (Bitcoin Cash) via blockchair (single dashboard call, no per-tx fetch)
+async function fetchWithTimeout(url: string, ms = 8000, init?: RequestInit): Promise<Response> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
   try {
-    const res = await fetch(`https://api.blockchair.com/bitcoin-cash/dashboards/address/${address}?limit=20`);
-    if (!res.ok) return [];
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
+  // ?transaction_details=true returns per-tx details inline => 1 HTTP call instead of N+1
+  const url = `https://api.blockchair.com/bitcoin-cash/dashboards/address/${address}?limit=20&transaction_details=true`;
+  try {
+    const res = await fetchWithTimeout(url, 10000);
+    if (!res.ok) {
+      console.warn(`BCH blockchair ${res.status}`);
+      return [];
+    }
     const data = await res.json();
     const addrData = data?.data?.[address];
     if (!addrData) return [];
-    const txHashes: string[] = addrData.transactions || [];
+    const txs: any[] = addrData.transactions || [];
+    const ctx = data?.context || {};
+    const latestBlock: number = ctx.state || 0;
     const out: IncomingTx[] = [];
-    for (const txid of txHashes.slice(0, 10)) {
-      try {
-        const txRes = await fetch(`https://api.blockchair.com/bitcoin-cash/dashboards/transaction/${txid}`);
-        if (!txRes.ok) continue;
-        const txData = await txRes.json();
-        const tx = txData?.data?.[txid];
-        if (!tx) continue;
-        const ts = tx.transaction?.time ? Math.floor(new Date(tx.transaction.time).getTime() / 1000) : 0;
-        if (ts < sinceTs) continue;
-        let received = 0;
-        for (const o of tx.outputs || []) {
-          if (o.recipient === address) received += o.value;
-        }
-        if (received === 0) continue;
-        out.push({
-          txHash: txid,
-          amount: received / 1e8,
-          confirmations: (tx.transaction?.block_id ?? 0) > 0 ? 6 : 0,
-          timestamp: ts,
-        });
-      } catch (_) { /* skip */ }
+    for (const tx of txs.slice(0, 20)) {
+      // tx may be string (hash only) or object with details
+      if (typeof tx === 'string') continue;
+      const ts = tx.time ? Math.floor(new Date(tx.time).getTime() / 1000) : 0;
+      if (ts && ts < sinceTs) continue;
+      const received = Number(tx.balance_change || 0); // satoshis received by this address
+      if (received <= 0) continue;
+      const block = Number(tx.block_id || 0);
+      const conf = block > 0 && latestBlock > 0 ? Math.max(1, latestBlock - block + 1) : 0;
+      out.push({
+        txHash: tx.hash,
+        amount: received / 1e8,
+        confirmations: conf,
+        timestamp: ts,
+      });
     }
     return out;
   } catch (e) {
