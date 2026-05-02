@@ -78,19 +78,26 @@ function buildExplorerUrls(network: string, params: Record<string, string>): str
 async function fetchWithFallback(network: string, params: Record<string, string>): Promise<any[]> {
   const urls = buildExplorerUrls(network, params);
   for (const url of urls) {
+    const host = url.split('?')[0];
     try {
       const res = await fetch(url);
       if (!res.ok) {
-        console.warn(`[${network}] HTTP ${res.status} on ${url.split('?')[0]}`);
+        console.warn(`[${network}] HTTP ${res.status} on ${host} → trying next`);
         continue;
       }
       const data = await res.json();
-      if (Array.isArray(data?.result)) return data.result;
-      // status="0" with empty message often means "no transactions found" — treat as success
-      if (data?.status === '0' && /no transactions/i.test(data?.message || '')) return [];
-      console.warn(`[${network}] Unexpected response from ${url.split('?')[0]}: ${JSON.stringify(data).slice(0, 200)}`);
+      // Success: real array of results (status="1" or array directly)
+      if (Array.isArray(data?.result) && (data?.status === '1' || data?.status === undefined)) {
+        return data.result;
+      }
+      // Empty result: explicitly "no transactions found" — treat as success
+      if (data?.status === '0' && /no transactions/i.test(data?.message || '')) {
+        return [];
+      }
+      // Anything else (NOTOK, rate-limit, plan-not-allowed, etc.) → try next source
+      console.warn(`[${network}] ${host} returned status="${data?.status}" message="${data?.message}" → trying next`);
     } catch (e) {
-      console.warn(`[${network}] Fetch failed on ${url.split('?')[0]}:`, (e as Error).message);
+      console.warn(`[${network}] Fetch failed on ${host}:`, (e as Error).message);
     }
   }
   return [];
