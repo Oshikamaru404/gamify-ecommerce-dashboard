@@ -61,6 +61,7 @@ serve(async (req) => {
       console.error('Error updating order:', error);
     } else {
       console.log('Order updated successfully:', data.id, '| value_coin:', valueCoin, '| txid_out:', txidOut);
+      await sendPaymentEmails(supabaseUrl, supabaseKey, data, 'Credit Card (PayGate)', txidOut || txidIn || undefined);
     }
 
     // Return plain text response - PayGate expects this to confirm receipt
