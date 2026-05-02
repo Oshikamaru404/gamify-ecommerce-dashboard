@@ -244,7 +244,10 @@ const BlogAutoPublishingPanel = () => {
         <CardHeader>
           <CardTitle>Configuration</CardTitle>
           <CardDescription>
-            Auto-publishing IA — runs Mon/Wed/Fri at 09:00 UTC (cron)
+            Current schedule:{' '}
+            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+              {config?.cron_schedule || '0 9 * * 1,3,5'}
+            </code>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
