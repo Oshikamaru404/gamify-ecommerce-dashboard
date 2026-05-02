@@ -468,6 +468,61 @@ async function getIncomingTxs(network: string, coin: string, address: string, si
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
+  // ===== Self-test mode: GET ?selftest=1 — validates explorer connectivity per chain =====
+  const url = new URL(req.url);
+  if (url.searchParams.get('selftest') === '1') {
+    // USDT contracts per chain (high-volume → guaranteed recent tx)
+    const probes: Array<{ network: string; contract: string }> = [
+      { network: 'eth',      contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+      { network: 'bsc',      contract: '0x55d398326f99059fF775485246999027B3197955' },
+      { network: 'polygon',  contract: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F' },
+      { network: 'base',     contract: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' },
+      { network: 'arbitrum', contract: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9' },
+      { network: 'optimism', contract: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58' },
+      { network: 'linea',    contract: '0xA219439258ca9da29E9Cc4cE5596924745e12B93' },
+    ];
+    const results: Record<string, unknown> = {
+      bsctrace_configured: !!BSCTRACE_BASE,
+      etherscan_configured: !!ETHERSCAN_KEY,
+      meganode_key_len: (Deno.env.get('MEGANODE_API_KEY') || '').length,
+    };
+    for (const p of probes) {
+      const urls = buildExplorerUrls(p.network, {
+        module: 'account',
+        action: 'tokentx',
+        contractaddress: p.contract,
+        page: '1',
+        offset: '1',
+        sort: 'desc',
+      });
+      const sourceResults: Array<{ source: string; ok: boolean; status?: string; sample?: string }> = [];
+      for (const u of urls) {
+        const host = new URL(u).host;
+        try {
+          const r = await fetch(u);
+          const body: any = await r.json().catch(() => ({}));
+          const isOk = Array.isArray(body?.result) && body.result.length > 0;
+          sourceResults.push({
+            source: host,
+            ok: isOk,
+            status: String(body?.status ?? r.status),
+            sample: isOk ? body.result[0]?.hash?.slice(0, 12) : (body?.message || '').slice(0, 60),
+          });
+        } catch (e) {
+          sourceResults.push({ source: host, ok: false, status: 'fetch-error', sample: (e as Error).message });
+        }
+      }
+      results[p.network] = {
+        sources_tried: sourceResults.length,
+        any_success: sourceResults.some(s => s.ok),
+        details: sourceResults,
+      };
+    }
+    return new Response(JSON.stringify(results, null, 2), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   const sb = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
