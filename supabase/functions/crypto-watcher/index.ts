@@ -51,7 +51,7 @@ const BLOCKSCOUT_BASES: Record<string, string> = {
   base: 'https://base.blockscout.com/api',
   polygon: 'https://polygon.blockscout.com/api',
   matic: 'https://polygon.blockscout.com/api',
-  linea: 'https://explorer.linea.build/api',
+  linea: 'https://api-explorer.linea.build/api',
   arbitrum: 'https://arbitrum.blockscout.com/api',
   arb: 'https://arbitrum.blockscout.com/api',
   optimism: 'https://optimism.blockscout.com/api',
