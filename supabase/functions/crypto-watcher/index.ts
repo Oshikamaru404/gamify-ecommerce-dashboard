@@ -263,7 +263,252 @@ async function fetchBtcTxs(address: string, sinceTs: number): Promise<IncomingTx
   return out;
 }
 
-// -- BCH (Bitcoin Cash) via Trezor Blockbook → Blockchair fallback
+// -- BCH (Bitcoin Cash) via ElectrumX (WSS) → Trezor Blockbook → Blockchair fallbacks
+//
+// ElectrumX = native protocol used by Electron Cash wallets. No API key, very lenient
+// per-IP limits, decentralized pool of public servers. We talk JSON-RPC over WSS.
+// To query an address we need the "scripthash": sha256(scriptPubKey) byte-reversed.
+
+// ---- CashAddr decoder (BCH address format) ---------------------------------
+// Reference: https://reference.cash/protocol/blockchain/encoding/cashaddr
+const CASHADDR_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+const CASHADDR_CHARSET_MAP: Record<string, number> = (() => {
+  const m: Record<string, number> = {};
+  for (let i = 0; i < CASHADDR_CHARSET.length; i++) m[CASHADDR_CHARSET[i]] = i;
+  return m;
+})();
+
+function cashaddrPolymod(values: number[]): bigint {
+  const GEN = [0x98f2bc8e61n, 0x79b76d99e2n, 0xf33e5fb3c4n, 0xae2eabe2a8n, 0x1e4f43e470n];
+  let c = 1n;
+  for (const v of values) {
+    const c0 = c >> 35n;
+    c = ((c & 0x07ffffffffn) << 5n) ^ BigInt(v);
+    for (let i = 0; i < 5; i++) {
+      if ((c0 >> BigInt(i)) & 1n) c ^= GEN[i];
+    }
+  }
+  return c ^ 1n;
+}
+
+function cashaddrConvertBits(data: number[], from: number, to: number, pad: boolean): number[] | null {
+  let acc = 0;
+  let bits = 0;
+  const ret: number[] = [];
+  const maxv = (1 << to) - 1;
+  for (const value of data) {
+    if (value < 0 || (value >> from) !== 0) return null;
+    acc = (acc << from) | value;
+    bits += from;
+    while (bits >= to) {
+      bits -= to;
+      ret.push((acc >> bits) & maxv);
+    }
+  }
+  if (pad) {
+    if (bits > 0) ret.push((acc << (to - bits)) & maxv);
+  } else if (bits >= from || ((acc << (to - bits)) & maxv)) {
+    return null;
+  }
+  return ret;
+}
+
+/** Decode a cashaddr (with or without prefix) → { type: 0=p2pkh|1=p2sh, hash160: Uint8Array } */
+function decodeCashAddr(addr: string): { type: number; hash: Uint8Array } | null {
+  const a = addr.toLowerCase();
+  let prefix = 'bitcoincash';
+  let payloadStr = a;
+  if (a.includes(':')) {
+    const [p, body] = a.split(':');
+    prefix = p;
+    payloadStr = body;
+  }
+  // Decode base32 payload
+  const data: number[] = [];
+  for (const ch of payloadStr) {
+    if (!(ch in CASHADDR_CHARSET_MAP)) return null;
+    data.push(CASHADDR_CHARSET_MAP[ch]);
+  }
+  // Verify checksum
+  const prefixData = [...prefix].map((c) => c.charCodeAt(0) & 0x1f).concat([0]);
+  if (cashaddrPolymod([...prefixData, ...data]) !== 0n) return null;
+
+  // Strip 8-symbol checksum, convert 5→8
+  const payload5 = data.slice(0, data.length - 8);
+  const payload8 = cashaddrConvertBits(payload5, 5, 8, false);
+  if (!payload8 || payload8.length < 21) return null;
+
+  const versionByte = payload8[0];
+  const type = (versionByte >> 3) & 0x1f; // 0=p2pkh, 1=p2sh
+  const hash = new Uint8Array(payload8.slice(1));
+  if (hash.length !== 20) return null;
+  return { type, hash };
+}
+
+/** Build scriptPubKey from cashaddr decode */
+function bchScriptPubKey(decoded: { type: number; hash: Uint8Array }): Uint8Array {
+  if (decoded.type === 0) {
+    // P2PKH: OP_DUP OP_HASH160 <20> <hash160> OP_EQUALVERIFY OP_CHECKSIG
+    const out = new Uint8Array(25);
+    out[0] = 0x76; out[1] = 0xa9; out[2] = 0x14;
+    out.set(decoded.hash, 3);
+    out[23] = 0x88; out[24] = 0xac;
+    return out;
+  }
+  // P2SH: OP_HASH160 <20> <hash160> OP_EQUAL
+  const out = new Uint8Array(23);
+  out[0] = 0xa9; out[1] = 0x14;
+  out.set(decoded.hash, 2);
+  out[22] = 0x87;
+  return out;
+}
+
+function bytesToHex(b: Uint8Array): string {
+  return Array.from(b).map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+async function bchAddressToScripthash(address: string): Promise<string | null> {
+  const decoded = decodeCashAddr(address);
+  if (!decoded) return null;
+  const spk = bchScriptPubKey(decoded);
+  const hashBuf = await crypto.subtle.digest('SHA-256', spk);
+  // ElectrumX wants the scripthash byte-reversed (little-endian display)
+  const h = new Uint8Array(hashBuf);
+  const reversed = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) reversed[i] = h[31 - i];
+  return bytesToHex(reversed);
+}
+
+// ---- ElectrumX WSS client --------------------------------------------------
+const ELECTRUMX_SERVERS = [
+  'wss://bch.imaginary.cash:50004',
+  'wss://blackie.c3-soft.com:50004',
+  'wss://bch.loping.net:50004',
+];
+
+let electrumxCursor = 0;
+function nextElectrumxServer(): string {
+  const u = ELECTRUMX_SERVERS[electrumxCursor % ELECTRUMX_SERVERS.length];
+  electrumxCursor++;
+  return u;
+}
+
+interface ElectrumxRpcRequest { id: number; method: string; params: unknown[] }
+
+/** Open a WSS connection, send N requests, collect responses by id, then close. */
+function electrumxBatch(
+  url: string,
+  requests: ElectrumxRpcRequest[],
+  timeoutMs = 12_000,
+): Promise<Record<number, any>> {
+  return new Promise((resolve, reject) => {
+    let ws: WebSocket;
+    const expected = new Set(requests.map((r) => r.id));
+    const results: Record<number, any> = {};
+    let settled = false;
+    const finish = (err: Error | null) => {
+      if (settled) return;
+      settled = true;
+      try { ws?.close(); } catch (_) { /* ignore */ }
+      err ? reject(err) : resolve(results);
+    };
+    const to = setTimeout(() => finish(new Error(`electrumx timeout ${url}`)), timeoutMs);
+
+    try { ws = new WebSocket(url); }
+    catch (e) { clearTimeout(to); return finish(e as Error); }
+
+    ws.onopen = () => {
+      for (const r of requests) ws.send(JSON.stringify(r) + '\n');
+    };
+    ws.onmessage = (ev) => {
+      const text = typeof ev.data === 'string' ? ev.data : '';
+      for (const line of text.split('\n')) {
+        if (!line.trim()) continue;
+        try {
+          const msg = JSON.parse(line);
+          if (typeof msg.id === 'number' && expected.has(msg.id)) {
+            results[msg.id] = msg.error ? { __error: msg.error } : msg.result;
+          }
+        } catch (_) { /* ignore */ }
+      }
+      if (Object.keys(results).length === expected.size) {
+        clearTimeout(to);
+        finish(null);
+      }
+    };
+    ws.onerror = () => { clearTimeout(to); finish(new Error(`ws error ${url}`)); };
+    ws.onclose = (e) => {
+      if (!settled) { clearTimeout(to); finish(new Error(`ws closed ${url} code=${e.code}`)); }
+    };
+  });
+}
+
+async function fetchBchFromElectrumX(address: string, sinceTs: number): Promise<IncomingTx[] | null> {
+  const scripthash = await bchAddressToScripthash(address);
+  if (!scripthash) {
+    console.warn('BCH electrumx: cannot decode address', address);
+    return null;
+  }
+
+  // Try up to 2 servers from the rotating pool
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const server = nextElectrumxServer();
+    try {
+      // 1. Get history + tip in one batch
+      const initial = await electrumxBatch(server, [
+        { id: 1, method: 'blockchain.scripthash.get_history', params: [scripthash] },
+        { id: 2, method: 'blockchain.headers.subscribe', params: [] },
+      ], 10_000);
+
+      const history = Array.isArray(initial[1]) ? initial[1] : [];
+      const tipHeight = Number(initial[2]?.height || 0);
+      if (!history.length) return [];
+
+      // Take the 20 most recent (history is oldest-first)
+      const recent = history.slice(-20).reverse();
+
+      // 2. Fetch verbose tx data for each
+      const txReqs: ElectrumxRpcRequest[] = recent.map((h: any, i: number) => ({
+        id: 100 + i,
+        method: 'blockchain.transaction.get',
+        params: [h.tx_hash, true],
+      }));
+      const txData = await electrumxBatch(server, txReqs, 15_000);
+
+      const out: IncomingTx[] = [];
+      for (let i = 0; i < recent.length; i++) {
+        const h = recent[i];
+        const tx = txData[100 + i];
+        if (!tx || tx.__error) continue;
+        const ts = Number(tx.time || tx.blocktime || 0);
+        if (sinceTs && ts && ts < sinceTs) continue;
+
+        // Sum vouts paying to our address.
+        // ElectrumX returns scriptPubKey.addresses with cashaddr (no prefix on some servers)
+        // OR scriptPubKey.cashAddrs. We compare by hex scriptPubKey for safety.
+        const decoded = decodeCashAddr(address)!;
+        const ourSpkHex = bytesToHex(bchScriptPubKey(decoded));
+        let received = 0;
+        for (const o of (tx.vout || [])) {
+          const spkHex = (o?.scriptPubKey?.hex || '').toLowerCase();
+          if (spkHex === ourSpkHex) received += Number(o.value || 0);
+        }
+        if (received <= 0) continue;
+
+        const height = Number(h.height || 0);
+        const conf = height > 0 && tipHeight > 0 ? Math.max(1, tipHeight - height + 1) : 0;
+        out.push({ txHash: h.tx_hash, amount: received, confirmations: conf, timestamp: ts });
+      }
+      return out;
+    } catch (e) {
+      console.warn(`BCH electrumx ${server} failed:`, (e as Error).message);
+      // try next server
+    }
+  }
+  return null;
+}
+
+// -- BCH (Bitcoin Cash) via Trezor Blockbook → Blockchair fallback (legacy)
 async function fetchWithTimeout(url: string, ms = 8000, init?: RequestInit): Promise<Response> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
@@ -335,11 +580,17 @@ async function fetchBchFromBlockchair(address: string, sinceTs: number): Promise
 }
 
 async function fetchBchTxs(address: string, sinceTs: number): Promise<IncomingTx[]> {
-  // Trezor Blockbook (primary), Blockchair (fallback)
+  // 1. ElectrumX WSS pool (no key, decentralized, BCH-native protocol)
+  try {
+    const r = await fetchBchFromElectrumX(address, sinceTs);
+    if (r !== null) return r;
+  } catch (e) { console.warn('BCH electrumx failed:', (e as Error).message); }
+  // 2. Trezor Blockbook
   try {
     const r = await fetchBchFromBlockbook(address, sinceTs);
     if (r !== null) return r;
   } catch (e) { console.warn('BCH blockbook failed:', (e as Error).message); }
+  // 3. Blockchair (rate-limited safety net)
   try {
     const r = await fetchBchFromBlockchair(address, sinceTs);
     if (r !== null) return r;
@@ -681,7 +932,7 @@ serve(async (req) => {
       try {
         // High-traffic BCH donation address
         const txs = await fetchBchTxs('qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a', sinceTs);
-        results['bch'] = { ok: txs.length > 0, source: 'blockchair', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+        results['bch'] = { ok: txs.length > 0, source: 'electrumx→blockbook→blockchair', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
       } catch (e) { results['bch'] = { ok: false, error: (e as Error).message }; }
     }
     if (wantsAll || only === 'tron') {
