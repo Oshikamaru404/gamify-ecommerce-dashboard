@@ -236,6 +236,11 @@ const OrderConfirmationEmail = ({
               {'  •  '}
               <Link href={`mailto:${SUPPORT_EMAIL}`} style={footerLink}>{SUPPORT_EMAIL}</Link>
             </Text>
+            <Text style={footerNoreply}>
+              This is an automated message sent from{' '}
+              <Link href={`mailto:${NOREPLY_EMAIL}`} style={footerLink}>{NOREPLY_EMAIL}</Link>
+              {' '}— please do not reply directly.
+            </Text>
             <Text style={footerCopy}>
               © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
             </Text>
