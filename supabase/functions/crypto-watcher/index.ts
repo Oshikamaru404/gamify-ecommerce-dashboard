@@ -170,15 +170,17 @@ async function fetchBtcTxs(address: string, sinceTs: number): Promise<IncomingTx
   return out;
 }
 
-// -- EVM native (ETH/BNB/POL/etc.)
+// -- EVM native (ETH/BNB/POL/etc.) — uses Etherscan V2 → Blockscout fallback
 async function fetchEvmNativeTxs(network: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  const base = ETHERSCAN_BASES[network.toLowerCase()];
-  if (!base) return [];
-  const url = `${base}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data = await res.json();
-  const result = Array.isArray(data?.result) ? data.result : [];
+  if (!isEvmSupported(network)) return [];
+  const result = await fetchWithFallback(network, {
+    module: 'account',
+    action: 'txlist',
+    address,
+    startblock: '0',
+    endblock: '99999999',
+    sort: 'desc',
+  });
   const out: IncomingTx[] = [];
   for (const tx of result) {
     const ts = parseInt(tx.timeStamp || '0');
@@ -196,16 +198,17 @@ async function fetchEvmNativeTxs(network: string, address: string, sinceTs: numb
   return out;
 }
 
-// -- EVM token (USDT/USDC on EVM chains)
+// -- EVM token (USDT/USDC on EVM chains) — uses Etherscan V2 → Blockscout fallback
 async function fetchEvmTokenTxs(network: string, coin: string, address: string, sinceTs: number): Promise<IncomingTx[]> {
-  const base = ETHERSCAN_BASES[network.toLowerCase()];
   const contract = TOKEN_CONTRACTS[network.toLowerCase()]?.[coin.toLowerCase()];
-  if (!base || !contract) return [];
-  const url = `${base}?module=account&action=tokentx&contractaddress=${contract}&address=${address}&sort=desc`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data = await res.json();
-  const result = Array.isArray(data?.result) ? data.result : [];
+  if (!contract || !isEvmSupported(network)) return [];
+  const result = await fetchWithFallback(network, {
+    module: 'account',
+    action: 'tokentx',
+    contractaddress: contract,
+    address,
+    sort: 'desc',
+  });
   const dec = decimalsFor(network, coin);
   const out: IncomingTx[] = [];
   for (const tx of result) {
