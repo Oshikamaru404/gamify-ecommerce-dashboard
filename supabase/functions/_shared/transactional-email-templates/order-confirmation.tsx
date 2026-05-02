@@ -23,18 +23,6 @@ const WHATSAPP_URL = 'https://wa.me/212600000000'
 const BRAND_RED = '#dc2626'
 const BRAND_RED_DARK = '#991b1b'
 
-// Inline SVG logo — same "B on red rounded square" mark used in the site header.
-// Encoded as data-URI so it renders in every email client without external host.
-const LOGO_SVG = encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
-    <rect width="56" height="56" rx="12" fill="#dc2626"/>
-    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central"
-          font-family="Inter, Arial, sans-serif" font-weight="800"
-          font-size="32" fill="#ffffff">B</text>
-  </svg>`,
-)
-const LOGO_DATA_URI = `data:image/svg+xml;utf8,${LOGO_SVG}`
-
 interface Props {
   customerName?: string
   orderId?: string
