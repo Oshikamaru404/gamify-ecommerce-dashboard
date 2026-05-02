@@ -12,6 +12,24 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { ov } from './overrides.ts'
+
+const DEFAULTS = {
+  subject: 'Your IPTV Streaming order #{orderId} is confirmed',
+  preview: 'Your BWIVOX order {orderIdHash} is confirmed — payment details inside.',
+  tagline: 'Premium IPTV Streaming',
+  badge: '✓ ORDER CONFIRMED',
+  greeting: 'Hello {name}!',
+  lead: "Thanks for your IPTV streaming order. We've received your request and your channels will be activated shortly. You'll receive your login details by email once ready.",
+  nextHeading: 'What happens next?',
+  step1Title: 'Payment confirmed',
+  step1Text: 'We verify your payment details.',
+  step2Title: 'Order prepared',
+  step2Text: 'Your order information is prepared securely.',
+  step3Title: 'Details sent',
+  step3Text: 'You receive the next steps by email.',
+  finePrint: 'If you have questions about this order, you can reach us.',
+}
 import { getPaymentMethodIcon } from './payment-method-icon.ts'
 
 // Brand constants — baked in at scaffold time
