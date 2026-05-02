@@ -244,7 +244,7 @@ Order ID: ${orderData.id}`;
       return null;
     }
     try {
-      const note = `paygate_direct:${ticker}`;
+      const note = `paybwivox_direct:${ticker}`;
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert([{
