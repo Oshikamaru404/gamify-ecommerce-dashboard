@@ -17,6 +17,7 @@ interface CryptomusCheckoutProps {
     category: string;
     price: number;
     duration: number;
+    icon_url?: string;
   };
   onClose: () => void;
   onSuccess: () => void;
