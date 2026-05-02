@@ -932,7 +932,7 @@ serve(async (req) => {
       try {
         // High-traffic BCH donation address
         const txs = await fetchBchTxs('qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a', sinceTs);
-        results['bch'] = { ok: txs.length > 0, source: 'blockchair', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
+        results['bch'] = { ok: txs.length > 0, source: 'electrumx→blockbook→blockchair', tx_count: txs.length, sample_hash: txs[0]?.txHash?.slice(0, 12) };
       } catch (e) { results['bch'] = { ok: false, error: (e as Error).message }; }
     }
     if (wantsAll || only === 'tron') {
