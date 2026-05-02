@@ -123,13 +123,14 @@ const BlogAutoPublishingPanel = () => {
         topic_ar: newTopic.topic_ar || null,
         target_keywords: keywords,
         category: newTopic.category,
+        angle: newTopic.angle,
         sort_order: 1000,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-topics-queue'] });
-      setNewTopic({ topic_en: '', topic_fr: '', topic_ar: '', target_keywords: '', category: 'iptv' });
+      setNewTopic({ topic_en: '', topic_fr: '', topic_ar: '', target_keywords: '', category: 'iptv', angle: 'indirect' });
       toast.success('Topic added');
     },
     onError: (err: any) => toast.error(`Add failed: ${err.message}`),
