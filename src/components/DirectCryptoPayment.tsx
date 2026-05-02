@@ -483,15 +483,40 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
           return (
           <div className="space-y-3 p-4 border-2 border-purple-300 rounded-lg bg-purple-50/30">
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <img
-                src={qrSrc}
-                alt="Payment QR"
-                className="w-44 h-44 bg-white p-2 rounded border"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payment.addressIn)}`;
-                }}
-              />
+              <div className="relative w-44 h-44 bg-white p-2 rounded border shrink-0">
+                <img
+                  src={qrSrc}
+                  alt="Payment QR"
+                  className="w-full h-full"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      `https://api.qrserver.com/v1/create-qr-code/?size=240x240&ecc=H&data=${encodeURIComponent(payment.addressIn)}`;
+                  }}
+                />
+                {/* Network/coin logo centered on the QR for branding */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="bg-white rounded-full p-1 shadow-md ring-2 ring-white">
+                    <img
+                      src={getNetworkMeta(selected.network).logo}
+                      alt={selected.network}
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
+                      className="h-9 w-9 rounded-full object-contain"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        // Fallback to coin icon (jsdelivr — CORS-friendly) if chain icon fails
+                        const coinSym = selected.coin.toLowerCase() === 'pol' ? 'matic' : selected.coin.toLowerCase();
+                        if (!img.dataset.fallback) {
+                          img.dataset.fallback = '1';
+                          img.src = coinIcon(coinSym);
+                        } else {
+                          img.style.display = 'none';
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="flex-1 w-full space-y-2 text-sm">
                 <div>
                   <p className="text-xs text-muted-foreground">Send exactly</p>
