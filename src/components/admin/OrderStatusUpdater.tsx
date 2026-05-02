@@ -48,6 +48,23 @@ const OrderStatusUpdater = ({
       // Update the order status
       onStatusUpdate(newStatus);
 
+      // Send email notification to customer
+      if (customerEmail) {
+        supabase.functions.invoke('send-transactional-email', {
+          body: {
+            templateName: 'order-status-update',
+            recipientEmail: customerEmail,
+            idempotencyKey: `order-status-${orderId}-${newStatus}`,
+            templateData: {
+              customerName,
+              orderId: orderId.slice(0, 8).toUpperCase(),
+              packageName,
+              status: newStatus,
+            },
+          },
+        }).catch((e) => console.error('status email failed', e));
+      }
+
       // Send WhatsApp notification if customer has WhatsApp
       if (customerWhatsapp && templates) {
         const template = templates.find(t => t.template_key === 'order_status');
