@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Loader2, Search, Package as PackageIcon, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserOrders } from '@/hooks/useUserOrders';
@@ -21,7 +21,11 @@ const OrdersPage: React.FC<Props> = ({ paidOnly = false, title }) => {
   const filtered = useMemo(() => {
     return orders.filter(o => {
       if (paidOnly && o.payment_status !== 'paid') return false;
-      if (status !== 'all' && o.status !== status) return false;
+      if (status !== 'all') {
+        if (status === 'completed') {
+          if (o.status !== 'completed' && o.status !== 'delivered') return false;
+        } else if (o.status !== status) return false;
+      }
       if (search && !o.package_name.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
