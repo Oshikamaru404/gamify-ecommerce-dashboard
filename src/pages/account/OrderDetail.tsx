@@ -7,6 +7,7 @@ import { ArrowLeft, Copy, RefreshCw, MessageCircle, Loader2, Eye, EyeOff } from 
 import { useUserOrders } from '@/hooks/useUserOrders';
 import { useToast } from '@/hooks/use-toast';
 import { CategoryBadge, PaymentBadge, OrderStatusBadge, getCategory } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
 import { cn } from '@/lib/utils';
 
 const OrderDetailPage: React.FC = () => {
