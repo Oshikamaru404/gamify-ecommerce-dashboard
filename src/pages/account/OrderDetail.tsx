@@ -44,26 +44,27 @@ const OrderDetailPage: React.FC = () => {
 
       {/* Hero header */}
       <Card className="overflow-hidden border-0 shadow-xl">
-        <div className={cn('p-5 sm:p-6 text-white relative', c.bg)}>
+        <div className={cn('p-4 sm:p-6 text-white relative', c.bg)}>
           <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10 blur-xl" />
-          <div className="relative flex items-start gap-4">
-            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-lg overflow-hidden ring-2 ring-white/40">
+          <div className="relative flex items-start gap-3 sm:gap-4">
+            <div className="h-14 w-14 sm:h-20 sm:w-20 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-lg overflow-hidden ring-2 ring-white/40">
               {order.package_id && icons[order.package_id] ? (
                 <img src={icons[order.package_id]} alt="" className="w-full h-full object-cover" />
               ) : (
-                <Icon className="h-9 w-9 text-red-600" />
+                <Icon className="h-8 w-8 text-red-600" />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl font-extrabold leading-tight">{order.package_name}</h1>
-              <div className="text-xs text-white/80 mt-1">Order #{order.id.slice(0, 8)} · {new Date(order.created_at).toLocaleDateString()}</div>
+              <h1 className="text-base sm:text-2xl font-extrabold leading-tight break-words">{order.package_name}</h1>
+              <div className="text-[11px] sm:text-xs text-white/80 mt-1 truncate">#{order.id.slice(0, 8)} · {new Date(order.created_at).toLocaleDateString()}</div>
               <div className="flex flex-wrap items-center gap-1.5 mt-2">
                 <CategoryBadge category={order.package_category} className="text-[10px] bg-white/20 backdrop-blur" />
-                <span className="text-[11px] bg-white/20 backdrop-blur px-2 py-0.5 rounded font-semibold">{order.duration_months}M</span>
+                <span className="text-[10px] bg-white/20 backdrop-blur px-2 py-0.5 rounded font-semibold">{order.duration_months}M</span>
+                <span className="text-lg sm:hidden font-extrabold ml-auto">${Number(order.amount).toFixed(2)}</span>
               </div>
             </div>
-            <div className="text-right shrink-0">
-              <div className="text-2xl sm:text-3xl font-extrabold">${Number(order.amount).toFixed(2)}</div>
+            <div className="text-right shrink-0 hidden sm:block">
+              <div className="text-3xl font-extrabold">${Number(order.amount).toFixed(2)}</div>
             </div>
           </div>
         </div>
