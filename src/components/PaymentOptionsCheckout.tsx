@@ -54,11 +54,11 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     customerName: '',
     customerEmail: '',
     customerWhatsapp: '',
-    deviceType: '',
-    appUsed: '',
     macAddress: '',
-    deviceId: '',
+    iptvUsername: '',
+    iptvPassword: '',
   });
+  const [connectionType, setConnectionType] = useState<ConnectionType>(null);
 
   // ---- Process state ----
   const [isProcessing, setIsProcessing] = useState(false);
