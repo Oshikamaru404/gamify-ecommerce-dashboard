@@ -81,6 +81,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AdminAuthProvider>
+        <UserAuthProvider>
         <LanguageProvider>
           <StoreProvider>
             <TooltipProvider>
