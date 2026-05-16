@@ -602,24 +602,64 @@ Order ID: ${orderData.id}`;
               <div className="text-center space-y-1">
                 <h3 className="text-lg font-semibold">Your details</h3>
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-                  <Zap className="h-3.5 w-3.5" /> We’re preparing your access
+                  <Zap className="h-3.5 w-3.5" /> We're preparing your access
                 </p>
               </div>
+
+              {autofill.savedProfiles.length > 0 && (
+                <SavedProfilesPicker
+                  profiles={autofill.savedProfiles}
+                  selectedId={selectedSavedId}
+                  onSelect={applySavedProfile}
+                />
+              )}
+
+              {autofilledRef.current && (autofill.displayName || autofill.email) && (
+                <div className="flex items-center gap-2 text-[11px] text-primary bg-primary/5 border border-primary/20 rounded-md px-2.5 py-1.5">
+                  <Sparkles className="h-3 w-3" />
+                  <span>Auto-filled from your account. Feel free to edit.</span>
+                </div>
+              )}
 
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="customerName">Full name *</Label>
-                  <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" />
+                  <div className="relative">
+                    <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" className="pr-9" />
+                    {formData.customerName.trim().length >= 2 && (
+                      <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="customerEmail">Email *</Label>
-                  <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" />
+                  <div className="relative">
+                    <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" className="pr-9" />
+                    {isValidEmail(formData.customerEmail) && (
+                      <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                    )}
+                  </div>
+                  {emailSuggestion && (
+                    <button
+                      type="button"
+                      onClick={() => { setFormData(p => ({ ...p, customerEmail: emailSuggestion! })); setEmailSuggestion(null); }}
+                      className="flex items-center gap-1 text-[11px] text-amber-700 hover:underline"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+                    </button>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="customerWhatsapp">WhatsApp / Phone *</Label>
-                <Input id="customerWhatsapp" name="customerWhatsapp" value={formData.customerWhatsapp} onChange={handleInputChange} placeholder="+1234567890" />
+                <div className="relative">
+                  <Input id="customerWhatsapp" name="customerWhatsapp" value={formData.customerWhatsapp} onChange={handleInputChange} placeholder="+1234567890" className="pr-9" />
+                  {formData.customerWhatsapp.replace(/\D/g, '').length >= 7 && (
+                    <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                  )}
+                </div>
               </div>
 
               {/* ===== Dynamic activation fields per offer / user / connection ===== */}
