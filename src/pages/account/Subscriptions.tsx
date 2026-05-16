@@ -47,7 +47,7 @@ const SubscriptionsPage: React.FC = () => {
                 <div className={cn('h-1.5 w-full', c.bg)} />
                 <div className="p-4">
                   <div className="flex items-start gap-3 mb-3">
-                    <ProductIcon iconUrl={iconUrl} category={o.package_category} size="lg" />
+                    <ProductIcon iconUrl={iconUrl} category={o.package_category} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="font-bold truncate">{o.package_name}</div>
                       <div className="flex items-center gap-1.5 mt-1">
