@@ -39,15 +39,13 @@ const ActivationsPage: React.FC = () => {
           {acts.map(o => {
             const macMatch = o.credentials_notes?.match(/([0-9A-F]{2}:){5}[0-9A-F]{2}/i);
             const c = getCategory(o.package_category || 'activation');
-            const Icon = c.icon;
+            const iconUrl = o.package_id ? icons[o.package_id] : undefined;
             return (
               <Card key={o.id} className="overflow-hidden shadow-md hover:shadow-lg transition-all border-0">
                 <div className={cn('h-1.5 w-full', c.bg)} />
                 <div className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className={cn('h-11 w-11 rounded-xl flex items-center justify-center text-white shadow-md shrink-0', c.bg)}>
-                      <Icon className="h-5 w-5" />
-                    </div>
+                    <ProductIcon iconUrl={iconUrl} category={o.package_category || 'activation'} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="min-w-0">
