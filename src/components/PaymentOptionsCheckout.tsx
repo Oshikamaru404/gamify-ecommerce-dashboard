@@ -434,6 +434,13 @@ Order ID: ${orderData.id}`;
                 </p>
               </div>
 
+              <QuickCheckoutAuth
+                onAuthed={(profile) => {
+                  if (profile?.display_name) setFormData(p => ({ ...p, customerName: profile.display_name! }));
+                  if (profile?.email) setFormData(p => ({ ...p, customerEmail: profile.email! }));
+                }}
+              />
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
