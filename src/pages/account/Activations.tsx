@@ -5,11 +5,13 @@ import { Loader2, Key, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserOrders } from '@/hooks/useUserOrders';
 import { useToast } from '@/hooks/use-toast';
-import { CategoryBadge, getCategory } from '@/components/account/AccountUI';
+import { CategoryBadge, getCategory, ProductIcon } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
 import { cn } from '@/lib/utils';
 
 const ActivationsPage: React.FC = () => {
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
   const { toast } = useToast();
   const acts = useMemo(() => orders.filter(o =>
     o.order_type === 'activation' || (o.credentials_notes && /mac/i.test(o.credentials_notes))
