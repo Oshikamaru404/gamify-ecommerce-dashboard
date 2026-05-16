@@ -32,43 +32,8 @@ interface PaymentOptionsCheckoutProps {
 }
 
 type AccountType = 'renewal' | 'new' | null;
-
-const DEVICE_OPTIONS = [
-  'Smart TV (Samsung / LG)',
-  'Android TV / Box',
-  'Amazon Firestick',
-  'MAG / STB Box',
-  'Formuler',
-  'iPhone / iPad',
-  'Android Phone / Tablet',
-  'PC / Mac',
-  'Other',
-];
-
-const APP_OPTIONS = [
-  'IBO Player / IBO Pro',
-  'IPTV Smarters Pro',
-  'XCIPTV',
-  'Tivimate',
-  'Smart STB',
-  'MAG Portal',
-  'Formuler MyTVOnline',
-  'Set-TV / STB Emu',
-  'M3U Playlist',
-  'Other',
-];
-
-// Apps that typically require a MAC address / Device ID for activation
-const MAC_REQUIRED_APPS = new Set([
-  'Smart STB',
-  'MAG Portal',
-  'Formuler MyTVOnline',
-  'Set-TV / STB Emu',
-]);
-const MAC_REQUIRED_DEVICES = new Set([
-  'MAG / STB Box',
-  'Formuler',
-]);
+type ConnectionType = 'm3u_xtream' | 'mag_stb' | null;
+type OfferKind = 'iptv_subscription' | 'iptv_panel' | 'player_activation' | 'player_panel';
 
 const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   packageData,
