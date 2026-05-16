@@ -338,6 +338,7 @@ Order ID: ${orderData.id}`;
       const url = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
       setWhatsappUrl(url);
       setOrderPlaced(true);
+      clearCheckoutDraft(packageData.id);
       toast.success('Order placed successfully!');
     } catch (e) {
       console.error(e);
@@ -372,7 +373,7 @@ Order ID: ${orderData.id}`;
       if (paymentError) throw paymentError;
       if (paymentData?.checkoutUrl) {
         toast.success('Redirecting to secure payment...');
-        setTimeout(() => { window.location.href = paymentData.checkoutUrl; }, 1000);
+        setTimeout(() => { clearCheckoutDraft(packageData.id); window.location.href = paymentData.checkoutUrl; }, 1000);
       } else {
         throw new Error('Failed to create payment link');
       }
