@@ -14,6 +14,7 @@ interface Props { paidOnly?: boolean; title?: string; }
 
 const OrdersPage: React.FC<Props> = ({ paidOnly = false, title }) => {
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string>('all');
 
