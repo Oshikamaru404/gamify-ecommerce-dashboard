@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 const SubscriptionsPage: React.FC = () => {
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
 
   const subs = useMemo(() =>
     orders
