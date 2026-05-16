@@ -62,19 +62,14 @@ const OrdersPage: React.FC<Props> = ({ paidOnly = false, title }) => {
       ) : (
         <div className="grid gap-3">
           {filtered.map(o => {
-            const c = getCategory(o.package_category);
-            const Icon = c.icon;
+            const iconUrl = o.package_id ? icons[o.package_id] : undefined;
             return (
               <Link key={o.id} to={`/account/orders/${o.id}`}>
-                <Card className="overflow-hidden border-l-4 hover:shadow-lg transition-all active:scale-[0.99]" style={{ borderLeftColor: 'transparent' }}>
+                <Card className="overflow-hidden hover:shadow-lg transition-all active:scale-[0.99]">
                   <div className="flex items-stretch">
-                    {/* Category color rail */}
-                    <div className={cn('w-1.5 shrink-0', c.bg)} />
                     <div className="flex-1 p-3 sm:p-4">
                       <div className="flex items-start gap-3">
-                        <div className={cn('h-11 w-11 rounded-xl flex items-center justify-center text-white shadow-md shrink-0', c.bg)}>
-                          <Icon className="h-5 w-5" />
-                        </div>
+                        <ProductIcon iconUrl={iconUrl} category={o.package_category} size="md" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <span className="font-bold text-sm sm:text-base truncate">{o.package_name}</span>
