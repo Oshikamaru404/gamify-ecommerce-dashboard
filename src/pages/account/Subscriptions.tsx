@@ -41,15 +41,13 @@ const SubscriptionsPage: React.FC = () => {
             const totalDays = (o.duration_months || 1) * 30;
             const pct = s.daysLeft !== null ? Math.max(0, Math.min(100, (s.daysLeft / totalDays) * 100)) : 0;
             const c = getCategory(o.package_category);
-            const Icon = c.icon;
+            const iconUrl = o.package_id ? icons[o.package_id] : undefined;
             return (
               <Card key={o.id} className="overflow-hidden shadow-md hover:shadow-xl transition-all border-0">
                 <div className={cn('h-1.5 w-full', c.bg)} />
                 <div className="p-4">
                   <div className="flex items-start gap-3 mb-3">
-                    <div className={cn('h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-md shrink-0', c.bg)}>
-                      <Icon className="h-6 w-6" />
-                    </div>
+                    <ProductIcon iconUrl={iconUrl} category={o.package_category} size="lg" />
                     <div className="flex-1 min-w-0">
                       <div className="font-bold truncate">{o.package_name}</div>
                       <div className="flex items-center gap-1.5 mt-1">
