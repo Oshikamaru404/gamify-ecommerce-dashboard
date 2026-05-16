@@ -19,15 +19,13 @@ export const getCategory = (key?: string) => (key && CATEGORY_STYLES[key]) || { 
 export const ProductIcon: React.FC<{ iconUrl?: string | null; category?: string; size?: 'sm' | 'md' | 'lg'; className?: string }> = ({ iconUrl, category, size = 'md', className }) => {
   const c = getCategory(category);
   const Icon = c.icon;
-  const sizes = { sm: 'h-9 w-9', md: 'h-11 w-11', lg: 'h-14 w-14' };
-  const iconSizes = { sm: 'h-4 w-4', md: 'h-5 w-5', lg: 'h-7 w-7' };
-  const imgSizes = { sm: 'h-7 w-7', md: 'h-8 w-8', lg: 'h-10 w-10' };
+  const sizes = { sm: 'h-10 w-10', md: 'h-12 w-12', lg: 'h-16 w-16' };
+  const iconSizes = { sm: 'h-5 w-5', md: 'h-6 w-6', lg: 'h-8 w-8' };
 
   if (iconUrl) {
     return (
-      <div className={cn(sizes[size], 'rounded-xl flex items-center justify-center shrink-0 shadow-md bg-white border-2 p-1 overflow-hidden', className)}
-           style={{ borderColor: 'rgba(239,68,68,0.2)' }}>
-        <img src={iconUrl} alt="" className={cn(imgSizes[size], 'object-contain')} loading="lazy" />
+      <div className={cn(sizes[size], 'rounded-xl shrink-0 shadow-md bg-white overflow-hidden ring-1 ring-red-200', className)}>
+        <img src={iconUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
       </div>
     );
   }
