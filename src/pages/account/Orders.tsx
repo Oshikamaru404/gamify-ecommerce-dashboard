@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Search, Package as PackageIcon, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserOrders } from '@/hooks/useUserOrders';
-import { CategoryBadge, PaymentBadge, OrderStatusBadge, getCategory } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
+import { CategoryBadge, PaymentBadge, OrderStatusBadge, ProductIcon } from '@/components/account/AccountUI';
 import { cn } from '@/lib/utils';
 
 interface Props { paidOnly?: boolean; title?: string; }
