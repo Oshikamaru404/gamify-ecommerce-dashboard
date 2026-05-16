@@ -90,6 +90,10 @@ function App() {
                 <Routes>
                   {/* Public routes - Updated to use Home as default */}
                   <Route path="/" element={<Home />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/account/orders" element={<Account />} />
+                  <Route path="/account/settings" element={<Account />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/index" element={<Index />} />
                   <Route path="/products" element={<Products />} />
