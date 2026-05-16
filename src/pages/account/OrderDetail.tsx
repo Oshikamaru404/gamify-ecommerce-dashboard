@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 const OrderDetailPage: React.FC = () => {
   const { id } = useParams();
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
   const { toast } = useToast();
   const order = orders.find(o => o.id === id);
 
