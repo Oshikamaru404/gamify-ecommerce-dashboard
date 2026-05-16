@@ -38,14 +38,17 @@ export const QuickCheckoutAuth: React.FC<Props> = ({ onAuthed }) => {
 
   return (
     <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">Quick checkout</p>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setAuthOpen(true)}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Log in or sign up</p>
+          <p className="text-[11px] text-muted-foreground">Don't have an account? Continue with a social provider to create one instantly.</p>
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={() => setAuthOpen(true)} className="shrink-0">
           <LogIn className="h-3.5 w-3.5 mr-1" /> Email
         </Button>
       </div>
       <SocialAuthButtons compact />
-      <p className="text-[11px] text-muted-foreground text-center">Optional — speeds up future orders.</p>
+      <p className="text-[11px] text-muted-foreground text-center">Optional — speeds up future orders and renewals.</p>
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} defaultTab="login" />
     </div>
   );
