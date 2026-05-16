@@ -29,6 +29,25 @@ const OrdersPage: React.FC<Props> = ({ paidOnly = false, title }) => {
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-red-500" /></div>;
 
+  const counts = useMemo(() => {
+    const base = orders.filter(o => !paidOnly || o.payment_status === 'paid');
+    return {
+      all: base.length,
+      pending: base.filter(o => o.status === 'pending').length,
+      processing: base.filter(o => o.status === 'processing').length,
+      completed: base.filter(o => o.status === 'completed' || o.status === 'delivered').length,
+      cancelled: base.filter(o => o.status === 'cancelled').length,
+    };
+  }, [orders, paidOnly]);
+
+  const statusChips: { key: string; label: string; cls: string; activeCls: string }[] = [
+    { key: 'all', label: 'All', cls: 'bg-slate-100 text-slate-700 hover:bg-slate-200', activeCls: 'bg-slate-700 text-white' },
+    { key: 'pending', label: 'Pending', cls: 'bg-amber-100 text-amber-700 hover:bg-amber-200', activeCls: 'bg-amber-500 text-white' },
+    { key: 'processing', label: 'Processing', cls: 'bg-blue-100 text-blue-700 hover:bg-blue-200', activeCls: 'bg-blue-600 text-white' },
+    { key: 'completed', label: 'Completed', cls: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200', activeCls: 'bg-emerald-600 text-white' },
+    { key: 'cancelled', label: 'Cancelled', cls: 'bg-red-100 text-red-700 hover:bg-red-200', activeCls: 'bg-red-600 text-white' },
+  ];
+
   return (
     <div className="space-y-4">
       <div>
@@ -36,21 +55,32 @@ const OrdersPage: React.FC<Props> = ({ paidOnly = false, title }) => {
         <p className="text-muted-foreground text-sm">{filtered.length} order{filtered.length !== 1 ? 's' : ''} found</p>
       </div>
 
-      <Card className="p-3 flex flex-col sm:flex-row gap-2 border-red-100 shadow-sm">
-        <div className="relative flex-1">
+      <div className="flex flex-wrap gap-2">
+        {statusChips.map(chip => {
+          const active = status === chip.key;
+          const count = counts[chip.key as keyof typeof counts];
+          return (
+            <button
+              key={chip.key}
+              type="button"
+              onClick={() => setStatus(chip.key)}
+              className={cn(
+                'px-3 py-1.5 rounded-full text-xs font-semibold transition-all',
+                active ? chip.activeCls + ' shadow-md scale-105' : chip.cls
+              )}
+            >
+              {chip.label}
+              <span className={cn('ml-1.5 inline-flex items-center justify-center min-w-[20px] h-[18px] px-1 rounded-full text-[10px] font-bold', active ? 'bg-white/25 text-white' : 'bg-white/80')}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <Card className="p-3 border-red-100 shadow-sm">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-400" />
           <Input placeholder="Search by package…" value={search} onChange={e => setSearch(e.target.value)} className="pl-9 border-red-100 focus-visible:ring-red-400" />
         </div>
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-full sm:w-44 border-red-100"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="processing">Processing</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
       </Card>
 
       {filtered.length === 0 ? (
