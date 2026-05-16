@@ -5,12 +5,14 @@ import { Package, Calendar, Clock, Wallet, ArrowRight, Loader2, Sparkles, Trendi
 import { Link } from 'react-router-dom';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useUserOrders, computeSubscriptionStatus } from '@/hooks/useUserOrders';
-import { CategoryBadge, PaymentBadge, SubStateBadge, getCategory } from '@/components/account/AccountUI';
+import { CategoryBadge, PaymentBadge, SubStateBadge, ProductIcon } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
 import { cn } from '@/lib/utils';
 
 const DashboardPage: React.FC = () => {
   const { profile, user } = useUserAuth();
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
 
   const stats = useMemo(() => {
     const subs = orders.map(computeSubscriptionStatus);
@@ -68,14 +70,11 @@ const DashboardPage: React.FC = () => {
           ) : (
             <div className="space-y-2">
               {activeSubs.map(({ o, s }) => {
-                const c = getCategory(o.package_category);
-                const Icon = c.icon;
+                const iconUrl = o.package_id ? icons[o.package_id] : undefined;
                 return (
                   <div key={o.id} className="flex items-center justify-between p-3 rounded-xl border-2 border-transparent hover:border-red-200 bg-gradient-to-r from-white to-red-50/40 transition-all">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={cn('h-10 w-10 rounded-lg flex items-center justify-center text-white shadow-md shrink-0', c.bg)}>
-                        <Icon className="h-5 w-5" />
-                      </div>
+                      <ProductIcon iconUrl={iconUrl} category={o.package_category} size="sm" />
                       <div className="min-w-0">
                         <div className="font-semibold truncate text-sm">{o.package_name}</div>
                         <div className="text-[11px] text-muted-foreground">{o.duration_months}M</div>
@@ -103,23 +102,25 @@ const DashboardPage: React.FC = () => {
           {recent.length === 0 ? (
             <div className="p-4"><EmptyState label="No orders yet." cta={{ to: '/', label: 'Browse packages' }} /></div>
           ) : (
-            recent.map(o => (
-              <Link key={o.id} to={`/account/orders/${o.id}`} className="flex items-center justify-between p-3 sm:px-6 hover:bg-red-50/40 transition">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-semibold truncate text-sm">{o.package_name}</span>
+            recent.map(o => {
+              const iconUrl = o.package_id ? icons[o.package_id] : undefined;
+              return (
+                <Link key={o.id} to={`/account/orders/${o.id}`} className="flex items-center gap-3 p-3 sm:px-6 hover:bg-red-50/40 transition">
+                  <ProductIcon iconUrl={iconUrl} category={o.package_category} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold truncate text-sm mb-0.5">{o.package_name}</div>
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <CategoryBadge category={o.package_category} className="text-[10px] py-0 px-1.5" />
+                      <span>{new Date(o.created_at).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <CategoryBadge category={o.package_category} className="text-[10px] py-0 px-1.5" />
-                    <span>{new Date(o.created_at).toLocaleDateString()}</span>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold text-red-600">${Number(o.amount).toFixed(2)}</div>
+                    <PaymentBadge status={o.payment_status} />
                   </div>
-                </div>
-                <div className="text-right shrink-0 ml-2">
-                  <div className="text-sm font-bold text-red-600">${Number(o.amount).toFixed(2)}</div>
-                  <PaymentBadge status={o.payment_status} />
-                </div>
-              </Link>
-            ))
+                </Link>
+              );
+            })
           )}
         </div>
       </Card>

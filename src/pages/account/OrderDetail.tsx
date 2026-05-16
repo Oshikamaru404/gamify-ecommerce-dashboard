@@ -7,11 +7,13 @@ import { ArrowLeft, Copy, RefreshCw, MessageCircle, Loader2, Eye, EyeOff } from 
 import { useUserOrders } from '@/hooks/useUserOrders';
 import { useToast } from '@/hooks/use-toast';
 import { CategoryBadge, PaymentBadge, OrderStatusBadge, getCategory } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
 import { cn } from '@/lib/utils';
 
 const OrderDetailPage: React.FC = () => {
   const { id } = useParams();
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
   const { toast } = useToast();
   const order = orders.find(o => o.id === id);
 
@@ -45,8 +47,12 @@ const OrderDetailPage: React.FC = () => {
         <div className={cn('p-5 sm:p-6 text-white relative', c.bg)}>
           <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10 blur-xl" />
           <div className="relative flex items-start gap-4">
-            <div className="h-14 w-14 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center shrink-0 shadow-lg">
-              <Icon className="h-7 w-7" />
+            <div className="h-14 w-14 rounded-xl bg-white/90 backdrop-blur flex items-center justify-center shrink-0 shadow-lg p-1.5 overflow-hidden">
+              {order.package_id && icons[order.package_id] ? (
+                <img src={icons[order.package_id]} alt="" className="h-10 w-10 object-contain" />
+              ) : (
+                <Icon className="h-7 w-7 text-white" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg sm:text-2xl font-extrabold leading-tight">{order.package_name}</h1>

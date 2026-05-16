@@ -5,11 +5,13 @@ import { Loader2, Key, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserOrders } from '@/hooks/useUserOrders';
 import { useToast } from '@/hooks/use-toast';
-import { CategoryBadge, getCategory } from '@/components/account/AccountUI';
+import { CategoryBadge, getCategory, ProductIcon } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
 import { cn } from '@/lib/utils';
 
 const ActivationsPage: React.FC = () => {
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
   const { toast } = useToast();
   const acts = useMemo(() => orders.filter(o =>
     o.order_type === 'activation' || (o.credentials_notes && /mac/i.test(o.credentials_notes))
@@ -37,15 +39,13 @@ const ActivationsPage: React.FC = () => {
           {acts.map(o => {
             const macMatch = o.credentials_notes?.match(/([0-9A-F]{2}:){5}[0-9A-F]{2}/i);
             const c = getCategory(o.package_category || 'activation');
-            const Icon = c.icon;
+            const iconUrl = o.package_id ? icons[o.package_id] : undefined;
             return (
               <Card key={o.id} className="overflow-hidden shadow-md hover:shadow-lg transition-all border-0">
                 <div className={cn('h-1.5 w-full', c.bg)} />
                 <div className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className={cn('h-11 w-11 rounded-xl flex items-center justify-center text-white shadow-md shrink-0', c.bg)}>
-                      <Icon className="h-5 w-5" />
-                    </div>
+                    <ProductIcon iconUrl={iconUrl} category={o.package_category || 'activation'} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="min-w-0">
