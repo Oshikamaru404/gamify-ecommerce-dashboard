@@ -187,12 +187,72 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'macAddress') {
+      setFormData((p) => ({ ...p, macAddress: formatMacInput(value) }));
+      return;
+    }
     setFormData((p) => ({ ...p, [name]: value }));
+    if (name === 'customerEmail') {
+      setEmailSuggestion(suggestEmailFix(value));
+    }
   };
   const handleRenewalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRenewal((p) => ({ ...p, [name]: value }));
   };
+
+  // ---- Apply a saved profile (one-click autofill of past credentials) ----
+  const applySavedProfile = (profile: SavedProfile | null) => {
+    setSelectedSavedId(profile?.id ?? null);
+    if (!profile) return;
+    setFormData((p) => ({
+      ...p,
+      macAddress: profile.mac_address ?? p.macAddress,
+      iptvUsername: profile.iptv_username ?? p.iptvUsername,
+    }));
+    if (profile.connection_type) setConnectionType(profile.connection_type);
+    toast.success('Saved profile applied');
+  };
+
+  // ---- Restore draft (once) when the modal opens ----
+  useEffect(() => {
+    if (draftRestoredRef.current || !packageData.id) return;
+    const draft = loadCheckoutDraft<{
+      accountType: AccountType;
+      connectionType: ConnectionType;
+      formData: typeof formData;
+      renewal: typeof renewal;
+    }>(packageData.id);
+    if (draft) {
+      draftRestoredRef.current = true;
+      if (draft.accountType) setAccountType(draft.accountType);
+      if (draft.connectionType) setConnectionType(draft.connectionType);
+      if (draft.formData) setFormData((p) => ({ ...p, ...draft.formData }));
+      if (draft.renewal) setRenewal((p) => ({ ...p, ...draft.renewal }));
+      toast('Draft restored', { description: 'We brought back your previous entries.' });
+    }
+  }, [packageData.id]);
+
+  // ---- Autosave draft (debounced) ----
+  useCheckoutDraftAutosave(
+    packageData.id,
+    { accountType, connectionType, formData, renewal },
+    !orderPlaced,
+  );
+
+  // ---- Smart Autofill from signed-in profile ----
+  useEffect(() => {
+    if (autofilledRef.current) return;
+    if (!autofill.email && !autofill.displayName && !autofill.phone) return;
+    autofilledRef.current = true;
+    setFormData((p) => ({
+      ...p,
+      customerName: p.customerName || autofill.displayName || '',
+      customerEmail: p.customerEmail || autofill.email || '',
+      customerWhatsapp: p.customerWhatsapp || autofill.phone || '',
+    }));
+  }, [autofill.email, autofill.displayName, autofill.phone]);
+
 
   // ---- Build credentials_notes payload (extra info for admin / activation) ----
   const buildNotesPayload = () => {
