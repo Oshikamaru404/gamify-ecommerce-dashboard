@@ -70,14 +70,11 @@ const DashboardPage: React.FC = () => {
           ) : (
             <div className="space-y-2">
               {activeSubs.map(({ o, s }) => {
-                const c = getCategory(o.package_category);
-                const Icon = c.icon;
+                const iconUrl = o.package_id ? icons[o.package_id] : undefined;
                 return (
                   <div key={o.id} className="flex items-center justify-between p-3 rounded-xl border-2 border-transparent hover:border-red-200 bg-gradient-to-r from-white to-red-50/40 transition-all">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={cn('h-10 w-10 rounded-lg flex items-center justify-center text-white shadow-md shrink-0', c.bg)}>
-                        <Icon className="h-5 w-5" />
-                      </div>
+                      <ProductIcon iconUrl={iconUrl} category={o.package_category} size="sm" />
                       <div className="min-w-0">
                         <div className="font-semibold truncate text-sm">{o.package_name}</div>
                         <div className="text-[11px] text-muted-foreground">{o.duration_months}M</div>
