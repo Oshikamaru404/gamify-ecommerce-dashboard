@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, Bitcoin,
-  ArrowRight, ArrowLeft, RefreshCw, Sparkles, ShieldCheck, Zap, Smartphone, Tv, Lock, User
+  ArrowRight, ArrowLeft, RefreshCw, Sparkles, ShieldCheck, Zap, Smartphone, Tv, Lock, User,
+  Check, AlertCircle, Clock, Award, History
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -17,6 +18,10 @@ import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPaym
 import { triggerOrderEmails } from '@/lib/orderEmails';
 import { cn } from '@/lib/utils';
 import QuickCheckoutAuth from '@/components/auth/QuickCheckoutAuth';
+import { useCheckoutAutofill, SavedProfile } from '@/hooks/useCheckoutAutofill';
+import { useCheckoutDraftAutosave, loadCheckoutDraft, clearCheckoutDraft } from '@/hooks/useCheckoutDraft';
+import { formatMacInput, isValidEmail, isValidMac, suggestEmailFix } from '@/lib/checkoutValidation';
+import SavedProfilesPicker from '@/components/auth/SavedProfilesPicker';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
@@ -70,6 +75,13 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
   const { data: siteSettings } = useSiteSettings();
   const [imageError, setImageError] = useState(false);
+
+  // ---- Smart Autofill / Saved profiles / Draft restore ----
+  const autofill = useCheckoutAutofill(packageData.category);
+  const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null);
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
+  const autofilledRef = useRef(false);
+  const draftRestoredRef = useRef(false);
 
   const displayName = useLocalizedText(packageData.name);
   const displayDescription = useLocalizedText(packageData.description);
@@ -148,12 +160,16 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       toast.error('Please fill in your name, email and WhatsApp number');
       return false;
     }
+    if (!isValidEmail(formData.customerEmail)) {
+      toast.error('Please enter a valid email address');
+      return false;
+    }
     if (showConnectionToggle && !connectionType) {
       toast.error('Please choose your connection type (M3U/Xtream or MAG/STB)');
       return false;
     }
-    if (showMac && !formData.macAddress) {
-      toast.error('MAC Address is required');
+    if (showMac && !isValidMac(formData.macAddress)) {
+      toast.error('Please enter a valid MAC address (XX:XX:XX:XX:XX:XX)');
       return false;
     }
     if (showUsername && !formData.iptvUsername) {
@@ -175,12 +191,72 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'macAddress') {
+      setFormData((p) => ({ ...p, macAddress: formatMacInput(value) }));
+      return;
+    }
     setFormData((p) => ({ ...p, [name]: value }));
+    if (name === 'customerEmail') {
+      setEmailSuggestion(suggestEmailFix(value));
+    }
   };
   const handleRenewalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setRenewal((p) => ({ ...p, [name]: value }));
   };
+
+  // ---- Apply a saved profile (one-click autofill of past credentials) ----
+  const applySavedProfile = (profile: SavedProfile | null) => {
+    setSelectedSavedId(profile?.id ?? null);
+    if (!profile) return;
+    setFormData((p) => ({
+      ...p,
+      macAddress: profile.mac_address ?? p.macAddress,
+      iptvUsername: profile.iptv_username ?? p.iptvUsername,
+    }));
+    if (profile.connection_type) setConnectionType(profile.connection_type);
+    toast.success('Saved profile applied');
+  };
+
+  // ---- Restore draft (once) when the modal opens ----
+  useEffect(() => {
+    if (draftRestoredRef.current || !packageData.id) return;
+    const draft = loadCheckoutDraft<{
+      accountType: AccountType;
+      connectionType: ConnectionType;
+      formData: typeof formData;
+      renewal: typeof renewal;
+    }>(packageData.id);
+    if (draft) {
+      draftRestoredRef.current = true;
+      if (draft.accountType) setAccountType(draft.accountType);
+      if (draft.connectionType) setConnectionType(draft.connectionType);
+      if (draft.formData) setFormData((p) => ({ ...p, ...draft.formData }));
+      if (draft.renewal) setRenewal((p) => ({ ...p, ...draft.renewal }));
+      toast('Draft restored', { description: 'We brought back your previous entries.' });
+    }
+  }, [packageData.id]);
+
+  // ---- Autosave draft (debounced) ----
+  useCheckoutDraftAutosave(
+    packageData.id,
+    { accountType, connectionType, formData, renewal },
+    !orderPlaced,
+  );
+
+  // ---- Smart Autofill from signed-in profile ----
+  useEffect(() => {
+    if (autofilledRef.current) return;
+    if (!autofill.email && !autofill.displayName && !autofill.phone) return;
+    autofilledRef.current = true;
+    setFormData((p) => ({
+      ...p,
+      customerName: p.customerName || autofill.displayName || '',
+      customerEmail: p.customerEmail || autofill.email || '',
+      customerWhatsapp: p.customerWhatsapp || autofill.phone || '',
+    }));
+  }, [autofill.email, autofill.displayName, autofill.phone]);
+
 
   // ---- Build credentials_notes payload (extra info for admin / activation) ----
   const buildNotesPayload = () => {
@@ -262,6 +338,7 @@ Order ID: ${orderData.id}`;
       const url = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
       setWhatsappUrl(url);
       setOrderPlaced(true);
+      clearCheckoutDraft(packageData.id);
       toast.success('Order placed successfully!');
     } catch (e) {
       console.error(e);
@@ -296,7 +373,7 @@ Order ID: ${orderData.id}`;
       if (paymentError) throw paymentError;
       if (paymentData?.checkoutUrl) {
         toast.success('Redirecting to secure payment...');
-        setTimeout(() => { window.location.href = paymentData.checkoutUrl; }, 1000);
+        setTimeout(() => { clearCheckoutDraft(packageData.id); window.location.href = paymentData.checkoutUrl; }, 1000);
       } else {
         throw new Error('Failed to create payment link');
       }
@@ -525,24 +602,64 @@ Order ID: ${orderData.id}`;
               <div className="text-center space-y-1">
                 <h3 className="text-lg font-semibold">Your details</h3>
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-                  <Zap className="h-3.5 w-3.5" /> We’re preparing your access
+                  <Zap className="h-3.5 w-3.5" /> We're preparing your access
                 </p>
               </div>
+
+              {autofill.savedProfiles.length > 0 && (
+                <SavedProfilesPicker
+                  profiles={autofill.savedProfiles}
+                  selectedId={selectedSavedId}
+                  onSelect={applySavedProfile}
+                />
+              )}
+
+              {autofilledRef.current && (autofill.displayName || autofill.email) && (
+                <div className="flex items-center gap-2 text-[11px] text-primary bg-primary/5 border border-primary/20 rounded-md px-2.5 py-1.5">
+                  <Sparkles className="h-3 w-3" />
+                  <span>Auto-filled from your account. Feel free to edit.</span>
+                </div>
+              )}
 
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="customerName">Full name *</Label>
-                  <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" />
+                  <div className="relative">
+                    <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" className="pr-9" />
+                    {formData.customerName.trim().length >= 2 && (
+                      <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="customerEmail">Email *</Label>
-                  <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" />
+                  <div className="relative">
+                    <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" className="pr-9" />
+                    {isValidEmail(formData.customerEmail) && (
+                      <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                    )}
+                  </div>
+                  {emailSuggestion && (
+                    <button
+                      type="button"
+                      onClick={() => { setFormData(p => ({ ...p, customerEmail: emailSuggestion! })); setEmailSuggestion(null); }}
+                      className="flex items-center gap-1 text-[11px] text-amber-700 hover:underline"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+                    </button>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="customerWhatsapp">WhatsApp / Phone *</Label>
-                <Input id="customerWhatsapp" name="customerWhatsapp" value={formData.customerWhatsapp} onChange={handleInputChange} placeholder="+1234567890" />
+                <div className="relative">
+                  <Input id="customerWhatsapp" name="customerWhatsapp" value={formData.customerWhatsapp} onChange={handleInputChange} placeholder="+1234567890" className="pr-9" />
+                  {formData.customerWhatsapp.replace(/\D/g, '').length >= 7 && (
+                    <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                  )}
+                </div>
               </div>
 
               {/* ===== Dynamic activation fields per offer / user / connection ===== */}
@@ -613,8 +730,11 @@ Order ID: ${orderData.id}`;
                   <div className="grid sm:grid-cols-2 gap-3">
                     {showMac && (
                       <div className="space-y-1.5 sm:col-span-2">
-                        <Label htmlFor="macAddress" className="text-xs">MAC Address *</Label>
-                        <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" />
+                        <Label htmlFor="macAddress" className="text-xs flex items-center gap-1.5">
+                          MAC Address *
+                          {isValidMac(formData.macAddress) && <Check className="h-3 w-3 text-green-600" />}
+                        </Label>
+                        <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" maxLength={17} className="font-mono tracking-wider" />
                       </div>
                     )}
                     {showUsername && (
@@ -678,12 +798,29 @@ Order ID: ${orderData.id}`;
                 </CardContent>
               </Card>
 
+              {/* Trust badges */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-green-50 border border-green-200 text-center">
+                  <ShieldCheck className="h-4 w-4 text-green-600" />
+                  <span className="text-[10px] font-semibold text-green-800 leading-tight">Secure checkout</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-center">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <span className="text-[10px] font-semibold text-blue-800 leading-tight">Activation 5–15 min</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-center">
+                  <Award className="h-4 w-4 text-amber-600" />
+                  <span className="text-[10px] font-semibold text-amber-800 leading-tight">30-day guarantee</span>
+                </div>
+              </div>
+
               {/* Payment methods */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <ShieldCheck className="h-4 w-4 text-green-600" />
                   Secure payment processing · Instant delivery after payment
                 </div>
+
 
                 <Tabs defaultValue="credit_card" className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/60 gap-1">
