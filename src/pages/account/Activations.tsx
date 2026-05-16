@@ -14,7 +14,10 @@ const ActivationsPage: React.FC = () => {
   const icons = usePackageIcons(orders.map(o => o.package_id));
   const { toast } = useToast();
   const acts = useMemo(() => orders.filter(o =>
-    o.order_type === 'activation' || (o.credentials_notes && /mac/i.test(o.credentials_notes))
+    o.order_type === 'activation'
+    || o.package_category === 'activation'
+    || o.package_category === 'player'
+    || (o.credentials_notes && /mac/i.test(o.credentials_notes))
   ), [orders]);
 
   const copy = (v: string) => { navigator.clipboard.writeText(v); toast({ title: 'Copied' }); };

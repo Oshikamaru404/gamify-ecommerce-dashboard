@@ -14,7 +14,11 @@ const SubscriptionsPage: React.FC = () => {
 
   const subs = useMemo(() =>
     orders
-      .filter(o => ['iptv_subscription', 'iptv_panel', 'player_panel'].includes(o.package_category) || o.duration_months > 0)
+      .filter(o =>
+        ['iptv_subscription', 'iptv_panel', 'player_panel'].includes(o.package_category)
+        && o.order_type !== 'activation'
+        && !(o.credentials_notes && /mac/i.test(o.credentials_notes))
+      )
       .map(o => ({ o, s: computeSubscriptionStatus(o) }))
       .filter(x => x.s.expiresAt !== null)
       .sort((a, b) => (a.s.daysLeft ?? 9999) - (b.s.daysLeft ?? 9999)),
