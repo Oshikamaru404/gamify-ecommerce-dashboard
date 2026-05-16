@@ -150,6 +150,7 @@ function App() {
             </TooltipProvider>
           </StoreProvider>
         </LanguageProvider>
+        </UserAuthProvider>
       </AdminAuthProvider>
     </QueryClientProvider>
   );
