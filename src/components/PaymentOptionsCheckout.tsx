@@ -16,6 +16,7 @@ import { useLocalizedText } from '@/lib/multilingualUtils';
 import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPayment';
 import { triggerOrderEmails } from '@/lib/orderEmails';
 import { cn } from '@/lib/utils';
+import QuickCheckoutAuth from '@/components/auth/QuickCheckoutAuth';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
