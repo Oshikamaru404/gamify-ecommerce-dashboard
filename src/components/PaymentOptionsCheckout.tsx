@@ -798,12 +798,29 @@ Order ID: ${orderData.id}`;
                 </CardContent>
               </Card>
 
+              {/* Trust badges */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-green-50 border border-green-200 text-center">
+                  <ShieldCheck className="h-4 w-4 text-green-600" />
+                  <span className="text-[10px] font-semibold text-green-800 leading-tight">Secure checkout</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-center">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <span className="text-[10px] font-semibold text-blue-800 leading-tight">Activation 5–15 min</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-center">
+                  <Award className="h-4 w-4 text-amber-600" />
+                  <span className="text-[10px] font-semibold text-amber-800 leading-tight">30-day guarantee</span>
+                </div>
+              </div>
+
               {/* Payment methods */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <ShieldCheck className="h-4 w-4 text-green-600" />
                   Secure payment processing · Instant delivery after payment
                 </div>
+
 
                 <Tabs defaultValue="credit_card" className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/60 gap-1">
