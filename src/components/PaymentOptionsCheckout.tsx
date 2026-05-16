@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, Bitcoin,
-  ArrowRight, ArrowLeft, RefreshCw, Sparkles, ShieldCheck, Zap, Smartphone, Tv, Lock, User
+  ArrowRight, ArrowLeft, RefreshCw, Sparkles, ShieldCheck, Zap, Smartphone, Tv, Lock, User,
+  Check, AlertCircle, Clock, Award, History
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -17,6 +18,10 @@ import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPaym
 import { triggerOrderEmails } from '@/lib/orderEmails';
 import { cn } from '@/lib/utils';
 import QuickCheckoutAuth from '@/components/auth/QuickCheckoutAuth';
+import { useCheckoutAutofill, SavedProfile } from '@/hooks/useCheckoutAutofill';
+import { useCheckoutDraftAutosave, loadCheckoutDraft, clearCheckoutDraft } from '@/hooks/useCheckoutDraft';
+import { formatMacInput, isValidEmail, isValidMac, suggestEmailFix } from '@/lib/checkoutValidation';
+import SavedProfilesPicker from '@/components/auth/SavedProfilesPicker';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
