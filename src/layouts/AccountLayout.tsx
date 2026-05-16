@@ -3,12 +3,11 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import AccountSidebar from '@/components/account/AccountSidebar';
 import RequireAuth from '@/components/account/RequireAuth';
-import SEO from '@/components/SEO';
 
 const AccountLayout: React.FC = () => {
+  React.useEffect(() => { document.title = 'My Account — BWIVOX'; }, []);
   return (
     <RequireAuth>
-      <SEO title="My Account — BWIVOX" description="Manage your orders, subscriptions and profile." />
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
           <AccountSidebar />
