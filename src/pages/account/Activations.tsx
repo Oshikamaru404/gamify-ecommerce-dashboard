@@ -13,13 +13,13 @@ const ActivationsPage: React.FC = () => {
   const { orders, loading } = useUserOrders();
   const icons = usePackageIcons(orders.map(o => o.package_id));
   const { toast } = useToast();
-  const acts = useMemo(() => orders.filter(o =>
-    o.order_type === 'activation'
-    || o.package_category === 'activation'
-    || o.package_category === 'player'
-    || o.package_category === 'player_panel'
-    || (o.credentials_notes && /mac/i.test(o.credentials_notes))
-  ), [orders]);
+  const acts = useMemo(() => {
+    const PLAYER_CATS = ['activation-player', 'player', 'player_panel', 'panel-player', 'activation'];
+    return orders.filter(o => {
+      const cat = (o.package_category || '').toLowerCase();
+      return PLAYER_CATS.includes(cat) || (o.credentials_notes && /mac/i.test(o.credentials_notes));
+    });
+  }, [orders]);
 
   const copy = (v: string) => { navigator.clipboard.writeText(v); toast({ title: 'Copied' }); };
 
