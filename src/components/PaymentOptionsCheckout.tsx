@@ -160,12 +160,16 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       toast.error('Please fill in your name, email and WhatsApp number');
       return false;
     }
+    if (!isValidEmail(formData.customerEmail)) {
+      toast.error('Please enter a valid email address');
+      return false;
+    }
     if (showConnectionToggle && !connectionType) {
       toast.error('Please choose your connection type (M3U/Xtream or MAG/STB)');
       return false;
     }
-    if (showMac && !formData.macAddress) {
-      toast.error('MAC Address is required');
+    if (showMac && !isValidMac(formData.macAddress)) {
+      toast.error('Please enter a valid MAC address (XX:XX:XX:XX:XX:XX)');
       return false;
     }
     if (showUsername && !formData.iptvUsername) {
