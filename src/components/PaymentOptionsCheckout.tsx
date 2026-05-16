@@ -730,8 +730,11 @@ Order ID: ${orderData.id}`;
                   <div className="grid sm:grid-cols-2 gap-3">
                     {showMac && (
                       <div className="space-y-1.5 sm:col-span-2">
-                        <Label htmlFor="macAddress" className="text-xs">MAC Address *</Label>
-                        <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" />
+                        <Label htmlFor="macAddress" className="text-xs flex items-center gap-1.5">
+                          MAC Address *
+                          {isValidMac(formData.macAddress) && <Check className="h-3 w-3 text-green-600" />}
+                        </Label>
+                        <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" maxLength={17} className="font-mono tracking-wider" />
                       </div>
                     )}
                     {showUsername && (
