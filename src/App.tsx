@@ -9,7 +9,18 @@ import { StoreProvider } from "./contexts/StoreContext";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
 import { UserAuthProvider } from "./contexts/UserAuthContext";
 import AuthCallback from "./pages/AuthCallback";
-import Account from "./pages/Account";
+import AccountLayout from "./layouts/AccountLayout";
+import AccountDashboard from "./pages/account/Dashboard";
+import AccountOrders from "./pages/account/Orders";
+import AccountOrderDetail from "./pages/account/OrderDetail";
+import AccountSubscriptions from "./pages/account/Subscriptions";
+import AccountActivations from "./pages/account/Activations";
+import AccountProfile from "./pages/account/settings/Profile";
+import AccountSecurity from "./pages/account/settings/Security";
+import AccountLinked from "./pages/account/settings/Linked";
+import AccountSavedProfiles from "./pages/account/settings/SavedProfiles";
+import AccountDanger from "./pages/account/settings/Danger";
+import AccountPlaceholder from "./pages/account/Placeholder";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -91,9 +102,23 @@ function App() {
                   {/* Public routes - Updated to use Home as default */}
                   <Route path="/" element={<Home />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/account/orders" element={<Account />} />
-                  <Route path="/account/settings" element={<Account />} />
+                  <Route path="/account" element={<AccountLayout />}>
+                    <Route index element={<AccountDashboard />} />
+                    <Route path="orders" element={<AccountOrders />} />
+                    <Route path="orders/:id" element={<AccountOrderDetail />} />
+                    <Route path="subscriptions" element={<AccountSubscriptions />} />
+                    <Route path="activations" element={<AccountActivations />} />
+                    <Route path="payments" element={<AccountOrders paidOnly title="Payment History" />} />
+                    <Route path="coupons" element={<AccountPlaceholder title="Coupons" description="Promo codes will be available soon." />} />
+                    <Route path="affiliate" element={<AccountPlaceholder title="Affiliate Program" description="Earn commissions by referring new customers. Launching soon." />} />
+                    <Route path="settings" element={<AccountProfile />} />
+                    <Route path="settings/profile" element={<AccountProfile />} />
+                    <Route path="settings/security" element={<AccountSecurity />} />
+                    <Route path="settings/notifications" element={<AccountPlaceholder title="Notifications" description="Notification preferences coming soon." />} />
+                    <Route path="settings/linked" element={<AccountLinked />} />
+                    <Route path="settings/saved-profiles" element={<AccountSavedProfiles />} />
+                    <Route path="settings/danger" element={<AccountDanger />} />
+                  </Route>
                   <Route path="/home" element={<Home />} />
                   <Route path="/index" element={<Index />} />
                   <Route path="/products" element={<Products />} />

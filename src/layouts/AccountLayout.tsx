@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import AccountSidebar from '@/components/account/AccountSidebar';
 import RequireAuth from '@/components/account/RequireAuth';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const AccountLayout: React.FC = () => {
   return (
