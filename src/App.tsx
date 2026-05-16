@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { StoreProvider } from "./contexts/StoreContext";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
+import { UserAuthProvider } from "./contexts/UserAuthContext";
+import AuthCallback from "./pages/AuthCallback";
+import Account from "./pages/Account";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -78,6 +81,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AdminAuthProvider>
+        <UserAuthProvider>
         <LanguageProvider>
           <StoreProvider>
             <TooltipProvider>
@@ -86,6 +90,10 @@ function App() {
                 <Routes>
                   {/* Public routes - Updated to use Home as default */}
                   <Route path="/" element={<Home />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/account/orders" element={<Account />} />
+                  <Route path="/account/settings" element={<Account />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/index" element={<Index />} />
                   <Route path="/products" element={<Products />} />
@@ -146,6 +154,7 @@ function App() {
             </TooltipProvider>
           </StoreProvider>
         </LanguageProvider>
+        </UserAuthProvider>
       </AdminAuthProvider>
     </QueryClientProvider>
   );

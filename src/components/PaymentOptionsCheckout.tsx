@@ -16,6 +16,7 @@ import { useLocalizedText } from '@/lib/multilingualUtils';
 import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPayment';
 import { triggerOrderEmails } from '@/lib/orderEmails';
 import { cn } from '@/lib/utils';
+import QuickCheckoutAuth from '@/components/auth/QuickCheckoutAuth';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
@@ -433,6 +434,13 @@ Order ID: ${orderData.id}`;
                   <Sparkles className="h-3.5 w-3.5" /> Fast and secure checkout
                 </p>
               </div>
+
+              <QuickCheckoutAuth
+                onAuthed={(profile) => {
+                  if (profile?.display_name) setFormData(p => ({ ...p, customerName: profile.display_name! }));
+                  if (profile?.email) setFormData(p => ({ ...p, customerEmail: profile.email! }));
+                }}
+              />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
