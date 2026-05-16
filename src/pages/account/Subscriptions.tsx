@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
 import { Loader2, Calendar, RefreshCw } from 'lucide-react';
 import { useUserOrders, computeSubscriptionStatus } from '@/hooks/useUserOrders';
+import { CategoryBadge, SubStateBadge, getCategory, progressColor } from '@/components/account/AccountUI';
+import { cn } from '@/lib/utils';
 
 const SubscriptionsPage: React.FC = () => {
   const { orders, loading } = useUserOrders();
@@ -18,48 +18,62 @@ const SubscriptionsPage: React.FC = () => {
       .sort((a, b) => (a.s.daysLeft ?? 9999) - (b.s.daysLeft ?? 9999)),
     [orders]);
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-red-500" /></div>;
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">My Subscriptions</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">My Subscriptions</h1>
         <p className="text-muted-foreground text-sm">{subs.length} subscription{subs.length !== 1 ? 's' : ''}</p>
       </div>
 
       {subs.length === 0 ? (
-        <Card className="p-10 text-center">
-          <Calendar className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+        <Card className="p-10 text-center border-dashed border-2 border-red-200">
+          <Calendar className="h-12 w-12 mx-auto text-red-300 mb-3" />
           <p className="text-muted-foreground mb-4">No subscription yet.</p>
-          <Button asChild><Link to="/">Browse packages</Link></Button>
+          <Button asChild className="bg-red-600 hover:bg-red-700"><Link to="/">Browse packages</Link></Button>
         </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {subs.map(({ o, s }) => {
             const totalDays = (o.duration_months || 1) * 30;
             const pct = s.daysLeft !== null ? Math.max(0, Math.min(100, (s.daysLeft / totalDays) * 100)) : 0;
-            const stateColor = s.state === 'expired' ? 'destructive' : s.state === 'expiring' ? 'secondary' : 'default';
+            const c = getCategory(o.package_category);
+            const Icon = c.icon;
             return (
-              <Card key={o.id} className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="min-w-0">
-                    <div className="font-semibold truncate">{o.package_name}</div>
-                    <div className="text-xs text-muted-foreground">{o.duration_months}M · {o.package_category}</div>
+              <Card key={o.id} className="overflow-hidden shadow-md hover:shadow-xl transition-all border-0">
+                <div className={cn('h-1.5 w-full', c.bg)} />
+                <div className="p-4">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className={cn('h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-md shrink-0', c.bg)}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold truncate">{o.package_name}</div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <CategoryBadge category={o.package_category} className="text-[10px]" />
+                        <span className="text-[11px] text-muted-foreground">{o.duration_months}M</span>
+                      </div>
+                    </div>
+                    <SubStateBadge state={s.state} />
                   </div>
-                  <Badge variant={stateColor as any}>{s.state}</Badge>
-                </div>
-                <div className="mt-3 mb-1 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">
-                    {s.daysLeft !== null && s.daysLeft >= 0
-                      ? `${s.daysLeft} days left`
-                      : 'Expired'}
-                  </span>
-                  <span className="text-muted-foreground">Expires {s.expiresAt?.toLocaleDateString()}</span>
-                </div>
-                <Progress value={pct} className="h-2" />
-                <div className="mt-4 flex gap-2">
-                  <Button size="sm" asChild className="flex-1"><Link to="/"><RefreshCw className="h-4 w-4 mr-1" /> Renew</Link></Button>
-                  <Button size="sm" variant="outline" asChild><Link to={`/account/orders/${o.id}`}>Details</Link></Button>
+
+                  <div className="rounded-lg bg-muted/40 p-3 mb-3">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="font-semibold">
+                        {s.daysLeft !== null && s.daysLeft >= 0 ? `${s.daysLeft} days left` : 'Expired'}
+                      </span>
+                      <span className="text-muted-foreground">{s.expiresAt?.toLocaleDateString()}</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+                      <div className={cn('h-full rounded-full transition-all', progressColor(s.state))} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button size="sm" asChild className="flex-1 bg-red-600 hover:bg-red-700"><Link to="/"><RefreshCw className="h-4 w-4 mr-1" /> Renew</Link></Button>
+                    <Button size="sm" variant="outline" asChild className="border-red-200 hover:bg-red-50 hover:text-red-600"><Link to={`/account/orders/${o.id}`}>Details</Link></Button>
+                  </div>
                 </div>
               </Card>
             );
