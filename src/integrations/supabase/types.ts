@@ -622,7 +622,9 @@ export type Database = {
           email: string | null
           id: string
           phone: string | null
+          preferred_language: string | null
           provider: string | null
+          saved_profiles: Json
           updated_at: string
         }
         Insert: {
@@ -632,7 +634,9 @@ export type Database = {
           email?: string | null
           id: string
           phone?: string | null
+          preferred_language?: string | null
           provider?: string | null
+          saved_profiles?: Json
           updated_at?: string
         }
         Update: {
@@ -642,7 +646,9 @@ export type Database = {
           email?: string | null
           id?: string
           phone?: string | null
+          preferred_language?: string | null
           provider?: string | null
+          saved_profiles?: Json
           updated_at?: string
         }
         Relationships: []
