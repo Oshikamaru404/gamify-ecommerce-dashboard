@@ -12,16 +12,19 @@ const SubscriptionsPage: React.FC = () => {
   const { orders, loading } = useUserOrders();
   const icons = usePackageIcons(orders.map(o => o.package_id));
 
-  const subs = useMemo(() =>
-    orders
-      .filter(o =>
-        ['iptv_subscription', 'iptv_panel'].includes(o.package_category)
-        && o.order_type !== 'activation'
-        && !(o.credentials_notes && /mac/i.test(o.credentials_notes))
-      )
+  const subs = useMemo(() => {
+    const IPTV_CATS = ['subscription', 'panel-iptv', 'iptv_subscription', 'iptv_panel', 'iptv'];
+    const PLAYER_CATS = ['activation-player', 'player', 'player_panel', 'panel-player'];
+    return orders
+      .filter(o => {
+        const cat = (o.package_category || '').toLowerCase();
+        if (PLAYER_CATS.includes(cat)) return false;
+        if (o.credentials_notes && /mac/i.test(o.credentials_notes)) return false;
+        return IPTV_CATS.includes(cat);
+      })
       .map(o => ({ o, s: computeSubscriptionStatus(o) }))
-      .sort((a, b) => (a.s.daysLeft ?? 9999) - (b.s.daysLeft ?? 9999)),
-    [orders]);
+      .sort((a, b) => (a.s.daysLeft ?? 9999) - (b.s.daysLeft ?? 9999));
+  }, [orders]);
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-red-500" /></div>;
 
