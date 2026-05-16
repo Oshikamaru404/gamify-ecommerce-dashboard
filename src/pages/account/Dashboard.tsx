@@ -102,23 +102,25 @@ const DashboardPage: React.FC = () => {
           {recent.length === 0 ? (
             <div className="p-4"><EmptyState label="No orders yet." cta={{ to: '/', label: 'Browse packages' }} /></div>
           ) : (
-            recent.map(o => (
-              <Link key={o.id} to={`/account/orders/${o.id}`} className="flex items-center justify-between p-3 sm:px-6 hover:bg-red-50/40 transition">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-semibold truncate text-sm">{o.package_name}</span>
+            recent.map(o => {
+              const iconUrl = o.package_id ? icons[o.package_id] : undefined;
+              return (
+                <Link key={o.id} to={`/account/orders/${o.id}`} className="flex items-center gap-3 p-3 sm:px-6 hover:bg-red-50/40 transition">
+                  <ProductIcon iconUrl={iconUrl} category={o.package_category} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold truncate text-sm mb-0.5">{o.package_name}</div>
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <CategoryBadge category={o.package_category} className="text-[10px] py-0 px-1.5" />
+                      <span>{new Date(o.created_at).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <CategoryBadge category={o.package_category} className="text-[10px] py-0 px-1.5" />
-                    <span>{new Date(o.created_at).toLocaleDateString()}</span>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold text-red-600">${Number(o.amount).toFixed(2)}</div>
+                    <PaymentBadge status={o.payment_status} />
                   </div>
-                </div>
-                <div className="text-right shrink-0 ml-2">
-                  <div className="text-sm font-bold text-red-600">${Number(o.amount).toFixed(2)}</div>
-                  <PaymentBadge status={o.payment_status} />
-                </div>
-              </Link>
-            ))
+                </Link>
+              );
+            })
           )}
         </div>
       </Card>
