@@ -32,43 +32,8 @@ interface PaymentOptionsCheckoutProps {
 }
 
 type AccountType = 'renewal' | 'new' | null;
-
-const DEVICE_OPTIONS = [
-  'Smart TV (Samsung / LG)',
-  'Android TV / Box',
-  'Amazon Firestick',
-  'MAG / STB Box',
-  'Formuler',
-  'iPhone / iPad',
-  'Android Phone / Tablet',
-  'PC / Mac',
-  'Other',
-];
-
-const APP_OPTIONS = [
-  'IBO Player / IBO Pro',
-  'IPTV Smarters Pro',
-  'XCIPTV',
-  'Tivimate',
-  'Smart STB',
-  'MAG Portal',
-  'Formuler MyTVOnline',
-  'Set-TV / STB Emu',
-  'M3U Playlist',
-  'Other',
-];
-
-// Apps that typically require a MAC address / Device ID for activation
-const MAC_REQUIRED_APPS = new Set([
-  'Smart STB',
-  'MAG Portal',
-  'Formuler MyTVOnline',
-  'Set-TV / STB Emu',
-]);
-const MAC_REQUIRED_DEVICES = new Set([
-  'MAG / STB Box',
-  'Formuler',
-]);
+type ConnectionType = 'm3u_xtream' | 'mag_stb' | null;
+type OfferKind = 'iptv_subscription' | 'iptv_panel' | 'player_activation' | 'player_panel';
 
 const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   packageData,
@@ -89,11 +54,11 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     customerName: '',
     customerEmail: '',
     customerWhatsapp: '',
-    deviceType: '',
-    appUsed: '',
     macAddress: '',
-    deviceId: '',
+    iptvUsername: '',
+    iptvPassword: '',
   });
+  const [connectionType, setConnectionType] = useState<ConnectionType>(null);
 
   // ---- Process state ----
   const [isProcessing, setIsProcessing] = useState(false);
@@ -136,10 +101,31 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     return 'text-red-500';
   };
 
-  const requiresMac = useMemo(
-    () => MAC_REQUIRED_APPS.has(formData.appUsed) || MAC_REQUIRED_DEVICES.has(formData.deviceType),
-    [formData.appUsed, formData.deviceType]
-  );
+  // ---- Determine offer kind ----
+  const offerKind: OfferKind = useMemo(() => {
+    const c = (packageData.category || '').toLowerCase();
+    if (c.includes('player') && c.includes('panel')) return 'player_panel';
+    if (c.includes('panel') || c.includes('reseller')) return 'iptv_panel';
+    if (c === 'player' || c.includes('player')) return 'player_activation';
+    return 'iptv_subscription';
+  }, [packageData.category]);
+
+  const isRenewal = accountType === 'renewal';
+  const isNew = accountType === 'new';
+
+  // Field visibility rules per offer + user type + connection
+  const showConnectionToggle = offerKind === 'iptv_subscription';
+  const showMac =
+    (offerKind === 'iptv_subscription' && connectionType === 'mag_stb') ||
+    offerKind === 'player_activation';
+  const showUsername =
+    (offerKind === 'iptv_subscription' && connectionType === 'm3u_xtream') ||
+    offerKind === 'iptv_panel' ||
+    offerKind === 'player_panel';
+  // Password only for NEW (never on renewal)
+  const showPassword = showUsername && isNew;
+  // Email field on the Player Panel (account email)
+  const showPanelEmail = offerKind === 'player_panel';
 
   // ---- Step navigation ----
   const validateStep1 = () => {
@@ -161,12 +147,20 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       toast.error('Please fill in your name, email and WhatsApp number');
       return false;
     }
-    if (!formData.deviceType || !formData.appUsed) {
-      toast.error('Please select your device and app');
+    if (showConnectionToggle && !connectionType) {
+      toast.error('Please choose your connection type (M3U/Xtream or MAG/STB)');
       return false;
     }
-    if (requiresMac && !formData.macAddress && !formData.deviceId) {
-      toast.error('MAC address or Device ID required for this device');
+    if (showMac && !formData.macAddress) {
+      toast.error('MAC Address is required');
+      return false;
+    }
+    if (showUsername && !formData.iptvUsername) {
+      toast.error('Username is required');
+      return false;
+    }
+    if (showPassword && !formData.iptvPassword) {
+      toast.error('Password is required');
       return false;
     }
     return true;
@@ -191,8 +185,8 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const buildNotesPayload = () => {
     const payload: Record<string, any> = {
       account_type: accountType,
-      device_type: formData.deviceType || null,
-      app_used: formData.appUsed || null,
+      offer_kind: offerKind,
+      connection_type: connectionType,
     };
     if (accountType === 'renewal') {
       payload.renewal = {
@@ -201,12 +195,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         account_id: renewal.accountId || null,
       };
     }
-    if (requiresMac) {
-      payload.mac_address = formData.macAddress || null;
-      payload.device_id = formData.deviceId || null;
-    }
+    if (showMac) payload.mac_address = formData.macAddress || null;
+    if (showUsername) payload.iptv_username = formData.iptvUsername || null;
+    if (showPassword) payload.iptv_password = formData.iptvPassword || null;
     return JSON.stringify(payload);
   };
+
 
   // ---- Order creation ----
   const createOrder = async (extra?: Partial<Record<string, string>>) => {
@@ -245,9 +239,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       const renewalLine = accountType === 'renewal'
         ? `\n🔁 Renewal — ${renewal.accountUsername || renewal.accountEmail || renewal.accountId}`
         : '\n🆕 New customer';
-      const macLine = requiresMac
-        ? `\n🔧 MAC/Device: ${formData.macAddress || formData.deviceId}`
-        : '';
+      const detailLines: string[] = [];
+      if (showMac) detailLines.push(`🔧 MAC: ${formData.macAddress}`);
+      if (showUsername) detailLines.push(`👤 Username: ${formData.iptvUsername}`);
+      if (showPassword) detailLines.push(`🔑 Password: ${formData.iptvPassword}`);
+      if (showConnectionToggle) detailLines.push(`🔌 Connection: ${connectionType === 'm3u_xtream' ? 'M3U / Xtream' : 'MAG / STB'}`);
+      const detailsBlock = detailLines.length ? `\n${detailLines.join('\n')}` : '';
 
       const message = `🛒 New Order Request${renewalLine}
 
@@ -257,8 +254,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
 👤 ${formData.customerName}
 ✉️ ${formData.customerEmail}
-📱 ${formData.customerWhatsapp}
-📺 ${formData.deviceType} — ${formData.appUsed}${macLine}
+📱 ${formData.customerWhatsapp}${detailsBlock}
 
 Order ID: ${orderData.id}`;
 
@@ -541,46 +537,97 @@ Order ID: ${orderData.id}`;
                 <Input id="customerWhatsapp" name="customerWhatsapp" value={formData.customerWhatsapp} onChange={handleInputChange} placeholder="+1234567890" />
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="flex items-center gap-1.5"><Tv className="h-3.5 w-3.5" /> Device *</Label>
-                  <Select value={formData.deviceType} onValueChange={(v) => setFormData(p => ({ ...p, deviceType: v }))}>
-                    <SelectTrigger><SelectValue placeholder="Select device" /></SelectTrigger>
-                    <SelectContent>
-                      {DEVICE_OPTIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+              {/* ===== Dynamic activation fields per offer / user / connection ===== */}
+              {showConnectionToggle && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5"><Tv className="h-3.5 w-3.5" /> Connection type *</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setConnectionType('m3u_xtream')}
+                      className={cn(
+                        'p-3 rounded-lg border-2 text-left text-sm transition-all',
+                        connectionType === 'm3u_xtream'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/40'
+                      )}
+                    >
+                      <div className="font-semibold">M3U Playlist & Xtream Codes</div>
+                      <p className="text-xs text-muted-foreground">Smarters, Tivimate, IBO, XCIPTV…</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConnectionType('mag_stb')}
+                      className={cn(
+                        'p-3 rounded-lg border-2 text-left text-sm transition-all',
+                        connectionType === 'mag_stb'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/40'
+                      )}
+                    >
+                      <div className="font-semibold">MAG Portal / STB Emu / Smart STB</div>
+                      <p className="text-xs text-muted-foreground">Device activation via MAC address</p>
+                    </button>
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5" /> App *</Label>
-                  <Select value={formData.appUsed} onValueChange={(v) => setFormData(p => ({ ...p, appUsed: v }))}>
-                    <SelectTrigger><SelectValue placeholder="Select app" /></SelectTrigger>
-                    <SelectContent>
-                      {APP_OPTIONS.map(a => <SelectItem key={a} value={a}>{a}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              )}
 
-              {requiresMac && (
+              {(showMac || showUsername || showPassword || showPanelEmail) && (
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-start gap-2 text-sm text-amber-900">
                     <Lock className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-semibold">Device activation info</p>
-                      <p className="text-xs">Required only for special device activation — this helps us instantly activate your device.</p>
+                      <p className="font-semibold">
+                        {isRenewal ? 'Renewal details' : 'Account creation details'}
+                      </p>
+                      <p className="text-xs">
+                        {isRenewal
+                          ? 'Enter the existing account info we’ll apply your renewal to.'
+                          : 'These details will be used to create and activate your access.'}
+                      </p>
                     </div>
                   </div>
+
+                  {showPanelEmail && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="panelEmail" className="text-xs">Account email *</Label>
+                      <Input
+                        id="panelEmail"
+                        name="customerEmail"
+                        type="email"
+                        value={formData.customerEmail}
+                        onChange={handleInputChange}
+                        placeholder="account@email.com"
+                      />
+                    </div>
+                  )}
+
                   <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="macAddress" className="text-xs">MAC Address</Label>
-                      <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="deviceId" className="text-xs">Or Device ID</Label>
-                      <Input id="deviceId" name="deviceId" value={formData.deviceId} onChange={handleInputChange} placeholder="Device identifier" />
-                    </div>
+                    {showMac && (
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label htmlFor="macAddress" className="text-xs">MAC Address *</Label>
+                        <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" />
+                      </div>
+                    )}
+                    {showUsername && (
+                      <div className={cn('space-y-1.5', !showPassword && 'sm:col-span-2')}>
+                        <Label htmlFor="iptvUsername" className="text-xs">Username *</Label>
+                        <Input id="iptvUsername" name="iptvUsername" value={formData.iptvUsername} onChange={handleInputChange} placeholder="username" />
+                      </div>
+                    )}
+                    {showPassword && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="iptvPassword" className="text-xs">Password *</Label>
+                        <Input id="iptvPassword" name="iptvPassword" type="text" value={formData.iptvPassword} onChange={handleInputChange} placeholder="password" />
+                      </div>
+                    )}
                   </div>
+
+                  {isRenewal && showUsername && !showPassword && (
+                    <p className="text-xs text-amber-800/80">
+                      🔒 No password needed for renewal — we apply it to the existing account.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
