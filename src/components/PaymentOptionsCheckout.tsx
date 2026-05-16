@@ -76,6 +76,13 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const { data: siteSettings } = useSiteSettings();
   const [imageError, setImageError] = useState(false);
 
+  // ---- Smart Autofill / Saved profiles / Draft restore ----
+  const autofill = useCheckoutAutofill(packageData.category);
+  const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null);
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
+  const autofilledRef = useRef(false);
+  const draftRestoredRef = useRef(false);
+
   const displayName = useLocalizedText(packageData.name);
   const displayDescription = useLocalizedText(packageData.description);
 
