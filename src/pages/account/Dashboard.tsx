@@ -5,12 +5,14 @@ import { Package, Calendar, Clock, Wallet, ArrowRight, Loader2, Sparkles, Trendi
 import { Link } from 'react-router-dom';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useUserOrders, computeSubscriptionStatus } from '@/hooks/useUserOrders';
-import { CategoryBadge, PaymentBadge, SubStateBadge, getCategory } from '@/components/account/AccountUI';
+import { CategoryBadge, PaymentBadge, SubStateBadge, ProductIcon } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
 import { cn } from '@/lib/utils';
 
 const DashboardPage: React.FC = () => {
   const { profile, user } = useUserAuth();
   const { orders, loading } = useUserOrders();
+  const icons = usePackageIcons(orders.map(o => o.package_id));
 
   const stats = useMemo(() => {
     const subs = orders.map(computeSubscriptionStatus);
