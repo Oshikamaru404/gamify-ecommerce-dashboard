@@ -101,10 +101,31 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     return 'text-red-500';
   };
 
-  const requiresMac = useMemo(
-    () => MAC_REQUIRED_APPS.has(formData.appUsed) || MAC_REQUIRED_DEVICES.has(formData.deviceType),
-    [formData.appUsed, formData.deviceType]
-  );
+  // ---- Determine offer kind ----
+  const offerKind: OfferKind = useMemo(() => {
+    const c = (packageData.category || '').toLowerCase();
+    if (c.includes('player') && c.includes('panel')) return 'player_panel';
+    if (c.includes('panel') || c.includes('reseller')) return 'iptv_panel';
+    if (c === 'player' || c.includes('player')) return 'player_activation';
+    return 'iptv_subscription';
+  }, [packageData.category]);
+
+  const isRenewal = accountType === 'renewal';
+  const isNew = accountType === 'new';
+
+  // Field visibility rules per offer + user type + connection
+  const showConnectionToggle = offerKind === 'iptv_subscription';
+  const showMac =
+    (offerKind === 'iptv_subscription' && connectionType === 'mag_stb') ||
+    offerKind === 'player_activation';
+  const showUsername =
+    (offerKind === 'iptv_subscription' && connectionType === 'm3u_xtream') ||
+    offerKind === 'iptv_panel' ||
+    offerKind === 'player_panel';
+  // Password only for NEW (never on renewal)
+  const showPassword = showUsername && isNew;
+  // Email field on the Player Panel (account email)
+  const showPanelEmail = offerKind === 'player_panel';
 
   // ---- Step navigation ----
   const validateStep1 = () => {
@@ -126,12 +147,20 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       toast.error('Please fill in your name, email and WhatsApp number');
       return false;
     }
-    if (!formData.deviceType || !formData.appUsed) {
-      toast.error('Please select your device and app');
+    if (showConnectionToggle && !connectionType) {
+      toast.error('Please choose your connection type (M3U/Xtream or MAG/STB)');
       return false;
     }
-    if (requiresMac && !formData.macAddress && !formData.deviceId) {
-      toast.error('MAC address or Device ID required for this device');
+    if (showMac && !formData.macAddress) {
+      toast.error('MAC Address is required');
+      return false;
+    }
+    if (showUsername && !formData.iptvUsername) {
+      toast.error('Username is required');
+      return false;
+    }
+    if (showPassword && !formData.iptvPassword) {
+      toast.error('Password is required');
       return false;
     }
     return true;
@@ -156,8 +185,8 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const buildNotesPayload = () => {
     const payload: Record<string, any> = {
       account_type: accountType,
-      device_type: formData.deviceType || null,
-      app_used: formData.appUsed || null,
+      offer_kind: offerKind,
+      connection_type: connectionType,
     };
     if (accountType === 'renewal') {
       payload.renewal = {
@@ -166,12 +195,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         account_id: renewal.accountId || null,
       };
     }
-    if (requiresMac) {
-      payload.mac_address = formData.macAddress || null;
-      payload.device_id = formData.deviceId || null;
-    }
+    if (showMac) payload.mac_address = formData.macAddress || null;
+    if (showUsername) payload.iptv_username = formData.iptvUsername || null;
+    if (showPassword) payload.iptv_password = formData.iptvPassword || null;
     return JSON.stringify(payload);
   };
+
 
   // ---- Order creation ----
   const createOrder = async (extra?: Partial<Record<string, string>>) => {
