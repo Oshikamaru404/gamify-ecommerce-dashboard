@@ -15,6 +15,29 @@ export const CATEGORY_STYLES: Record<string, { label: string; bg: string; ring: 
 
 export const getCategory = (key?: string) => (key && CATEGORY_STYLES[key]) || { label: key || 'Other', bg: 'bg-gradient-to-br from-slate-500 to-slate-600', ring: 'ring-slate-300', icon: PackageIcon, text: 'text-slate-700' };
 
+// Renders the real product icon (uploaded image) if available, else the category icon.
+export const ProductIcon: React.FC<{ iconUrl?: string | null; category?: string; size?: 'sm' | 'md' | 'lg'; className?: string }> = ({ iconUrl, category, size = 'md', className }) => {
+  const c = getCategory(category);
+  const Icon = c.icon;
+  const sizes = { sm: 'h-9 w-9', md: 'h-11 w-11', lg: 'h-14 w-14' };
+  const iconSizes = { sm: 'h-4 w-4', md: 'h-5 w-5', lg: 'h-7 w-7' };
+  const imgSizes = { sm: 'h-7 w-7', md: 'h-8 w-8', lg: 'h-10 w-10' };
+
+  if (iconUrl) {
+    return (
+      <div className={cn(sizes[size], 'rounded-xl flex items-center justify-center shrink-0 shadow-md bg-white border-2 p-1 overflow-hidden', className)}
+           style={{ borderColor: 'rgba(239,68,68,0.2)' }}>
+        <img src={iconUrl} alt="" className={cn(imgSizes[size], 'object-contain')} loading="lazy" />
+      </div>
+    );
+  }
+  return (
+    <div className={cn(sizes[size], 'rounded-xl flex items-center justify-center text-white shadow-md shrink-0', c.bg, className)}>
+      <Icon className={iconSizes[size]} />
+    </div>
+  );
+};
+
 export const CategoryBadge: React.FC<{ category?: string; className?: string }> = ({ category, className }) => {
   const c = getCategory(category);
   const Icon = c.icon;
