@@ -47,11 +47,11 @@ const OrderDetailPage: React.FC = () => {
         <div className={cn('p-5 sm:p-6 text-white relative', c.bg)}>
           <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10 blur-xl" />
           <div className="relative flex items-start gap-4">
-            <div className="h-14 w-14 rounded-xl bg-white/90 backdrop-blur flex items-center justify-center shrink-0 shadow-lg p-1.5 overflow-hidden">
+            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-lg overflow-hidden ring-2 ring-white/40">
               {order.package_id && icons[order.package_id] ? (
-                <img src={icons[order.package_id]} alt="" className="h-10 w-10 object-contain" />
+                <img src={icons[order.package_id]} alt="" className="w-full h-full object-cover" />
               ) : (
-                <Icon className="h-7 w-7 text-white" />
+                <Icon className="h-9 w-9 text-red-600" />
               )}
             </div>
             <div className="flex-1 min-w-0">
