@@ -31,8 +31,6 @@ const OrdersPage: React.FC<Props> = ({ paidOnly = false, title }) => {
     });
   }, [orders, search, status, paidOnly]);
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-red-500" /></div>;
-
   const counts = useMemo(() => {
     const base = orders.filter(o => !paidOnly || o.payment_status === 'paid');
     return {
@@ -43,6 +41,8 @@ const OrdersPage: React.FC<Props> = ({ paidOnly = false, title }) => {
       cancelled: base.filter(o => o.status === 'cancelled').length,
     };
   }, [orders, paidOnly]);
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-red-500" /></div>;
 
   const statusChips: { key: string; label: string; cls: string; activeCls: string }[] = [
     { key: 'all', label: 'All', cls: 'bg-slate-100 text-slate-700 hover:bg-slate-200', activeCls: 'bg-slate-700 text-white' },
