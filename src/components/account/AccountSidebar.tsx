@@ -93,7 +93,7 @@ export const AccountSidebar: React.FC = () => {
                         isActive={active}
                         className={cn(
                           'transition-all',
-                          active && 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:text-white shadow-md font-semibold'
+                          active && 'bg-gradient-to-r from-red-500 to-red-600 !text-white hover:from-red-600 hover:to-red-700 hover:!text-white data-[active=true]:!text-white shadow-md font-semibold [&_*]:!text-white'
                         )}
                       >
                         <NavLink to={item.url} onClick={() => setOpenMobile(false)} className="flex items-center gap-2">
