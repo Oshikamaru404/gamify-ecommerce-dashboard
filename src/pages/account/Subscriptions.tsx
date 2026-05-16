@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Loader2, Calendar, RefreshCw } from 'lucide-react';
 import { useUserOrders, computeSubscriptionStatus } from '@/hooks/useUserOrders';
-import { CategoryBadge, SubStateBadge, getCategory, progressColor } from '@/components/account/AccountUI';
+import { usePackageIcons } from '@/hooks/usePackageIcons';
+import { CategoryBadge, SubStateBadge, getCategory, progressColor, ProductIcon } from '@/components/account/AccountUI';
 import { cn } from '@/lib/utils';
 
 const SubscriptionsPage: React.FC = () => {
