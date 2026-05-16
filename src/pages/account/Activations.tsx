@@ -17,6 +17,7 @@ const ActivationsPage: React.FC = () => {
     o.order_type === 'activation'
     || o.package_category === 'activation'
     || o.package_category === 'player'
+    || o.package_category === 'player_panel'
     || (o.credentials_notes && /mac/i.test(o.credentials_notes))
   ), [orders]);
 
