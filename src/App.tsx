@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { StoreProvider } from "./contexts/StoreContext";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
+import { UserAuthProvider } from "./contexts/UserAuthContext";
+import AuthCallback from "./pages/AuthCallback";
+import Account from "./pages/Account";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
