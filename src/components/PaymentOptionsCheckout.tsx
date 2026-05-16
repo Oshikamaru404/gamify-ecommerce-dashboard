@@ -239,9 +239,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       const renewalLine = accountType === 'renewal'
         ? `\n🔁 Renewal — ${renewal.accountUsername || renewal.accountEmail || renewal.accountId}`
         : '\n🆕 New customer';
-      const macLine = requiresMac
-        ? `\n🔧 MAC/Device: ${formData.macAddress || formData.deviceId}`
-        : '';
+      const detailLines: string[] = [];
+      if (showMac) detailLines.push(`🔧 MAC: ${formData.macAddress}`);
+      if (showUsername) detailLines.push(`👤 Username: ${formData.iptvUsername}`);
+      if (showPassword) detailLines.push(`🔑 Password: ${formData.iptvPassword}`);
+      if (showConnectionToggle) detailLines.push(`🔌 Connection: ${connectionType === 'm3u_xtream' ? 'M3U / Xtream' : 'MAG / STB'}`);
+      const detailsBlock = detailLines.length ? `\n${detailLines.join('\n')}` : '';
 
       const message = `🛒 New Order Request${renewalLine}
 
@@ -251,8 +254,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
 👤 ${formData.customerName}
 ✉️ ${formData.customerEmail}
-📱 ${formData.customerWhatsapp}
-📺 ${formData.deviceType} — ${formData.appUsed}${macLine}
+📱 ${formData.customerWhatsapp}${detailsBlock}
 
 Order ID: ${orderData.id}`;
 
