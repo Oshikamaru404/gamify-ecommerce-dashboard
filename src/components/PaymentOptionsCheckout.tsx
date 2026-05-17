@@ -472,22 +472,49 @@ Order ID: ${orderData.id}`;
                 />
               )}
 
-              {/* Renewing? thin banner / inline toggle */}
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2.5">
-                <div className="flex items-center gap-2 text-sm">
-                  {accountType === 'renewal'
-                    ? <RefreshCw className="h-4 w-4 text-primary" />
-                    : <Sparkles className="h-4 w-4 text-primary" />}
-                  <span className="font-medium">
-                    {accountType === 'renewal' ? 'Renewing an existing subscription' : 'New customer'}
-                  </span>
-                </div>
+              {/* Account type segmented control */}
+              <div
+                role="tablist"
+                aria-label="Account type"
+                className="grid grid-cols-2 gap-1.5 p-1.5 rounded-xl border-2 border-border bg-muted/40 shadow-sm"
+              >
                 <button
                   type="button"
-                  onClick={() => setAccountType(isRenewal ? 'new' : 'renewal')}
-                  className="text-xs font-semibold text-primary hover:underline"
+                  role="tab"
+                  aria-selected={isNew}
+                  onClick={() => setAccountType('new')}
+                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                    isNew
+                      ? 'bg-primary text-primary-foreground shadow-md ring-2 ring-primary/30'
+                      : 'bg-transparent text-muted-foreground hover:bg-background/60 hover:text-foreground'
+                  }`}
                 >
-                  {isRenewal ? 'Switch to new customer' : 'I’m renewing →'}
+                  <Sparkles className="h-4 w-4" />
+                  <span>New customer</span>
+                  {isNew && (
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-foreground/20 text-primary-foreground uppercase tracking-wide">
+                      Active
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isRenewal}
+                  onClick={() => setAccountType('renewal')}
+                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                    isRenewal
+                      ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-600/30 dark:bg-emerald-500'
+                      : 'bg-transparent text-muted-foreground hover:bg-background/60 hover:text-foreground'
+                  }`}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span>I’m renewing</span>
+                  {isRenewal && (
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/25 text-white uppercase tracking-wide">
+                      Active
+                    </span>
+                  )}
                 </button>
               </div>
 
