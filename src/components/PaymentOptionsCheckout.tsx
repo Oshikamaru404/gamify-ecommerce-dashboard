@@ -570,25 +570,17 @@ Order ID: ${orderData.id}`;
                 </button>
               </div>
 
-              {accountType === 'renewal' && (
-                <div className="space-y-3 p-4 rounded-xl bg-muted/40 border animate-in fade-in slide-in-from-top-2 duration-300">
-                  <p className="text-xs text-muted-foreground">
-                    Provide at least one of the following so we can find your account:
-                  </p>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="accountUsername" className="text-xs">Username</Label>
-                      <Input id="accountUsername" name="accountUsername" value={renewal.accountUsername} onChange={handleRenewalChange} placeholder="your_username" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="accountEmail" className="text-xs">Account email</Label>
-                      <Input id="accountEmail" name="accountEmail" type="email" value={renewal.accountEmail} onChange={handleRenewalChange} placeholder="you@email.com" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="accountId" className="text-xs">Or account / line ID</Label>
-                    <Input id="accountId" name="accountId" value={renewal.accountId} onChange={handleRenewalChange} placeholder="e.g. 12345" />
-                  </div>
+              {accountType === 'renewal' && !authUser && (
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900 flex items-start gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Lock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <p>Please log in above (one tap with a social provider, or email) so we can find your account and apply the renewal.</p>
+                </div>
+              )}
+
+              {accountType === 'renewal' && authUser && (
+                <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-sm text-green-900 flex items-start gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <p>We'll apply the renewal to your account. Continue to the next step.</p>
                 </div>
               )}
 
