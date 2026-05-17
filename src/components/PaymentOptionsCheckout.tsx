@@ -153,11 +153,9 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       toast.error('Please select an option to continue');
       return false;
     }
-    if (accountType === 'renewal') {
-      if (!renewal.accountUsername && !renewal.accountEmail && !renewal.accountId) {
-        toast.error('Please provide at least one identifier (username, email or account ID)');
-        return false;
-      }
+    if (accountType === 'renewal' && !authUser) {
+      toast.error('Please log in above so we can find your account');
+      return false;
     }
     return true;
   };
