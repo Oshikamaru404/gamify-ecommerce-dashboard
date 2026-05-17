@@ -7,8 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ShoppingCart, MessageCircle, CreditCard, X, Loader2, Package, CheckCircle, Home, Bitcoin,
-  ArrowRight, ArrowLeft, RefreshCw, Sparkles, ShieldCheck, Zap, Smartphone, Tv, Lock, User,
-  Check, AlertCircle, Clock, Award, History
+  ArrowRight, ArrowLeft, RefreshCw, Sparkles, ShieldCheck, Zap, Tv, Lock, User,
+  Check, AlertCircle, Clock, Award, Pencil
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -19,6 +19,7 @@ import { triggerOrderEmails } from '@/lib/orderEmails';
 import { cn } from '@/lib/utils';
 import QuickCheckoutAuth from '@/components/auth/QuickCheckoutAuth';
 import { useUserAuth } from '@/contexts/UserAuthContext';
+import { useUserOrders } from '@/hooks/useUserOrders';
 import { useCheckoutAutofill, SavedProfile } from '@/hooks/useCheckoutAutofill';
 import { useCheckoutDraftAutosave, loadCheckoutDraft, clearCheckoutDraft } from '@/hooks/useCheckoutDraft';
 import { formatMacInput, isValidEmail, isValidMac, suggestEmailFix } from '@/lib/checkoutValidation';
@@ -38,7 +39,7 @@ interface PaymentOptionsCheckoutProps {
   onSuccess: () => void;
 }
 
-type AccountType = 'renewal' | 'new' | null;
+type AccountType = 'renewal' | 'new';
 type ConnectionType = 'm3u_xtream' | 'mag_stb' | null;
 type OfferKind = 'iptv_subscription' | 'iptv_panel' | 'player_activation' | 'player_panel';
 
@@ -47,17 +48,16 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   onClose,
   onSuccess,
 }) => {
-  // ---- Step state ----
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const { user: authUser } = useUserAuth();
-  const [accountType, setAccountType] = useState<AccountType>(null);
+  // ---- 2-step flow ----
+  const [step, setStep] = useState<1 | 2>(1);
+  const { user: authUser, profile, loading: authLoading } = useUserAuth();
+  const { orders: pastOrders } = useUserOrders();
 
-  // ---- Form state ----
-  const [renewal, setRenewal] = useState({
-    accountUsername: '',
-    accountEmail: '',
-    accountId: '',
-  });
+  // Auto-detect: authed users default to renewal, guests to new. User can flip.
+  const [accountType, setAccountType] = useState<AccountType>('new');
+  const [editIdentity, setEditIdentity] = useState(false);
+  const [selectedRenewalOrderId, setSelectedRenewalOrderId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -68,7 +68,6 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   });
   const [connectionType, setConnectionType] = useState<ConnectionType>(null);
 
-  // ---- Process state ----
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
@@ -78,7 +77,6 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const { data: siteSettings } = useSiteSettings();
   const [imageError, setImageError] = useState(false);
 
-  // ---- Smart Autofill / Saved profiles / Draft restore ----
   const autofill = useCheckoutAutofill(packageData.category);
   const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
@@ -87,36 +85,27 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
   const displayName = useLocalizedText(packageData.name);
   const displayDescription = useLocalizedText(packageData.description);
-
   const whatsappNumber = siteSettings?.find(s => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
 
   const isCreditsPackage = () =>
     packageData.category?.includes('panel') || packageData.category === 'player';
-
   const getDisplayDuration = () =>
     isCreditsPackage()
       ? `${packageData.duration} Credits`
       : `${packageData.duration} ${packageData.duration === 1 ? 'Month' : 'Months'}`;
-
   const getDurationLabel = () => (isCreditsPackage() ? 'Credits:' : 'Duration:');
-
   const getCategoryBorderStyle = () => {
-    const category = packageData.category?.toLowerCase() || '';
-    if (category.includes('panel') || category.includes('reseller') || category === 'player') {
+    const c = packageData.category?.toLowerCase() || '';
+    if (c.includes('panel') || c.includes('reseller') || c === 'player')
       return { borderColor: '#8f35e5', boxShadow: '0 0 0 3px rgba(143, 53, 229, 0.2)' };
-    }
     return { borderColor: '#ef4444', boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)' };
   };
-
   const getFallbackIconClass = () => {
-    const category = packageData.category?.toLowerCase() || '';
-    if (category.includes('panel') || category.includes('reseller') || category === 'player') {
-      return 'text-[#8f35e5]';
-    }
+    const c = packageData.category?.toLowerCase() || '';
+    if (c.includes('panel') || c.includes('reseller') || c === 'player') return 'text-[#8f35e5]';
     return 'text-red-500';
   };
 
-  // ---- Determine offer kind ----
   const offerKind: OfferKind = useMemo(() => {
     const c = (packageData.category || '').toLowerCase();
     if (c.includes('player') && c.includes('panel')) return 'player_panel';
@@ -128,71 +117,50 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const isRenewal = accountType === 'renewal';
   const isNew = accountType === 'new';
 
-  // Field visibility rules per offer + user type + connection
   const showConnectionToggle = offerKind === 'iptv_subscription';
   const showMac =
     (offerKind === 'iptv_subscription' && connectionType === 'mag_stb') ||
     offerKind === 'player_activation';
-  // IPTV M3U/Xtream: new = we generate credentials (no fields); renewal = need existing username + password
   const isIptvM3U = offerKind === 'iptv_subscription' && connectionType === 'm3u_xtream';
   const showUsername =
     (isIptvM3U && isRenewal) ||
     offerKind === 'iptv_panel' ||
     offerKind === 'player_panel';
-  // Password: IPTV M3U renewal needs it; panels only on NEW
   const showPassword =
     (isIptvM3U && isRenewal) ||
     ((offerKind === 'iptv_panel' || offerKind === 'player_panel') && isNew);
   const showIptvM3UNewNotice = isIptvM3U && isNew;
-  // Email field on the Player Panel (account email)
   const showPanelEmail = offerKind === 'player_panel';
 
-  // ---- Step navigation ----
-  const validateStep1 = () => {
-    if (!accountType) {
-      toast.error('Please select an option to continue');
-      return false;
-    }
-    if (accountType === 'renewal' && !authUser) {
-      toast.error('Please log in above so we can find your account');
-      return false;
-    }
-    return true;
-  };
+  // Past renewable subs for the dropdown (same offer family, completed/paid)
+  const renewableOrders = useMemo(() => {
+    if (offerKind !== 'iptv_subscription') return [];
+    return pastOrders.filter(o =>
+      (o.package_category || '').toLowerCase().includes('iptv') &&
+      !(o.package_category || '').toLowerCase().includes('panel')
+    );
+  }, [pastOrders, offerKind]);
 
-  const validateStep2 = () => {
-    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) {
-      toast.error('Please fill in your name, email and WhatsApp number');
-      return false;
+  // Auto-default to renewal when an authed user has past orders
+  useEffect(() => {
+    if (authUser && renewableOrders.length > 0 && accountType === 'new' && !draftRestoredRef.current) {
+      setAccountType('renewal');
     }
-    if (!isValidEmail(formData.customerEmail)) {
-      toast.error('Please enter a valid email address');
-      return false;
-    }
-    if (showConnectionToggle && !connectionType) {
-      toast.error('Please choose your connection type (M3U/Xtream or MAG/STB)');
-      return false;
-    }
-    if (showMac && !isValidMac(formData.macAddress)) {
-      toast.error('Please enter a valid MAC address (XX:XX:XX:XX:XX:XX)');
-      return false;
-    }
-    if (showUsername && !formData.iptvUsername) {
-      toast.error('Username is required');
-      return false;
-    }
-    if (showPassword && !formData.iptvPassword) {
-      toast.error('Password is required');
-      return false;
-    }
-    return true;
-  };
+  }, [authUser, renewableOrders.length]); // eslint-disable-line
 
-  const goNext = () => {
-    if (step === 1 && validateStep1()) setStep(2);
-    else if (step === 2 && validateStep2()) setStep(3);
-  };
-  const goBack = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2) : s));
+  // ---- Validation (no toasts; just gate the button) ----
+  const step1Valid = useMemo(() => {
+    if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) return false;
+    if (!isValidEmail(formData.customerEmail)) return false;
+    if (showConnectionToggle && !connectionType) return false;
+    if (showMac && !isValidMac(formData.macAddress)) return false;
+    if (showUsername && !formData.iptvUsername) return false;
+    if (showPassword && !formData.iptvPassword) return false;
+    return true;
+  }, [formData, connectionType, showConnectionToggle, showMac, showUsername, showPassword]);
+
+  const goNext = () => { if (step === 1 && step1Valid) setStep(2); };
+  const goBack = () => setStep(1);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -201,16 +169,9 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       return;
     }
     setFormData((p) => ({ ...p, [name]: value }));
-    if (name === 'customerEmail') {
-      setEmailSuggestion(suggestEmailFix(value));
-    }
-  };
-  const handleRenewalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setRenewal((p) => ({ ...p, [name]: value }));
+    if (name === 'customerEmail') setEmailSuggestion(suggestEmailFix(value));
   };
 
-  // ---- Apply a saved profile (one-click autofill of past credentials) ----
   const applySavedProfile = (profile: SavedProfile | null) => {
     setSelectedSavedId(profile?.id ?? null);
     if (!profile) return;
@@ -223,33 +184,43 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     toast.success('Saved profile applied');
   };
 
-  // ---- Restore draft (once) when the modal opens ----
+  // ---- Restore draft AFTER auth resolves (so we don't overwrite pre-filled data) ----
   useEffect(() => {
-    if (draftRestoredRef.current || !packageData.id) return;
+    if (draftRestoredRef.current || !packageData.id || authLoading) return;
     const draft = loadCheckoutDraft<{
       accountType: AccountType;
       connectionType: ConnectionType;
       formData: typeof formData;
-      renewal: typeof renewal;
     }>(packageData.id);
     if (draft) {
       draftRestoredRef.current = true;
       if (draft.accountType) setAccountType(draft.accountType);
       if (draft.connectionType) setConnectionType(draft.connectionType);
-      if (draft.formData) setFormData((p) => ({ ...p, ...draft.formData }));
-      if (draft.renewal) setRenewal((p) => ({ ...p, ...draft.renewal }));
+      if (draft.formData) {
+        setFormData((p) => ({
+          ...p,
+          // Don't overwrite values already filled from auth/profile
+          customerName: p.customerName || draft.formData.customerName || '',
+          customerEmail: p.customerEmail || draft.formData.customerEmail || '',
+          customerWhatsapp: p.customerWhatsapp || draft.formData.customerWhatsapp || '',
+          macAddress: draft.formData.macAddress || p.macAddress,
+          iptvUsername: draft.formData.iptvUsername || p.iptvUsername,
+          iptvPassword: draft.formData.iptvPassword || p.iptvPassword,
+        }));
+      }
       toast('Draft restored', { description: 'We brought back your previous entries.' });
+    } else {
+      draftRestoredRef.current = true;
     }
-  }, [packageData.id]);
+  }, [packageData.id, authLoading]);
 
-  // ---- Autosave draft (debounced) ----
   useCheckoutDraftAutosave(
     packageData.id,
-    { accountType, connectionType, formData, renewal },
+    { accountType, connectionType, formData },
     !orderPlaced,
   );
 
-  // ---- Smart Autofill from signed-in profile ----
+  // ---- Autofill from signed-in profile ----
   useEffect(() => {
     if (autofilledRef.current) return;
     if (!autofill.email && !autofill.displayName && !autofill.phone) return;
@@ -262,19 +233,17 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     }));
   }, [autofill.email, autofill.displayName, autofill.phone]);
 
-
-  // ---- Build credentials_notes payload (extra info for admin / activation) ----
   const buildNotesPayload = () => {
     const payload: Record<string, any> = {
       account_type: accountType,
       offer_kind: offerKind,
       connection_type: connectionType,
     };
-    if (accountType === 'renewal') {
+    if (accountType === 'renewal' && selectedRenewalOrderId) {
+      const o = renewableOrders.find(x => x.id === selectedRenewalOrderId);
       payload.renewal = {
-        username: renewal.accountUsername || null,
-        email: renewal.accountEmail || null,
-        account_id: renewal.accountId || null,
+        previous_order_id: selectedRenewalOrderId,
+        previous_package: o?.package_name || null,
       };
     }
     if (showMac) payload.mac_address = formData.macAddress || null;
@@ -283,8 +252,6 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     return JSON.stringify(payload);
   };
 
-
-  // ---- Order creation ----
   const createOrder = async (extra?: Partial<Record<string, string>>) => {
     const { data: orderData, error } = await supabase
       .from('orders')
@@ -319,7 +286,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'WhatsApp' });
 
       const renewalLine = accountType === 'renewal'
-        ? `\n🔁 Renewal — ${renewal.accountUsername || renewal.accountEmail || renewal.accountId}`
+        ? `\n🔁 Renewal${selectedRenewalOrderId ? ` — Order #${selectedRenewalOrderId.slice(0,8)}` : ''}`
         : '\n🆕 New customer';
       const detailLines: string[] = [];
       if (showMac) detailLines.push(`🔧 MAC: ${formData.macAddress}`);
@@ -363,17 +330,9 @@ Order ID: ${orderData.id}`;
         package_image_url: packageData.icon_url,
         paymentMethodLabel: paymentType === 'credit_card' ? 'Credit Card (PayBwivox)' : 'Crypto (PayBwivox)',
       });
-
       const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
         'paygate-create-payment',
-        {
-          body: {
-            packageData: { ...packageData, name: displayName },
-            customerInfo: formData,
-            orderId: orderData.id,
-            paymentType,
-          },
-        }
+        { body: { packageData: { ...packageData, name: displayName }, customerInfo: formData, orderId: orderData.id, paymentType } }
       );
       if (paymentError) throw paymentError;
       if (paymentData?.checkoutUrl) {
@@ -393,9 +352,7 @@ Order ID: ${orderData.id}`;
   const handleDirectCryptoCreateOrder = async ({ ticker }: { wallet: CryptoWallet; ticker: string }): Promise<string | null> => {
     try {
       const note = `paybwivox_direct:${ticker}`;
-      const orderData = await createOrder({
-        customer_whatsapp: `${formData.customerWhatsapp}|${note}`,
-      });
+      const orderData = await createOrder({ customer_whatsapp: `${formData.customerWhatsapp}|${note}` });
       setPlacedOrderId(orderData.id);
       triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: `Crypto Direct (${ticker})` });
       return orderData.id as string;
@@ -428,9 +385,7 @@ Order ID: ${orderData.id}`;
             </div>
             <div>
               <h2 className="text-xl font-bold text-green-700">Subscription activated successfully</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Order #{placedOrderId?.slice(0, 8)} · Welcome aboard 👋
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">Order #{placedOrderId?.slice(0, 8)} · Welcome aboard 👋</p>
             </div>
             <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <div className="flex justify-between">
@@ -440,13 +395,9 @@ Order ID: ${orderData.id}`;
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               {whatsappUrl ? (
-                <p className="text-sm text-green-800">
-                  📱 Redirecting to WhatsApp in <span className="font-bold">{countdown}s</span>
-                </p>
+                <p className="text-sm text-green-800">📱 Redirecting to WhatsApp in <span className="font-bold">{countdown}s</span></p>
               ) : (
-                <p className="text-sm text-green-800">
-                  ✅ Credentials will be sent to your email shortly.
-                </p>
+                <p className="text-sm text-green-800">✅ Credentials will be sent to your email shortly.</p>
               )}
             </div>
             <div className="flex gap-2 pt-1">
@@ -465,21 +416,16 @@ Order ID: ${orderData.id}`;
     );
   }
 
-  // ---- Progress bar ----
-  const progressPct = (step / 3) * 100;
-  const stepLabel =
-    step === 1 ? 'Step 1 of 3 · Account' :
-    step === 2 ? 'Step 2 of 3 · Your details' :
-    'Final step · Payment';
-  const microMessage =
-    step === 1 ? 'Quick setup — takes less than 1 minute.' :
-    step === 2 ? 'Almost done — just a few details left.' :
-    'You’re seconds away from activation.';
+  // ---- Header copy ----
+  const stepLabel = step === 1 ? 'Step 1 of 2 · Your details' : 'Step 2 of 2 · Payment';
+  const microMessage = step === 1 ? 'Quick setup — under a minute.' : 'You’re seconds away from activation.';
+  const progressPct = (step / 2) * 100;
+
+  const identityKnown = !!authUser && !editIdentity;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 animate-in fade-in duration-200">
       <Card className="w-full max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl border-0">
-        {/* Header with progress */}
         <CardHeader className="space-y-3 pb-4 sticky top-0 bg-card z-10 border-b">
           <div className="flex items-center justify-between">
             <div>
@@ -490,186 +436,143 @@ Order ID: ${orderData.id}`;
               <X className="h-5 w-5" />
             </Button>
           </div>
-          {/* Progress bar */}
+          {/* Compact 1—2 stepper */}
           <div className="space-y-2">
-            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-primary via-primary to-primary/80 transition-all duration-500 ease-out rounded-full"
-                style={{ width: `${progressPct}%` }}
-              />
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-500 rounded-full" style={{ width: `${progressPct}%` }} />
             </div>
-            <div className="flex justify-between text-[11px] font-medium text-muted-foreground">
-              <span className={cn(step >= 1 && 'text-primary')}>Account</span>
-              <span className={cn(step >= 2 && 'text-primary')}>Details</span>
-              <span className={cn(step >= 3 && 'text-primary')}>Payment</span>
+            <div className="flex items-center justify-center gap-3 text-[11px] font-medium">
+              <span className={cn('flex items-center gap-1.5', step >= 1 ? 'text-primary' : 'text-muted-foreground')}>
+                <span className={cn('w-5 h-5 rounded-full flex items-center justify-center text-[10px]', step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted')}>1</span>
+                Details
+              </span>
+              <span className="h-px w-8 bg-muted" />
+              <span className={cn('flex items-center gap-1.5', step >= 2 ? 'text-primary' : 'text-muted-foreground')}>
+                <span className={cn('w-5 h-5 rounded-full flex items-center justify-center text-[10px]', step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted')}>2</span>
+                Payment
+              </span>
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-5 pt-5">
-          {/* ============ STEP 1 ============ */}
+          {/* ============ STEP 1: Details ============ */}
           {step === 1 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="text-center space-y-1">
-                <h3 className="text-lg font-semibold">Do you already have an account?</h3>
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5" /> Fast and secure checkout
-                </p>
-              </div>
-
-              <QuickCheckoutAuth
-                onAuthed={(profile) => {
-                  if (profile?.display_name) setFormData(p => ({ ...p, customerName: profile.display_name! }));
-                  if (profile?.email) setFormData(p => ({ ...p, customerEmail: profile.email! }));
-                }}
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setAccountType('renewal')}
-                  className={cn(
-                    'group relative p-5 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
-                    accountType === 'renewal'
-                      ? 'border-primary bg-primary/5 shadow-md'
-                      : 'border-border bg-card hover:border-primary/50'
-                  )}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className={cn(
-                      'p-2 rounded-lg transition-colors',
-                      accountType === 'renewal' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                    )}>
-                      <RefreshCw className="h-5 w-5" />
-                    </div>
-                    <h4 className="font-semibold">Renew subscription</h4>
-                  </div>
-                  <p className="text-xs text-muted-foreground">For existing customers — apply renewal to your account.</p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAccountType('new')}
-                  className={cn(
-                    'group relative p-5 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
-                    accountType === 'new'
-                      ? 'border-primary bg-primary/5 shadow-md'
-                      : 'border-border bg-card hover:border-primary/50'
-                  )}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className={cn(
-                      'p-2 rounded-lg transition-colors',
-                      accountType === 'new' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                    )}>
-                      <Sparkles className="h-5 w-5" />
-                    </div>
-                    <h4 className="font-semibold">New customer</h4>
-                  </div>
-                  <p className="text-xs text-muted-foreground">A client space will be created automatically for future renewals.</p>
-                </button>
-              </div>
-
-              {accountType === 'renewal' && !authUser && (
-                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900 flex items-start gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <Lock className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <p>Please log in above (one tap with a social provider, or email) so we can find your account and apply the renewal.</p>
-                </div>
-              )}
-
-              {accountType === 'renewal' && authUser && (
-                <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-sm text-green-900 flex items-start gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <p>We'll apply the renewal to your account. Continue to the next step.</p>
-                </div>
-              )}
-
-              {accountType === 'new' && (
-                <div className="space-y-3 animate-in fade-in duration-300">
-                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-sm text-blue-900 flex items-start gap-2">
-                    <ShieldCheck className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                    <p>You're almost ready to access your subscription. We'll automatically create your client space after payment.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ============ STEP 2 ============ */}
-          {step === 2 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="text-center space-y-1">
-                <h3 className="text-lg font-semibold">Your details</h3>
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-                  <Zap className="h-3.5 w-3.5" /> We're preparing your access
-                </p>
-              </div>
-
+              {/* Single auth slot — guests only */}
               {!authUser && (
-                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-primary">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span className="font-semibold">Skip the typing — sign up in 1 tap</span>
-                  </div>
-                  <QuickCheckoutAuth
-                    onAuthed={(p) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        customerName: prev.customerName || p?.display_name || '',
-                        customerEmail: prev.customerEmail || p?.email || '',
-                      }));
-                    }}
-                  />
-                  <p className="text-[11px] text-muted-foreground text-center">Or fill the fields below manually.</p>
-                </div>
-              )}
-
-              {autofill.savedProfiles.length > 0 && (
-                <SavedProfilesPicker
-                  profiles={autofill.savedProfiles}
-                  selectedId={selectedSavedId}
-                  onSelect={applySavedProfile}
+                <QuickCheckoutAuth
+                  onAuthed={(p) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      customerName: prev.customerName || p?.display_name || '',
+                      customerEmail: prev.customerEmail || p?.email || '',
+                    }));
+                  }}
                 />
               )}
 
-              {autofilledRef.current && (autofill.displayName || autofill.email) && (
-                <div className="flex items-center gap-2 text-[11px] text-primary bg-primary/5 border border-primary/20 rounded-md px-2.5 py-1.5">
-                  <Sparkles className="h-3 w-3" />
-                  <span>Auto-filled from your account. Feel free to edit.</span>
+              {/* Renewing? thin banner / inline toggle */}
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2.5">
+                <div className="flex items-center gap-2 text-sm">
+                  {accountType === 'renewal'
+                    ? <RefreshCw className="h-4 w-4 text-primary" />
+                    : <Sparkles className="h-4 w-4 text-primary" />}
+                  <span className="font-medium">
+                    {accountType === 'renewal' ? 'Renewing an existing subscription' : 'New customer'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAccountType(isRenewal ? 'new' : 'renewal')}
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  {isRenewal ? 'Switch to new customer' : 'I’m renewing →'}
+                </button>
+              </div>
+
+              {/* Renewal context */}
+              {isRenewal && !authUser && (
+                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                  <Lock className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <p>Log in above so we can locate your account and apply the renewal.</p>
+                </div>
+              )}
+              {isRenewal && authUser && renewableOrders.length > 0 && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Which subscription are you renewing?</Label>
+                  <Select value={selectedRenewalOrderId ?? ''} onValueChange={(v) => setSelectedRenewalOrderId(v)}>
+                    <SelectTrigger><SelectValue placeholder="Select a previous subscription" /></SelectTrigger>
+                    <SelectContent>
+                      {renewableOrders.map(o => (
+                        <SelectItem key={o.id} value={o.id}>
+                          {o.package_name} · #{o.id.slice(0,6)} · {new Date(o.created_at).toLocaleDateString()}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="customerName">Full name *</Label>
-                  <div className="relative">
-                    <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" className="pr-9" />
-                    {formData.customerName.trim().length >= 2 && (
-                      <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
-                    )}
+              {/* Identity: chip when authed, full fields when guest or editing */}
+              {identityKnown ? (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        Signed in as {profile?.display_name || authUser?.email}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate">{formData.customerEmail || authUser?.email}</p>
+                    </div>
                   </div>
+                  <Button variant="ghost" size="sm" onClick={() => setEditIdentity(true)} className="text-xs">
+                    <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                  </Button>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="customerEmail">Email *</Label>
-                  <div className="relative">
-                    <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" className="pr-9" />
-                    {isValidEmail(formData.customerEmail) && (
-                      <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
-                    )}
-                  </div>
-                  {emailSuggestion && (
-                    <button
-                      type="button"
-                      onClick={() => { setFormData(p => ({ ...p, customerEmail: emailSuggestion! })); setEmailSuggestion(null); }}
-                      className="flex items-center gap-1 text-[11px] text-amber-700 hover:underline"
-                    >
-                      <AlertCircle className="h-3 w-3" />
-                      Did you mean <span className="font-semibold">{emailSuggestion}</span>?
-                    </button>
+              ) : (
+                <>
+                  {autofill.savedProfiles.length > 0 && (
+                    <SavedProfilesPicker
+                      profiles={autofill.savedProfiles}
+                      selectedId={selectedSavedId}
+                      onSelect={applySavedProfile}
+                    />
                   )}
-                </div>
-              </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="customerName">Full name *</Label>
+                      <div className="relative">
+                        <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" className="pr-9" />
+                        {formData.customerName.trim().length >= 2 && (
+                          <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="customerEmail">Email *</Label>
+                      <div className="relative">
+                        <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" className="pr-9" />
+                        {isValidEmail(formData.customerEmail) && (
+                          <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                      {emailSuggestion && (
+                        <button
+                          type="button"
+                          onClick={() => { setFormData(p => ({ ...p, customerEmail: emailSuggestion! })); setEmailSuggestion(null); }}
+                          className="flex items-center gap-1 text-[11px] text-amber-700 hover:underline"
+                        >
+                          <AlertCircle className="h-3 w-3" />
+                          Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
 
+              {/* WhatsApp always required */}
               <div className="space-y-1.5">
                 <Label htmlFor="customerWhatsapp">WhatsApp / Phone *</Label>
                 <div className="relative">
@@ -680,7 +583,7 @@ Order ID: ${orderData.id}`;
                 </div>
               </div>
 
-              {/* ===== Dynamic activation fields per offer / user / connection ===== */}
+              {/* ===== Dynamic activation fields ===== */}
               {showConnectionToggle && (
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5"><Tv className="h-3.5 w-3.5" /> Connection type *</Label>
@@ -690,9 +593,7 @@ Order ID: ${orderData.id}`;
                       onClick={() => setConnectionType('m3u_xtream')}
                       className={cn(
                         'p-3 rounded-lg border-2 text-left text-sm transition-all',
-                        connectionType === 'm3u_xtream'
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/40'
+                        connectionType === 'm3u_xtream' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
                       )}
                     >
                       <div className="font-semibold">M3U Playlist & Xtream Codes</div>
@@ -703,9 +604,7 @@ Order ID: ${orderData.id}`;
                       onClick={() => setConnectionType('mag_stb')}
                       className={cn(
                         'p-3 rounded-lg border-2 text-left text-sm transition-all',
-                        connectionType === 'mag_stb'
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/40'
+                        connectionType === 'mag_stb' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
                       )}
                     >
                       <div className="font-semibold">MAG Portal / STB Emu / Smart STB</div>
@@ -732,9 +631,7 @@ Order ID: ${orderData.id}`;
                   <div className="flex items-start gap-2 text-sm text-amber-900">
                     <Lock className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-semibold">
-                        {isRenewal ? 'Renewal details' : 'Account creation details'}
-                      </p>
+                      <p className="font-semibold">{isRenewal ? 'Renewal details' : 'Account creation details'}</p>
                       <p className="text-xs">
                         {isRenewal
                           ? 'Enter the existing account info we’ll apply your renewal to.'
@@ -742,21 +639,12 @@ Order ID: ${orderData.id}`;
                       </p>
                     </div>
                   </div>
-
                   {showPanelEmail && (
                     <div className="space-y-1.5">
                       <Label htmlFor="panelEmail" className="text-xs">Account email *</Label>
-                      <Input
-                        id="panelEmail"
-                        name="customerEmail"
-                        type="email"
-                        value={formData.customerEmail}
-                        onChange={handleInputChange}
-                        placeholder="account@email.com"
-                      />
+                      <Input id="panelEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="account@email.com" />
                     </div>
                   )}
-
                   <div className="grid sm:grid-cols-2 gap-3">
                     {showMac && (
                       <div className="space-y-1.5 sm:col-span-2">
@@ -780,7 +668,6 @@ Order ID: ${orderData.id}`;
                       </div>
                     )}
                   </div>
-
                   {isRenewal && showUsername && !showPassword && (
                     <p className="text-xs text-amber-800/80">
                       🔒 No password needed for renewal — we apply it to the existing account.
@@ -791,10 +678,9 @@ Order ID: ${orderData.id}`;
             </div>
           )}
 
-          {/* ============ STEP 3 ============ */}
-          {step === 3 && (
+          {/* ============ STEP 2: Payment ============ */}
+          {step === 2 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-              {/* Order recap */}
               <Card className="bg-muted/40 border-2">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
@@ -818,7 +704,7 @@ Order ID: ${orderData.id}`;
                   </div>
                   <div className="text-sm space-y-1.5 pt-2 border-t">
                     <div className="flex justify-between"><span className="text-muted-foreground">{getDurationLabel()}</span><span>{getDisplayDuration()}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span>{accountType === 'renewal' ? 'Renewal' : 'New customer'}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span>{isRenewal ? 'Renewal' : 'New customer'}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground"><User className="h-3 w-3 inline mr-1" />{formData.customerName}</span><span className="truncate ml-2 max-w-[140px]">{formData.customerEmail}</span></div>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
@@ -828,7 +714,6 @@ Order ID: ${orderData.id}`;
                 </CardContent>
               </Card>
 
-              {/* Trust badges */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-green-50 border border-green-200 text-center">
                   <ShieldCheck className="h-4 w-4 text-green-600" />
@@ -844,14 +729,11 @@ Order ID: ${orderData.id}`;
                 </div>
               </div>
 
-              {/* Payment methods */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <ShieldCheck className="h-4 w-4 text-green-600" />
                   Secure payment processing · Instant delivery after payment
                 </div>
-
-
                 <Tabs defaultValue="credit_card" className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/60 gap-1">
                     <TabsTrigger value="credit_card"
@@ -867,7 +749,6 @@ Order ID: ${orderData.id}`;
                       <MessageCircle className="h-4 w-4" /><span>WhatsApp</span>
                     </TabsTrigger>
                   </TabsList>
-
                   <TabsContent value="credit_card" className="mt-4">
                     <Card>
                       <CardContent className="pt-6 space-y-4">
@@ -885,11 +766,9 @@ Order ID: ${orderData.id}`;
                       </CardContent>
                     </Card>
                   </TabsContent>
-
                   <TabsContent value="crypto" className="mt-4">
                     <DirectCryptoPayment amountUsd={packageData.price} onCreateOrder={handleDirectCryptoCreateOrder} />
                   </TabsContent>
-
                   <TabsContent value="whatsapp" className="mt-4">
                     <Card>
                       <CardContent className="pt-6 space-y-4">
@@ -913,19 +792,14 @@ Order ID: ${orderData.id}`;
           )}
 
           {/* ============ Navigation ============ */}
-          {step < 3 && (
-            <div className="flex items-center justify-between gap-3 pt-2">
-              {step > 1 ? (
-                <Button variant="outline" onClick={goBack} className="h-12 px-5">
-                  <ArrowLeft className="h-4 w-4 mr-1" /> Back
-                </Button>
-              ) : <div />}
-              <Button onClick={goNext} className="h-12 px-6 ml-auto">
+          {step === 1 && (
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button onClick={goNext} disabled={!step1Valid} className="h-12 px-6">
                 Continue <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           )}
-          {step === 3 && (
+          {step === 2 && (
             <div className="flex items-center justify-between pt-2">
               <Button variant="outline" onClick={goBack} className="h-11">
                 <ArrowLeft className="h-4 w-4 mr-1" /> Back
