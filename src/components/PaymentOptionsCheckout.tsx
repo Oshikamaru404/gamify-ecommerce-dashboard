@@ -131,12 +131,17 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const showMac =
     (offerKind === 'iptv_subscription' && connectionType === 'mag_stb') ||
     offerKind === 'player_activation';
+  // IPTV M3U/Xtream: new = we generate credentials (no fields); renewal = need existing username + password
+  const isIptvM3U = offerKind === 'iptv_subscription' && connectionType === 'm3u_xtream';
   const showUsername =
-    (offerKind === 'iptv_subscription' && connectionType === 'm3u_xtream') ||
+    (isIptvM3U && isRenewal) ||
     offerKind === 'iptv_panel' ||
     offerKind === 'player_panel';
-  // Password only for NEW (never on renewal)
-  const showPassword = showUsername && isNew;
+  // Password: IPTV M3U renewal needs it; panels only on NEW
+  const showPassword =
+    (isIptvM3U && isRenewal) ||
+    ((offerKind === 'iptv_panel' || offerKind === 'player_panel') && isNew);
+  const showIptvM3UNewNotice = isIptvM3U && isNew;
   // Email field on the Player Panel (account email)
   const showPanelEmail = offerKind === 'player_panel';
 
