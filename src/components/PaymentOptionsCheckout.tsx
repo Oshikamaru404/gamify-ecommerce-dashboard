@@ -585,9 +585,33 @@ Order ID: ${orderData.id}`;
               )}
 
               {accountType === 'new' && (
-                <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-sm text-blue-900 flex items-start gap-2 animate-in fade-in duration-300">
-                  <ShieldCheck className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <p>You’re almost ready to access your subscription. We’ll automatically create your client space after payment.</p>
+                <div className="space-y-3 animate-in fade-in duration-300">
+                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-sm text-blue-900 flex items-start gap-2">
+                    <ShieldCheck className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                    <p>You're almost ready to access your subscription. We'll automatically create your client space after payment.</p>
+                  </div>
+                  {!authUser && (
+                    <div className="p-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <Sparkles className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold">Sign up in 1 tap to auto-fill your details</p>
+                          <p className="text-[11px] text-muted-foreground">Use a social provider or email above — we'll grab your name & email so you skip typing.</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      >
+                        <User className="h-3.5 w-3.5 mr-1.5" /> Use Quick sign-up above
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
