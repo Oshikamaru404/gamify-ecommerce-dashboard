@@ -702,6 +702,18 @@ Order ID: ${orderData.id}`;
                 </div>
               )}
 
+              {showIptvM3UNewNotice && (
+                <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 flex items-start gap-2 text-sm text-blue-900 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Lock className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold">No credentials required</p>
+                    <p className="text-xs mt-1">
+                      Your IPTV username & password will be generated and sent to you by email / WhatsApp once your payment is confirmed.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {(showMac || showUsername || showPassword || showPanelEmail) && (
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-start gap-2 text-sm text-amber-900">
