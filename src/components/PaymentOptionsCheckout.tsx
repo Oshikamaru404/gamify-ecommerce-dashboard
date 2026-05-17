@@ -49,6 +49,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 }) => {
   // ---- Step state ----
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const { user: authUser } = useUserAuth();
   const [accountType, setAccountType] = useState<AccountType>(null);
 
   // ---- Form state ----
