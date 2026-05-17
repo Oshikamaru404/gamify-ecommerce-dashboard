@@ -18,6 +18,7 @@ import DirectCryptoPayment, { CryptoWallet } from '@/components/DirectCryptoPaym
 import { triggerOrderEmails } from '@/lib/orderEmails';
 import { cn } from '@/lib/utils';
 import QuickCheckoutAuth from '@/components/auth/QuickCheckoutAuth';
+import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useCheckoutAutofill, SavedProfile } from '@/hooks/useCheckoutAutofill';
 import { useCheckoutDraftAutosave, loadCheckoutDraft, clearCheckoutDraft } from '@/hooks/useCheckoutDraft';
 import { formatMacInput, isValidEmail, isValidMac, suggestEmailFix } from '@/lib/checkoutValidation';
