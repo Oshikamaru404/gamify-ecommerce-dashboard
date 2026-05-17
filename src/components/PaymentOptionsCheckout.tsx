@@ -627,6 +627,25 @@ Order ID: ${orderData.id}`;
                 </p>
               </div>
 
+              {!authUser && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-primary">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span className="font-semibold">Skip the typing — sign up in 1 tap</span>
+                  </div>
+                  <QuickCheckoutAuth
+                    onAuthed={(p) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        customerName: prev.customerName || p?.display_name || '',
+                        customerEmail: prev.customerEmail || p?.email || '',
+                      }));
+                    }}
+                  />
+                  <p className="text-[11px] text-muted-foreground text-center">Or fill the fields below manually.</p>
+                </div>
+              )}
+
               {autofill.savedProfiles.length > 0 && (
                 <SavedProfilesPicker
                   profiles={autofill.savedProfiles}
