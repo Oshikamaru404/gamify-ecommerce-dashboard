@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import SocialAuthButtons from './SocialAuthButtons';
-import { Button } from '@/components/ui/button';
-import { CheckCircle2, LogIn } from 'lucide-react';
+import { CheckCircle2, Mail } from 'lucide-react';
 import AuthDialog from './AuthDialog';
 
 interface Props {
@@ -38,17 +37,24 @@ export const QuickCheckoutAuth: React.FC<Props> = ({ onAuthed }) => {
 
   return (
     <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold">Log in or sign up</p>
-          <p className="text-[11px] text-muted-foreground">Don't have an account? Continue with a social provider to create one instantly.</p>
-        </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => setAuthOpen(true)} className="shrink-0">
-          <LogIn className="h-3.5 w-3.5 mr-1" /> Email
-        </Button>
+      <div className="text-center">
+        <p className="text-sm font-semibold">Quick login</p>
+        <p className="text-[11px] text-muted-foreground">Tap a provider — or use email.</p>
       </div>
-      <SocialAuthButtons compact />
-      <p className="text-[11px] text-muted-foreground text-center">Optional — speeds up future orders and renewals.</p>
+      <div className="grid grid-cols-6 gap-2">
+        <div className="col-span-5">
+          <SocialAuthButtons compact />
+        </div>
+        <button
+          type="button"
+          onClick={() => setAuthOpen(true)}
+          title="Continue with email"
+          aria-label="Continue with email"
+          className="h-11 rounded-md flex items-center justify-center transition-all hover:scale-[1.03] active:scale-95 bg-primary text-primary-foreground border border-transparent shadow-sm"
+        >
+          <Mail className="h-5 w-5" />
+        </button>
+      </div>
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} defaultTab="login" />
     </div>
   );
