@@ -21,7 +21,7 @@ import { useUserAuth } from '@/contexts/UserAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Send, ArrowLeft, LogOut } from 'lucide-react';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 type Step = 'category' | 'subcategory' | 'form' | 'chat';
 
