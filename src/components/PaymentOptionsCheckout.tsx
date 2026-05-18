@@ -467,6 +467,7 @@ Order ID: ${orderData.id}`;
                       ...prev,
                       customerName: prev.customerName || p?.display_name || '',
                       customerEmail: prev.customerEmail || p?.email || '',
+                      customerWhatsapp: prev.customerWhatsapp || (p as any)?.phone || '',
                     }));
                   }}
                 />
