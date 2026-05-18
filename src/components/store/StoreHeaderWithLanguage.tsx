@@ -143,6 +143,9 @@ const StoreHeaderWithLanguage: React.FC = () => {
         isMenuOpen ? "block" : "hidden"
       )}>
         <nav className="flex flex-col space-y-4 px-4">
+          <div className="md:hidden pt-2">
+            <GlobalSearch compact />
+          </div>
           {navigation.map((item) => (
             <Link
               key={item.name}
