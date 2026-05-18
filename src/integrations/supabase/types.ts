@@ -238,6 +238,104 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversations: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          created_at: string
+          display_name: string | null
+          guest_email: string
+          guest_name: string | null
+          guest_token: string
+          id: string
+          last_message_at: string
+          priority: string
+          status: string
+          subcategory: string | null
+          tags: string[]
+          unread_admin: number
+          unread_user: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: string
+          created_at?: string
+          display_name?: string | null
+          guest_email: string
+          guest_name?: string | null
+          guest_token?: string
+          id?: string
+          last_message_at?: string
+          priority?: string
+          status?: string
+          subcategory?: string | null
+          tags?: string[]
+          unread_admin?: number
+          unread_user?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string
+          display_name?: string | null
+          guest_email?: string
+          guest_name?: string | null
+          guest_token?: string
+          id?: string
+          last_message_at?: string
+          priority?: string
+          status?: string
+          subcategory?: string | null
+          tags?: string[]
+          unread_admin?: number
+          unread_user?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          attachments: Json
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_name: string | null
+          sender_type: string
+        }
+        Insert: {
+          attachments?: Json
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_name?: string | null
+          sender_type: string
+        }
+        Update: {
+          attachments?: Json
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_name?: string | null
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crypto_payment_intents: {
         Row: {
           amount_usd: number
