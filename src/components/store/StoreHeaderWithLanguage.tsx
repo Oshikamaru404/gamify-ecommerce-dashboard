@@ -8,6 +8,7 @@ import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import HeaderAuthButton from '@/components/auth/HeaderAuthButton';
+import GlobalSearch from '@/components/store/GlobalSearch';
 
 const StoreHeaderWithLanguage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
