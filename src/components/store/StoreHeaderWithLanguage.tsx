@@ -8,6 +8,7 @@ import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import HeaderAuthButton from '@/components/auth/HeaderAuthButton';
+import GlobalSearch from '@/components/store/GlobalSearch';
 
 const StoreHeaderWithLanguage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -113,6 +114,9 @@ const StoreHeaderWithLanguage: React.FC = () => {
 
         {/* Mobile Menu Button & Language Selector */}
         <div className="flex items-center gap-2">
+          <div className="hidden md:block">
+            <GlobalSearch />
+          </div>
           <HeaderAuthButton />
           {isLoading ? (
             <div className="flex items-center gap-2">
@@ -139,6 +143,9 @@ const StoreHeaderWithLanguage: React.FC = () => {
         isMenuOpen ? "block" : "hidden"
       )}>
         <nav className="flex flex-col space-y-4 px-4">
+          <div className="md:hidden pt-2">
+            <GlobalSearch compact />
+          </div>
           {navigation.map((item) => (
             <Link
               key={item.name}
