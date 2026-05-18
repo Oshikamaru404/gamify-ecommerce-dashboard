@@ -63,6 +63,8 @@ import Content from "./pages/admin/Content";
 import StyleEditor from "./pages/admin/StyleEditor";
 import Communication from "./pages/admin/Communication";
 import EmailTemplates from "./pages/admin/EmailTemplates";
+import Chat from "./pages/Chat";
+import ChatAdmin from "./pages/admin/ChatAdmin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -149,6 +151,7 @@ function App() {
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/refund-policy" element={<RefundPolicy />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
+                  <Route path="/chat" element={<Chat />} />
                   
                   {/* Admin routes */}
                   <Route path="/diza/login" element={<AdminLogin />} />
@@ -169,6 +172,7 @@ function App() {
                     <Route path="content" element={<Content />} />
                     <Route path="communication" element={<Communication />} />
                     <Route path="emails" element={<EmailTemplates />} />
+                    <Route path="chat" element={<ChatAdmin />} />
                   </Route>
                   
                   {/* Catch all route */}
