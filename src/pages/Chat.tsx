@@ -21,7 +21,7 @@ import { useUserAuth } from '@/contexts/UserAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Send, ArrowLeft, LogOut } from 'lucide-react';
-import SEO from '@/components/SEO';
+import { Helmet } from 'react-helmet-async';
 
 type Step = 'category' | 'subcategory' | 'form' | 'chat';
 
@@ -103,7 +103,10 @@ const Chat: React.FC = () => {
 
   return (
     <StoreLayout>
-      <SEO title="Support Chat — BWIVOX" description="Get real-time support from BWIVOX. Choose your topic and chat with our team." />
+      <Helmet>
+        <title>Support Chat — BWIVOX</title>
+        <meta name="description" content="Get real-time support from BWIVOX. Choose your topic and chat with our team." />
+      </Helmet>
       <div className="container mx-auto max-w-3xl px-4 py-6 sm:py-12">
         {step === 'chat' && conversationId ? (
           <ChatRoom conversationId={conversationId} onLeave={handleLeave} />
