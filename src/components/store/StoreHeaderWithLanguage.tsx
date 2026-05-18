@@ -114,6 +114,9 @@ const StoreHeaderWithLanguage: React.FC = () => {
 
         {/* Mobile Menu Button & Language Selector */}
         <div className="flex items-center gap-2">
+          <div className="hidden md:block">
+            <GlobalSearch />
+          </div>
           <HeaderAuthButton />
           {isLoading ? (
             <div className="flex items-center gap-2">
