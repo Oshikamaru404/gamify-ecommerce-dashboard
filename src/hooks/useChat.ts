@@ -1,0 +1,183 @@
+import { useEffect, useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+const TOKEN_KEY = 'bwivox_chat_token';
+const CONV_KEY = 'bwivox_chat_conv';
+
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  sender_type: 'user' | 'admin' | 'system';
+  sender_name: string | null;
+  content: string;
+  created_at: string;
+}
+
+export interface ChatConversation {
+  id: string;
+  user_id: string | null;
+  guest_name: string | null;
+  guest_email: string;
+  guest_token: string;
+  display_name: string | null;
+  category: string;
+  subcategory: string | null;
+  priority: string;
+  status: string;
+  tags: string[];
+  admin_notes: string | null;
+  unread_admin: number;
+  unread_user: number;
+  last_message_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function getStoredChatToken() {
+  return {
+    token: localStorage.getItem(TOKEN_KEY),
+    convId: localStorage.getItem(CONV_KEY),
+  };
+}
+
+export function storeChatToken(convId: string, token: string) {
+  localStorage.setItem(CONV_KEY, convId);
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearChatToken() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(CONV_KEY);
+}
+
+export function useConversationMessages(conversationId: string | null) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!conversationId) return;
+    setLoading(true);
+
+    supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        setMessages((data || []) as ChatMessage[]);
+        setLoading(false);
+      });
+
+    const channel = supabase
+      .channel(`chat-msg-${conversationId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${conversationId}` },
+        (payload) => {
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === (payload.new as any).id)) return prev;
+            return [...prev, payload.new as ChatMessage];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
+
+  return { messages, loading };
+}
+
+export function useConversation(conversationId: string | null) {
+  const [conv, setConv] = useState<ChatConversation | null>(null);
+
+  const refresh = useCallback(async () => {
+    if (!conversationId) return;
+    const { data } = await supabase.from('chat_conversations').select('*').eq('id', conversationId).maybeSingle();
+    setConv(data as ChatConversation | null);
+  }, [conversationId]);
+
+  useEffect(() => {
+    refresh();
+    if (!conversationId) return;
+    const channel = supabase
+      .channel(`chat-conv-${conversationId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'chat_conversations', filter: `id=eq.${conversationId}` },
+        (payload) => setConv(payload.new as ChatConversation)
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, refresh]);
+
+  return { conversation: conv, refresh };
+}
+
+export async function sendChatMessage(params: {
+  conversationId: string;
+  senderType: 'user' | 'admin';
+  senderName: string;
+  content: string;
+}) {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .insert({
+      conversation_id: params.conversationId,
+      sender_type: params.senderType,
+      sender_name: params.senderName,
+      content: params.content,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+
+  // Fire-and-forget notification
+  supabase.functions
+    .invoke('send-chat-notification', {
+      body: { conversation_id: params.conversationId, message_id: data.id },
+    })
+    .catch((e) => console.warn('notify failed', e));
+
+  return data;
+}
+
+export async function createConversation(params: {
+  userId: string | null;
+  guestName: string;
+  guestEmail: string;
+  category: string;
+  subcategory: string | null;
+  priority: string;
+  firstMessage: string;
+}) {
+  const { data, error } = await supabase
+    .from('chat_conversations')
+    .insert({
+      user_id: params.userId,
+      guest_name: params.guestName,
+      guest_email: params.guestEmail,
+      category: params.category,
+      subcategory: params.subcategory,
+      priority: params.priority,
+      status: 'open',
+    })
+    .select()
+    .single();
+  if (error) throw error;
+
+  storeChatToken(data.id, data.guest_token);
+
+  await sendChatMessage({
+    conversationId: data.id,
+    senderType: 'user',
+    senderName: params.guestName,
+    content: params.firstMessage,
+  });
+
+  return data as ChatConversation;
+}
