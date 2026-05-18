@@ -467,6 +467,7 @@ Order ID: ${orderData.id}`;
                       ...prev,
                       customerName: prev.customerName || p?.display_name || '',
                       customerEmail: prev.customerEmail || p?.email || '',
+                      customerWhatsapp: prev.customerWhatsapp || (p as any)?.phone || '',
                     }));
                   }}
                 />
@@ -562,74 +563,79 @@ Order ID: ${orderData.id}`;
                 </div>
               )}
 
-              {/* Identity: chip when authed, full fields when guest or editing */}
-              {identityKnown ? (
-                <div className="flex items-center justify-between gap-3 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2.5">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        Signed in as {profile?.display_name || authUser?.email}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground truncate">{formData.customerEmail || authUser?.email}</p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => setEditIdentity(true)} className="text-xs">
-                    <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
-                  </Button>
-                </div>
-              ) : (
+              {/* Identity: shown only when user is authenticated.
+                  Guests collect name/email/phone via QuickCheckoutAuth (single entry point). */}
+              {authUser && (
                 <>
-                  {autofill.savedProfiles.length > 0 && (
-                    <SavedProfilesPicker
-                      profiles={autofill.savedProfiles}
-                      selectedId={selectedSavedId}
-                      onSelect={applySavedProfile}
-                    />
-                  )}
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="customerName">Full name *</Label>
-                      <div className="relative">
-                        <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" className="pr-9" />
-                        {formData.customerName.trim().length >= 2 && (
-                          <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
-                        )}
+                  {identityKnown ? (
+                    <div className="flex items-center justify-between gap-3 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            Signed in as {profile?.display_name || authUser?.email}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate">{formData.customerEmail || authUser?.email}</p>
+                        </div>
                       </div>
+                      <Button variant="ghost" size="sm" onClick={() => setEditIdentity(true)} className="text-xs">
+                        <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                      </Button>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="customerEmail">Email *</Label>
-                      <div className="relative">
-                        <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" className="pr-9" />
-                        {isValidEmail(formData.customerEmail) && (
-                          <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
-                        )}
+                  ) : (
+                    <>
+                      {autofill.savedProfiles.length > 0 && (
+                        <SavedProfilesPicker
+                          profiles={autofill.savedProfiles}
+                          selectedId={selectedSavedId}
+                          onSelect={applySavedProfile}
+                        />
+                      )}
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="customerName">Full name *</Label>
+                          <div className="relative">
+                            <Input id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="John Doe" className="pr-9" />
+                            {formData.customerName.trim().length >= 2 && (
+                              <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="customerEmail">Email *</Label>
+                          <div className="relative">
+                            <Input id="customerEmail" name="customerEmail" type="email" value={formData.customerEmail} onChange={handleInputChange} placeholder="john@example.com" className="pr-9" />
+                            {isValidEmail(formData.customerEmail) && (
+                              <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                            )}
+                          </div>
+                          {emailSuggestion && (
+                            <button
+                              type="button"
+                              onClick={() => { setFormData(p => ({ ...p, customerEmail: emailSuggestion! })); setEmailSuggestion(null); }}
+                              className="flex items-center gap-1 text-[11px] text-amber-700 hover:underline"
+                            >
+                              <AlertCircle className="h-3 w-3" />
+                              Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      {emailSuggestion && (
-                        <button
-                          type="button"
-                          onClick={() => { setFormData(p => ({ ...p, customerEmail: emailSuggestion! })); setEmailSuggestion(null); }}
-                          className="flex items-center gap-1 text-[11px] text-amber-700 hover:underline"
-                        >
-                          <AlertCircle className="h-3 w-3" />
-                          Did you mean <span className="font-semibold">{emailSuggestion}</span>?
-                        </button>
+                    </>
+                  )}
+
+                  {/* WhatsApp — required after OAuth (providers don't return phone) */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="customerWhatsapp">WhatsApp / Phone *</Label>
+                    <div className="relative">
+                      <Input id="customerWhatsapp" name="customerWhatsapp" value={formData.customerWhatsapp} onChange={handleInputChange} placeholder="+1234567890" className="pr-9" />
+                      {formData.customerWhatsapp.replace(/\D/g, '').length >= 7 && (
+                        <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
                       )}
                     </div>
                   </div>
                 </>
               )}
-
-              {/* WhatsApp always required */}
-              <div className="space-y-1.5">
-                <Label htmlFor="customerWhatsapp">WhatsApp / Phone *</Label>
-                <div className="relative">
-                  <Input id="customerWhatsapp" name="customerWhatsapp" value={formData.customerWhatsapp} onChange={handleInputChange} placeholder="+1234567890" className="pr-9" />
-                  {formData.customerWhatsapp.replace(/\D/g, '').length >= 7 && (
-                    <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
-                  )}
-                </div>
-              </div>
 
               {/* ===== Dynamic activation fields ===== */}
               {showConnectionToggle && (
