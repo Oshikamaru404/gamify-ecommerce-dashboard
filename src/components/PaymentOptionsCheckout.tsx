@@ -459,20 +459,41 @@ Order ID: ${orderData.id}`;
           {/* ============ STEP 1: Details ============ */}
           {step === 1 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-              {/* Single auth slot — guests only */}
+              {/* GUEST GATE: until logged in, only show auth widget + perks. */}
               {!authUser && (
-                <QuickCheckoutAuth
-                  onAuthed={(p) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      customerName: prev.customerName || p?.display_name || '',
-                      customerEmail: prev.customerEmail || p?.email || '',
-                      customerWhatsapp: prev.customerWhatsapp || (p as any)?.phone || '',
-                    }));
-                  }}
-                />
+                <>
+                  <QuickCheckoutAuth
+                    onAuthed={(p) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        customerName: prev.customerName || p?.display_name || "",
+                        customerEmail: prev.customerEmail || p?.email || "",
+                        customerWhatsapp: prev.customerWhatsapp || (p as any)?.phone || "",
+                      }));
+                    }}
+                  />
+                  <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/5 p-3.5 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-primary" />
+                      <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                        Why an account is required
+                      </p>
+                    </div>
+                    <ul className="grid sm:grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-foreground/80">
+                      <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Auto-detect existing subscriptions to renew</li>
+                      <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Keep your M3U / Xtream credentials safe</li>
+                      <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Track orders &amp; payment history</li>
+                      <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Faster checkout on future purchases</li>
+                    </ul>
+                    <p className="text-[11px] text-muted-foreground pt-1">
+                      Log in with a provider above, or tap the email icon to create an account in seconds.
+                    </p>
+                  </div>
+                </>
               )}
 
+              {/* AUTHED ONLY: everything below requires a logged-in user. */}
+              {authUser && (<>
               {/* Account type segmented control */}
               <div
                 role="tablist"
@@ -519,34 +540,8 @@ Order ID: ${orderData.id}`;
                 </button>
               </div>
 
-              {/* Account perks — shown to guests in BOTH modes to encourage account creation */}
-              {!authUser && (
-                <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/5 p-3.5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-primary" />
-                    <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                      {isRenewal ? 'Why log in to renew' : 'Why create an account'}
-                    </p>
-                  </div>
-                  <ul className="grid sm:grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-foreground/80">
-                    {isRenewal ? (
-                      <>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Keep your existing M3U / Xtream credentials</li>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Auto-detect your active subscription</li>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> One-click renewal at checkout</li>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Full order &amp; payment history</li>
-                      </>
-                    ) : (
-                      <>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Auto-fill name &amp; email — no typing</li>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Track your order &amp; credentials anytime</li>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Faster checkout on your next purchase</li>
-                        <li className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" /> Manage all your subscriptions in one place</li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-              )}
+              {/* (perks shown to guests above the gate) */}
+
               {isRenewal && authUser && renewableOrders.length > 0 && (
                 <div className="space-y-1.5">
                   <Label className="text-xs">Which subscription are you renewing?</Label>
@@ -729,6 +724,7 @@ Order ID: ${orderData.id}`;
                   )}
                 </div>
               )}
+              </>)}
             </div>
           )}
 
