@@ -24,6 +24,9 @@ import { useCheckoutAutofill, SavedProfile } from '@/hooks/useCheckoutAutofill';
 import { useCheckoutDraftAutosave, loadCheckoutDraft, clearCheckoutDraft } from '@/hooks/useCheckoutDraft';
 import { formatMacInput, isValidEmail, isValidMac, suggestEmailFix } from '@/lib/checkoutValidation';
 import SavedProfilesPicker from '@/components/auth/SavedProfilesPicker';
+import { usePackageStockPromo } from '@/hooks/usePackageStockPromo';
+import { computeLineTotal } from '@/lib/quantityPromo';
+import { Minus, Plus } from 'lucide-react';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
@@ -67,6 +70,8 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     iptvPassword: '',
   });
   const [connectionType, setConnectionType] = useState<ConnectionType>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [macEntries, setMacEntries] = useState<Array<{ mac: string; label: string }>>([{ mac: '', label: '' }]);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -132,6 +137,49 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const showIptvM3UNewNotice = isIptvM3U && isNew;
   const showPanelEmail = offerKind === 'player_panel';
 
+  // === Quantity & stock features only apply to non-panel offers ===
+  const supportsQuantity = offerKind === 'iptv_subscription' || offerKind === 'player_activation';
+  const { data: stockPromo } = usePackageStockPromo(packageData.id);
+  const stockAvailable = stockPromo?.stock_enabled
+    ? Math.max(0, stockPromo.stock_quantity)
+    : Infinity;
+  const isOutOfStock = stockPromo?.stock_enabled && stockAvailable <= 0;
+  const isLowStock =
+    !!stockPromo?.stock_enabled &&
+    stockAvailable > 0 &&
+    stockAvailable <= (stockPromo?.low_stock_threshold ?? 0);
+  const maxQty = supportsQuantity ? Math.min(50, stockAvailable === Infinity ? 50 : stockAvailable) : 1;
+
+  // Effective qty (capped by stock and feature gate)
+  const effectiveQty = supportsQuantity ? Math.min(Math.max(1, quantity), maxQty || 1) : 1;
+
+  // Compute totals from promo config
+  const totals = useMemo(
+    () => computeLineTotal(packageData.price, effectiveQty, stockPromo?.promo),
+    [packageData.price, effectiveQty, stockPromo?.promo],
+  );
+  const finalTotal = totals.total;
+
+  // Keep macEntries length in sync with quantity when MAC fields are shown
+  useEffect(() => {
+    if (!showMac) return;
+    setMacEntries((prev) => {
+      const target = supportsQuantity ? effectiveQty : 1;
+      if (prev.length === target) return prev;
+      if (prev.length < target) {
+        return [...prev, ...Array.from({ length: target - prev.length }, () => ({ mac: '', label: '' }))];
+      }
+      return prev.slice(0, target);
+    });
+  }, [effectiveQty, showMac, supportsQuantity]);
+
+  const adjustQuantity = (delta: number) => {
+    setQuantity((q) => {
+      const next = Math.max(1, Math.min(maxQty || 1, q + delta));
+      return next;
+    });
+  };
+
   // Past renewable subs for the dropdown (same offer family, completed/paid)
   const renewableOrders = useMemo(() => {
     if (offerKind !== 'iptv_subscription') return [];
@@ -149,15 +197,24 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   }, [authUser, renewableOrders.length]); // eslint-disable-line
 
   // ---- Validation (no toasts; just gate the button) ----
+  const macsValid = useMemo(() => {
+    if (!showMac) return true;
+    if (supportsQuantity && effectiveQty > 1) {
+      return macEntries.length === effectiveQty && macEntries.every((m) => isValidMac(m.mac));
+    }
+    return isValidMac(formData.macAddress);
+  }, [showMac, supportsQuantity, effectiveQty, macEntries, formData.macAddress]);
+
   const step1Valid = useMemo(() => {
+    if (isOutOfStock) return false;
     if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) return false;
     if (!isValidEmail(formData.customerEmail)) return false;
     if (showConnectionToggle && !connectionType) return false;
-    if (showMac && !isValidMac(formData.macAddress)) return false;
+    if (!macsValid) return false;
     if (showUsername && !formData.iptvUsername) return false;
     if (showPassword && !formData.iptvPassword) return false;
     return true;
-  }, [formData, connectionType, showConnectionToggle, showMac, showUsername, showPassword]);
+  }, [formData, connectionType, showConnectionToggle, macsValid, showUsername, showPassword, isOutOfStock]);
 
   const goNext = () => { if (step === 1 && step1Valid) setStep(2); };
   const goBack = () => setStep(1);
@@ -170,6 +227,16 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     }
     setFormData((p) => ({ ...p, [name]: value }));
     if (name === 'customerEmail') setEmailSuggestion(suggestEmailFix(value));
+  };
+
+  const updateMacEntry = (idx: number, patch: Partial<{ mac: string; label: string }>) => {
+    setMacEntries((prev) =>
+      prev.map((e, i) =>
+        i === idx
+          ? { ...e, ...(patch.mac !== undefined ? { mac: formatMacInput(patch.mac) } : {}), ...(patch.label !== undefined ? { label: patch.label } : {}) }
+          : e,
+      ),
+    );
   };
 
   const applySavedProfile = (profile: SavedProfile | null) => {
@@ -233,11 +300,22 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     }));
   }, [autofill.email, autofill.displayName, autofill.phone]);
 
+  const collectedMacs = useMemo(() => {
+    if (!showMac) return [] as Array<{ mac: string; label: string }>;
+    if (supportsQuantity && effectiveQty > 1) {
+      return macEntries
+        .slice(0, effectiveQty)
+        .map((m) => ({ mac: m.mac.trim(), label: (m.label || '').trim() }));
+    }
+    return formData.macAddress ? [{ mac: formData.macAddress, label: '' }] : [];
+  }, [showMac, supportsQuantity, effectiveQty, macEntries, formData.macAddress]);
+
   const buildNotesPayload = () => {
     const payload: Record<string, any> = {
       account_type: accountType,
       offer_kind: offerKind,
       connection_type: connectionType,
+      quantity: effectiveQty,
     };
     if (accountType === 'renewal' && selectedRenewalOrderId) {
       const o = renewableOrders.find(x => x.id === selectedRenewalOrderId);
@@ -246,9 +324,21 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         previous_package: o?.package_name || null,
       };
     }
-    if (showMac) payload.mac_address = formData.macAddress || null;
+    if (showMac) {
+      payload.mac_addresses = collectedMacs;
+      // Back-compat
+      payload.mac_address = collectedMacs[0]?.mac || null;
+    }
     if (showUsername) payload.iptv_username = formData.iptvUsername || null;
     if (showPassword) payload.iptv_password = formData.iptvPassword || null;
+    if (stockPromo?.promo && totals.appliedTier) {
+      payload.promo_applied = {
+        mode: stockPromo.promo.mode,
+        tier_qty: totals.appliedTier.qty,
+        tier_value: totals.appliedTier.value,
+        discount: Number(totals.discount.toFixed(2)),
+      };
+    }
     return JSON.stringify(payload);
   };
 
@@ -263,7 +353,9 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         package_name: displayName,
         package_category: packageData.category,
         duration_months: packageData.duration,
-        amount: packageData.price,
+        amount: Number(finalTotal.toFixed(2)),
+        quantity: effectiveQty,
+        mac_addresses: collectedMacs as any,
         order_type: accountType === 'renewal' ? 'renewal' : 'activation',
         status: 'pending',
         payment_status: 'pending',
@@ -289,16 +381,25 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         ? `\n🔁 Renewal${selectedRenewalOrderId ? ` — Order #${selectedRenewalOrderId.slice(0,8)}` : ''}`
         : '\n🆕 New customer';
       const detailLines: string[] = [];
-      if (showMac) detailLines.push(`🔧 MAC: ${formData.macAddress}`);
+      if (effectiveQty > 1) detailLines.push(`🔢 Quantity: x${effectiveQty}`);
+      if (showMac) {
+        if (collectedMacs.length > 1) {
+          detailLines.push(`🔧 MAC addresses:`);
+          collectedMacs.forEach((m, i) => detailLines.push(`   ${i + 1}. ${m.mac}${m.label ? ` (${m.label})` : ''}`));
+        } else if (collectedMacs[0]) {
+          detailLines.push(`🔧 MAC: ${collectedMacs[0].mac}${collectedMacs[0].label ? ` (${collectedMacs[0].label})` : ''}`);
+        }
+      }
       if (showUsername) detailLines.push(`👤 Username: ${formData.iptvUsername}`);
       if (showPassword) detailLines.push(`🔑 Password: ${formData.iptvPassword}`);
       if (showConnectionToggle) detailLines.push(`🔌 Connection: ${connectionType === 'm3u_xtream' ? 'M3U / Xtream' : 'MAG / STB'}`);
+      if (totals.discount > 0) detailLines.push(`🏷️ Promo: -$${totals.discount.toFixed(2)}`);
       const detailsBlock = detailLines.length ? `\n${detailLines.join('\n')}` : '';
 
       const message = `🛒 New Order Request${renewalLine}
 
-📦 Package: ${displayName}
-💰 Price: $${packageData.price}
+📦 Package: ${displayName}${effectiveQty > 1 ? ` × ${effectiveQty}` : ''}
+💰 Price: $${finalTotal.toFixed(2)}
 ⏱️ Duration: ${getDisplayDuration()}
 
 👤 ${formData.customerName}
@@ -332,7 +433,7 @@ Order ID: ${orderData.id}`;
       });
       const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
         'paygate-create-payment',
-        { body: { packageData: { ...packageData, name: displayName }, customerInfo: formData, orderId: orderData.id, paymentType } }
+        { body: { packageData: { ...packageData, name: displayName, price: finalTotal, quantity: effectiveQty }, customerInfo: formData, orderId: orderData.id, paymentType } }
       );
       if (paymentError) throw paymentError;
       if (paymentData?.checkoutUrl) {
@@ -390,7 +491,7 @@ Order ID: ${orderData.id}`;
             <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{displayName}</span>
-                <span className="font-bold">${packageData.price}</span>
+                <span className="font-bold">${finalTotal.toFixed(2)}{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
               </div>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
@@ -695,7 +796,35 @@ Order ID: ${orderData.id}`;
                     </div>
                   )}
                   <div className="grid sm:grid-cols-2 gap-3">
-                    {showMac && (
+                    {showMac && supportsQuantity && effectiveQty > 1 ? (
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label className="text-xs">MAC Addresses ({effectiveQty}) *</Label>
+                        {macEntries.slice(0, effectiveQty).map((entry, idx) => (
+                          <div key={idx} className="grid grid-cols-[1fr,140px] gap-2">
+                            <div className="relative">
+                              <Input
+                                value={entry.mac}
+                                onChange={(e) => updateMacEntry(idx, { mac: e.target.value })}
+                                placeholder={`MAC #${idx + 1} — 00:1A:79:XX:XX:XX`}
+                                maxLength={17}
+                                className="font-mono tracking-wider pr-8"
+                              />
+                              {isValidMac(entry.mac) && (
+                                <Check className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-green-600" />
+                              )}
+                            </div>
+                            <Input
+                              value={entry.label}
+                              onChange={(e) => updateMacEntry(idx, { label: e.target.value })}
+                              placeholder="Label (optional)"
+                            />
+                          </div>
+                        ))}
+                        <p className="text-[10px] text-amber-800/70">
+                          Tip: add a label like “TV salon” to identify each device.
+                        </p>
+                      </div>
+                    ) : showMac ? (
                       <div className="space-y-1.5 sm:col-span-2">
                         <Label htmlFor="macAddress" className="text-xs flex items-center gap-1.5">
                           MAC Address *
@@ -703,7 +832,7 @@ Order ID: ${orderData.id}`;
                         </Label>
                         <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" maxLength={17} className="font-mono tracking-wider" />
                       </div>
-                    )}
+                    ) : null}
                     {showUsername && (
                       <div className={cn('space-y-1.5', !showPassword && 'sm:col-span-2')}>
                         <Label htmlFor="iptvUsername" className="text-xs">Username *</Label>
@@ -758,9 +887,14 @@ Order ID: ${orderData.id}`;
                     <div className="flex justify-between"><span className="text-muted-foreground"><User className="h-3 w-3 inline mr-1" />{formData.customerName}</span><span className="truncate ml-2 max-w-[140px]">{formData.customerEmail}</span></div>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total</span>
-                    <span className="text-primary">${packageData.price}</span>
+                    <span>Total{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
+                    <span className="text-primary">${finalTotal.toFixed(2)}</span>
                   </div>
+                  {totals.discount > 0 && (
+                    <p className="text-[11px] text-emerald-700 text-right -mt-1">
+                      Quantity promo applied — you save ${totals.discount.toFixed(2)}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -811,13 +945,13 @@ Order ID: ${orderData.id}`;
                         </div>
                         <Button onClick={() => handlePayGatePayment('credit_card')} disabled={isProcessing} className="w-full h-12 bg-blue-600 hover:bg-blue-700">
                           {isProcessing ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <CreditCard className="h-5 w-5 mr-2" />}
-                          Pay ${packageData.price}
+                          Pay ${finalTotal.toFixed(2)}
                         </Button>
                       </CardContent>
                     </Card>
                   </TabsContent>
                   <TabsContent value="crypto" className="mt-4">
-                    <DirectCryptoPayment amountUsd={packageData.price} onCreateOrder={handleDirectCryptoCreateOrder} />
+                    <DirectCryptoPayment amountUsd={finalTotal} onCreateOrder={handleDirectCryptoCreateOrder} />
                   </TabsContent>
                   <TabsContent value="whatsapp" className="mt-4">
                     <Card>

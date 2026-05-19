@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { IPTVPackage, useCreateIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
 import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
+import StockPromoEditor, { StockPromoValue } from './StockPromoEditor';
 
 type PackageDialogProps = {
   open: boolean;
@@ -44,6 +45,17 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     status: 'active' as 'active' | 'inactive' | 'featured',
     sort_order: '0',
   });
+
+  const [stockPromo, setStockPromo] = useState<StockPromoValue>({
+    stock_enabled: false,
+    stock_quantity: 0,
+    low_stock_threshold: 5,
+    quantity_promo_mode: 'percentage',
+    quantity_promos: [],
+  });
+
+  const supportsQtyFeatures =
+    formData.category === 'activation-player' || formData.category === 'subscription';
   
   
 
@@ -67,6 +79,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         status: pkg.status || 'active',
         sort_order: pkg.sort_order?.toString() || '0',
       });
+      setStockPromo({
+        stock_enabled: !!pkg.stock_enabled,
+        stock_quantity: pkg.stock_quantity ?? 0,
+        low_stock_threshold: pkg.low_stock_threshold ?? 5,
+        quantity_promo_mode: pkg.quantity_promo_mode ?? 'percentage',
+        quantity_promos: Array.isArray(pkg.quantity_promos) ? pkg.quantity_promos : [],
+      });
     } else {
       setFormData({
         name: '',
@@ -85,6 +104,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         price_12_months: '',
         status: 'active',
         sort_order: '0',
+      });
+      setStockPromo({
+        stock_enabled: false,
+        stock_quantity: 0,
+        low_stock_threshold: 5,
+        quantity_promo_mode: 'percentage',
+        quantity_promos: [],
       });
     }
   }, [pkg, open]);
@@ -110,7 +136,12 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
       price_12_months: formData.price_12_months ? parseFloat(formData.price_12_months) : null,
       status: formData.status,
       sort_order: parseInt(formData.sort_order) || 0,
-    };
+      stock_enabled: stockPromo.stock_enabled,
+      stock_quantity: stockPromo.stock_quantity,
+      low_stock_threshold: stockPromo.low_stock_threshold,
+      quantity_promo_mode: stockPromo.quantity_promo_mode,
+      quantity_promos: stockPromo.quantity_promos,
+    } as any;
     
     if (pkg) {
       updatePackage.mutate({ id: pkg.id, ...packageData });
@@ -340,6 +371,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
             features={formData.features}
             onChange={(features) => setFormData(prev => ({ ...prev, features }))}
           />
+
+          <StockPromoEditor value={stockPromo} onChange={setStockPromo} />
+          {!supportsQtyFeatures && (
+            <p className="text-[11px] text-muted-foreground -mt-2">
+              ℹ️ Quantity selection &amp; multi-MAC are only offered to customers on Subscription and Activation Player categories. Stock &amp; promos still apply.
+            </p>
+          )}
 
           <div>
             <Label htmlFor="sort_order">Sort Order</Label>

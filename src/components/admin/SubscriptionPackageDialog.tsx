@@ -11,6 +11,7 @@ import { SubscriptionPackage, useCreateSubscriptionPackage, useUpdateSubscriptio
 import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
 import CreditOptionsManager from './CreditOptionsManager';
+import StockPromoEditor, { StockPromoValue } from './StockPromoEditor';
 
 type SubscriptionPackageDialogProps = {
   open: boolean;
@@ -35,6 +36,14 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
     status: 'active' as 'active' | 'inactive' | 'featured',
     sort_order: '0',
   });
+
+  const [stockPromo, setStockPromo] = useState<StockPromoValue>({
+    stock_enabled: false,
+    stock_quantity: 0,
+    low_stock_threshold: 5,
+    quantity_promo_mode: 'percentage',
+    quantity_promos: [],
+  });
   
   
 
@@ -49,6 +58,13 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         status: (pkg.status as 'active' | 'inactive' | 'featured') || 'active',
         sort_order: pkg.sort_order?.toString() || '0',
       });
+      setStockPromo({
+        stock_enabled: !!(pkg as any).stock_enabled,
+        stock_quantity: (pkg as any).stock_quantity ?? 0,
+        low_stock_threshold: (pkg as any).low_stock_threshold ?? 5,
+        quantity_promo_mode: (pkg as any).quantity_promo_mode ?? 'percentage',
+        quantity_promos: Array.isArray((pkg as any).quantity_promos) ? (pkg as any).quantity_promos : [],
+      });
     } else {
       setFormData({
         name: '',
@@ -58,6 +74,13 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         features: [],
         status: 'active',
         sort_order: '0',
+      });
+      setStockPromo({
+        stock_enabled: false,
+        stock_quantity: 0,
+        low_stock_threshold: 5,
+        quantity_promo_mode: 'percentage',
+        quantity_promos: [],
       });
     }
   }, [pkg, open]);
@@ -72,6 +95,11 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
       features: formData.features.length > 0 ? formData.features : null,
       status: formData.status,
       sort_order: parseInt(formData.sort_order) || 0,
+      stock_enabled: stockPromo.stock_enabled,
+      stock_quantity: stockPromo.stock_quantity,
+      low_stock_threshold: stockPromo.low_stock_threshold,
+      quantity_promo_mode: stockPromo.quantity_promo_mode,
+      quantity_promos: stockPromo.quantity_promos,
       // Legacy fields for backward compatibility - these are no longer used in the new dynamic credit system
       price_3_credits: null,
       price_6_credits: null,
@@ -79,7 +107,7 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
       credits_3_months: null,
       credits_6_months: null,
       credits_12_months: null,
-    };
+    } as any;
     
     if (pkg) {
       updatePackage.mutate({ id: pkg.id, ...packageData });
@@ -101,11 +129,12 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         </DialogHeader>
         
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="basic">Basic Information</TabsTrigger>
             <TabsTrigger value="credits" disabled={!pkg}>
-              Credit Options {!pkg && '(Save package first)'}
+              Credit Options {!pkg && '(Save first)'}
             </TabsTrigger>
+            <TabsTrigger value="stock">Stock &amp; Promos</TabsTrigger>
           </TabsList>
           
           <TabsContent value="basic" className="space-y-4">
@@ -190,6 +219,10 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
                 packageName={pkg.name}
               />
             )}
+          </TabsContent>
+
+          <TabsContent value="stock" className="space-y-4">
+            <StockPromoEditor value={stockPromo} onChange={setStockPromo} />
           </TabsContent>
         </Tabs>
 
