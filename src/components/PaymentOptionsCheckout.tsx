@@ -381,16 +381,25 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         ? `\n🔁 Renewal${selectedRenewalOrderId ? ` — Order #${selectedRenewalOrderId.slice(0,8)}` : ''}`
         : '\n🆕 New customer';
       const detailLines: string[] = [];
-      if (showMac) detailLines.push(`🔧 MAC: ${formData.macAddress}`);
+      if (effectiveQty > 1) detailLines.push(`🔢 Quantity: x${effectiveQty}`);
+      if (showMac) {
+        if (collectedMacs.length > 1) {
+          detailLines.push(`🔧 MAC addresses:`);
+          collectedMacs.forEach((m, i) => detailLines.push(`   ${i + 1}. ${m.mac}${m.label ? ` (${m.label})` : ''}`));
+        } else if (collectedMacs[0]) {
+          detailLines.push(`🔧 MAC: ${collectedMacs[0].mac}${collectedMacs[0].label ? ` (${collectedMacs[0].label})` : ''}`);
+        }
+      }
       if (showUsername) detailLines.push(`👤 Username: ${formData.iptvUsername}`);
       if (showPassword) detailLines.push(`🔑 Password: ${formData.iptvPassword}`);
       if (showConnectionToggle) detailLines.push(`🔌 Connection: ${connectionType === 'm3u_xtream' ? 'M3U / Xtream' : 'MAG / STB'}`);
+      if (totals.discount > 0) detailLines.push(`🏷️ Promo: -$${totals.discount.toFixed(2)}`);
       const detailsBlock = detailLines.length ? `\n${detailLines.join('\n')}` : '';
 
       const message = `🛒 New Order Request${renewalLine}
 
-📦 Package: ${displayName}
-💰 Price: $${packageData.price}
+📦 Package: ${displayName}${effectiveQty > 1 ? ` × ${effectiveQty}` : ''}
+💰 Price: $${finalTotal.toFixed(2)}
 ⏱️ Duration: ${getDisplayDuration()}
 
 👤 ${formData.customerName}
