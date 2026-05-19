@@ -137,6 +137,49 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   const showIptvM3UNewNotice = isIptvM3U && isNew;
   const showPanelEmail = offerKind === 'player_panel';
 
+  // === Quantity & stock features only apply to non-panel offers ===
+  const supportsQuantity = offerKind === 'iptv_subscription' || offerKind === 'player_activation';
+  const { data: stockPromo } = usePackageStockPromo(packageData.id);
+  const stockAvailable = stockPromo?.stock_enabled
+    ? Math.max(0, stockPromo.stock_quantity)
+    : Infinity;
+  const isOutOfStock = stockPromo?.stock_enabled && stockAvailable <= 0;
+  const isLowStock =
+    !!stockPromo?.stock_enabled &&
+    stockAvailable > 0 &&
+    stockAvailable <= (stockPromo?.low_stock_threshold ?? 0);
+  const maxQty = supportsQuantity ? Math.min(50, stockAvailable === Infinity ? 50 : stockAvailable) : 1;
+
+  // Effective qty (capped by stock and feature gate)
+  const effectiveQty = supportsQuantity ? Math.min(Math.max(1, quantity), maxQty || 1) : 1;
+
+  // Compute totals from promo config
+  const totals = useMemo(
+    () => computeLineTotal(packageData.price, effectiveQty, stockPromo?.promo),
+    [packageData.price, effectiveQty, stockPromo?.promo],
+  );
+  const finalTotal = totals.total;
+
+  // Keep macEntries length in sync with quantity when MAC fields are shown
+  useEffect(() => {
+    if (!showMac) return;
+    setMacEntries((prev) => {
+      const target = supportsQuantity ? effectiveQty : 1;
+      if (prev.length === target) return prev;
+      if (prev.length < target) {
+        return [...prev, ...Array.from({ length: target - prev.length }, () => ({ mac: '', label: '' }))];
+      }
+      return prev.slice(0, target);
+    });
+  }, [effectiveQty, showMac, supportsQuantity]);
+
+  const adjustQuantity = (delta: number) => {
+    setQuantity((q) => {
+      const next = Math.max(1, Math.min(maxQty || 1, q + delta));
+      return next;
+    });
+  };
+
   // Past renewable subs for the dropdown (same offer family, completed/paid)
   const renewableOrders = useMemo(() => {
     if (offerKind !== 'iptv_subscription') return [];
