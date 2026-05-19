@@ -433,7 +433,7 @@ Order ID: ${orderData.id}`;
       });
       const { data: paymentData, error: paymentError } = await supabase.functions.invoke(
         'paygate-create-payment',
-        { body: { packageData: { ...packageData, name: displayName }, customerInfo: formData, orderId: orderData.id, paymentType } }
+        { body: { packageData: { ...packageData, name: displayName, price: finalTotal, quantity: effectiveQty }, customerInfo: formData, orderId: orderData.id, paymentType } }
       );
       if (paymentError) throw paymentError;
       if (paymentData?.checkoutUrl) {
@@ -491,7 +491,7 @@ Order ID: ${orderData.id}`;
             <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{displayName}</span>
-                <span className="font-bold">${packageData.price}</span>
+                <span className="font-bold">${finalTotal.toFixed(2)}{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
               </div>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
@@ -796,7 +796,35 @@ Order ID: ${orderData.id}`;
                     </div>
                   )}
                   <div className="grid sm:grid-cols-2 gap-3">
-                    {showMac && (
+                    {showMac && supportsQuantity && effectiveQty > 1 ? (
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label className="text-xs">MAC Addresses ({effectiveQty}) *</Label>
+                        {macEntries.slice(0, effectiveQty).map((entry, idx) => (
+                          <div key={idx} className="grid grid-cols-[1fr,140px] gap-2">
+                            <div className="relative">
+                              <Input
+                                value={entry.mac}
+                                onChange={(e) => updateMacEntry(idx, { mac: e.target.value })}
+                                placeholder={`MAC #${idx + 1} — 00:1A:79:XX:XX:XX`}
+                                maxLength={17}
+                                className="font-mono tracking-wider pr-8"
+                              />
+                              {isValidMac(entry.mac) && (
+                                <Check className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-green-600" />
+                              )}
+                            </div>
+                            <Input
+                              value={entry.label}
+                              onChange={(e) => updateMacEntry(idx, { label: e.target.value })}
+                              placeholder="Label (optional)"
+                            />
+                          </div>
+                        ))}
+                        <p className="text-[10px] text-amber-800/70">
+                          Tip: add a label like “TV salon” to identify each device.
+                        </p>
+                      </div>
+                    ) : showMac ? (
                       <div className="space-y-1.5 sm:col-span-2">
                         <Label htmlFor="macAddress" className="text-xs flex items-center gap-1.5">
                           MAC Address *
@@ -804,7 +832,7 @@ Order ID: ${orderData.id}`;
                         </Label>
                         <Input id="macAddress" name="macAddress" value={formData.macAddress} onChange={handleInputChange} placeholder="00:1A:79:XX:XX:XX" maxLength={17} className="font-mono tracking-wider" />
                       </div>
-                    )}
+                    ) : null}
                     {showUsername && (
                       <div className={cn('space-y-1.5', !showPassword && 'sm:col-span-2')}>
                         <Label htmlFor="iptvUsername" className="text-xs">Username *</Label>
@@ -859,9 +887,14 @@ Order ID: ${orderData.id}`;
                     <div className="flex justify-between"><span className="text-muted-foreground"><User className="h-3 w-3 inline mr-1" />{formData.customerName}</span><span className="truncate ml-2 max-w-[140px]">{formData.customerEmail}</span></div>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total</span>
-                    <span className="text-primary">${packageData.price}</span>
+                    <span>Total{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
+                    <span className="text-primary">${finalTotal.toFixed(2)}</span>
                   </div>
+                  {totals.discount > 0 && (
+                    <p className="text-[11px] text-emerald-700 text-right -mt-1">
+                      Quantity promo applied — you save ${totals.discount.toFixed(2)}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -912,13 +945,13 @@ Order ID: ${orderData.id}`;
                         </div>
                         <Button onClick={() => handlePayGatePayment('credit_card')} disabled={isProcessing} className="w-full h-12 bg-blue-600 hover:bg-blue-700">
                           {isProcessing ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <CreditCard className="h-5 w-5 mr-2" />}
-                          Pay ${packageData.price}
+                          Pay ${finalTotal.toFixed(2)}
                         </Button>
                       </CardContent>
                     </Card>
                   </TabsContent>
                   <TabsContent value="crypto" className="mt-4">
-                    <DirectCryptoPayment amountUsd={packageData.price} onCreateOrder={handleDirectCryptoCreateOrder} />
+                    <DirectCryptoPayment amountUsd={finalTotal} onCreateOrder={handleDirectCryptoCreateOrder} />
                   </TabsContent>
                   <TabsContent value="whatsapp" className="mt-4">
                     <Card>
