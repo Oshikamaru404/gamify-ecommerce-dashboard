@@ -197,15 +197,24 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   }, [authUser, renewableOrders.length]); // eslint-disable-line
 
   // ---- Validation (no toasts; just gate the button) ----
+  const macsValid = useMemo(() => {
+    if (!showMac) return true;
+    if (supportsQuantity && effectiveQty > 1) {
+      return macEntries.length === effectiveQty && macEntries.every((m) => isValidMac(m.mac));
+    }
+    return isValidMac(formData.macAddress);
+  }, [showMac, supportsQuantity, effectiveQty, macEntries, formData.macAddress]);
+
   const step1Valid = useMemo(() => {
+    if (isOutOfStock) return false;
     if (!formData.customerName || !formData.customerEmail || !formData.customerWhatsapp) return false;
     if (!isValidEmail(formData.customerEmail)) return false;
     if (showConnectionToggle && !connectionType) return false;
-    if (showMac && !isValidMac(formData.macAddress)) return false;
+    if (!macsValid) return false;
     if (showUsername && !formData.iptvUsername) return false;
     if (showPassword && !formData.iptvPassword) return false;
     return true;
-  }, [formData, connectionType, showConnectionToggle, showMac, showUsername, showPassword]);
+  }, [formData, connectionType, showConnectionToggle, macsValid, showUsername, showPassword, isOutOfStock]);
 
   const goNext = () => { if (step === 1 && step1Valid) setStep(2); };
   const goBack = () => setStep(1);
@@ -218,6 +227,16 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     }
     setFormData((p) => ({ ...p, [name]: value }));
     if (name === 'customerEmail') setEmailSuggestion(suggestEmailFix(value));
+  };
+
+  const updateMacEntry = (idx: number, patch: Partial<{ mac: string; label: string }>) => {
+    setMacEntries((prev) =>
+      prev.map((e, i) =>
+        i === idx
+          ? { ...e, ...(patch.mac !== undefined ? { mac: formatMacInput(patch.mac) } : {}), ...(patch.label !== undefined ? { label: patch.label } : {}) }
+          : e,
+      ),
+    );
   };
 
   const applySavedProfile = (profile: SavedProfile | null) => {
@@ -281,11 +300,22 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     }));
   }, [autofill.email, autofill.displayName, autofill.phone]);
 
+  const collectedMacs = useMemo(() => {
+    if (!showMac) return [] as Array<{ mac: string; label: string }>;
+    if (supportsQuantity && effectiveQty > 1) {
+      return macEntries
+        .slice(0, effectiveQty)
+        .map((m) => ({ mac: m.mac.trim(), label: (m.label || '').trim() }));
+    }
+    return formData.macAddress ? [{ mac: formData.macAddress, label: '' }] : [];
+  }, [showMac, supportsQuantity, effectiveQty, macEntries, formData.macAddress]);
+
   const buildNotesPayload = () => {
     const payload: Record<string, any> = {
       account_type: accountType,
       offer_kind: offerKind,
       connection_type: connectionType,
+      quantity: effectiveQty,
     };
     if (accountType === 'renewal' && selectedRenewalOrderId) {
       const o = renewableOrders.find(x => x.id === selectedRenewalOrderId);
@@ -294,9 +324,21 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         previous_package: o?.package_name || null,
       };
     }
-    if (showMac) payload.mac_address = formData.macAddress || null;
+    if (showMac) {
+      payload.mac_addresses = collectedMacs;
+      // Back-compat
+      payload.mac_address = collectedMacs[0]?.mac || null;
+    }
     if (showUsername) payload.iptv_username = formData.iptvUsername || null;
     if (showPassword) payload.iptv_password = formData.iptvPassword || null;
+    if (stockPromo?.promo && totals.appliedTier) {
+      payload.promo_applied = {
+        mode: stockPromo.promo.mode,
+        tier_qty: totals.appliedTier.qty,
+        tier_value: totals.appliedTier.value,
+        discount: Number(totals.discount.toFixed(2)),
+      };
+    }
     return JSON.stringify(payload);
   };
 
@@ -311,7 +353,9 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         package_name: displayName,
         package_category: packageData.category,
         duration_months: packageData.duration,
-        amount: packageData.price,
+        amount: Number(finalTotal.toFixed(2)),
+        quantity: effectiveQty,
+        mac_addresses: collectedMacs as any,
         order_type: accountType === 'renewal' ? 'renewal' : 'activation',
         status: 'pending',
         payment_status: 'pending',
