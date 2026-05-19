@@ -733,6 +733,103 @@ Order ID: ${orderData.id}`;
                 </>
               )}
 
+              {/* ===== Quantity selector & stock (only for IPTV subs + Player activations) ===== */}
+              {supportsQuantity && (
+                <div className="rounded-xl border-2 border-border bg-muted/30 p-3.5 space-y-3">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-semibold flex items-center gap-2">
+                        <Package className="h-4 w-4" /> Quantity
+                      </Label>
+                      <p className="text-[11px] text-muted-foreground">
+                        {offerKind === 'player_activation'
+                          ? 'Pick how many devices to activate (one MAC per device).'
+                          : 'Pick how many subscriptions you need.'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button" variant="outline" size="icon"
+                        className="h-9 w-9"
+                        onClick={() => adjustQuantity(-1)}
+                        disabled={effectiveQty <= 1 || isOutOfStock}
+                      ><Minus className="h-4 w-4" /></Button>
+                      <div className="w-12 text-center font-bold text-lg tabular-nums">{effectiveQty}</div>
+                      <Button
+                        type="button" variant="outline" size="icon"
+                        className="h-9 w-9"
+                        onClick={() => adjustQuantity(1)}
+                        disabled={effectiveQty >= (maxQty || 1) || isOutOfStock}
+                      ><Plus className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+
+                  {/* Stock status */}
+                  {stockPromo?.stock_enabled && (
+                    <div className="flex items-center gap-2 flex-wrap text-xs">
+                      {isOutOfStock ? (
+                        <span className="px-2 py-1 rounded-md bg-red-100 text-red-700 font-semibold border border-red-200">
+                          Out of stock
+                        </span>
+                      ) : isLowStock ? (
+                        <span className="px-2 py-1 rounded-md bg-amber-100 text-amber-800 font-semibold border border-amber-200">
+                          Only {stockAvailable} left in stock
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
+                          In stock
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Live total with promo */}
+                  <div className="flex items-end justify-between pt-2 border-t">
+                    <div className="text-xs text-muted-foreground">
+                      {effectiveQty > 1 && (
+                        <span>${packageData.price.toFixed(2)} × {effectiveQty}</span>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      {totals.discount > 0 && (
+                        <div className="text-[11px] text-muted-foreground line-through">
+                          ${(packageData.price * effectiveQty).toFixed(2)}
+                        </div>
+                      )}
+                      <div className="text-lg font-bold text-primary">
+                        ${finalTotal.toFixed(2)}
+                      </div>
+                      {totals.discount > 0 && (
+                        <div className="text-[10px] text-emerald-700 font-semibold">
+                          You save ${totals.discount.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Promo tiers hint */}
+                  {Array.isArray(stockPromo?.promo?.tiers) && stockPromo.promo.tiers.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {stockPromo.promo.tiers.map((t: any, i: number) => (
+                        <span
+                          key={i}
+                          className={cn(
+                            'text-[10px] px-2 py-0.5 rounded-full border',
+                            effectiveQty >= t.quantity
+                              ? 'bg-primary/10 border-primary/30 text-primary font-semibold'
+                              : 'bg-muted/50 border-border text-muted-foreground'
+                          )}
+                        >
+                          {stockPromo.promo.mode === 'fixed'
+                            ? `×${t.quantity} → $${Number(t.value).toFixed(2)}`
+                            : `×${t.quantity} → -${t.value}%`}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* ===== Dynamic activation fields ===== */}
               {showConnectionToggle && (
                 <div className="space-y-2">
