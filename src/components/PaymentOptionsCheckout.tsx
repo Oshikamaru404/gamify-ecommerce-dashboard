@@ -24,6 +24,9 @@ import { useCheckoutAutofill, SavedProfile } from '@/hooks/useCheckoutAutofill';
 import { useCheckoutDraftAutosave, loadCheckoutDraft, clearCheckoutDraft } from '@/hooks/useCheckoutDraft';
 import { formatMacInput, isValidEmail, isValidMac, suggestEmailFix } from '@/lib/checkoutValidation';
 import SavedProfilesPicker from '@/components/auth/SavedProfilesPicker';
+import { usePackageStockPromo } from '@/hooks/usePackageStockPromo';
+import { computeLineTotal } from '@/lib/quantityPromo';
+import { Minus, Plus } from 'lucide-react';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
@@ -67,6 +70,8 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     iptvPassword: '',
   });
   const [connectionType, setConnectionType] = useState<ConnectionType>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [macEntries, setMacEntries] = useState<Array<{ mac: string; label: string }>>([{ mac: '', label: '' }]);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
