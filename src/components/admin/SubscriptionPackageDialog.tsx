@@ -95,6 +95,11 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
       features: formData.features.length > 0 ? formData.features : null,
       status: formData.status,
       sort_order: parseInt(formData.sort_order) || 0,
+      stock_enabled: stockPromo.stock_enabled,
+      stock_quantity: stockPromo.stock_quantity,
+      low_stock_threshold: stockPromo.low_stock_threshold,
+      quantity_promo_mode: stockPromo.quantity_promo_mode,
+      quantity_promos: stockPromo.quantity_promos,
       // Legacy fields for backward compatibility - these are no longer used in the new dynamic credit system
       price_3_credits: null,
       price_6_credits: null,
@@ -102,7 +107,7 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
       credits_3_months: null,
       credits_6_months: null,
       credits_12_months: null,
-    };
+    } as any;
     
     if (pkg) {
       updatePackage.mutate({ id: pkg.id, ...packageData });
@@ -124,11 +129,12 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         </DialogHeader>
         
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="basic">Basic Information</TabsTrigger>
             <TabsTrigger value="credits" disabled={!pkg}>
-              Credit Options {!pkg && '(Save package first)'}
+              Credit Options {!pkg && '(Save first)'}
             </TabsTrigger>
+            <TabsTrigger value="stock">Stock &amp; Promos</TabsTrigger>
           </TabsList>
           
           <TabsContent value="basic" className="space-y-4">
@@ -213,6 +219,10 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
                 packageName={pkg.name}
               />
             )}
+          </TabsContent>
+
+          <TabsContent value="stock" className="space-y-4">
+            <StockPromoEditor value={stockPromo} onChange={setStockPromo} />
           </TabsContent>
         </Tabs>
 
