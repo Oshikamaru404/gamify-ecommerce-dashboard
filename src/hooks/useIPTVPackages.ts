@@ -23,6 +23,11 @@ export type IPTVPackage = {
   sort_order: number | null;
   created_at: string | null;
   updated_at: string | null;
+  stock_enabled?: boolean;
+  stock_quantity?: number;
+  low_stock_threshold?: number;
+  quantity_promo_mode?: 'percentage' | 'fixed';
+  quantity_promos?: Array<{ qty: number; value: number }>;
 };
 
 export const useIPTVPackages = () => {
