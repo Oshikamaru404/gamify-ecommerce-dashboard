@@ -11,6 +11,7 @@ import { SubscriptionPackage, useCreateSubscriptionPackage, useUpdateSubscriptio
 import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
 import CreditOptionsManager from './CreditOptionsManager';
+import StockPromoEditor, { StockPromoValue } from './StockPromoEditor';
 
 type SubscriptionPackageDialogProps = {
   open: boolean;
@@ -35,6 +36,14 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
     status: 'active' as 'active' | 'inactive' | 'featured',
     sort_order: '0',
   });
+
+  const [stockPromo, setStockPromo] = useState<StockPromoValue>({
+    stock_enabled: false,
+    stock_quantity: 0,
+    low_stock_threshold: 5,
+    quantity_promo_mode: 'percentage',
+    quantity_promos: [],
+  });
   
   
 
@@ -49,6 +58,13 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         status: (pkg.status as 'active' | 'inactive' | 'featured') || 'active',
         sort_order: pkg.sort_order?.toString() || '0',
       });
+      setStockPromo({
+        stock_enabled: !!(pkg as any).stock_enabled,
+        stock_quantity: (pkg as any).stock_quantity ?? 0,
+        low_stock_threshold: (pkg as any).low_stock_threshold ?? 5,
+        quantity_promo_mode: (pkg as any).quantity_promo_mode ?? 'percentage',
+        quantity_promos: Array.isArray((pkg as any).quantity_promos) ? (pkg as any).quantity_promos : [],
+      });
     } else {
       setFormData({
         name: '',
@@ -58,6 +74,13 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         features: [],
         status: 'active',
         sort_order: '0',
+      });
+      setStockPromo({
+        stock_enabled: false,
+        stock_quantity: 0,
+        low_stock_threshold: 5,
+        quantity_promo_mode: 'percentage',
+        quantity_promos: [],
       });
     }
   }, [pkg, open]);
