@@ -136,7 +136,12 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
       price_12_months: formData.price_12_months ? parseFloat(formData.price_12_months) : null,
       status: formData.status,
       sort_order: parseInt(formData.sort_order) || 0,
-    };
+      stock_enabled: stockPromo.stock_enabled,
+      stock_quantity: stockPromo.stock_quantity,
+      low_stock_threshold: stockPromo.low_stock_threshold,
+      quantity_promo_mode: stockPromo.quantity_promo_mode,
+      quantity_promos: stockPromo.quantity_promos,
+    } as any;
     
     if (pkg) {
       updatePackage.mutate({ id: pkg.id, ...packageData });
