@@ -372,6 +372,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
             onChange={(features) => setFormData(prev => ({ ...prev, features }))}
           />
 
+          <StockPromoEditor value={stockPromo} onChange={setStockPromo} />
+          {!supportsQtyFeatures && (
+            <p className="text-[11px] text-muted-foreground -mt-2">
+              ℹ️ Quantity selection &amp; multi-MAC are only offered to customers on Subscription and Activation Player categories. Stock &amp; promos still apply.
+            </p>
+          )}
+
           <div>
             <Label htmlFor="sort_order">Sort Order</Label>
             <Input
