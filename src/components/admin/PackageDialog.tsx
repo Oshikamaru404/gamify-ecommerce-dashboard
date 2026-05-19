@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { IPTVPackage, useCreateIPTVPackage, useUpdateIPTVPackage } from '@/hooks/useIPTVPackages';
 import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
+import StockPromoEditor, { StockPromoValue } from './StockPromoEditor';
 
 type PackageDialogProps = {
   open: boolean;
@@ -44,6 +45,17 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     status: 'active' as 'active' | 'inactive' | 'featured',
     sort_order: '0',
   });
+
+  const [stockPromo, setStockPromo] = useState<StockPromoValue>({
+    stock_enabled: false,
+    stock_quantity: 0,
+    low_stock_threshold: 5,
+    quantity_promo_mode: 'percentage',
+    quantity_promos: [],
+  });
+
+  const supportsQtyFeatures =
+    formData.category === 'activation-player' || formData.category === 'subscription';
   
   
 
@@ -67,6 +79,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         status: pkg.status || 'active',
         sort_order: pkg.sort_order?.toString() || '0',
       });
+      setStockPromo({
+        stock_enabled: !!pkg.stock_enabled,
+        stock_quantity: pkg.stock_quantity ?? 0,
+        low_stock_threshold: pkg.low_stock_threshold ?? 5,
+        quantity_promo_mode: pkg.quantity_promo_mode ?? 'percentage',
+        quantity_promos: Array.isArray(pkg.quantity_promos) ? pkg.quantity_promos : [],
+      });
     } else {
       setFormData({
         name: '',
@@ -85,6 +104,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         price_12_months: '',
         status: 'active',
         sort_order: '0',
+      });
+      setStockPromo({
+        stock_enabled: false,
+        stock_quantity: 0,
+        low_stock_threshold: 5,
+        quantity_promo_mode: 'percentage',
+        quantity_promos: [],
       });
     }
   }, [pkg, open]);
