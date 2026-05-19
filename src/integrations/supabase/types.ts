@@ -554,6 +554,7 @@ export type Database = {
           icon: string | null
           icon_url: string | null
           id: string
+          low_stock_threshold: number
           name: string
           price_1_month: number | null
           price_10_credits: number | null
@@ -563,8 +564,12 @@ export type Database = {
           price_3_months: number | null
           price_50_credits: number | null
           price_6_months: number | null
+          quantity_promo_mode: string
+          quantity_promos: Json
           sort_order: number | null
           status: Database["public"]["Enums"]["package_status"] | null
+          stock_enabled: boolean
+          stock_quantity: number
           updated_at: string | null
         }
         Insert: {
@@ -575,6 +580,7 @@ export type Database = {
           icon?: string | null
           icon_url?: string | null
           id?: string
+          low_stock_threshold?: number
           name: string
           price_1_month?: number | null
           price_10_credits?: number | null
@@ -584,8 +590,12 @@ export type Database = {
           price_3_months?: number | null
           price_50_credits?: number | null
           price_6_months?: number | null
+          quantity_promo_mode?: string
+          quantity_promos?: Json
           sort_order?: number | null
           status?: Database["public"]["Enums"]["package_status"] | null
+          stock_enabled?: boolean
+          stock_quantity?: number
           updated_at?: string | null
         }
         Update: {
@@ -596,6 +606,7 @@ export type Database = {
           icon?: string | null
           icon_url?: string | null
           id?: string
+          low_stock_threshold?: number
           name?: string
           price_1_month?: number | null
           price_10_credits?: number | null
@@ -605,8 +616,12 @@ export type Database = {
           price_3_months?: number | null
           price_50_credits?: number | null
           price_6_months?: number | null
+          quantity_promo_mode?: string
+          quantity_promos?: Json
           sort_order?: number | null
           status?: Database["public"]["Enums"]["package_status"] | null
+          stock_enabled?: boolean
+          stock_quantity?: number
           updated_at?: string | null
         }
         Relationships: []
@@ -642,11 +657,13 @@ export type Database = {
           duration_months: number
           id: string
           m3u_url: string | null
+          mac_addresses: Json
           order_type: string
           package_category: string
           package_id: string | null
           package_name: string
           payment_status: string
+          quantity: number
           status: string
           updated_at: string | null
           xtream_host: string | null
@@ -666,11 +683,13 @@ export type Database = {
           duration_months: number
           id?: string
           m3u_url?: string | null
+          mac_addresses?: Json
           order_type?: string
           package_category: string
           package_id?: string | null
           package_name: string
           payment_status?: string
+          quantity?: number
           status?: string
           updated_at?: string | null
           xtream_host?: string | null
@@ -690,11 +709,13 @@ export type Database = {
           duration_months?: number
           id?: string
           m3u_url?: string | null
+          mac_addresses?: Json
           order_type?: string
           package_category?: string
           package_id?: string | null
           package_name?: string
           payment_status?: string
+          quantity?: number
           status?: string
           updated_at?: string | null
           xtream_host?: string | null
@@ -827,12 +848,17 @@ export type Database = {
           icon: string | null
           icon_url: string | null
           id: string
+          low_stock_threshold: number
           name: string
           price_12_credits: number | null
           price_3_credits: number | null
           price_6_credits: number | null
+          quantity_promo_mode: string
+          quantity_promos: Json
           sort_order: number | null
           status: string | null
+          stock_enabled: boolean
+          stock_quantity: number
           updated_at: string | null
         }
         Insert: {
@@ -845,12 +871,17 @@ export type Database = {
           icon?: string | null
           icon_url?: string | null
           id?: string
+          low_stock_threshold?: number
           name: string
           price_12_credits?: number | null
           price_3_credits?: number | null
           price_6_credits?: number | null
+          quantity_promo_mode?: string
+          quantity_promos?: Json
           sort_order?: number | null
           status?: string | null
+          stock_enabled?: boolean
+          stock_quantity?: number
           updated_at?: string | null
         }
         Update: {
@@ -863,12 +894,17 @@ export type Database = {
           icon?: string | null
           icon_url?: string | null
           id?: string
+          low_stock_threshold?: number
           name?: string
           price_12_credits?: number | null
           price_3_credits?: number | null
           price_6_credits?: number | null
+          quantity_promo_mode?: string
+          quantity_promos?: Json
           sort_order?: number | null
           status?: string | null
+          stock_enabled?: boolean
+          stock_quantity?: number
           updated_at?: string | null
         }
         Relationships: []
