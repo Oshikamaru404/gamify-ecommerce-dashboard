@@ -10,6 +10,7 @@ import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText, generateProductSlug, getAllProductSlugs } from '@/lib/multilingualUtils';
+import StockBadge from '@/components/StockBadge';
 
 const ProductDetail = () => {
   const { slug } = useParams();
