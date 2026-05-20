@@ -453,6 +453,17 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
               )}
             </div>
 
+            {/* Stock & Quantity Promos */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Stock & Quantity Promos</h3>
+              <p className="text-xs text-muted-foreground">
+                Quantity selector & stock display apply only to <b>Subscription</b> and <b>Activation Player</b> on checkout (not panels).
+              </p>
+              <StockPromoEditor value={stockPromo} onChange={setStockPromo} />
+            </div>
+
+
+
             {/* Icon and Logo Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Icon & Logo</h3>
