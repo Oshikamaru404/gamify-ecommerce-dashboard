@@ -10,6 +10,7 @@ import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText, generateProductSlug, getAllProductSlugs } from '@/lib/multilingualUtils';
+import StockBadge from '@/components/StockBadge';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -146,11 +147,17 @@ const ProductDetail = () => {
                 <div className="flex-1">
                   <h1 className="text-4xl font-bold mb-2">{packageName}</h1>
                   <p className="text-white/90 text-xl">{packageDescription}</p>
-                  <div className="flex items-center gap-2 mt-4">
+                  <div className="flex items-center gap-2 mt-4 flex-wrap">
                     <Badge className="bg-white/20 text-white">
                       <Star className="w-4 h-4 mr-1 fill-current" />
                       {isActivationPackage ? 'Device Activation' : 'Premium IPTV'}
                     </Badge>
+                    <StockBadge
+                      enabled={(pkg as any).stock_enabled}
+                      quantity={(pkg as any).stock_quantity}
+                      threshold={(pkg as any).low_stock_threshold}
+                      size="md"
+                    />
                   </div>
                 </div>
               </div>
