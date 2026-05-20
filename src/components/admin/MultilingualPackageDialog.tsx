@@ -195,7 +195,12 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         icon_url: data.icon_url,
         sort_order: data.sort_order,
         status: data.status,
-      };
+        stock_enabled: stockPromo.stock_enabled,
+        stock_quantity: stockPromo.stock_quantity,
+        low_stock_threshold: stockPromo.low_stock_threshold,
+        quantity_promo_mode: stockPromo.quantity_promo_mode,
+        quantity_promos: stockPromo.quantity_promos,
+      } as any;
 
       if (editingPackage) {
         await updatePackage.mutateAsync({ id: editingPackage.id, ...packageData });
