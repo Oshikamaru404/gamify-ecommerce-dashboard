@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, AlertTriangle, XCircle } from 'lucide-react';
+import { Package, AlertTriangle, XCircle, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StockBadgeProps {
@@ -7,15 +7,13 @@ interface StockBadgeProps {
   quantity?: number;
   threshold?: number;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  /** sm = card chip · md = inline badge · lg = hero CTA · cta = bold animated banner */
+  size?: 'sm' | 'md' | 'lg' | 'cta';
 }
 
 /**
- * Displays a clear stock indicator next to a product.
- * - Hidden when stock tracking is disabled.
- * - "X restant(s)" when in stock.
- * - "Stock faible" highlight when at/below threshold.
- * - "Rupture de stock" when 0.
+ * Clear, attention-grabbing stock indicator displayed next to a product.
+ * Hidden when stock tracking is disabled.
  */
 const StockBadge: React.FC<StockBadgeProps> = ({
   enabled,
@@ -30,41 +28,60 @@ const StockBadge: React.FC<StockBadgeProps> = ({
   const isOut = qty <= 0;
   const isLow = !isOut && qty <= threshold;
 
-  const sizeCls =
-    size === 'sm' ? 'text-xs px-2 py-0.5' :
-    size === 'lg' ? 'text-base px-3 py-1.5' :
-    'text-sm px-2.5 py-1';
-
-  const iconCls = size === 'sm' ? 'w-3 h-3' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4';
-
+  // Label
   let label: string;
-  let Icon = Package;
-  let colorCls = 'bg-green-50 text-green-700 border-green-200';
-
+  let Icon: React.ElementType = Package;
   if (isOut) {
     label = 'Rupture de stock';
     Icon = XCircle;
-    colorCls = 'bg-red-50 text-red-700 border-red-200';
   } else if (isLow) {
-    label = `Plus que ${qty} restant${qty > 1 ? 's' : ''} !`;
-    Icon = AlertTriangle;
-    colorCls = 'bg-orange-50 text-orange-700 border-orange-200 animate-pulse';
+    label = `🔥 Plus que ${qty} restant${qty > 1 ? 's' : ''} !`;
+    Icon = Flame;
   } else {
     label = `${qty} en stock`;
+    Icon = Package;
   }
+
+  // Color palettes
+  const palette = isOut
+    ? 'bg-red-600 text-white border-red-700 shadow-red-500/40'
+    : isLow
+      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-600 shadow-orange-500/40'
+      : 'bg-gradient-to-r from-emerald-500 to-green-600 text-white border-emerald-600 shadow-emerald-500/30';
+
+  // Sizes
+  const sizeCls = {
+    sm: 'text-xs px-2.5 py-1 gap-1',
+    md: 'text-sm px-3 py-1.5 gap-1.5',
+    lg: 'text-base px-4 py-2 gap-2',
+    cta: 'text-base sm:text-lg px-5 py-2.5 gap-2 font-bold tracking-wide',
+  }[size];
+
+  const iconCls = {
+    sm: 'w-3.5 h-3.5',
+    md: 'w-4 h-4',
+    lg: 'w-5 h-5',
+    cta: 'w-5 h-5',
+  }[size];
+
+  const animate = (isLow || isOut) ? 'animate-pulse' : '';
+  const ring = isLow ? 'ring-2 ring-orange-300/60' : isOut ? 'ring-2 ring-red-300/60' : '';
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border font-semibold whitespace-nowrap',
-        colorCls,
+        'inline-flex items-center rounded-full border font-semibold shadow-lg whitespace-nowrap',
+        palette,
         sizeCls,
+        animate,
+        ring,
         className,
       )}
       aria-label={label}
+      role="status"
     >
-      <Icon className={iconCls} />
-      {label}
+      <Icon className={cn(iconCls, 'shrink-0')} />
+      <span>{label}</span>
     </span>
   );
 };

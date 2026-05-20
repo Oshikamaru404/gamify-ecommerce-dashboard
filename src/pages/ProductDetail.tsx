@@ -156,7 +156,7 @@ const ProductDetail = () => {
                       enabled={(pkg as any).stock_enabled}
                       quantity={(pkg as any).stock_quantity}
                       threshold={(pkg as any).low_stock_threshold}
-                      size="md"
+                      size="cta"
                     />
                   </div>
                 </div>
@@ -275,7 +275,17 @@ const ProductDetail = () => {
 
             {/* Right Column - Plan Selection */}
             <div className="space-y-6">
-              <div className="sticky top-6">
+              <div className="sticky top-6 space-y-4">
+                {(pkg as any).stock_enabled && (
+                  <div className="flex justify-center">
+                    <StockBadge
+                      enabled={(pkg as any).stock_enabled}
+                      quantity={(pkg as any).stock_quantity}
+                      threshold={(pkg as any).low_stock_threshold}
+                      size="cta"
+                    />
+                  </div>
+                )}
                 <PlanSelector
                   packageId={pkg.id}
                   packageName={packageName}
