@@ -22,6 +22,7 @@ import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useUserOrders } from '@/hooks/useUserOrders';
 import { useCheckoutAutofill, SavedProfile } from '@/hooks/useCheckoutAutofill';
 import { useCheckoutDraftAutosave, loadCheckoutDraft, clearCheckoutDraft } from '@/hooks/useCheckoutDraft';
+import StockBadge from '@/components/StockBadge';
 import { formatMacInput, isValidEmail, isValidMac, suggestEmailFix } from '@/lib/checkoutValidation';
 import SavedProfilesPicker from '@/components/auth/SavedProfilesPicker';
 import { usePackageStockPromo } from '@/hooks/usePackageStockPromo';
