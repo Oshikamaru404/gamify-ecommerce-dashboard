@@ -6,6 +6,7 @@ import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
 import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
+import StockBadge from '@/components/StockBadge';
 
 interface SubscriptionPackageCardProps {
   package: SubscriptionPackage;
