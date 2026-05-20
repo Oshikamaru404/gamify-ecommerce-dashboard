@@ -69,6 +69,14 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
   const createPackage = useCreateIPTVPackage();
   const updatePackage = useUpdateIPTVPackage();
 
+  const [stockPromo, setStockPromo] = useState<StockPromoValue>({
+    stock_enabled: false,
+    stock_quantity: 0,
+    low_stock_threshold: 5,
+    quantity_promo_mode: 'percentage',
+    quantity_promos: [],
+  });
+
   const form = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
     defaultValues: {
