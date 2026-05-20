@@ -51,17 +51,17 @@ const StockBadge: React.FC<StockBadgeProps> = ({
 
   // Sizes
   const sizeCls = {
-    sm: 'text-xs px-2.5 py-1 gap-1',
-    md: 'text-sm px-3 py-1.5 gap-1.5',
-    lg: 'text-base px-4 py-2 gap-2',
-    cta: 'text-base sm:text-lg px-5 py-2.5 gap-2 font-bold tracking-wide',
+    sm: 'text-[11px] px-2 py-0.5 gap-1',
+    md: 'text-xs px-2.5 py-1 gap-1.5',
+    lg: 'text-sm px-3 py-1 gap-1.5',
+    cta: 'text-sm px-3 py-1 gap-1.5 font-semibold',
   }[size];
 
   const iconCls = {
-    sm: 'w-3.5 h-3.5',
-    md: 'w-4 h-4',
-    lg: 'w-5 h-5',
-    cta: 'w-5 h-5',
+    sm: 'w-3 h-3',
+    md: 'w-3.5 h-3.5',
+    lg: 'w-4 h-4',
+    cta: 'w-4 h-4',
   }[size];
 
   const animate = (isLow || isOut) ? 'animate-pulse' : '';
