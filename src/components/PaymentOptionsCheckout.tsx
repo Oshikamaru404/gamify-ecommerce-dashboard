@@ -765,22 +765,15 @@ Order ID: ${orderData.id}`;
                     </div>
                   </div>
 
-                  {/* Stock status */}
+                  {/* Stock status (prominent CTA badge) */}
                   {stockPromo?.stock_enabled && (
-                    <div className="flex items-center gap-2 flex-wrap text-xs">
-                      {isOutOfStock ? (
-                        <span className="px-2 py-1 rounded-md bg-red-100 text-red-700 font-semibold border border-red-200">
-                          Out of stock
-                        </span>
-                      ) : isLowStock ? (
-                        <span className="px-2 py-1 rounded-md bg-amber-100 text-amber-800 font-semibold border border-amber-200">
-                          Only {stockAvailable} left in stock
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
-                          In stock
-                        </span>
-                      )}
+                    <div className="flex justify-center">
+                      <StockBadge
+                        enabled
+                        quantity={stockAvailable === Infinity ? 999 : stockAvailable}
+                        threshold={stockPromo?.low_stock_threshold ?? 5}
+                        size="cta"
+                      />
                     </div>
                   )}
 
