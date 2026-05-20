@@ -19,6 +19,8 @@ import { toast } from 'sonner';
 import ImageUploader from '@/components/admin/ImageUploader';
 import IPTVCreditOptionsManager from '@/components/admin/IPTVCreditOptionsManager';
 import { getLocalizedText } from '@/lib/multilingualUtils';
+import StockPromoEditor, { StockPromoValue } from '@/components/admin/StockPromoEditor';
+import { normalizePromoTiers } from '@/lib/quantityPromo';
 
 const supportedLanguages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
