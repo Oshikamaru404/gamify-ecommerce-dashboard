@@ -19,6 +19,8 @@ import { toast } from 'sonner';
 import ImageUploader from '@/components/admin/ImageUploader';
 import IPTVCreditOptionsManager from '@/components/admin/IPTVCreditOptionsManager';
 import { getLocalizedText } from '@/lib/multilingualUtils';
+import StockPromoEditor, { StockPromoValue } from '@/components/admin/StockPromoEditor';
+import { normalizePromoTiers } from '@/lib/quantityPromo';
 
 const supportedLanguages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -66,6 +68,14 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
   const [showImageUploader, setShowImageUploader] = useState(false);
   const createPackage = useCreateIPTVPackage();
   const updatePackage = useUpdateIPTVPackage();
+
+  const [stockPromo, setStockPromo] = useState<StockPromoValue>({
+    stock_enabled: false,
+    stock_quantity: 0,
+    low_stock_threshold: 5,
+    quantity_promo_mode: 'percentage',
+    quantity_promos: [],
+  });
 
   const form = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
@@ -129,6 +139,13 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         sort_order: editingPackage.sort_order || 0,
         status: editingPackage.status || 'active',
       });
+      setStockPromo({
+        stock_enabled: !!(editingPackage as any).stock_enabled,
+        stock_quantity: Number((editingPackage as any).stock_quantity ?? 0),
+        low_stock_threshold: Number((editingPackage as any).low_stock_threshold ?? 5),
+        quantity_promo_mode: ((editingPackage as any).quantity_promo_mode === 'fixed' ? 'fixed' : 'percentage'),
+        quantity_promos: normalizePromoTiers((editingPackage as any).quantity_promos),
+      });
     } else {
       form.reset({
         name: { en: '' },
@@ -147,6 +164,13 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         icon_url: '',
         sort_order: 0,
         status: 'active',
+      });
+      setStockPromo({
+        stock_enabled: false,
+        stock_quantity: 0,
+        low_stock_threshold: 5,
+        quantity_promo_mode: 'percentage',
+        quantity_promos: [],
       });
     }
   }, [editingPackage, form]);
@@ -171,7 +195,12 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         icon_url: data.icon_url,
         sort_order: data.sort_order,
         status: data.status,
-      };
+        stock_enabled: stockPromo.stock_enabled,
+        stock_quantity: stockPromo.stock_quantity,
+        low_stock_threshold: stockPromo.low_stock_threshold,
+        quantity_promo_mode: stockPromo.quantity_promo_mode,
+        quantity_promos: stockPromo.quantity_promos,
+      } as any;
 
       if (editingPackage) {
         await updatePackage.mutateAsync({ id: editingPackage.id, ...packageData });
@@ -423,6 +452,17 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Stock & Quantity Promos */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Stock & Quantity Promos</h3>
+              <p className="text-xs text-muted-foreground">
+                Quantity selector & stock display apply only to <b>Subscription</b> and <b>Activation Player</b> on checkout (not panels).
+              </p>
+              <StockPromoEditor value={stockPromo} onChange={setStockPromo} />
+            </div>
+
+
 
             {/* Icon and Logo Section */}
             <div className="space-y-4">
