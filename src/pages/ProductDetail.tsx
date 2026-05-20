@@ -156,7 +156,7 @@ const ProductDetail = () => {
                       enabled={(pkg as any).stock_enabled}
                       quantity={(pkg as any).stock_quantity}
                       threshold={(pkg as any).low_stock_threshold}
-                      size="md"
+                      size="cta"
                     />
                   </div>
                 </div>
