@@ -139,6 +139,13 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         sort_order: editingPackage.sort_order || 0,
         status: editingPackage.status || 'active',
       });
+      setStockPromo({
+        stock_enabled: !!(editingPackage as any).stock_enabled,
+        stock_quantity: Number((editingPackage as any).stock_quantity ?? 0),
+        low_stock_threshold: Number((editingPackage as any).low_stock_threshold ?? 5),
+        quantity_promo_mode: ((editingPackage as any).quantity_promo_mode === 'fixed' ? 'fixed' : 'percentage'),
+        quantity_promos: normalizePromoTiers((editingPackage as any).quantity_promos),
+      });
     } else {
       form.reset({
         name: { en: '' },
@@ -157,6 +164,13 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         icon_url: '',
         sort_order: 0,
         status: 'active',
+      });
+      setStockPromo({
+        stock_enabled: false,
+        stock_quantity: 0,
+        low_stock_threshold: 5,
+        quantity_promo_mode: 'percentage',
+        quantity_promos: [],
       });
     }
   }, [editingPackage, form]);
