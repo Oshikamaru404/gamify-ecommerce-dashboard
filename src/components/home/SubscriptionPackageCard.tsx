@@ -77,9 +77,20 @@ const SubscriptionPackageCard: React.FC<SubscriptionPackageCardProps> = ({
 
         {/* Bottom Section - Content */}
         <div className="flex-1 bg-white p-6 flex flex-col">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 text-center leading-tight">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 text-center leading-tight">
             {packageName}
           </h3>
+
+          {pkg.stock_enabled && (
+            <div className="flex justify-center mb-3">
+              <StockBadge
+                enabled={pkg.stock_enabled}
+                quantity={pkg.stock_quantity}
+                threshold={(pkg as any).low_stock_threshold}
+                size="sm"
+              />
+            </div>
+          )}
           
           <div className="text-center mb-4">
             <div className="text-4xl font-bold text-red-600">
