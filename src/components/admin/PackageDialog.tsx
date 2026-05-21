@@ -84,6 +84,9 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         stock_enabled: !!pkg.stock_enabled,
         stock_quantity: pkg.stock_quantity ?? 0,
         low_stock_threshold: pkg.low_stock_threshold ?? 5,
+        stock_by_plan: ((pkg as any).stock_by_plan && typeof (pkg as any).stock_by_plan === 'object')
+          ? (pkg as any).stock_by_plan as Record<string, number>
+          : {},
         quantity_promo_mode: pkg.quantity_promo_mode ?? 'percentage',
         quantity_promos: Array.isArray(pkg.quantity_promos) ? pkg.quantity_promos : [],
       });
