@@ -41,7 +41,13 @@ const CurrencySelector: React.FC<Props> = ({ compact }) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[180px]">
         <DropdownMenuLabel className="flex items-center gap-2">
-          <span>{countryFlag(countryCode)}</span>
+          {countryCode && (
+            <img
+              src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
+              alt={countryCode}
+              className="w-5 h-5 rounded-full object-cover ring-1 ring-border"
+            />
+          )}
           <span className="text-xs text-muted-foreground">{countryCode}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
