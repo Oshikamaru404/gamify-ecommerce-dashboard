@@ -184,6 +184,7 @@ function App() {
               <Toaster />
             </TooltipProvider>
           </StoreProvider>
+          </CurrencyProvider>
         </LanguageProvider>
         </UserAuthProvider>
       </AdminAuthProvider>
