@@ -8,6 +8,7 @@ import { ShoppingCart, Eye } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { toast } from 'sonner';
 import { Product } from '@/lib/types';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ProductCardProps {
   product: Product;
@@ -18,6 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
   const { addToCart } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const { formatPrice } = useCurrency();
 
   const handleAddToCart = () => {
     addToCart(product.id, 1);
@@ -120,15 +122,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showQuickOrder = tru
             {product.salePrice ? (
               <>
                 <span className="text-xl font-bold text-red-600">
-                  ${product.salePrice.toFixed(2)}
+                  {formatPrice(product.salePrice)}
                 </span>
                 <span className="text-sm text-muted-foreground line-through">
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </span>
               </>
             ) : (
               <span className="text-xl font-bold text-gray-900">
-                ${product.price.toFixed(2)}
+                {formatPrice(product.price)}
               </span>
             )}
           </div>

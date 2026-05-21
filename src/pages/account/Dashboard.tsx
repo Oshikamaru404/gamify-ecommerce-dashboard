@@ -8,11 +8,15 @@ import { useUserOrders, computeSubscriptionStatus } from '@/hooks/useUserOrders'
 import { CategoryBadge, PaymentBadge, SubStateBadge, ProductIcon } from '@/components/account/AccountUI';
 import { usePackageIcons } from '@/hooks/usePackageIcons';
 import { cn } from '@/lib/utils';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { CURRENCIES, countryFlag } from '@/lib/currency';
+import { Check } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const { profile, user } = useUserAuth();
   const { orders, loading } = useUserOrders();
   const icons = usePackageIcons(orders.map(o => o.package_id));
+  const { currency, setCurrency, countryCode, formatPrice, availableCurrencies } = useCurrency();
 
   const stats = useMemo(() => {
     const subs = orders.map(computeSubscriptionStatus);
@@ -55,8 +59,42 @@ const DashboardPage: React.FC = () => {
         <KPI icon={Package} label="Total orders" value={stats.total} gradient="from-red-500 to-orange-500" />
         <KPI icon={Calendar} label="Active subs" value={stats.active} gradient="from-emerald-500 to-teal-500" />
         <KPI icon={Clock} label="Next expiry" value={stats.next === null ? '—' : `${stats.next}d`} gradient="from-amber-500 to-orange-500" />
-        <KPI icon={Wallet} label="Total spent" value={`$${stats.totalSpent.toFixed(0)}`} gradient="from-purple-500 to-pink-500" />
+        <KPI icon={Wallet} label="Total spent" value={formatPrice(stats.totalSpent, 0)} gradient="from-purple-500 to-pink-500" />
       </div>
+
+      {/* Currency preference */}
+      <Card className="border-red-100 shadow-md p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div>
+            <div className="font-bold text-sm flex items-center gap-2">
+              <span className="text-base">{countryFlag(countryCode)}</span>
+              Preferred currency
+            </div>
+            <div className="text-xs text-muted-foreground">Detected from {countryCode}. Switch anytime.</div>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {availableCurrencies.map(code => {
+            const c = CURRENCIES[code];
+            const active = code === currency;
+            return (
+              <button
+                key={code}
+                onClick={() => setCurrency(code)}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 rounded-lg border-2 text-sm font-semibold transition-all',
+                  active ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 hover:border-red-200',
+                )}
+              >
+                <span className="text-base">{c.symbol}</span>
+                <span>{c.code}</span>
+                <span className="text-xs text-muted-foreground hidden sm:inline">{c.name}</span>
+                {active && <Check className="h-3.5 w-3.5 ml-1" />}
+              </button>
+            );
+          })}
+        </div>
+      </Card>
 
       {/* Active subscriptions */}
       <Card className="overflow-hidden border-red-100 shadow-md">
@@ -115,7 +153,7 @@ const DashboardPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-sm font-bold text-red-600">${Number(o.amount).toFixed(2)}</div>
+                    <div className="text-sm font-bold text-red-600">{formatPrice(Number(o.amount))}</div>
                     <PaymentBadge status={o.payment_status} />
                   </div>
                 </Link>
