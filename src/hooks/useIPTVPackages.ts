@@ -47,7 +47,7 @@ export const useIPTVPackages = () => {
       }
       
       console.log('Successfully fetched IPTV packages:', data);
-      return data as IPTVPackage[];
+      return data as unknown as IPTVPackage[];
     },
   });
 };
