@@ -24,7 +24,7 @@ const CurrencySelector: React.FC<Props> = ({ compact }) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-1.5 px-2">
-          <span className="text-base leading-none">{countryFlag(countryCode)}</span>
+          <span className="text-base leading-none">{countryCode ? countryFlag(countryCode) : '🌍'}</span>
           <span className="text-sm font-semibold">{current.code}</span>
           {!compact && <span className="text-sm text-muted-foreground">{current.symbol}</span>}
         </Button>

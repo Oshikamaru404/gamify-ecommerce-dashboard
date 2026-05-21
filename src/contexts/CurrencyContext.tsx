@@ -14,33 +14,48 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 const STORAGE_KEY = 'preferred_currency';
 const COUNTRY_KEY = 'detected_country';
 
+// Multiple providers — ipapi.co frequently fails due to CORS/rate-limit.
+const GEO_PROVIDERS: { url: string; pick: (d: any) => string | undefined }[] = [
+  { url: 'https://ipwho.is/',                pick: (d) => d?.country_code },
+  { url: 'https://get.geojs.io/v1/ip/country.json', pick: (d) => d?.country },
+  { url: 'https://ipapi.co/json/',           pick: (d) => d?.country_code },
+  { url: 'https://api.country.is/',          pick: (d) => d?.country },
+];
+
+const detectCountry = async (): Promise<string | null> => {
+  for (const p of GEO_PROVIDERS) {
+    try {
+      const res = await fetch(p.url, { headers: { Accept: 'application/json' } });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const cc = p.pick(data);
+      if (cc && typeof cc === 'string' && cc.length === 2) return cc.toUpperCase();
+    } catch { /* try next */ }
+  }
+  return null;
+};
+
 export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currency, setCurrencyState] = useState<CurrencyCode>('EUR');
-  const [countryCode, setCountryCode] = useState<string>('FR');
+  const [countryCode, setCountryCode] = useState<string>(() => {
+    return localStorage.getItem(COUNTRY_KEY) || '';
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as CurrencyCode | null;
-    const storedCountry = localStorage.getItem(COUNTRY_KEY);
-    if (storedCountry) setCountryCode(storedCountry);
+    if (stored && CURRENCIES[stored]) setCurrencyState(stored);
 
-    // Always try to refresh country for flag, but only override currency if no preference
     (async () => {
-      try {
-        const res = await fetch('https://ipapi.co/json/');
-        if (!res.ok) throw new Error('geo failed');
-        const data = await res.json();
-        if (data?.country_code) {
-          setCountryCode(data.country_code);
-          localStorage.setItem(COUNTRY_KEY, data.country_code);
-          if (!stored) {
-            const detected = countryToCurrency(data.country_code);
-            setCurrencyState(detected);
-            localStorage.setItem(STORAGE_KEY, detected);
-            return;
-          }
+      const cc = await detectCountry();
+      if (cc) {
+        setCountryCode(cc);
+        localStorage.setItem(COUNTRY_KEY, cc);
+        if (!stored) {
+          const detected = countryToCurrency(cc);
+          setCurrencyState(detected);
+          localStorage.setItem(STORAGE_KEY, detected);
         }
-      } catch {/* ignore */}
-      if (stored && CURRENCIES[stored]) setCurrencyState(stored);
+      }
     })();
   }, []);
 
