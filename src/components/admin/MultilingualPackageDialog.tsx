@@ -144,6 +144,9 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         stock_enabled: !!(editingPackage as any).stock_enabled,
         stock_quantity: Number((editingPackage as any).stock_quantity ?? 0),
         low_stock_threshold: Number((editingPackage as any).low_stock_threshold ?? 5),
+        stock_by_plan: ((editingPackage as any).stock_by_plan && typeof (editingPackage as any).stock_by_plan === 'object')
+          ? (editingPackage as any).stock_by_plan as Record<string, number>
+          : {},
         quantity_promo_mode: ((editingPackage as any).quantity_promo_mode === 'fixed' ? 'fixed' : 'percentage'),
         quantity_promos: normalizePromoTiers((editingPackage as any).quantity_promos),
       });
