@@ -10,7 +10,7 @@ import PaymentOptionsCheckout from '@/components/PaymentOptionsCheckout';
 import PlanSelector from '@/components/PlanSelector';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useLocalizedText, generateProductSlug, getAllProductSlugs } from '@/lib/multilingualUtils';
-import StockBadge from '@/components/StockBadge';
+
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -152,12 +152,6 @@ const ProductDetail = () => {
                       <Star className="w-4 h-4 mr-1 fill-current" />
                       {isActivationPackage ? 'Device Activation' : 'Premium IPTV'}
                     </Badge>
-                    <StockBadge
-                      enabled={(pkg as any).stock_enabled}
-                      quantity={(pkg as any).stock_quantity}
-                      threshold={(pkg as any).low_stock_threshold}
-                      size="cta"
-                    />
                   </div>
                 </div>
               </div>
@@ -276,16 +270,6 @@ const ProductDetail = () => {
             {/* Right Column - Plan Selection */}
             <div className="space-y-6">
               <div className="sticky top-6 space-y-4">
-                {(pkg as any).stock_enabled && (
-                  <div className="flex justify-center">
-                    <StockBadge
-                      enabled={(pkg as any).stock_enabled}
-                      quantity={(pkg as any).stock_quantity}
-                      threshold={(pkg as any).low_stock_threshold}
-                      size="cta"
-                    />
-                  </div>
-                )}
                 <PlanSelector
                   packageId={pkg.id}
                   packageName={packageName}

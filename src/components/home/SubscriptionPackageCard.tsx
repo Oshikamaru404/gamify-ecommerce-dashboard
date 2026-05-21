@@ -6,7 +6,7 @@ import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SubscriptionPackage } from '@/hooks/useSubscriptionPackages';
 import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
-import StockBadge from '@/components/StockBadge';
+
 
 interface SubscriptionPackageCardProps {
   package: SubscriptionPackage;
@@ -81,16 +81,6 @@ const SubscriptionPackageCard: React.FC<SubscriptionPackageCardProps> = ({
             {packageName}
           </h3>
 
-          {pkg.stock_enabled && (
-            <div className="flex justify-center mb-3">
-              <StockBadge
-                enabled={pkg.stock_enabled}
-                quantity={pkg.stock_quantity}
-                threshold={(pkg as any).low_stock_threshold}
-                size="sm"
-              />
-            </div>
-          )}
           
           <div className="text-center mb-4">
             <div className="text-4xl font-bold text-red-600">

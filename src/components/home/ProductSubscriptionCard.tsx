@@ -7,7 +7,7 @@ import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
-import StockBadge from '@/components/StockBadge';
+
 
 interface ProductSubscriptionCardProps {
   package: IPTVPackage;
@@ -89,16 +89,6 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
             {packageName}
           </h3>
 
-          {pkg.stock_enabled && (
-            <div className="flex justify-center mb-3">
-              <StockBadge
-                enabled={pkg.stock_enabled}
-                quantity={pkg.stock_quantity}
-                threshold={pkg.low_stock_threshold}
-                size="sm"
-              />
-            </div>
-          )}
           
           {/* Price Display - One Month Price - Make it non-clickable */}
           <div className="text-center mb-4">
