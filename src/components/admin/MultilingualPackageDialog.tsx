@@ -173,6 +173,7 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         stock_enabled: false,
         stock_quantity: 0,
         low_stock_threshold: 5,
+        stock_by_plan: {},
         quantity_promo_mode: 'percentage',
         quantity_promos: [],
       });
