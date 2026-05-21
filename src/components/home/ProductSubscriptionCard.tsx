@@ -7,6 +7,7 @@ import { Check, Star, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { IPTVPackage } from '@/hooks/useIPTVPackages';
 import { useLocalizedText, generateProductSlug } from '@/lib/multilingualUtils';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 
 interface ProductSubscriptionCardProps {
@@ -21,6 +22,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
   // Use multilingual utility functions
   const packageName = useLocalizedText(pkg.name);
   const packageDescription = useLocalizedText(pkg.description);
+  const { formatPrice } = useCurrency();
 
   // Always derive canonical slug from the English name so URLs are language-stable
   const productSlug = generateProductSlug(pkg.name, pkg.category);
@@ -93,7 +95,7 @@ const ProductSubscriptionCard: React.FC<ProductSubscriptionCardProps> = ({
           {/* Price Display - One Month Price - Make it non-clickable */}
           <div className="text-center mb-4">
             <div className="bg-gradient-to-r from-green-500 to-green-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg inline-block cursor-default">
-              ${oneMonthPrice.toFixed(2)}/month
+              {formatPrice(oneMonthPrice)}/month
             </div>
             
             {/* Yearly Savings Badge - Make it non-clickable */}
