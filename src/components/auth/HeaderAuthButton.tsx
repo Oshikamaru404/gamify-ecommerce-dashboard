@@ -26,8 +26,12 @@ export const HeaderAuthButton: React.FC = () => {
             Sign Up
           </Button>
         </div>
-        <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => { setTab('login'); setOpen(true); }}>
-          <User className="h-5 w-5" />
+        <Button
+          size="sm"
+          className="sm:hidden h-8 px-3 rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold shadow-sm"
+          onClick={() => { setTab('login'); setOpen(true); }}
+        >
+          <LogIn className="h-3.5 w-3.5 mr-1" /> Login
         </Button>
         <AuthDialog open={open} onOpenChange={setOpen} defaultTab={tab} />
       </>
