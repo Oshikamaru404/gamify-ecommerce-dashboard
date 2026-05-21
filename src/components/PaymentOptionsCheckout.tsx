@@ -141,8 +141,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   // === Quantity & stock features only apply to non-panel offers ===
   const supportsQuantity = offerKind === 'iptv_subscription' || offerKind === 'player_activation';
   const { data: stockPromo } = usePackageStockPromo(packageData.id);
+  // Per-plan stock if configured for this duration, else fall back to global stock
+  const planStockKey = String(packageData.duration);
+  const planStockValue = stockPromo?.stock_by_plan?.[planStockKey];
+  const hasPlanStock = planStockValue !== undefined && planStockValue !== null;
   const stockAvailable = stockPromo?.stock_enabled
-    ? Math.max(0, stockPromo.stock_quantity)
+    ? Math.max(0, hasPlanStock ? Number(planStockValue) : stockPromo.stock_quantity)
     : Infinity;
   const isOutOfStock = stockPromo?.stock_enabled && stockAvailable <= 0;
   const isLowStock =

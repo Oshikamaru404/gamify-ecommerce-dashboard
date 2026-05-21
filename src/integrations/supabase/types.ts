@@ -568,6 +568,7 @@ export type Database = {
           quantity_promos: Json
           sort_order: number | null
           status: Database["public"]["Enums"]["package_status"] | null
+          stock_by_plan: Json
           stock_enabled: boolean
           stock_quantity: number
           updated_at: string | null
@@ -594,6 +595,7 @@ export type Database = {
           quantity_promos?: Json
           sort_order?: number | null
           status?: Database["public"]["Enums"]["package_status"] | null
+          stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
           updated_at?: string | null
@@ -620,6 +622,7 @@ export type Database = {
           quantity_promos?: Json
           sort_order?: number | null
           status?: Database["public"]["Enums"]["package_status"] | null
+          stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
           updated_at?: string | null
@@ -857,6 +860,7 @@ export type Database = {
           quantity_promos: Json
           sort_order: number | null
           status: string | null
+          stock_by_plan: Json
           stock_enabled: boolean
           stock_quantity: number
           updated_at: string | null
@@ -880,6 +884,7 @@ export type Database = {
           quantity_promos?: Json
           sort_order?: number | null
           status?: string | null
+          stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
           updated_at?: string | null
@@ -903,6 +908,7 @@ export type Database = {
           quantity_promos?: Json
           sort_order?: number | null
           status?: string | null
+          stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
           updated_at?: string | null

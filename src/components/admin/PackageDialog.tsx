@@ -50,6 +50,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
     stock_enabled: false,
     stock_quantity: 0,
     low_stock_threshold: 5,
+    stock_by_plan: {},
     quantity_promo_mode: 'percentage',
     quantity_promos: [],
   });
@@ -83,6 +84,9 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         stock_enabled: !!pkg.stock_enabled,
         stock_quantity: pkg.stock_quantity ?? 0,
         low_stock_threshold: pkg.low_stock_threshold ?? 5,
+        stock_by_plan: ((pkg as any).stock_by_plan && typeof (pkg as any).stock_by_plan === 'object')
+          ? (pkg as any).stock_by_plan as Record<string, number>
+          : {},
         quantity_promo_mode: pkg.quantity_promo_mode ?? 'percentage',
         quantity_promos: Array.isArray(pkg.quantity_promos) ? pkg.quantity_promos : [],
       });
@@ -109,6 +113,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         stock_enabled: false,
         stock_quantity: 0,
         low_stock_threshold: 5,
+        stock_by_plan: {},
         quantity_promo_mode: 'percentage',
         quantity_promos: [],
       });
@@ -139,6 +144,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
       stock_enabled: stockPromo.stock_enabled,
       stock_quantity: stockPromo.stock_quantity,
       low_stock_threshold: stockPromo.low_stock_threshold,
+      stock_by_plan: stockPromo.stock_by_plan ?? {},
       quantity_promo_mode: stockPromo.quantity_promo_mode,
       quantity_promos: stockPromo.quantity_promos,
     } as any;

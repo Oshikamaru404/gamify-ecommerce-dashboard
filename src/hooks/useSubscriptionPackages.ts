@@ -44,7 +44,7 @@ export const useSubscriptionPackages = () => {
       }
       
       console.log('Successfully fetched subscription packages:', data);
-      return data as SubscriptionPackage[];
+      return data as unknown as SubscriptionPackage[];
     },
   });
 };
