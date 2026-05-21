@@ -144,6 +144,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
       stock_enabled: stockPromo.stock_enabled,
       stock_quantity: stockPromo.stock_quantity,
       low_stock_threshold: stockPromo.low_stock_threshold,
+      stock_by_plan: stockPromo.stock_by_plan ?? {},
       quantity_promo_mode: stockPromo.quantity_promo_mode,
       quantity_promos: stockPromo.quantity_promos,
     } as any;
