@@ -43,11 +43,12 @@ export const HeaderAuthButton: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button variant="ghost" size="icon" className="rounded-full relative">
           <Avatar className="h-8 w-8">
             {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
             <AvatarFallback>{initial}</AvatarFallback>
           </Avatar>
+          <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white" aria-label="Online" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-background z-[100]">
