@@ -63,6 +63,9 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         stock_enabled: !!(pkg as any).stock_enabled,
         stock_quantity: (pkg as any).stock_quantity ?? 0,
         low_stock_threshold: (pkg as any).low_stock_threshold ?? 5,
+        stock_by_plan: ((pkg as any).stock_by_plan && typeof (pkg as any).stock_by_plan === 'object')
+          ? (pkg as any).stock_by_plan as Record<string, number>
+          : {},
         quantity_promo_mode: (pkg as any).quantity_promo_mode ?? 'percentage',
         quantity_promos: Array.isArray((pkg as any).quantity_promos) ? (pkg as any).quantity_promos : [],
       });
