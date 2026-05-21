@@ -33,6 +33,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   } = useIPTVCreditOptions(packageId);
   const isLoading = creditLoading || iptvCreditLoading;
   const [selectedPlan, setSelectedPlan] = useState<string>('');
+  const { formatPrice } = useCurrency();
 
   const isActivationPackage = packageData?.category === 'activation-player';
 
@@ -231,9 +232,8 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
   };
 
   const formatMonthlyAverage = (price: number, months: number) => {
-    if (months === 0) return null; // Credit-based pricing has no monthly average
-    const monthlyAverage = (price / months).toFixed(2);
-    return `USD ${monthlyAverage}/month`;
+    if (months === 0) return null;
+    return `${formatPrice(price / months)}/month`;
   };
 
   // Calculate savings percentage for plans vs monthly price
@@ -312,7 +312,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                 </div>
                 <div className="mb-2">
                   <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white text-2xl px-6 py-3 rounded-full shadow-lg">
-                    ${sortedOptions[0]?.price || 199.99}
+                    {formatPrice(sortedOptions[0]?.price || 199.99)}
                   </Badge>
                 </div>
                 <div className="text-sm text-gray-600 mb-1">
@@ -363,7 +363,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                     </div>
                     <div className="text-right">
                       <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xl px-4 py-2 rounded-full shadow-lg">
-                        ${option.price}
+                        {formatPrice(option.price)}
                       </Badge>
                     </div>
                   </div>
