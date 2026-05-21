@@ -89,8 +89,48 @@ const StockPromoEditor: React.FC<Props> = ({ value, onChange }) => {
               />
             </div>
             <p className="col-span-2 text-[11px] text-muted-foreground">
-              Stock auto-decrements when an order's payment is marked as <b>paid</b>.
+              Stock auto-decrements when an order's payment is marked as <b>paid</b>. The global quantity is used only as a fallback when no per-plan stock is set.
             </p>
+
+            <div className="col-span-2 mt-2 rounded-md border bg-muted/30 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold">Stock per plan (overrides global)</Label>
+                <button
+                  type="button"
+                  className="text-[11px] text-muted-foreground hover:text-foreground underline"
+                  onClick={() => update({ stock_by_plan: {} })}
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {PLAN_DURATIONS.map((p) => {
+                  const current = value.stock_by_plan?.[p.key];
+                  const isSet = current !== undefined && current !== null;
+                  return (
+                    <div key={p.key}>
+                      <Label className="text-[11px]">{p.label}</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="—"
+                        value={isSet ? current : ''}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const next = { ...(value.stock_by_plan || {}) };
+                          if (raw === '') delete next[p.key];
+                          else next[p.key] = Math.max(0, parseInt(raw) || 0);
+                          update({ stock_by_plan: next });
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Leave a field empty to use the global stock quantity for that plan.
+              </p>
+            </div>
           </div>
         )}
       </div>
