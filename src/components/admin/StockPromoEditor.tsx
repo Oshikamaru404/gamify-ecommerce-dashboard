@@ -11,9 +11,17 @@ export interface StockPromoValue {
   stock_enabled: boolean;
   stock_quantity: number;
   low_stock_threshold: number;
+  stock_by_plan: Record<string, number>;
   quantity_promo_mode: QuantityPromoMode;
   quantity_promos: QuantityPromoTier[];
 }
+
+const PLAN_DURATIONS: Array<{ key: string; label: string }> = [
+  { key: '1', label: '1 month' },
+  { key: '3', label: '3 months' },
+  { key: '6', label: '6 months' },
+  { key: '12', label: '12 months' },
+];
 
 interface Props {
   value: StockPromoValue;
