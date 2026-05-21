@@ -891,29 +891,19 @@ Order ID: ${orderData.id}`;
                       <div className="space-y-2 sm:col-span-2">
                         <Label className="text-xs">MAC Addresses ({effectiveQty}) *</Label>
                         {macEntries.slice(0, effectiveQty).map((entry, idx) => (
-                          <div key={idx} className="grid grid-cols-[1fr,140px] gap-2">
-                            <div className="relative">
-                              <Input
-                                value={entry.mac}
-                                onChange={(e) => updateMacEntry(idx, { mac: e.target.value })}
-                                placeholder={`MAC #${idx + 1} — 00:1A:79:XX:XX:XX`}
-                                maxLength={17}
-                                className="font-mono tracking-wider pr-8"
-                              />
-                              {isValidMac(entry.mac) && (
-                                <Check className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-green-600" />
-                              )}
-                            </div>
+                          <div key={idx} className="relative">
                             <Input
-                              value={entry.label}
-                              onChange={(e) => updateMacEntry(idx, { label: e.target.value })}
-                              placeholder="Label (optional)"
+                              value={entry.mac}
+                              onChange={(e) => updateMacEntry(idx, { mac: e.target.value })}
+                              placeholder={`MAC #${idx + 1} — 00:1A:79:XX:XX:XX`}
+                              maxLength={17}
+                              className="font-mono tracking-wider pr-8"
                             />
+                            {isValidMac(entry.mac) && (
+                              <Check className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-green-600" />
+                            )}
                           </div>
                         ))}
-                        <p className="text-[10px] text-amber-800/70">
-                          Tip: add a label like “TV salon” to identify each device.
-                        </p>
                       </div>
                     ) : showMac ? (
                       <div className="space-y-1.5 sm:col-span-2">
