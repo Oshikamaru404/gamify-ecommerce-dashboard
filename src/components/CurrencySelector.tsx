@@ -24,14 +24,30 @@ const CurrencySelector: React.FC<Props> = ({ compact }) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-1.5 px-2">
-          <span className="text-base leading-none">{countryCode ? countryFlag(countryCode) : '🌍'}</span>
+          {countryCode ? (
+            <img
+              src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
+              srcSet={`https://flagcdn.com/w80/${countryCode.toLowerCase()}.png 2x`}
+              alt={countryCode}
+              className="w-5 h-5 rounded-full object-cover ring-1 ring-border"
+              loading="lazy"
+            />
+          ) : (
+            <span className="text-base leading-none">🌍</span>
+          )}
           <span className="text-sm font-semibold">{current.code}</span>
           {!compact && <span className="text-sm text-muted-foreground">{current.symbol}</span>}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[180px]">
         <DropdownMenuLabel className="flex items-center gap-2">
-          <span>{countryFlag(countryCode)}</span>
+          {countryCode && (
+            <img
+              src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
+              alt={countryCode}
+              className="w-5 h-5 rounded-full object-cover ring-1 ring-border"
+            />
+          )}
           <span className="text-xs text-muted-foreground">{countryCode}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
