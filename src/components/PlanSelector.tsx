@@ -368,6 +368,22 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
                       </Badge>
                     </div>
                   </div>
+                  {packageData?.stock_enabled && (() => {
+                    const key = String(option.months > 0 ? option.months : option.credits);
+                    const planQty = packageData?.stock_by_plan?.[key];
+                    const qty = planQty !== undefined ? Number(planQty) : Number(packageData?.stock_quantity ?? 0);
+                    return (
+                      <div className="mt-3 flex justify-center">
+                        <StockBadge
+                          enabled
+                          quantity={qty}
+                          threshold={packageData?.stock_threshold ?? 5}
+                          size="cta"
+                          className="w-full justify-center text-base py-2"
+                        />
+                      </div>
+                    );
+                  })()}
                 </Label>
               </div>
             ))}
