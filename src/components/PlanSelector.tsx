@@ -9,6 +9,7 @@ import { Check, Star, Crown, Shield } from 'lucide-react';
 import { useSubscriptionCreditOptions } from '@/hooks/useSubscriptionCreditOptions';
 import { useIPTVCreditOptions } from '@/hooks/useIPTVCreditOptions';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import StockBadge from '@/components/StockBadge';
 
 type PlanSelectorProps = {
   packageId: string;
