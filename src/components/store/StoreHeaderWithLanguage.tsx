@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LanguageSelector from '@/components/LanguageSelector';
 import CurrencySelector from '@/components/CurrencySelector';
+import RegionSettingsSheet from '@/components/RegionSettingsSheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useUserAuth } from '@/contexts/UserAuthContext';
 import HeaderAuthButton from '@/components/auth/HeaderAuthButton';
 import GlobalSearch from '@/components/store/GlobalSearch';
 
@@ -16,6 +18,8 @@ const StoreHeaderWithLanguage: React.FC = () => {
   const location = useLocation();
   const { t, isLoading } = useLanguage();
   const { data: siteSettings } = useSiteSettings();
+  const { user } = useUserAuth();
+
 
   const whatsappNumber =
     siteSettings?.find((s) => s.setting_key === 'whatsapp_number')?.setting_value || '1234567890';
@@ -134,12 +138,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
             </div>
           </Link>
           <div className="flex items-center gap-1">
-            <CurrencySelector compact />
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-            ) : (
-              <LanguageSelector />
-            )}
+            <RegionSettingsSheet />
 
             {/* Notifications */}
             <Link
@@ -151,20 +150,23 @@ const StoreHeaderWithLanguage: React.FC = () => {
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
             </Link>
 
-            {/* Chat direct */}
-            <Link
-              to="/chat"
-              aria-label="Chat"
-              className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
-            >
-              <MessageCircle size={18} />
-              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold ring-2 ring-white">
-                1
-              </span>
-            </Link>
+            {/* Chat direct — only when logged in */}
+            {user && (
+              <Link
+                to="/chat"
+                aria-label="Chat"
+                className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
+              >
+                <MessageCircle size={18} />
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold ring-2 ring-white">
+                  1
+                </span>
+              </Link>
+            )}
 
             <HeaderAuthButton />
           </div>
+
         </div>
 
         {/* Line 2 : burger + search */}
