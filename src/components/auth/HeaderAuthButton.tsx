@@ -18,24 +18,28 @@ export const HeaderAuthButton: React.FC = () => {
   if (!user) {
     return (
       <>
-        <div className="hidden sm:flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => { setTab('login'); setOpen(true); }}>
-            <LogIn className="h-4 w-4 mr-1" /> Login
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
+            onClick={() => { setTab('login'); setOpen(true); }}
+          >
+            <LogIn className="h-4 w-4 sm:mr-1" />
+            <span className="hidden xs:inline sm:inline">Login</span>
           </Button>
-          <Button size="sm" onClick={() => { setTab('signup'); setOpen(true); }}>
+          <Button
+            size="sm"
+            className="h-8 px-2 sm:px-3 text-xs sm:text-sm"
+            onClick={() => { setTab('signup'); setOpen(true); }}
+          >
             Sign Up
           </Button>
         </div>
-        <Button
-          size="sm"
-          className="sm:hidden h-8 px-3 rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold shadow-sm"
-          onClick={() => { setTab('login'); setOpen(true); }}
-        >
-          <LogIn className="h-3.5 w-3.5 mr-1" /> Login
-        </Button>
         <AuthDialog open={open} onOpenChange={setOpen} defaultTab={tab} />
       </>
     );
+
   }
 
   const initial = (profile?.display_name || user.email || '?').charAt(0).toUpperCase();
