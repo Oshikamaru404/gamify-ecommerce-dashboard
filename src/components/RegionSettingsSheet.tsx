@@ -35,21 +35,26 @@ const RegionSettingsSheet: React.FC = () => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5 px-2 h-9">
+        <button
+          type="button"
+          aria-label="Region & Language"
+          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-muted/60 hover:bg-muted transition-colors border border-border/50 shadow-sm"
+        >
           {countryCode ? (
             <img
               src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
               srcSet={`https://flagcdn.com/w80/${countryCode.toLowerCase()}.png 2x`}
               alt={countryCode}
-              className="w-5 h-5 rounded-full object-cover ring-1 ring-border"
+              className="w-4 h-4 rounded-full object-cover ring-1 ring-red-500"
               loading="lazy"
             />
           ) : (
-            <span className="text-base leading-none">🌍</span>
+            <span className="w-4 h-4 rounded-full bg-red-500 inline-block ring-1 ring-red-500" />
           )}
-          <span className="text-xs font-semibold">{current.code}</span>
-          <span className="text-xs">{getLanguageFlag(language)}</span>
-        </Button>
+          <span className="text-xs font-semibold uppercase tracking-wide text-foreground">{language}</span>
+          <span className="text-xs text-muted-foreground">|</span>
+          <span className="text-xs font-semibold text-foreground">{current.code}</span>
+        </button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[85vw] sm:max-w-sm flex flex-col">
         <SheetHeader>
