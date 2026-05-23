@@ -38,22 +38,22 @@ const RegionSettingsSheet: React.FC = () => {
         <button
           type="button"
           aria-label="Region & Language"
-          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-muted/60 hover:bg-muted transition-colors border border-border/50 shadow-sm"
+          className="inline-flex items-center gap-1 h-7 pl-2 pr-2.5 rounded-full bg-muted/60 hover:bg-muted transition-colors border border-border/50 shadow-sm"
         >
           {countryCode ? (
             <img
               src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
               srcSet={`https://flagcdn.com/w80/${countryCode.toLowerCase()}.png 2x`}
               alt={countryCode}
-              className="w-4 h-4 rounded-full object-cover ring-1 ring-red-500"
+              className="w-3.5 h-3.5 rounded-full object-cover ring-1 ring-red-500"
               loading="lazy"
             />
           ) : (
-            <span className="w-4 h-4 rounded-full bg-red-500 inline-block ring-1 ring-red-500" />
+            <span className="w-3.5 h-3.5 rounded-full bg-red-500 inline-block ring-1 ring-red-500" />
           )}
-          <span className="text-xs font-semibold uppercase tracking-wide text-foreground">{language}</span>
-          <span className="text-xs text-muted-foreground">|</span>
-          <span className="text-xs font-semibold text-foreground">{current.code}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-foreground">{language}</span>
+          <span className="text-[11px] text-muted-foreground">|</span>
+          <span className="text-[11px] font-semibold text-foreground">{current.code}</span>
         </button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[85vw] sm:max-w-sm flex flex-col">
