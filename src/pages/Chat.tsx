@@ -29,6 +29,7 @@ const Chat: React.FC = () => {
   const { user, profile } = useUserAuth();
   const [searchParams] = useSearchParams();
   const tokenParam = searchParams.get('token');
+  const quickParam = searchParams.get('quick');
 
   const [step, setStep] = useState<Step>('category');
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -44,18 +45,26 @@ const Chat: React.FC = () => {
     (async () => {
       const stored = getStoredChatToken();
       const token = tokenParam || stored.token;
-      if (!token) return;
-      const { data } = await supabase
-        .from('chat_conversations')
-        .select('id')
-        .eq('guest_token', token)
-        .maybeSingle();
-      if (data?.id) {
-        setConversationId(data.id);
-        setStep('chat');
+      if (token) {
+        const { data } = await supabase
+          .from('chat_conversations')
+          .select('id')
+          .eq('guest_token', token)
+          .maybeSingle();
+        if (data?.id) {
+          setConversationId(data.id);
+          setStep('chat');
+          return;
+        }
+      }
+      // Quick mode: skip category picker → go straight to general assistance form
+      if (quickParam === '1') {
+        setCategoryId('general');
+        setSubcategoryId('');
+        setStep('form');
       }
     })();
-  }, [tokenParam]);
+  }, [tokenParam, quickParam]);
 
   // Auto-fill from profile when it loads
   useEffect(() => {
