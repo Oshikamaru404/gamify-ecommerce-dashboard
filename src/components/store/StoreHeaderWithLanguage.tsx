@@ -153,7 +153,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
             {/* Chat direct — only when logged in */}
             {user && (
               <Link
-                to="/chat"
+                to="/chat?quick=1"
                 aria-label="Chat"
                 className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
               >
