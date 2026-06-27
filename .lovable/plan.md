@@ -1,218 +1,102 @@
-# P5 — Customer Account Space (plan complet, 3 sous-phases)
+# P5.2 Coupons + P5.3 Affiliate/Referral — Implementation Plan
 
-Objectif : transformer `/account` en un vrai espace client SaaS, responsive, sécurisé, multilingue (EN/FR/AR), avec auto-fill, renouvellement 1-clic et préparation au système referral.
-
----
-
-## Layout global (commun aux 3 phases)
-
-**Shell** : `AccountLayout` avec `SidebarProvider` (shadcn) + `Outlet`.
-
-- Sidebar **collapsible="icon"** desktop, **drawer** mobile, **NavLink** actif highlighté.
-- Header compact : avatar, langue, bouton retour boutique, logout.
-- Sidebar groupée :
-  - **Account** : Dashboard · Orders · Subscriptions · Activation Details
-  - **Wallet** : Payment History · Coupons
-  - **Growth** : Affiliate Program
-  - **Settings** : Profile · Security · Notifications · Linked Accounts · Saved Profiles · Language · Danger Zone
-
-Routes : `/account`, `/account/orders`, `/account/orders/:id`, `/account/subscriptions`, `/account/activations`, `/account/payments`, `/account/coupons`, `/account/affiliate`, `/account/settings/profile`, `/account/settings/security`, `/account/settings/notifications`, `/account/settings/linked`, `/account/settings/saved-profiles`, `/account/settings/danger`.
-
-Toutes les pages protégées par un `RequireAuth` wrapper (redirige vers `/` + ouvre `AuthDialog`).
+Massive scope (8 tables, 8+ edge functions, 6+ pages). I'll ship in 3 sequential migrations + code waves so each layer is reviewable. Confirm before I start — once approved I execute end-to-end without further questions.
 
 ---
 
-## P5.1 — Core (priorité 1, livraison immédiate)
+## Wave 1 — Database (1 migration, ~8 tables)
 
-Tout ce qui apporte de la valeur sans nouveau backend lourd.
+**Coupon tables**
+- `coupons` — all fields from spec (code unique, type, value, currency, status, dates, max_total/per_user/per_device, min_amount, applicable_product_types[], applicable_product_ids[], excluded_product_ids[], allowed/excluded_user_ids[], created_by_admin_id, linked_affiliate_id)
+- `coupon_redemptions` — coupon_id, user_id, order_id, discount/original/final, currency, ip, user_agent, device_fingerprint, cookie_id
+- `coupon_usage_attempts` — audit log of every validate call (success + failure_reason)
 
-### 1. Dashboard `/account`
-Vue d'ensemble :
-- Carte **Welcome** (avatar + display_name + provider badge)
-- 4 KPI cards : commandes totales, abos actifs, prochaine expiration, économies réalisées (somme remises)
-- **Active subscriptions** (3 max) avec compte à rebours visuel + bouton "Renew"
-- **Recent orders** (5 dernières) avec statut coloré
-- CTA "Explore packages" si 0 commande
+**Affiliate tables**
+- `affiliates` — user_id unique, referral_code unique, default_coupon_id, status, commission_type/value, payout_method, payout_details (jsonb), totals
+- `affiliate_referral_clicks` — anonymous click log
+- `affiliate_referrals` — affiliate↔referred_user link (unique on referred_user_id)
+- `affiliate_commissions` — order_id unique, status, validation_available_at (paid_at + 30d), approved/rejected/paid timestamps, rejection_reason
+- `affiliate_payouts` — amount, method, reference, status
+- `affiliate_fraud_flags` — reason, severity, metadata jsonb
 
-### 2. My Orders `/account/orders` + `/account/orders/:id`
-- Liste filtrable (statut, date, catégorie), search, pagination
-- Card mobile / table desktop
-- Détail commande : récap, items, paiement, credentials (si livrés), timeline statut
-- Boutons : **Renew** (pre-fill checkout), **Download invoice PDF**, **Contact support** (WhatsApp pré-rempli)
-- ⚙️ *Payment History* fusionné ici via filtre "Paid only" + colonne méthode/montant
+**Orders** — add `coupon_id`, `coupon_code`, `discount_amount`, `original_amount`, `affiliate_id`, `referral_cookie_id` columns (nullable, additive only).
 
-### 3. My Subscriptions `/account/subscriptions`
-- Calcul depuis `orders` où `package_category in (iptv_subscription, iptv_panel, player_panel)` + `credentials_delivered_at` + `duration_months`
-- Card par abo : nom, expiration, jours restants (barre de progression), statut (active / expiring soon ≤7j / expired)
-- **Renew 1-clic** : ouvre checkout pre-rempli avec credentials du précédent
+**RLS pattern**
+- Public: none.
+- `authenticated`: read own redemptions, own affiliate row, own commissions, own payouts, own referrals.
+- Admin (`is_admin_user()`): full access on all.
+- Inserts to coupons/commissions/payouts: admin or service_role only (edge functions use service role).
+- Click tracking insert: anon allowed (with rate-limit handled in edge function).
+- GRANTs follow the standard pattern (anon click-track only on `affiliate_referral_clicks`).
 
-### 4. Activation Details `/account/activations`
-- Liste des activations Player (IBO, Smarters, etc.) avec credentials masqués
-- Bouton "Show credentials" (révèle 30s) + **Copy** par champ
-- QR code M3U (pratique mobile)
-- Tutoriel rapide par device
-
-### 5. Settings — Profile `/account/settings/profile`
-- Edit display_name, phone (WhatsApp), avatar upload (bucket `avatars` à créer, public, 2MB max)
-- Email read-only (avec badge "Verified" / "Change requires re-auth")
-- Langue préférée (EN/FR/AR — persistée dans `profiles.preferred_language`)
-
-### 6. Settings — Security `/account/settings/security`
-- **Change Password** (re-auth via current password si provider=email)
-- Sessions actives (liste devices `supabase.auth.getSession` + bouton "Logout all other")
-- 2FA optionnel (placeholder, badge "Coming soon" si tu veux)
-
-### 7. Settings — Linked Accounts `/account/settings/linked`
-- Liste providers liés (Google, Facebook, Apple, Discord, X, Steam) avec badges
-- Bouton "Connect" / "Disconnect" par provider via `supabase.auth.linkIdentity` / `unlinkIdentity`
-
-### 8. Settings — Saved Profiles `/account/settings/saved-profiles`
-- Réutilise `useCheckoutAutofill` → liste MAC/Xtream usernames sauvegardés
-- Nommer, éditer, supprimer
-- Bouton "Use at next checkout" (pin)
-
-### 9. Settings — Danger Zone `/account/settings/danger`
-- Export mes données (JSON download — RGPD)
-- Supprimer mon compte (confirmation typée + cascade côté Supabase)
-
-### Backend P5.1
-- Migration : `profiles` += `preferred_language text`, `saved_profiles jsonb default '[]'`
-- Bucket storage `avatars` (public) + RLS user upload son propre dossier
-- Edge function `generate-invoice-pdf` (React-PDF ou simple HTML→PDF) appelée depuis le bouton
-- RLS : utilisateur peut SELECT ses `orders` où `customer_email = (select email from profiles where id = auth.uid())`
+**Trigger**
+- On `orders` UPDATE → payment_status='paid': call `process_affiliate_commission()` security-definer function to create pending commission row if `affiliate_id` set and no self-referral.
 
 ---
 
-## P5.2 — Engagement (après P5.1 validé)
+## Wave 2 — Edge Functions
 
-### 10. Notifications system
-**Backend** :
-- Table `notifications` (user_id, type, title, body, link, is_read, created_at)
-- RLS : user voit/update les siennes
-- Triggers PG :
-  - sur INSERT `orders` → notif "Order received"
-  - sur UPDATE `orders.status` → notif statut
-  - cron quotidien : abos expirant dans 7j / 3j / 1j → notif
+1. `validate-coupon` (verify_jwt=false, accepts optional auth) — runs all 10 validation rules, returns discount calculation, logs attempt.
+2. `track-referral-click` (verify_jwt=false) — inserts click row, returns cookie_id.
+3. `register-referral` — called post-signup to bind `referred_user_id` to affiliate via cookie.
+4. `validate-affiliate-commissions` (scheduled daily via pg_cron) — flips pending→approved after 30d if order still paid, else rejects.
+5. `admin-affiliate-payout` — admin-only, creates payout, marks commissions paid.
+6. `affiliate-join` — creates affiliate row for current user (auto-active or pending based on `site_settings.affiliate_auto_approve`).
 
-**Frontend** :
-- Cloche dans header avec badge unread count + dropdown 5 dernières
-- Page `/account/settings/notifications` :
-  - Préférences (email on/off par type, WhatsApp on/off, in-app)
-  - Liste full historique avec mark all as read
-
-### 11. Coupons system
-**Backend (prérequis)** :
-- Table `coupons` (code, type [percent|fixed], value, min_amount, max_uses, used_count, valid_from, valid_until, applicable_categories[], created_by)
-- Table `coupon_redemptions` (coupon_id, user_id, order_id, amount_saved)
-- Admin panel pour CRUD coupons (à ajouter dans `/diza`)
-- Edge function `validate-coupon` (vérifie validité + applique au total)
-
-**Frontend** :
-- Champ "Promo code" dans checkout step 3 → calcul live
-- Page `/account/coupons` :
-  - Coupons disponibles (welcome, fidélité, anniversaire auto-générés)
-  - Historique utilisation avec montants économisés
-  - Bouton "Copy code"
+Coupon application is handled inline in order-creation (server-side `apply-coupon-to-checkout` step inside the existing order flow) to avoid race with payment intent creation.
 
 ---
 
-## P5.3 — Growth (Affiliate Program, gros chantier dédié)
+## Wave 3 — Frontend
 
-### 12. Affiliate Program complet
-**Backend** :
-- Table `affiliate_accounts` (user_id, referral_code unique, tier, commission_rate, total_earned, balance, payout_method, payout_details_encrypted)
-- Table `affiliate_referrals` (affiliate_id, referred_user_id, first_order_id, status [pending|confirmed|paid])
-- Table `affiliate_commissions` (referral_id, order_id, amount, status, paid_at)
-- Table `affiliate_payouts` (affiliate_id, amount, method, status, processed_at, tx_ref)
-- Tracking : cookie `?ref=CODE` 30j → assigné à signup
-- Edge function `process-affiliate-commission` (trigger sur order paid)
-- Edge function `request-payout` (crypto/PayPal/wire)
+**Checkout** (`PaymentOptionsCheckout.tsx`)
+- New coupon input block above payment method: input + Apply button, calls `validate-coupon`, shows success/error.
+- Order summary: subtotal / discount line (green) / final total.
+- Stores `coupon_id`, codes, amounts in order on creation.
+- Reads `?ref=CODE` from URL on app mount (new `useReferralTracking` hook in `App.tsx`), persists to `localStorage` + `document.cookie` for 30d, fires `track-referral-click`.
 
-**Frontend `/account/affiliate`** :
-- Onboarding (si pas encore affilié) : "Become an affiliate" + acceptation T&C
-- Dashboard : code unique + lien copyable, QR, stats (clicks, signups, conversions, earnings)
-- Graph revenus 30j (Recharts)
-- Liste referrals avec statuts
-- Marketing kit (banners téléchargeables, textes pré-rédigés EN/FR/AR)
-- Demande de payout (seuil minimum configurable)
-- Tier system (Bronze/Silver/Gold) avec progression visible
+**User pages**
+- `/account/coupons` — tabs Available / Used / Expired, with savings totals.
+- `/account/affiliate` — gated onboarding + dashboard (referral link + code + coupon, copy buttons, stats cards, commissions/payouts tables).
 
----
+**Admin pages**
+- `/diza/coupons` — list, create/edit dialog, redemptions drawer, failed-attempts log.
+- `/diza/affiliates` — affiliates list w/ status actions, commission rate edit, commissions table (manual approve/reject), payout creation, fraud flags panel.
+- Routes added to `adminRoutes.tsx` + sidebar.
 
-## Détails techniques transverses
-
-### Composants à créer
-```
-src/layouts/AccountLayout.tsx
-src/components/account/AccountSidebar.tsx
-src/components/account/RequireAuth.tsx
-src/components/account/KPICard.tsx
-src/components/account/SubscriptionCountdown.tsx
-src/components/account/OrderStatusBadge.tsx
-src/components/account/CredentialsReveal.tsx
-src/components/account/AvatarUploader.tsx
-src/components/account/NotificationBell.tsx (P5.2)
-src/components/account/CouponCard.tsx (P5.2)
-src/components/account/AffiliateStatsCard.tsx (P5.3)
-src/pages/account/Dashboard.tsx
-src/pages/account/Orders.tsx
-src/pages/account/OrderDetail.tsx
-src/pages/account/Subscriptions.tsx
-src/pages/account/Activations.tsx
-src/pages/account/Payments.tsx (alias filtré Orders)
-src/pages/account/Coupons.tsx (P5.2)
-src/pages/account/Affiliate.tsx (P5.3)
-src/pages/account/settings/Profile.tsx
-src/pages/account/settings/Security.tsx
-src/pages/account/settings/Notifications.tsx (P5.2)
-src/pages/account/settings/Linked.tsx
-src/pages/account/settings/SavedProfiles.tsx
-src/pages/account/settings/Danger.tsx
-```
-
-### Hooks
-```
-useUserOrders, useUserSubscriptions, useUserActivations,
-useNotifications (P5.2), useCoupons (P5.2),
-useAffiliate, useAffiliateStats (P5.3),
-useLinkedProviders, useAvatarUpload
-```
-
-### Design system
-- Garde les tokens HSL de `index.css` (pas de couleurs hardcodées)
-- Animations Motion : fade-in cards stagger 50ms, counters animés sur KPI
-- États vides illustrés (svg simple) pour chaque page vide
-- Skeleton loaders cohérents
-- Responsive mobile-first (sidebar drawer, KPI cards 2-col mobile / 4-col desktop)
-
-### i18n
-- Toutes les strings via `useTranslations` (clés `account.*`)
-- Génération auto FR/AR par edge function `generate-translations` existante
-
-### Sécurité
-- Tous les uploads avatar → bucket `avatars/{user_id}/...` (RLS scoped)
-- Re-auth obligatoire pour : change password, delete account, change email
-- Invoice PDF générée server-side avec user JWT validé
-- Affiliate payout details chiffrés (pgcrypto)
+**Shared**
+- `src/lib/coupons.ts` — types, format helpers.
+- `src/lib/affiliate.ts` — referral cookie helpers, fingerprint (lightweight, no extra dep — UA + screen + tz hash).
+- `src/hooks/useCoupon.ts`, `useAffiliate.ts`, `useReferralTracking.ts`.
 
 ---
 
-## Roadmap d'exécution
+## Wave 4 — Notifications
 
-| Phase | Contenu | Effort estimé |
-|---|---|---|
-| **P5.1** | Layout + 9 pages core + bucket avatars + invoice PDF | 1 grosse itération |
-| **P5.2** | Notifications (DB + triggers + UI) + Coupons (admin + checkout + page) | 1 itération |
-| **P5.3** | Affiliate Program complet (4 tables + tracking + dashboard + payout) | 1-2 itérations |
+Plug into existing `send-transactional-email`:
+- coupon applied (in-checkout toast only, no email — avoids noise).
+- affiliate approved, commission created/approved, payout paid → user email.
+- new affiliate, payout requested, fraud flag high → admin email (`bwivox@gmail.com`).
 
-Ordre conseillé : **P5.1 d'abord (livré complet)** → tester en prod → **P5.2** → **P5.3**.
+Adds 5 new template entries in the registry.
 
 ---
 
-## Suggestions bonus (à valider)
-- **Auto-renew** opt-in : carte bancaire tokenisée via PayGate pour renouvellement auto
-- **Loyalty points** : 1€ dépensé = 1 point, échangeable contre coupon (à intégrer avec P5.2)
-- **Wishlist** : sauvegarder packages favoris pour plus tard
-- **Multi-device alerts** : email/WhatsApp quand un device se connecte à ton compte
+## Out of scope / limitations I'll document at the end
+- Device fingerprint is heuristic (no FingerprintJS dep to keep bundle lean) — sufficient for soft anti-fraud, not bulletproof.
+- Payout execution is manual (admin marks paid); no automated crypto/PayPal payout integration.
+- Free-trial coupon type stored as `percentage` 100 + flag `is_trial` — full trial lifecycle not built.
+- No auto-generated welcome/birthday coupons in this pass (table supports it; cron job can be added later).
 
-Veux-tu que j'attaque **P5.1 maintenant** ? Si oui, confirme aussi : sidebar verticale (recommandé) ou tabs horizontales pour les settings ?
+---
+
+## Execution order
+1. Migration (await approval) →
+2. Edge functions + scheduled job →
+3. Checkout integration →
+4. User pages →
+5. Admin pages →
+6. Email templates →
+7. Final summary doc.
+
+This is roughly 25–35 file changes. Reply **go** and I start with the migration.
