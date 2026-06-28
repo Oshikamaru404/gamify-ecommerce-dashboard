@@ -166,7 +166,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     () => computeLineTotal(packageData.price, effectiveQty, stockPromo?.promo),
     [packageData.price, effectiveQty, stockPromo?.promo],
   );
-  const finalTotal = totals.total;
+  const finalTotalBeforeCoupon = totals.total;
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  // Clear coupon if line total changes (qty / promo recomputed)
+  useEffect(() => { if (appliedCoupon) setAppliedCoupon(null); /* eslint-disable-next-line */ }, [finalTotalBeforeCoupon]);
+  const couponDiscount = appliedCoupon ? Math.min(appliedCoupon.discount_amount, finalTotalBeforeCoupon) : 0;
+  const finalTotal = Math.max(0, Math.round((finalTotalBeforeCoupon - couponDiscount) * 100) / 100);
 
   // Keep macEntries length in sync with quantity when MAC fields are shown
   useEffect(() => {
