@@ -66,6 +66,11 @@ import Communication from "./pages/admin/Communication";
 import EmailTemplates from "./pages/admin/EmailTemplates";
 import Chat from "./pages/Chat";
 import ChatAdmin from "./pages/admin/ChatAdmin";
+import AccountCoupons from "./pages/account/Coupons";
+import AccountAffiliate from "./pages/account/Affiliate";
+import AdminCoupons from "./pages/admin/Coupons";
+import AdminAffiliates from "./pages/admin/Affiliates";
+import { useReferralTracking } from "./hooks/useReferralTracking";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +96,12 @@ function ScrollToTop() {
   return null;
 }
 
+function ReferralTracker() {
+  useReferralTracking();
+  return null;
+}
+
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -102,6 +113,7 @@ function App() {
             <TooltipProvider>
               <BrowserRouter>
                 <ScrollToTop />
+                <ReferralTracker />
                 <Routes>
                   {/* Public routes - Updated to use Home as default */}
                   <Route path="/" element={<Home />} />
@@ -113,8 +125,9 @@ function App() {
                     <Route path="subscriptions" element={<AccountSubscriptions />} />
                     <Route path="activations" element={<AccountActivations />} />
                     <Route path="payments" element={<AccountOrders paidOnly title="Payment History" />} />
-                    <Route path="coupons" element={<AccountPlaceholder title="Coupons" description="Promo codes will be available soon." />} />
-                    <Route path="affiliate" element={<AccountPlaceholder title="Affiliate Program" description="Earn commissions by referring new customers. Launching soon." />} />
+                    <Route path="coupons" element={<AccountCoupons />} />
+                    <Route path="affiliate" element={<AccountAffiliate />} />
+
                     <Route path="settings" element={<AccountProfile />} />
                     <Route path="settings/profile" element={<AccountProfile />} />
                     <Route path="settings/security" element={<AccountSecurity />} />
@@ -175,7 +188,10 @@ function App() {
                     <Route path="communication" element={<Communication />} />
                     <Route path="emails" element={<EmailTemplates />} />
                     <Route path="chat" element={<ChatAdmin />} />
+                    <Route path="coupons" element={<AdminCoupons />} />
+                    <Route path="affiliates" element={<AdminAffiliates />} />
                   </Route>
+
                   
                   {/* Catch all route */}
                   <Route path="*" element={<NotFound />} />

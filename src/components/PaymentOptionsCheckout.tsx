@@ -28,6 +28,9 @@ import SavedProfilesPicker from '@/components/auth/SavedProfilesPicker';
 import { usePackageStockPromo } from '@/hooks/usePackageStockPromo';
 import { computeLineTotal } from '@/lib/quantityPromo';
 import { Minus, Plus } from 'lucide-react';
+import CouponField from '@/components/checkout/CouponField';
+import type { AppliedCoupon } from '@/hooks/useCoupon';
+import { getReferralCode, getReferralCookieId } from '@/lib/affiliate';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
@@ -163,7 +166,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     () => computeLineTotal(packageData.price, effectiveQty, stockPromo?.promo),
     [packageData.price, effectiveQty, stockPromo?.promo],
   );
-  const finalTotal = totals.total;
+  const finalTotalBeforeCoupon = totals.total;
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  // Clear coupon if line total changes (qty / promo recomputed)
+  useEffect(() => { if (appliedCoupon) setAppliedCoupon(null); /* eslint-disable-next-line */ }, [finalTotalBeforeCoupon]);
+  const couponDiscount = appliedCoupon ? Math.min(appliedCoupon.discount_amount, finalTotalBeforeCoupon) : 0;
+  const finalTotal = Math.max(0, Math.round((finalTotalBeforeCoupon - couponDiscount) * 100) / 100);
 
   // Keep macEntries length in sync with quantity when MAC fields are shown
   useEffect(() => {
@@ -348,6 +356,18 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   };
 
   const createOrder = async (extra?: Partial<Record<string, string>>) => {
+    // Resolve affiliate attribution from referral cookie OR linked-affiliate coupon.
+    let affiliateId: string | null = null;
+    const refCode = getReferralCode();
+    if (refCode) {
+      const { data: aff } = await supabase.from('affiliates').select('id,user_id,status').eq('referral_code', refCode).maybeSingle();
+      if (aff?.status === 'active' && aff.user_id !== authUser?.id) affiliateId = aff.id;
+    }
+    if (!affiliateId && appliedCoupon?.linked_affiliate_id) {
+      const { data: aff } = await supabase.from('affiliates').select('id,user_id,status').eq('id', appliedCoupon.linked_affiliate_id).maybeSingle();
+      if (aff?.status === 'active' && aff.user_id !== authUser?.id) affiliateId = aff.id;
+    }
+
     const { data: orderData, error } = await supabase
       .from('orders')
       .insert([{
@@ -359,6 +379,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         package_category: packageData.category,
         duration_months: packageData.duration,
         amount: Number(finalTotal.toFixed(2)),
+        original_amount: Number(finalTotalBeforeCoupon.toFixed(2)),
+        discount_amount: Number(couponDiscount.toFixed(2)),
+        coupon_id: appliedCoupon?.id ?? null,
+        coupon_code: appliedCoupon?.code ?? null,
+        affiliate_id: affiliateId,
+        referral_cookie_id: getReferralCookieId(),
         quantity: effectiveQty,
         mac_addresses: collectedMacs as any,
         order_type: accountType === 'renewal' ? 'renewal' : 'activation',
@@ -370,6 +396,26 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       .select()
       .single();
     if (error) throw error;
+
+    // Record redemption (best-effort)
+    if (appliedCoupon) {
+      supabase.from('coupon_redemptions').insert({
+        coupon_id: appliedCoupon.id,
+        user_id: authUser?.id ?? null,
+        order_id: orderData.id,
+        discount_amount: couponDiscount,
+        original_amount: finalTotalBeforeCoupon,
+        final_amount: finalTotal,
+        currency: 'EUR',
+        cookie_id: getReferralCookieId(),
+      }).then(() => {
+        supabase.rpc('increment_coupon_uses' as any, { p_id: appliedCoupon.id }).then(() => {}, () => {
+          supabase.from('coupons').select('total_uses').eq('id', appliedCoupon.id).single().then(({ data }) => {
+            if (data) supabase.from('coupons').update({ total_uses: (data.total_uses ?? 0) + 1 }).eq('id', appliedCoupon.id);
+          });
+        });
+      }, () => {});
+    }
     return orderData;
   };
 
@@ -971,9 +1017,21 @@ Order ID: ${orderData.id}`;
                     <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span>{isRenewal ? 'Renewal' : 'New customer'}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground"><User className="h-3 w-3 inline mr-1" />{formData.customerName}</span><span className="truncate ml-2 max-w-[140px]">{formData.customerEmail}</span></div>
                   </div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
-                    <span className="text-primary">${finalTotal.toFixed(2)}</span>
+                  <div className="space-y-1.5 pt-2 border-t">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span>${finalTotalBeforeCoupon.toFixed(2)}</span>
+                    </div>
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-sm text-emerald-700">
+                        <span>Coupon {appliedCoupon?.code}</span>
+                        <span>-${couponDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-lg font-bold pt-1.5 border-t">
+                      <span>Total{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
+                      <span className="text-primary">${finalTotal.toFixed(2)}</span>
+                    </div>
                   </div>
                   {totals.discount > 0 && (
                     <p className="text-[11px] text-emerald-700 text-right -mt-1">
@@ -982,6 +1040,16 @@ Order ID: ${orderData.id}`;
                   )}
                 </CardContent>
               </Card>
+
+              {/* Coupon / promo code */}
+              <CouponField
+                amount={finalTotalBeforeCoupon}
+                productType={offerKind}
+                productId={packageData.id}
+                applied={appliedCoupon}
+                onApply={setAppliedCoupon}
+              />
+
 
               <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-green-50 border border-green-200 text-center">
