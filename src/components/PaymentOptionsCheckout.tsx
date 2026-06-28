@@ -1017,9 +1017,21 @@ Order ID: ${orderData.id}`;
                     <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span>{isRenewal ? 'Renewal' : 'New customer'}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground"><User className="h-3 w-3 inline mr-1" />{formData.customerName}</span><span className="truncate ml-2 max-w-[140px]">{formData.customerEmail}</span></div>
                   </div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
-                    <span className="text-primary">${finalTotal.toFixed(2)}</span>
+                  <div className="space-y-1.5 pt-2 border-t">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span>${finalTotalBeforeCoupon.toFixed(2)}</span>
+                    </div>
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-sm text-emerald-700">
+                        <span>Coupon {appliedCoupon?.code}</span>
+                        <span>-${couponDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-lg font-bold pt-1.5 border-t">
+                      <span>Total{effectiveQty > 1 ? ` (×${effectiveQty})` : ''}</span>
+                      <span className="text-primary">${finalTotal.toFixed(2)}</span>
+                    </div>
                   </div>
                   {totals.discount > 0 && (
                     <p className="text-[11px] text-emerald-700 text-right -mt-1">
@@ -1028,6 +1040,16 @@ Order ID: ${orderData.id}`;
                   )}
                 </CardContent>
               </Card>
+
+              {/* Coupon / promo code */}
+              <CouponField
+                amount={finalTotalBeforeCoupon}
+                productType={offerKind}
+                productId={packageData.id}
+                applied={appliedCoupon}
+                onApply={setAppliedCoupon}
+              />
+
 
               <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col items-center gap-1 p-2.5 rounded-lg bg-green-50 border border-green-200 text-center">
