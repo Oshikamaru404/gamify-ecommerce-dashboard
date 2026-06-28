@@ -356,6 +356,18 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   };
 
   const createOrder = async (extra?: Partial<Record<string, string>>) => {
+    // Resolve affiliate attribution from referral cookie OR linked-affiliate coupon.
+    let affiliateId: string | null = null;
+    const refCode = getReferralCode();
+    if (refCode) {
+      const { data: aff } = await supabase.from('affiliates').select('id,user_id,status').eq('referral_code', refCode).maybeSingle();
+      if (aff?.status === 'active' && aff.user_id !== authUser?.id) affiliateId = aff.id;
+    }
+    if (!affiliateId && appliedCoupon?.linked_affiliate_id) {
+      const { data: aff } = await supabase.from('affiliates').select('id,user_id,status').eq('id', appliedCoupon.linked_affiliate_id).maybeSingle();
+      if (aff?.status === 'active' && aff.user_id !== authUser?.id) affiliateId = aff.id;
+    }
+
     const { data: orderData, error } = await supabase
       .from('orders')
       .insert([{
@@ -367,6 +379,12 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
         package_category: packageData.category,
         duration_months: packageData.duration,
         amount: Number(finalTotal.toFixed(2)),
+        original_amount: Number(finalTotalBeforeCoupon.toFixed(2)),
+        discount_amount: Number(couponDiscount.toFixed(2)),
+        coupon_id: appliedCoupon?.id ?? null,
+        coupon_code: appliedCoupon?.code ?? null,
+        affiliate_id: affiliateId,
+        referral_cookie_id: getReferralCookieId(),
         quantity: effectiveQty,
         mac_addresses: collectedMacs as any,
         order_type: accountType === 'renewal' ? 'renewal' : 'activation',
@@ -378,6 +396,26 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
       .select()
       .single();
     if (error) throw error;
+
+    // Record redemption (best-effort)
+    if (appliedCoupon) {
+      supabase.from('coupon_redemptions').insert({
+        coupon_id: appliedCoupon.id,
+        user_id: authUser?.id ?? null,
+        order_id: orderData.id,
+        discount_amount: couponDiscount,
+        original_amount: finalTotalBeforeCoupon,
+        final_amount: finalTotal,
+        currency: 'EUR',
+        cookie_id: getReferralCookieId(),
+      }).then(() => {
+        supabase.rpc('increment_coupon_uses' as any, { p_id: appliedCoupon.id }).then(() => {}, () => {
+          supabase.from('coupons').select('total_uses').eq('id', appliedCoupon.id).single().then(({ data }) => {
+            if (data) supabase.from('coupons').update({ total_uses: (data.total_uses ?? 0) + 1 }).eq('id', appliedCoupon.id);
+          });
+        });
+      }, () => {});
+    }
     return orderData;
   };
 
