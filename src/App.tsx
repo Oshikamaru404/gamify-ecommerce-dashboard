@@ -66,6 +66,11 @@ import Communication from "./pages/admin/Communication";
 import EmailTemplates from "./pages/admin/EmailTemplates";
 import Chat from "./pages/Chat";
 import ChatAdmin from "./pages/admin/ChatAdmin";
+import AccountCoupons from "./pages/account/Coupons";
+import AccountAffiliate from "./pages/account/Affiliate";
+import AdminCoupons from "./pages/admin/Coupons";
+import AdminAffiliates from "./pages/admin/Affiliates";
+import { useReferralTracking } from "./hooks/useReferralTracking";
 
 const queryClient = new QueryClient({
   defaultOptions: {
