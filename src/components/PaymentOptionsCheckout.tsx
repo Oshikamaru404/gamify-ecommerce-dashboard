@@ -28,6 +28,9 @@ import SavedProfilesPicker from '@/components/auth/SavedProfilesPicker';
 import { usePackageStockPromo } from '@/hooks/usePackageStockPromo';
 import { computeLineTotal } from '@/lib/quantityPromo';
 import { Minus, Plus } from 'lucide-react';
+import CouponField from '@/components/checkout/CouponField';
+import type { AppliedCoupon } from '@/hooks/useCoupon';
+import { getReferralCode, getReferralCookieId } from '@/lib/affiliate';
 
 interface PaymentOptionsCheckoutProps {
   packageData: {
