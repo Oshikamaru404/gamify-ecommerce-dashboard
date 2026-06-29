@@ -9,6 +9,9 @@ import Settings from '@/pages/admin/Settings';
 import BlogManagement from '@/pages/admin/BlogManagement';
 import Communication from '@/pages/admin/Communication';
 import EmailTemplates from '@/pages/admin/EmailTemplates';
+import AdminCoupons from '@/pages/admin/Coupons';
+import AdminAffiliates from '@/pages/admin/Affiliates';
+import ChatAdmin from '@/pages/admin/ChatAdmin';
 
 const AdminRoutes = () => {
   return (
@@ -23,6 +26,9 @@ const AdminRoutes = () => {
         <Route path="/blog" element={<BlogManagement />} />
         <Route path="/communication" element={<Communication />} />
         <Route path="/emails" element={<EmailTemplates />} />
+        <Route path="/coupons" element={<AdminCoupons />} />
+        <Route path="/affiliates" element={<AdminAffiliates />} />
+        <Route path="/chat" element={<ChatAdmin />} />
       </Routes>
     </AdminLayout>
   );
