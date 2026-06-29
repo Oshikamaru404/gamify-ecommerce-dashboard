@@ -13,7 +13,9 @@ import {
   Mail,
   LogOut,
   Menu,
-  X
+  X,
+  Tag,
+  Users
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
@@ -34,6 +36,8 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Communication', href: '/diza/communication', icon: MessageSquare },
     { name: 'Support Chat', href: '/diza/chat', icon: MessageSquare },
     { name: 'Email Templates', href: '/diza/emails', icon: Mail },
+    { name: 'Coupons', href: '/diza/coupons', icon: Tag },
+    { name: 'Affiliates', href: '/diza/affiliates', icon: Users },
     { name: 'Settings', href: '/diza/settings', icon: Settings },
   ];
 
