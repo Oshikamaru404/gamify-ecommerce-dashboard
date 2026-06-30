@@ -203,11 +203,11 @@ export async function findOrCreateGeneralRoom(params: {
   email: string;
 }) {
   // Reuse existing general_room for this user if any
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from('chat_conversations')
     .select('*')
     .eq('user_id', params.userId)
-    .eq('conversation_type' as any, 'general_room')
+    .eq('conversation_type', 'general_room')
     .order('last_message_at', { ascending: false })
     .limit(1);
   if (existing && existing.length > 0) {
