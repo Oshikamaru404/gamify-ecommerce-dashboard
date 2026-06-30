@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Loader2, Zap, ChevronDown, Megaphone, MessageCircle } from 'lucide-react';
+import { Menu, X, Loader2, Zap, ChevronDown, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -11,6 +11,7 @@ import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import HeaderAuthButton from '@/components/auth/HeaderAuthButton';
 import GlobalSearch from '@/components/store/GlobalSearch';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 const StoreHeaderWithLanguage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
