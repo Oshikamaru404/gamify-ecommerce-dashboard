@@ -131,7 +131,8 @@ function App() {
                     <Route path="settings" element={<AccountProfile />} />
                     <Route path="settings/profile" element={<AccountProfile />} />
                     <Route path="settings/security" element={<AccountSecurity />} />
-                    <Route path="settings/notifications" element={<AccountPlaceholder title="Notifications" description="Notification preferences coming soon." />} />
+                    <Route path="notifications" element={<AccountNotifications />} />
+                    <Route path="settings/notifications" element={<AccountPlaceholder title="Notification preferences" description="Notification preferences coming soon." />} />
                     <Route path="settings/linked" element={<AccountLinked />} />
                     <Route path="settings/saved-profiles" element={<AccountSavedProfiles />} />
                     <Route path="settings/danger" element={<AccountDanger />} />
