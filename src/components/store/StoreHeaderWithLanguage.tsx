@@ -151,15 +151,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
           <div className="flex items-center gap-1">
             <RegionSettingsSheet />
 
-            {/* Notifications */}
-            <Link
-              to="/account"
-              aria-label="Notifications"
-              className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
-            >
-              <Megaphone size={18} />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-            </Link>
+            <NotificationBell variant="mobile" />
 
             {/* Chat direct — only when logged in */}
             {user && (
@@ -169,9 +161,6 @@ const StoreHeaderWithLanguage: React.FC = () => {
                 className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
               >
                 <MessageCircle size={18} />
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold ring-2 ring-white">
-                  1
-                </span>
               </Link>
             )}
 
