@@ -70,6 +70,7 @@ import AccountCoupons from "./pages/account/Coupons";
 import AccountAffiliate from "./pages/account/Affiliate";
 import AdminCoupons from "./pages/admin/Coupons";
 import AdminAffiliates from "./pages/admin/Affiliates";
+import AccountNotifications from "./pages/account/Notifications";
 import { useReferralTracking } from "./hooks/useReferralTracking";
 
 const queryClient = new QueryClient({
