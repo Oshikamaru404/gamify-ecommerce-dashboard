@@ -42,7 +42,7 @@ const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <AccountUI>
+    <>
       <Helmet><title>Notifications — BWIVOX</title></Helmet>
       <div className="space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
