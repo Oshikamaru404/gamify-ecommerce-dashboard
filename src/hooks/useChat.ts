@@ -31,6 +31,18 @@ export interface ChatConversation {
   last_message_at: string;
   created_at: string;
   updated_at: string;
+  conversation_type?: string;
+  assigned_admin_id?: string | null;
+  color?: string | null;
+  emoji?: string | null;
+  pinned?: boolean;
+  archived?: boolean;
+  muted?: boolean;
+  internal_notes?: string | null;
+  last_seen_user_at?: string | null;
+  last_seen_admin_at?: string | null;
+  typing_user_at?: string | null;
+  typing_admin_at?: string | null;
 }
 
 export function getStoredChatToken() {
