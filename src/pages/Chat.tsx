@@ -128,7 +128,14 @@ const Chat: React.FC = () => {
         <meta name="description" content="Get real-time support from BWIVOX. Choose your topic and chat with our team." />
       </Helmet>
       <div className="container mx-auto max-w-3xl px-4 py-6 sm:py-12">
-        {step === 'chat' && conversationId ? (
+        {quickParam === '1' && !user ? (
+          <Card className="p-8 text-center space-y-3">
+            <h1 className="text-xl font-bold">Sign in to open General Room</h1>
+            <p className="text-sm text-muted-foreground">
+              The General Room is a private one-to-one chat with our team. Sign in to your account to access it.
+            </p>
+          </Card>
+        ) : step === 'chat' && conversationId ? (
           <ChatRoom conversationId={conversationId} onLeave={handleLeave} />
         ) : (
           <Card className="p-5 sm:p-8">
