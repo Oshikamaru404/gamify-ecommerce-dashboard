@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { CHAT_CATEGORIES, PRIORITY_META, STATUS_META, getSubcategoryLabel, getCategory } from '@/lib/chatCategories';
 import {
   createConversation,
+  findOrCreateGeneralRoom,
   sendChatMessage,
   useConversation,
   useConversationMessages,
