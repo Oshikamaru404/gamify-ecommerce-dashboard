@@ -21,6 +21,7 @@ const groups = [
       { title: 'My Orders', url: '/account/orders', icon: Package, color: 'text-orange-600' },
       { title: 'My Subscriptions', url: '/account/subscriptions', icon: Calendar, color: 'text-emerald-600' },
       { title: 'Activations', url: '/account/activations', icon: Key, color: 'text-blue-600' },
+      { title: 'Notifications', url: '/account/notifications', icon: Bell, color: 'text-rose-600' },
     ],
   },
   {

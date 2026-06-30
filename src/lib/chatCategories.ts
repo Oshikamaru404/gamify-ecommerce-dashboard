@@ -126,11 +126,20 @@ export const PRIORITY_META: Record<Priority, { label: string; color: string; bg:
 export const STATUS_META: Record<string, { label: string; color: string }> = {
   open: { label: 'Open', color: 'bg-blue-100 text-blue-700' },
   pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-700' },
+  waiting_customer: { label: 'Waiting Customer', color: 'bg-purple-100 text-purple-700' },
   resolved: { label: 'Resolved', color: 'bg-green-100 text-green-700' },
   closed: { label: 'Closed', color: 'bg-gray-100 text-gray-700' },
 };
 
+export const GENERAL_ROOM_CATEGORY = {
+  id: 'general_room',
+  label: 'General Room',
+  icon: '💬',
+  priority: 'medium' as Priority,
+};
+
 export function getCategory(id: string) {
+  if (id === 'general_room') return GENERAL_ROOM_CATEGORY as any;
   return CHAT_CATEGORIES.find((c) => c.id === id);
 }
 

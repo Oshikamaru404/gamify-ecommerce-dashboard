@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Loader2, Zap, ChevronDown, Megaphone, MessageCircle } from 'lucide-react';
+import { Menu, X, Loader2, Zap, ChevronDown, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -11,6 +11,7 @@ import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import HeaderAuthButton from '@/components/auth/HeaderAuthButton';
 import GlobalSearch from '@/components/store/GlobalSearch';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 const StoreHeaderWithLanguage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -115,6 +116,16 @@ const StoreHeaderWithLanguage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <GlobalSearch />
+          <NotificationBell variant="desktop" />
+          {user && (
+            <Link
+              to="/chat?quick=1"
+              aria-label="Chat"
+              className="relative h-10 w-10 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
+            >
+              <MessageCircle size={18} />
+            </Link>
+          )}
           <HeaderAuthButton />
           <CurrencySelector />
           {isLoading ? (
@@ -140,15 +151,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
           <div className="flex items-center gap-1">
             <RegionSettingsSheet />
 
-            {/* Notifications */}
-            <Link
-              to="/account"
-              aria-label="Notifications"
-              className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
-            >
-              <Megaphone size={18} />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-            </Link>
+            <NotificationBell variant="mobile" />
 
             {/* Chat direct — only when logged in */}
             {user && (
@@ -158,9 +161,6 @@ const StoreHeaderWithLanguage: React.FC = () => {
                 className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
               >
                 <MessageCircle size={18} />
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold ring-2 ring-white">
-                  1
-                </span>
               </Link>
             )}
 

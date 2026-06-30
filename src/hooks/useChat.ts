@@ -31,6 +31,18 @@ export interface ChatConversation {
   last_message_at: string;
   created_at: string;
   updated_at: string;
+  conversation_type?: string;
+  assigned_admin_id?: string | null;
+  color?: string | null;
+  emoji?: string | null;
+  pinned?: boolean;
+  archived?: boolean;
+  muted?: boolean;
+  internal_notes?: string | null;
+  last_seen_user_at?: string | null;
+  last_seen_admin_at?: string | null;
+  typing_user_at?: string | null;
+  typing_admin_at?: string | null;
 }
 
 export function getStoredChatToken() {
@@ -154,18 +166,21 @@ export async function createConversation(params: {
   subcategory: string | null;
   priority: string;
   firstMessage: string;
+  conversationType?: 'support' | 'general_room';
 }) {
+  const insertRow: any = {
+    user_id: params.userId,
+    guest_name: params.guestName,
+    guest_email: params.guestEmail,
+    category: params.category,
+    subcategory: params.subcategory,
+    priority: params.priority,
+    status: 'open',
+    conversation_type: params.conversationType || 'support',
+  };
   const { data, error } = await supabase
     .from('chat_conversations')
-    .insert({
-      user_id: params.userId,
-      guest_name: params.guestName,
-      guest_email: params.guestEmail,
-      category: params.category,
-      subcategory: params.subcategory,
-      priority: params.priority,
-      status: 'open',
-    })
+    .insert(insertRow)
     .select()
     .single();
   if (error) throw error;
@@ -181,3 +196,43 @@ export async function createConversation(params: {
 
   return data as ChatConversation;
 }
+
+export async function findOrCreateGeneralRoom(params: {
+  userId: string;
+  displayName: string;
+  email: string;
+}) {
+  // Reuse existing general_room for this user if any
+  const { data: existing } = await (supabase as any)
+    .from('chat_conversations')
+    .select('*')
+    .eq('user_id', params.userId)
+    .eq('conversation_type', 'general_room')
+    .order('last_message_at', { ascending: false })
+    .limit(1);
+  if (existing && existing.length > 0) {
+    const conv = existing[0] as any as ChatConversation;
+    if (conv.guest_token) storeChatToken(conv.id, conv.guest_token);
+    return conv;
+  }
+  const insertRow: any = {
+    user_id: params.userId,
+    guest_name: params.displayName,
+    guest_email: params.email,
+    category: 'general_room',
+    subcategory: null,
+    priority: 'medium',
+    status: 'open',
+    conversation_type: 'general_room',
+    display_name: params.displayName,
+  };
+  const { data, error } = await supabase
+    .from('chat_conversations')
+    .insert(insertRow)
+    .select()
+    .single();
+  if (error) throw error;
+  storeChatToken(data.id, data.guest_token);
+  return data as ChatConversation;
+}
+
