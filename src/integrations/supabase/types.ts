@@ -561,18 +561,30 @@ export type Database = {
       chat_conversations: {
         Row: {
           admin_notes: string | null
+          archived: boolean
+          assigned_admin_id: string | null
           category: string
+          color: string | null
+          conversation_type: string
           created_at: string
           display_name: string | null
+          emoji: string | null
           guest_email: string
           guest_name: string | null
           guest_token: string
           id: string
+          internal_notes: string | null
           last_message_at: string
+          last_seen_admin_at: string | null
+          last_seen_user_at: string | null
+          muted: boolean
+          pinned: boolean
           priority: string
           status: string
           subcategory: string | null
           tags: string[]
+          typing_admin_at: string | null
+          typing_user_at: string | null
           unread_admin: number
           unread_user: number
           updated_at: string
@@ -580,18 +592,30 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          archived?: boolean
+          assigned_admin_id?: string | null
           category: string
+          color?: string | null
+          conversation_type?: string
           created_at?: string
           display_name?: string | null
+          emoji?: string | null
           guest_email: string
           guest_name?: string | null
           guest_token?: string
           id?: string
+          internal_notes?: string | null
           last_message_at?: string
+          last_seen_admin_at?: string | null
+          last_seen_user_at?: string | null
+          muted?: boolean
+          pinned?: boolean
           priority?: string
           status?: string
           subcategory?: string | null
           tags?: string[]
+          typing_admin_at?: string | null
+          typing_user_at?: string | null
           unread_admin?: number
           unread_user?: number
           updated_at?: string
@@ -599,18 +623,30 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          archived?: boolean
+          assigned_admin_id?: string | null
           category?: string
+          color?: string | null
+          conversation_type?: string
           created_at?: string
           display_name?: string | null
+          emoji?: string | null
           guest_email?: string
           guest_name?: string | null
           guest_token?: string
           id?: string
+          internal_notes?: string | null
           last_message_at?: string
+          last_seen_admin_at?: string | null
+          last_seen_user_at?: string | null
+          muted?: boolean
+          pinned?: boolean
           priority?: string
           status?: string
           subcategory?: string | null
           tags?: string[]
+          typing_admin_at?: string | null
+          typing_user_at?: string | null
           unread_admin?: number
           unread_user?: number
           updated_at?: string
@@ -624,7 +660,11 @@ export type Database = {
           content: string
           conversation_id: string
           created_at: string
+          delivered_at: string
+          edited_at: string | null
           id: string
+          read_at: string | null
+          reply_to_id: string | null
           sender_name: string | null
           sender_type: string
         }
@@ -633,7 +673,11 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
+          delivered_at?: string
+          edited_at?: string | null
           id?: string
+          read_at?: string | null
+          reply_to_id?: string | null
           sender_name?: string | null
           sender_type: string
         }
@@ -642,7 +686,11 @@ export type Database = {
           content?: string
           conversation_id?: string
           created_at?: string
+          delivered_at?: string
+          edited_at?: string | null
           id?: string
+          read_at?: string | null
+          reply_to_id?: string | null
           sender_name?: string | null
           sender_type?: string
         }
@@ -652,6 +700,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -1157,6 +1212,54 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          archived_at: string | null
+          body: string | null
+          category: string
+          created_at: string
+          icon: string | null
+          id: string
+          link: string | null
+          metadata: Json
+          read_at: string | null
+          severity: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          body?: string | null
+          category?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          link?: string | null
+          metadata?: Json
+          read_at?: string | null
+          severity?: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          body?: string | null
+          category?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          link?: string | null
+          metadata?: Json
+          read_at?: string | null
+          severity?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           affiliate_id: string | null
@@ -1540,9 +1643,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          p_body: string
+          p_category: string
+          p_icon: string
+          p_link: string
+          p_metadata: Json
+          p_severity: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       delete_all_published_feedback: { Args: never; Returns: number }
       is_admin_user: { Args: never; Returns: boolean }
       reset_product_sales: { Args: never; Returns: number }
+      resolve_user_from_email: { Args: { p_email: string }; Returns: string }
       update_blog_cron_schedule: {
         Args: { new_schedule: string }
         Returns: undefined
