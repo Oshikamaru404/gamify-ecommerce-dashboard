@@ -44,6 +44,23 @@ const Chat: React.FC = () => {
   // Resume existing conv by token (URL param OR localStorage)
   useEffect(() => {
     (async () => {
+      // Quick General Room mode — requires auth, reuse or create the single per-user general_room
+      if (quickParam === '1') {
+        if (!user) return; // wait for auth
+        try {
+          const conv = await findOrCreateGeneralRoom({
+            userId: user.id,
+            displayName: profile?.display_name || user.email?.split('@')[0] || 'Customer',
+            email: profile?.email || user.email || '',
+          });
+          setConversationId(conv.id);
+          setStep('chat');
+        } catch (e: any) {
+          toast.error(e.message || 'Could not open chat');
+        }
+        return;
+      }
+
       const stored = getStoredChatToken();
       const token = tokenParam || stored.token;
       if (token) {
@@ -55,17 +72,10 @@ const Chat: React.FC = () => {
         if (data?.id) {
           setConversationId(data.id);
           setStep('chat');
-          return;
         }
       }
-      // Quick mode: skip category picker → go straight to general assistance form
-      if (quickParam === '1') {
-        setCategoryId('general');
-        setSubcategoryId('');
-        setStep('form');
-      }
     })();
-  }, [tokenParam, quickParam]);
+  }, [tokenParam, quickParam, user, profile]);
 
   // Auto-fill from profile when it loads
   useEffect(() => {
