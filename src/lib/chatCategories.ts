@@ -139,6 +139,7 @@ export const GENERAL_ROOM_CATEGORY = {
 };
 
 export function getCategory(id: string) {
+  if (id === 'general_room') return GENERAL_ROOM_CATEGORY as any;
   return CHAT_CATEGORIES.find((c) => c.id === id);
 }
 
