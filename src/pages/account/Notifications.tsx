@@ -133,7 +133,7 @@ const NotificationsPage: React.FC = () => {
           )}
         </Card>
       </div>
-    </AccountUI>
+    </>
   );
 };
 
