@@ -29,6 +29,10 @@ import {
 
 const PRIORITY_ORDER: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
 
+function uniqueRealtimeChannelName(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 const ChatAdmin: React.FC = () => {
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,13 +60,13 @@ const ChatAdmin: React.FC = () => {
     load();
 
     const channel = supabase
-      .channel('admin-chat-list')
+      .channel(uniqueRealtimeChannelName('admin-chat-list'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_conversations' }, () => load())
       .subscribe();
 
     return () => {
       mounted = false;
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, []);
 

@@ -17,6 +17,10 @@ type OrderNotificationProps = {
   onNewOrder?: () => void;
 };
 
+function uniqueRealtimeChannelName(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 const OrderNotification: React.FC<OrderNotificationProps> = ({ onNewOrder }) => {
   const [notifications, setNotifications] = useState<NewOrder[]>([]);
   const [isVisible, setIsVisible] = useState(false);
@@ -24,7 +28,7 @@ const OrderNotification: React.FC<OrderNotificationProps> = ({ onNewOrder }) => 
   useEffect(() => {
     // Subscribe to real-time order updates
     const channel = supabase
-      .channel('new-orders')
+      .channel(uniqueRealtimeChannelName('new-orders'))
       .on(
         'postgres_changes',
         {
@@ -47,7 +51,7 @@ const OrderNotification: React.FC<OrderNotificationProps> = ({ onNewOrder }) => 
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [onNewOrder]);
 

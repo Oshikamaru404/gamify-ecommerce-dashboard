@@ -20,6 +20,10 @@ export interface AppNotification {
 
 export type NotificationFilter = 'all' | 'unread' | 'read' | 'archived';
 
+function uniqueRealtimeChannelName(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export function useNotifications(opts: { limit?: number } = {}) {
   const { user } = useUserAuth();
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -47,7 +51,7 @@ export function useNotifications(opts: { limit?: number } = {}) {
     load();
     if (!user) return;
     const channel = supabase
-      .channel(`notif-${user.id}`)
+      .channel(uniqueRealtimeChannelName(`notif-${user.id}`))
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
@@ -55,7 +59,7 @@ export function useNotifications(opts: { limit?: number } = {}) {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [user, load]);
 
