@@ -4,6 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 const TOKEN_KEY = 'bwivox_chat_token';
 const CONV_KEY = 'bwivox_chat_conv';
 
+function uniqueRealtimeChannelName(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export interface ChatMessage {
   id: string;
   conversation_id: string;
@@ -81,7 +85,7 @@ export function useConversationMessages(conversationId: string | null) {
       });
 
     const channel = supabase
-      .channel(`chat-msg-${conversationId}`)
+      .channel(uniqueRealtimeChannelName(`chat-msg-${conversationId}`))
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${conversationId}` },
@@ -95,7 +99,7 @@ export function useConversationMessages(conversationId: string | null) {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [conversationId]);
 
@@ -115,7 +119,7 @@ export function useConversation(conversationId: string | null) {
     refresh();
     if (!conversationId) return;
     const channel = supabase
-      .channel(`chat-conv-${conversationId}`)
+      .channel(uniqueRealtimeChannelName(`chat-conv-${conversationId}`))
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'chat_conversations', filter: `id=eq.${conversationId}` },
@@ -123,7 +127,7 @@ export function useConversation(conversationId: string | null) {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [conversationId, refresh]);
 
