@@ -141,7 +141,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
       {/* ====== MOBILE — 2 LINES (z2u-style) ====== */}
       <div className="lg:hidden">
         {/* Line 1 : logo + currency + language + auth */}
-        <div className="container flex h-14 items-center justify-between gap-2">
+        <div className="container flex h-12 items-center justify-between gap-2">
           <Link to="/" className="flex items-center">
             <div className="text-xl font-bold leading-none">
               <span className="text-red-600">BWIVOX</span>
@@ -156,7 +156,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
             {/* Chat direct — only when logged in */}
             {user && (
               <Link
-                to="/chat?quick=1"
+                to="/chat"
                 aria-label="Chat"
                 className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
               >
@@ -170,11 +170,11 @@ const StoreHeaderWithLanguage: React.FC = () => {
         </div>
 
         {/* Line 2 : burger + search */}
-        <div className="container flex h-12 items-center gap-2 pb-2">
+        <div className="container flex h-10 items-center gap-2 pb-1">
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 shrink-0 border border-gray-200"
+            className="h-9 w-9 shrink-0 border border-gray-200"
             onClick={toggleMenu}
             aria-label="Menu"
           >
