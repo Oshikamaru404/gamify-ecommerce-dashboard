@@ -36,7 +36,7 @@ const detectCountry = async (): Promise<string | null> => {
 };
 
 export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currency, setCurrencyState] = useState<CurrencyCode>('EUR');
+  const [currency, setCurrencyState] = useState<CurrencyCode>('USD');
   const [countryCode, setCountryCode] = useState<string>(() => {
     return localStorage.getItem(COUNTRY_KEY) || '';
   });
