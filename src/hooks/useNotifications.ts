@@ -24,11 +24,13 @@ function uniqueRealtimeChannelName(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function useNotifications(opts: { limit?: number } = {}) {
+export function useNotifications(opts: { limit?: number; excludeCategories?: string[]; onlyCategories?: string[] } = {}) {
   const { user } = useUserAuth();
   const [items, setItems] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const limit = opts.limit ?? 50;
+  const excludeCategories = opts.excludeCategories;
+  const onlyCategories = opts.onlyCategories;
 
   const load = useCallback(async () => {
     if (!user) {
@@ -37,15 +39,23 @@ export function useNotifications(opts: { limit?: number } = {}) {
       return;
     }
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from('notifications' as any)
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit);
-    setItems(((data || []) as unknown) as AppNotification[]);
+    if (onlyCategories && onlyCategories.length > 0) {
+      query = query.in('category', onlyCategories);
+    }
+    const { data } = await query;
+    let rows = ((data || []) as unknown) as AppNotification[];
+    if (excludeCategories && excludeCategories.length > 0) {
+      rows = rows.filter((n) => !excludeCategories.includes(n.category));
+    }
+    setItems(rows);
     setLoading(false);
-  }, [user, limit]);
+  }, [user, limit, excludeCategories?.join(','), onlyCategories?.join(',')]);
 
   useEffect(() => {
     load();
