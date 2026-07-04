@@ -119,7 +119,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
           <NotificationBell variant="desktop" />
           {user && (
             <Link
-              to="/chat?quick=1"
+              to="/chat"
               aria-label="Chat"
               className="relative h-10 w-10 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
             >
