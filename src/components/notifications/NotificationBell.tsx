@@ -27,7 +27,7 @@ interface NotificationBellProps {
 
 const NotificationBell: React.FC<NotificationBellProps> = ({ variant = 'desktop', className }) => {
   const { user } = useUserAuth();
-  const { items, unreadCount, markRead, markAllRead, archive } = useNotifications({ limit: 10 });
+  const { items, unreadCount, markRead, markAllRead, archive } = useNotifications({ limit: 10, excludeCategories: ['chat'] });
   const navigate = useNavigate();
 
   if (!user) {
