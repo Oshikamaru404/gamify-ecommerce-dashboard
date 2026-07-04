@@ -190,7 +190,7 @@ const StoreHeaderWithLanguage: React.FC = () => {
       <div
         className={cn(
           'absolute left-0 right-0 z-50 border-b bg-white pb-4 pt-2 shadow-lg lg:hidden',
-          'top-[6.5rem]',
+          'top-[5.5rem]',
           isMenuOpen ? 'block' : 'hidden',
         )}
       >
