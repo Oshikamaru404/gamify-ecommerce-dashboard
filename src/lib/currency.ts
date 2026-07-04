@@ -18,15 +18,15 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyDef> = {
   GBP: { code: 'GBP', symbol: '£', name: 'British Pound',rate: 0.85, position: 'before' },
 };
 
-// Country → preferred currency
+// Country → preferred currency (defaults to USD when unknown)
 export const countryToCurrency = (cc?: string): CurrencyCode => {
-  if (!cc) return 'EUR';
+  if (!cc) return 'USD';
   const c = cc.toUpperCase();
-  const usd = ['US','CA','MX','AU','NZ','SG','HK','PH','JP','KR','TW','TH','MY','ID','VN','IN','BR','AR','CL','CO','PE','ZA','AE','SA','EG','IL','TR'];
+  const eur = ['FR','DE','ES','IT','PT','BE','NL','LU','IE','AT','FI','GR','CY','MT','SK','SI','EE','LV','LT','HR'];
   const gbp = ['GB','UK'];
   if (gbp.includes(c)) return 'GBP';
-  if (usd.includes(c)) return 'USD';
-  return 'EUR';
+  if (eur.includes(c)) return 'EUR';
+  return 'USD';
 };
 
 // Country code → flag emoji
