@@ -6,11 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   PRIORITY_META,
   STATUS_META,
-  CHAT_CATEGORIES,
   getCategory,
   getSubcategoryLabel,
 } from '@/lib/chatCategories';
@@ -39,9 +37,7 @@ const ChatAdmin: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterCat, setFilterCat] = useState<string>('all');
   const [filterPrio, setFilterPrio] = useState<string>('all');
-  const [tab, setTab] = useState<'support' | 'general_room'>('support');
   const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
@@ -72,13 +68,8 @@ const ChatAdmin: React.FC = () => {
 
   const filtered = useMemo(() => {
     return conversations
-      .filter((c) => {
-        const t = c.conversation_type || 'support';
-        return tab === 'general_room' ? t === 'general_room' : t !== 'general_room';
-      })
       .filter((c) => (showArchived ? true : !c.archived))
       .filter((c) => filterStatus === 'all' || c.status === filterStatus)
-      .filter((c) => filterCat === 'all' || c.category === filterCat)
       .filter((c) => filterPrio === 'all' || c.priority === filterPrio)
       .filter((c) => {
         if (!search) return true;
@@ -98,14 +89,8 @@ const ChatAdmin: React.FC = () => {
         if (pa !== pb) return pa - pb;
         return new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime();
       });
-  }, [conversations, filterStatus, filterCat, filterPrio, search, tab, showArchived]);
+  }, [conversations, filterStatus, filterPrio, search, showArchived]);
 
-  const supportUnread = conversations
-    .filter((c) => (c.conversation_type || 'support') !== 'general_room' && !c.archived)
-    .reduce((s, c) => s + (c.unread_admin || 0), 0);
-  const generalUnread = conversations
-    .filter((c) => c.conversation_type === 'general_room' && !c.archived)
-    .reduce((s, c) => s + (c.unread_admin || 0), 0);
 
   return (
     <div>
@@ -120,18 +105,6 @@ const ChatAdmin: React.FC = () => {
         </label>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => { setTab(v as any); setSelectedId(null); }} className="mb-3">
-        <TabsList>
-          <TabsTrigger value="support" className="gap-2">
-            Support Chat
-            {supportUnread > 0 && <span className="bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5 font-bold">{supportUnread}</span>}
-          </TabsTrigger>
-          <TabsTrigger value="general_room" className="gap-2">
-            General Room
-            {generalUnread > 0 && <span className="bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5 font-bold">{generalUnread}</span>}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
 
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr_320px] gap-3 h-[calc(100vh-240px)]">
         {/* List */}
@@ -146,7 +119,7 @@ const ChatAdmin: React.FC = () => {
                 className="pl-8 h-9"
               />
             </div>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -168,19 +141,9 @@ const ChatAdmin: React.FC = () => {
                   <SelectItem value="low">Low</SelectItem>
                 </SelectContent>
               </Select>
-              {tab === 'support' ? (
-                <Select value={filterCat} onValueChange={setFilterCat}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All topics</SelectItem>
-                    {CHAT_CATEGORIES.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.icon} {c.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : <div />}
             </div>
           </div>
+
 
           <div className="flex-1 overflow-y-auto">
             {loading ? (
