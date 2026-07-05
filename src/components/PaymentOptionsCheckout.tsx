@@ -11,6 +11,8 @@ import {
   Check, AlertCircle, Clock, Award, Pencil
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { findOrCreateGeneralRoom, sendChatMessage } from '@/hooks/useChat';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useLocalizedText } from '@/lib/multilingualUtils';
@@ -58,6 +60,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   // ---- 2-step flow ----
   const [step, setStep] = useState<1 | 2>(1);
   const { user: authUser, profile, loading: authLoading } = useUserAuth();
+  const navigate = useNavigate();
   const { orders: pastOrders } = useUserOrders();
 
   // Auto-detect: authed users default to renewal, guests to new. User can flip.
@@ -419,14 +422,18 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     return orderData;
   };
 
-  const handleWhatsAppOrder = async () => {
+  const handleChatOrder = async () => {
     if (isSubmitting) return;
+    if (!authUser) {
+      toast.error('Please sign in to use Pay with Chat.');
+      return;
+    }
     setIsSubmitting(true);
     setIsProcessing(true);
     try {
       const orderData = await createOrder();
       setPlacedOrderId(orderData.id);
-      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'WhatsApp' });
+      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'Chat' });
 
       const renewalLine = accountType === 'renewal'
         ? `\n🔁 Renewal${selectedRenewalOrderId ? ` — Order #${selectedRenewalOrderId.slice(0,8)}` : ''}`
@@ -459,11 +466,23 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
 Order ID: ${orderData.id}`;
 
-      const url = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
-      setWhatsappUrl(url);
+      // Open (or create) the user's general chat room and post the order details
+      const conv = await findOrCreateGeneralRoom({
+        userId: authUser.id,
+        displayName: formData.customerName || profile?.display_name || authUser.email?.split('@')[0] || 'Customer',
+        email: formData.customerEmail || profile?.email || authUser.email || '',
+      });
+      await sendChatMessage({
+        conversationId: conv.id,
+        senderType: 'user',
+        senderName: formData.customerName || 'Customer',
+        content: message,
+      });
+
       setOrderPlaced(true);
       clearCheckoutDraft(packageData.id);
-      toast.success('Order placed successfully!');
+      toast.success('Order sent to chat!');
+      setTimeout(() => navigate('/chat'), 1500);
     } catch (e) {
       console.error(e);
       toast.error('Failed to create order. Please try again.');
@@ -472,6 +491,7 @@ Order ID: ${orderData.id}`;
       setIsProcessing(false);
     }
   };
+
 
   const handlePayGatePayment = async (paymentType: 'credit_card' | 'crypto') => {
     setIsProcessing(true);
@@ -1081,9 +1101,9 @@ Order ID: ${orderData.id}`;
                       className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold py-2.5 rounded-md border-2 border-transparent transition-all data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:border-orange-600 data-[state=active]:shadow-md data-[state=inactive]:bg-orange-50 data-[state=inactive]:text-orange-700 data-[state=inactive]:hover:bg-orange-100">
                       <Bitcoin className="h-4 w-4" /><span>Crypto</span>
                     </TabsTrigger>
-                    <TabsTrigger value="whatsapp"
+                    <TabsTrigger value="chat"
                       className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold py-2.5 rounded-md border-2 border-transparent transition-all data-[state=active]:bg-green-500 data-[state=active]:text-white data-[state=active]:border-green-600 data-[state=active]:shadow-md data-[state=inactive]:bg-green-50 data-[state=inactive]:text-green-700 data-[state=inactive]:hover:bg-green-100">
-                      <MessageCircle className="h-4 w-4" /><span>WhatsApp</span>
+                      <MessageCircle className="h-4 w-4" /><span>Chat</span>
                     </TabsTrigger>
                   </TabsList>
                   <TabsContent value="credit_card" className="mt-4">
@@ -1106,23 +1126,28 @@ Order ID: ${orderData.id}`;
                   <TabsContent value="crypto" className="mt-4">
                     <DirectCryptoPayment amountUsd={finalTotal} onCreateOrder={handleDirectCryptoCreateOrder} />
                   </TabsContent>
-                  <TabsContent value="whatsapp" className="mt-4">
+                  <TabsContent value="chat" className="mt-4">
                     <Card>
                       <CardContent className="pt-6 space-y-4">
                         <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
                           <MessageCircle className="h-5 w-5 text-green-600 mt-0.5" />
                           <div>
-                            <h4 className="font-semibold text-green-900 mb-1">Order via WhatsApp</h4>
-                            <p className="text-sm text-green-700">Our team will guide you through the payment process.</p>
+                            <h4 className="font-semibold text-green-900 mb-1">Pay with Chat</h4>
+                            <p className="text-sm text-green-700">
+                              {authUser
+                                ? 'We\'ll open your private chat with our team, and your order details are sent automatically. Our team will guide you through payment.'
+                                : 'Sign in first to use Pay with Chat. Your order details will be posted directly in your private chat with our team.'}
+                            </p>
                           </div>
                         </div>
-                        <Button onClick={handleWhatsAppOrder} disabled={isProcessing} className="w-full h-12 bg-green-600 hover:bg-green-700">
+                        <Button onClick={handleChatOrder} disabled={isProcessing || !authUser} className="w-full h-12 bg-green-600 hover:bg-green-700">
                           {isProcessing ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <MessageCircle className="h-5 w-5 mr-2" />}
-                          Continue to WhatsApp
+                          {authUser ? 'Continue in Chat' : 'Sign in to use Chat'}
                         </Button>
                       </CardContent>
                     </Card>
                   </TabsContent>
+
                 </Tabs>
               </div>
             </div>
