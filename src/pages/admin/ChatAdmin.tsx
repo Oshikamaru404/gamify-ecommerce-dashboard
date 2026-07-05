@@ -181,7 +181,7 @@ const ChatAdmin: React.FC = () => {
                     <div className="flex items-center gap-1 flex-wrap mb-1">
                       <Badge className={`text-[10px] ${prio?.bg} ${prio?.color} border-0 px-1.5 py-0`}>{prio?.label}</Badge>
                       <Badge className={`text-[10px] ${status?.color} px-1.5 py-0`}>{status?.label}</Badge>
-                      {tab === 'support' && <span className="text-[10px] text-muted-foreground">{cat?.icon} {cat?.label}</span>}
+                      {cat && c.category !== 'general_room' && <span className="text-[10px] text-muted-foreground">{cat?.icon} {cat?.label}</span>}
                     </div>
                     <div className="text-[10px] text-muted-foreground">
                       {new Date(c.last_message_at).toLocaleString()}
