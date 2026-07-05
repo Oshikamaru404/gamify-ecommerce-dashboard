@@ -11,6 +11,8 @@ import {
   Check, AlertCircle, Clock, Award, Pencil
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { findOrCreateGeneralRoom, sendChatMessage } from '@/hooks/useChat';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useLocalizedText } from '@/lib/multilingualUtils';
@@ -58,6 +60,7 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
   // ---- 2-step flow ----
   const [step, setStep] = useState<1 | 2>(1);
   const { user: authUser, profile, loading: authLoading } = useUserAuth();
+  const navigate = useNavigate();
   const { orders: pastOrders } = useUserOrders();
 
   // Auto-detect: authed users default to renewal, guests to new. User can flip.
