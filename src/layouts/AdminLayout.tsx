@@ -21,20 +21,21 @@ import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAdminChatNotifier } from '@/hooks/useAdminChatNotifier';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const { logout } = useAdminAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+  const { unread: chatUnread } = useAdminChatNotifier();
+
   const navigation = [
     { name: 'Dashboard', href: '/diza', icon: Home },
     { name: 'Orders', href: '/diza/orders', icon: ShoppingCart },
     { name: 'Products', href: '/diza/products', icon: Package },
     { name: 'Content', href: '/diza/content', icon: FileText },
     { name: 'Blog', href: '/diza/blog', icon: BookOpen },
-    { name: 'Communication', href: '/diza/communication', icon: MessageSquare },
-    { name: 'Support Chat', href: '/diza/chat', icon: MessageSquare },
+    { name: 'Chat', href: '/diza/chat', icon: MessageSquare, badge: chatUnread },
     { name: 'Email Templates', href: '/diza/emails', icon: Mail },
     { name: 'Coupons', href: '/diza/coupons', icon: Tag },
     { name: 'Affiliates', href: '/diza/affiliates', icon: Users },
@@ -46,6 +47,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       {navigation.map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.href;
+        const badge = (item as any).badge as number | undefined;
         return (
           <Link
             key={item.name}
@@ -59,7 +61,12 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             )}
           >
             <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
-            {item.name}
+            <span className="flex-1">{item.name}</span>
+            {badge && badge > 0 ? (
+              <span className="ml-2 min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold">
+                {badge > 99 ? '99+' : badge}
+              </span>
+            ) : null}
           </Link>
         );
       })}
