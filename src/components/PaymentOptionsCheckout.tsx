@@ -422,14 +422,18 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     return orderData;
   };
 
-  const handleWhatsAppOrder = async () => {
+  const handleChatOrder = async () => {
     if (isSubmitting) return;
+    if (!authUser) {
+      toast.error('Please sign in to use Pay with Chat.');
+      return;
+    }
     setIsSubmitting(true);
     setIsProcessing(true);
     try {
       const orderData = await createOrder();
       setPlacedOrderId(orderData.id);
-      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'WhatsApp' });
+      triggerOrderEmails({ ...orderData, package_image_url: packageData.icon_url, paymentMethodLabel: 'Chat' });
 
       const renewalLine = accountType === 'renewal'
         ? `\n🔁 Renewal${selectedRenewalOrderId ? ` — Order #${selectedRenewalOrderId.slice(0,8)}` : ''}`
@@ -462,11 +466,23 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
 
 Order ID: ${orderData.id}`;
 
-      const url = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
-      setWhatsappUrl(url);
+      // Open (or create) the user's general chat room and post the order details
+      const conv = await findOrCreateGeneralRoom({
+        userId: authUser.id,
+        displayName: formData.customerName || profile?.display_name || authUser.email?.split('@')[0] || 'Customer',
+        email: formData.customerEmail || profile?.email || authUser.email || '',
+      });
+      await sendChatMessage({
+        conversationId: conv.id,
+        senderType: 'user',
+        senderName: formData.customerName || 'Customer',
+        content: message,
+      });
+
       setOrderPlaced(true);
       clearCheckoutDraft(packageData.id);
-      toast.success('Order placed successfully!');
+      toast.success('Order sent to chat!');
+      setTimeout(() => navigate('/chat'), 1500);
     } catch (e) {
       console.error(e);
       toast.error('Failed to create order. Please try again.');
@@ -475,6 +491,7 @@ Order ID: ${orderData.id}`;
       setIsProcessing(false);
     }
   };
+
 
   const handlePayGatePayment = async (paymentType: 'credit_card' | 'crypto') => {
     setIsProcessing(true);
