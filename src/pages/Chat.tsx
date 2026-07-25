@@ -93,6 +93,7 @@ const Chat: React.FC = () => {
 };
 
 const ChatRoom: React.FC<{ conversationId: string }> = ({ conversationId }) => {
+  const navigate = useNavigate();
   const { conversation } = useConversation(conversationId);
   const { messages } = useConversationMessages(conversationId);
   const [text, setText] = useState('');
