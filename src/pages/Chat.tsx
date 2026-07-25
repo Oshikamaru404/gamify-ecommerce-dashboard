@@ -176,19 +176,27 @@ const ChatRoom: React.FC<{ conversationId: string }> = ({ conversationId }) => {
   }
 
   return (
-    <Card className="flex flex-col h-[calc(100vh-6.5rem)] overflow-hidden">
-      <div className="border-b p-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">💬</span>
-          <div>
-            <div className="font-semibold text-sm">Chat with BWIVOX</div>
-            <div className={`text-[11px] inline-flex items-center gap-1 ${adminOnline ? 'text-emerald-600' : 'text-muted-foreground'}`}>
-              <span className={`h-2 w-2 rounded-full ${adminOnline ? 'bg-emerald-500' : 'bg-gray-300'}`} />
-              {adminOnline ? 'Support online' : 'Offline — we reply by email too'}
-            </div>
+    <div className="flex flex-col h-full w-full bg-background">
+      <div className="border-b bg-white/95 backdrop-blur px-3 sm:px-4 py-2.5 flex items-center gap-3 shadow-sm shrink-0">
+        <button
+          onClick={() => navigate(-1)}
+          className="h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700 shrink-0"
+          aria-label="Back"
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center font-bold shrink-0">
+          B
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm truncate">BWIVOX Support</div>
+          <div className={`text-[11px] inline-flex items-center gap-1 ${adminOnline ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+            <span className={`h-2 w-2 rounded-full ${adminOnline ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
+            {adminTyping ? 'typing…' : adminOnline ? 'Online' : 'Offline — we reply by email too'}
           </div>
         </div>
       </div>
+
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-muted/30">
         {messages.map((m) => {
