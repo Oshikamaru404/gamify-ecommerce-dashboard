@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, X, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, X, Loader2, TrendingUp, Sparkles, Package, Tv, Users, Zap, Play } from 'lucide-react';
 import { useIPTVPackages } from '@/hooks/useIPTVPackages';
 import { useSubscriptionPackages } from '@/hooks/useSubscriptionPackages';
 import { getLocalizedText, generateProductSlug, parseMultilingualText } from '@/lib/multilingualUtils';
@@ -15,47 +15,48 @@ type CategoryKey =
   | 'reseller'
   | 'subscription-pkg';
 
-const CATEGORY_LABEL: Record<CategoryKey, string> = {
-  'subscription': 'Subscription IPTV',
-  'panel-iptv': 'IPTV Panel',
-  'player': 'Player Panel',
-  'activation-player': 'Player Activation',
-  'reseller': 'Reseller',
-  'subscription-pkg': 'Subscription',
+const CATEGORY_META: Record<CategoryKey, { label: string; icon: React.ComponentType<any>; color: string; group: string }> = {
+  'subscription':       { label: 'IPTV Subscription', icon: Tv,      color: 'bg-red-50 text-red-700 border-red-200',           group: 'IPTV' },
+  'subscription-pkg':   { label: 'Subscription',      icon: Tv,      color: 'bg-red-50 text-red-700 border-red-200',           group: 'IPTV' },
+  'panel-iptv':         { label: 'IPTV Panel',        icon: Users,   color: 'bg-blue-50 text-blue-700 border-blue-200',        group: 'Panels' },
+  'player':             { label: 'Player Panel',      icon: Play,    color: 'bg-indigo-50 text-indigo-700 border-indigo-200',  group: 'Panels' },
+  'activation-player':  { label: 'Player Activation', icon: Zap,     color: 'bg-amber-50 text-amber-700 border-amber-200',     group: 'Activation' },
+  'reseller':           { label: 'Reseller',          icon: Package, color: 'bg-emerald-50 text-emerald-700 border-emerald-200', group: 'Reseller' },
 };
+
+const GROUP_ORDER = ['IPTV', 'Panels', 'Activation', 'Reseller'];
 
 const buildHref = (cat: CategoryKey, name: string): string => {
   switch (cat) {
-    case 'panel-iptv':
-      return `/iptv-panel/${generateProductSlug(name)}`;
-    case 'player':
-      return `/player-panel/${generateProductSlug(name)}`;
-    case 'subscription':
-      return `/subscription`;
-    case 'activation-player':
-      return `/activation`;
-    case 'reseller':
-      return `/reseller`;
-    case 'subscription-pkg':
-      return `/subscription`;
+    case 'panel-iptv':        return `/iptv-panel/${generateProductSlug(name)}`;
+    case 'player':            return `/player-panel/${generateProductSlug(name)}`;
+    case 'subscription':      return `/subscription`;
+    case 'activation-player': return `/activation`;
+    case 'reseller':          return `/reseller`;
+    case 'subscription-pkg':  return `/subscription`;
   }
 };
 
-const normalize = (s: string) =>
-  s.toLowerCase().replace(/\s+/g, ' ').trim();
+const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
 
 type Hit = {
   key: string;
   displayName: string;
   iconUrl?: string | null;
+  featured: boolean;
+  minPrice?: number | null;
   categories: { cat: CategoryKey; href: string }[];
+  score: number;
 };
 
 const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ className, compact }) => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: iptvPkgs, isLoading: l1 } = useIPTVPackages();
   const { data: subPkgs, isLoading: l2 } = useSubscriptionPackages();
@@ -71,76 +72,233 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
-  const hits: Hit[] = useMemo(() => {
-    const q = normalize(query);
-    if (q.length < 2) return [];
-
-    type Row = { name: string; iconUrl?: string | null; cat: CategoryKey };
+  const allRows = useMemo(() => {
+    type Row = { name: string; iconUrl?: string | null; cat: CategoryKey; featured: boolean; sort: number; price: number | null };
     const rows: Row[] = [];
+
+    const minPriceIPTV = (p: any): number | null => {
+      const opts = [p.price_1_month, p.price_3_months, p.price_6_months, p.price_12_months,
+                    p.price_10_credits, p.price_25_credits, p.price_50_credits, p.price_100_credits]
+        .filter((v) => typeof v === 'number' && v > 0) as number[];
+      return opts.length ? Math.min(...opts) : null;
+    };
+    const minPriceSub = (p: any): number | null => {
+      const opts = [p.price_3_credits, p.price_6_credits, p.price_12_credits]
+        .filter((v) => typeof v === 'number' && v > 0) as number[];
+      return opts.length ? Math.min(...opts) : null;
+    };
 
     (iptvPkgs || []).forEach((p: any) => {
       if (p.status !== 'active' && p.status !== 'featured') return;
       const cat = p.category as CategoryKey;
-      if (!CATEGORY_LABEL[cat]) return;
-      rows.push({ name: p.name, iconUrl: p.icon_url || p.icon, cat });
+      if (!CATEGORY_META[cat]) return;
+      rows.push({
+        name: p.name, iconUrl: p.icon_url || p.icon, cat,
+        featured: p.status === 'featured',
+        sort: p.sort_order ?? 999,
+        price: minPriceIPTV(p),
+      });
     });
     (subPkgs || []).forEach((p: any) => {
       if (p.status !== 'active' && p.status !== 'featured') return;
-      rows.push({ name: p.name, iconUrl: p.icon_url || p.icon, cat: 'subscription-pkg' });
+      rows.push({
+        name: p.name, iconUrl: p.icon_url || p.icon, cat: 'subscription-pkg',
+        featured: p.status === 'featured',
+        sort: p.sort_order ?? 999,
+        price: minPriceSub(p),
+      });
     });
 
-    // Filter rows whose any translation contains query
-    const matched = rows.filter((r) => {
-      const all = Object.values(parseMultilingualText(r.name));
-      return all.some((v) => normalize(String(v)).includes(q));
-    });
+    return rows;
+  }, [iptvPkgs, subPkgs]);
 
-    // Group by normalized english name
+  const scoreMatch = (haystack: string, q: string): number => {
+    if (!q) return 0;
+    if (haystack === q) return 100;
+    if (haystack.startsWith(q)) return 80;
+    const words = haystack.split(' ');
+    if (words.some((w) => w.startsWith(q))) return 60;
+    if (haystack.includes(q)) return 40;
+    return 0;
+  };
+
+  const hits: Hit[] = useMemo(() => {
+    const q = normalize(query);
+
+    // Group by english-name to merge multi-category products
     const groups = new Map<string, Hit>();
-    matched.forEach((r) => {
+
+    allRows.forEach((r) => {
       const englishName = getLocalizedText(r.name, 'en', 'en').trim();
       const key = normalize(englishName);
       const display = getLocalizedText(r.name, language, 'en').trim() || englishName;
+
+      let score = 0;
+      if (q.length >= 1) {
+        const allNames = Object.values(parseMultilingualText(r.name)).map((v) => normalize(String(v)));
+        score = Math.max(...allNames.map((n) => scoreMatch(n, q)), 0);
+        if (score === 0) return;
+      }
+      // Featured boost
+      if (r.featured) score += 15;
+      // Sort order (lower = more popular)
+      score += Math.max(0, 20 - (r.sort ?? 999));
+
       const href = buildHref(r.cat, r.name);
       if (!groups.has(key)) {
         groups.set(key, {
           key,
           displayName: display,
           iconUrl: r.iconUrl,
+          featured: r.featured,
+          minPrice: r.price,
           categories: [{ cat: r.cat, href }],
+          score,
         });
       } else {
         const g = groups.get(key)!;
         if (!g.iconUrl && r.iconUrl) g.iconUrl = r.iconUrl;
-        if (!g.categories.some((c) => c.cat === r.cat)) {
-          g.categories.push({ cat: r.cat, href });
-        }
+        if (r.featured) g.featured = true;
+        if (r.price != null && (g.minPrice == null || r.price < g.minPrice)) g.minPrice = r.price;
+        if (!g.categories.some((c) => c.cat === r.cat)) g.categories.push({ cat: r.cat, href });
+        g.score = Math.max(g.score, score);
       }
     });
 
-    return Array.from(groups.values()).slice(0, 8);
-  }, [query, iptvPkgs, subPkgs, language]);
+    const arr = Array.from(groups.values()).sort((a, b) => b.score - a.score);
+    return arr.slice(0, q ? 12 : 6);
+  }, [query, allRows, language]);
+
+  // Reset active index whenever hits change
+  useEffect(() => { setActiveIndex(0); }, [query, open]);
+
+  // Group hits by primary category group for the "results" state
+  const grouped = useMemo(() => {
+    const byGroup = new Map<string, Hit[]>();
+    hits.forEach((h) => {
+      const grp = CATEGORY_META[h.categories[0].cat].group;
+      if (!byGroup.has(grp)) byGroup.set(grp, []);
+      byGroup.get(grp)!.push(h);
+    });
+    return GROUP_ORDER
+      .filter((g) => byGroup.has(g))
+      .map((g) => ({ group: g, items: byGroup.get(g)! }));
+  }, [hits]);
+
+  const flatItems: { hit: Hit; href: string }[] = useMemo(
+    () => hits.map((h) => ({ hit: h, href: h.categories[0].href })),
+    [hits],
+  );
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open || flatItems.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((i) => (i + 1) % flatItems.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((i) => (i - 1 + flatItems.length) % flatItems.length);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const item = flatItems[activeIndex];
+      if (item) {
+        navigate(item.href);
+        setOpen(false);
+        setQuery('');
+        inputRef.current?.blur();
+      }
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+      inputRef.current?.blur();
+    }
+  };
+
+  const renderHit = (h: Hit, index: number) => {
+    const primaryCat = h.categories[0];
+    const isActive = flatItems[activeIndex]?.hit.key === h.key;
+    return (
+      <li key={h.key}>
+        <Link
+          to={primaryCat.href}
+          onClick={() => { setOpen(false); setQuery(''); }}
+          onMouseEnter={() => setActiveIndex(index)}
+          className={cn(
+            'flex items-center gap-3 px-3 py-2.5 transition-colors rounded-lg mx-1',
+            isActive ? 'bg-red-50' : 'hover:bg-gray-50',
+          )}
+        >
+          {h.iconUrl ? (
+            <img
+              src={h.iconUrl}
+              alt=""
+              className="h-10 w-10 rounded-lg object-cover border border-gray-100 shrink-0"
+              loading="lazy"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shrink-0 flex items-center justify-center">
+              <Package size={16} className="text-gray-400" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-sm text-gray-900 truncate">{h.displayName}</span>
+              {h.featured && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200 shrink-0">
+                  <Sparkles size={10} /> Popular
+                </span>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1">
+              {h.categories.slice(0, 3).map((c) => {
+                const meta = CATEGORY_META[c.cat];
+                const Icon = meta.icon;
+                return (
+                  <span
+                    key={c.cat}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium border',
+                      meta.color,
+                    )}
+                  >
+                    <Icon size={10} /> {meta.label}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+          {h.minPrice != null && (
+            <div className="text-right shrink-0">
+              <div className="text-[10px] text-gray-500 leading-none">from</div>
+              <div className="text-sm font-bold text-red-600">${h.minPrice}</div>
+            </div>
+          )}
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <div ref={wrapperRef} className={cn('relative', className)}>
       <div className={cn(
         'flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2 transition-all',
-        'focus-within:border-red-500 focus-within:bg-white focus-within:shadow-sm',
-        compact ? 'w-full' : 'w-64 lg:w-80'
+        'focus-within:border-red-500 focus-within:bg-white focus-within:shadow-md focus-within:ring-2 focus-within:ring-red-100',
+        compact ? 'w-full' : 'w-64 lg:w-80',
       )}>
         <Search size={16} className="text-gray-400 shrink-0" />
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          placeholder="Search packages..."
+          onKeyDown={handleKeyDown}
+          placeholder="Search IPTV, panels, activations…"
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
         />
         {query && (
           <button
             type="button"
-            onClick={() => { setQuery(''); setOpen(false); }}
+            onClick={() => { setQuery(''); inputRef.current?.focus(); }}
             className="text-gray-400 hover:text-gray-600"
             aria-label="Clear search"
           >
@@ -149,47 +307,48 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
         )}
       </div>
 
-      {open && query.length >= 2 && (
-        <div className="absolute left-0 right-0 top-full mt-2 max-h-[70vh] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl z-50">
+      {open && (
+        <div className="absolute left-0 right-0 top-full mt-2 max-h-[75vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
           {isLoading ? (
-            <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500">
-              <Loader2 size={16} className="animate-spin" /> Loading...
+            <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
+              <Loader2 size={16} className="animate-spin" /> Loading products…
+            </div>
+          ) : hits.length === 0 && query.length >= 1 ? (
+            <div className="py-10 text-center">
+              <Search size={24} className="mx-auto text-gray-300 mb-2" />
+              <div className="text-sm font-medium text-gray-700">No results for "{query}"</div>
+              <div className="text-xs text-gray-500 mt-1">Try a different keyword or browse categories.</div>
             </div>
           ) : hits.length === 0 ? (
-            <div className="py-6 text-center text-sm text-gray-500">No results for "{query}"</div>
+            <div className="py-8 text-center text-sm text-gray-500">Start typing to search…</div>
           ) : (
-            <ul className="py-2">
-              {hits.map((h) => (
-                <li key={h.key} className="px-3 py-2 hover:bg-gray-50">
-                  <div className="flex items-center gap-3">
-                    {h.iconUrl ? (
-                      <img
-                        src={h.iconUrl}
-                        alt=""
-                        className="h-9 w-9 rounded-md object-cover border border-gray-100 shrink-0"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="h-9 w-9 rounded-md bg-gray-100 shrink-0" />
-                    )}
-                    <div className="font-semibold text-sm text-gray-900 truncate">{h.displayName}</div>
-                  </div>
-                  <div className="mt-2 ml-12 flex flex-wrap gap-1.5">
-                    {h.categories.map((c) => (
-                      <Link
-                        key={c.cat}
-                        to={c.href}
-                        onClick={() => { setOpen(false); setQuery(''); }}
-                        className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-100 transition-colors"
-                      >
-                        {CATEGORY_LABEL[c.cat]}
-                        <span className="text-red-500/70">(1)</span>
-                      </Link>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="py-2">
+              {query.length === 0 && (
+                <div className="px-4 pt-1 pb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                  <TrendingUp size={12} /> Trending now
+                </div>
+              )}
+              {query.length === 0 ? (
+                <ul>{hits.map((h, i) => renderHit(h, i))}</ul>
+              ) : (
+                <>
+                  {grouped.map(({ group, items }) => (
+                    <div key={group} className="mb-1">
+                      <div className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                        {group}
+                      </div>
+                      <ul>
+                        {items.map((h) => renderHit(h, hits.indexOf(h)))}
+                      </ul>
+                    </div>
+                  ))}
+                </>
+              )}
+              <div className="mt-1 border-t px-4 py-2 flex items-center justify-between text-[10px] text-gray-400">
+                <span>↑↓ navigate · ↵ open · esc close</span>
+                <span>{hits.length} result{hits.length > 1 ? 's' : ''}</span>
+              </div>
+            </div>
           )}
         </div>
       )}

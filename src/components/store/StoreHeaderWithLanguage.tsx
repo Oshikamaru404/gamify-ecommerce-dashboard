@@ -116,16 +116,16 @@ const StoreHeaderWithLanguage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <GlobalSearch />
-          <NotificationBell variant="desktop" />
           {user && (
             <Link
               to="/chat"
               aria-label="Chat"
-              className="relative h-10 w-10 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
+              className="relative h-10 w-10 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
             >
               <MessageCircle size={18} />
             </Link>
           )}
+          <NotificationBell variant="desktop" />
           <HeaderAuthButton />
           <CurrencySelector />
           {isLoading ? (
@@ -151,18 +151,18 @@ const StoreHeaderWithLanguage: React.FC = () => {
           <div className="flex items-center gap-1">
             <RegionSettingsSheet />
 
-            <NotificationBell variant="mobile" />
-
             {/* Chat direct — only when logged in */}
             {user && (
               <Link
                 to="/chat"
                 aria-label="Chat"
-                className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700"
+                className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
               >
                 <MessageCircle size={18} />
               </Link>
             )}
+
+            <NotificationBell variant="mobile" />
 
             <HeaderAuthButton />
           </div>
