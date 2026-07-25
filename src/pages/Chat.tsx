@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import StoreLayout from '@/components/store/StoreLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,7 +14,7 @@ import {
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Send, LogIn } from 'lucide-react';
+import { Loader2, Send, LogIn, ArrowLeft } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
 const Chat: React.FC = () => {
