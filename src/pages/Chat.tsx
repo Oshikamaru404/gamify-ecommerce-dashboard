@@ -62,26 +62,28 @@ const Chat: React.FC = () => {
   }, [tokenParam, user, profile]);
 
   return (
-    <StoreLayout hideFooter>
+    <StoreLayout hideHeader hideFooter fullScreen>
       <Helmet>
         <title>Chat — BWIVOX</title>
         <meta name="description" content="Private chat with BWIVOX support." />
       </Helmet>
-      <div className="container mx-auto max-w-4xl px-2 sm:px-4 py-3">
+      <div className="h-full w-full">
         {initializing ? (
-          <Card className="p-10 flex items-center justify-center">
+          <div className="h-full w-full flex items-center justify-center bg-muted/30">
             <Loader2 className="h-6 w-6 animate-spin" />
-          </Card>
+          </div>
         ) : !user && !conversationId ? (
-          <Card className="p-8 text-center space-y-4">
-            <h1 className="text-xl font-bold">Sign in to chat</h1>
-            <p className="text-sm text-muted-foreground">
-              Chat is a private conversation between you and our team. Please sign in to continue.
-            </p>
-            <Button asChild>
-              <Link to="/account"><LogIn className="h-4 w-4 mr-2" /> Sign in</Link>
-            </Button>
-          </Card>
+          <div className="h-full w-full flex items-center justify-center p-4 bg-muted/30">
+            <Card className="p-8 text-center space-y-4 max-w-md w-full">
+              <h1 className="text-xl font-bold">Sign in to chat</h1>
+              <p className="text-sm text-muted-foreground">
+                Chat is a private conversation between you and our team. Please sign in to continue.
+              </p>
+              <Button asChild>
+                <Link to="/account"><LogIn className="h-4 w-4 mr-2" /> Sign in</Link>
+              </Button>
+            </Card>
+          </div>
         ) : conversationId ? (
           <ChatRoom conversationId={conversationId} />
         ) : null}
