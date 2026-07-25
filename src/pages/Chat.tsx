@@ -277,7 +277,7 @@ const ChatRoom: React.FC<{ conversationId: string }> = ({ conversationId }) => {
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
