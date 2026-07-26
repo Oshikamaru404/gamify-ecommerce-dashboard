@@ -40,13 +40,26 @@ const buildHref = (cat: CategoryKey, name: string): string => {
 const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
 
 type Hit = {
-  key: string;
+  key: string;            // unique per (product + category)
+  productKey: string;     // shared across categories of same product
   displayName: string;
   iconUrl?: string | null;
   featured: boolean;
   minPrice?: number | null;
-  categories: { cat: CategoryKey; href: string }[];
+  cat: CategoryKey;
+  href: string;
+  siblingCats: CategoryKey[]; // other categories where same product exists
   score: number;
+};
+
+// Priority ordering: subscription first (most requested), then panels, then activations
+const CAT_PRIORITY: Record<CategoryKey, number> = {
+  'subscription': 0,
+  'subscription-pkg': 0,
+  'panel-iptv': 2,
+  'player': 3,
+  'activation-player': 4,
+  'reseller': 5,
 };
 
 const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ className, compact }) => {
