@@ -258,57 +258,62 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
   };
 
   const renderHit = (h: Hit, index: number) => {
-    const primaryCat = h.categories[0];
     const isActive = flatItems[activeIndex]?.hit.key === h.key;
+    const meta = CATEGORY_META[h.cat];
+    const Icon = meta.icon;
     return (
       <li key={h.key}>
         <Link
-          to={primaryCat.href}
+          to={h.href}
           onClick={() => { setOpen(false); setQuery(''); }}
           onMouseEnter={() => setActiveIndex(index)}
           className={cn(
-            'flex items-center gap-3 px-3 py-2.5 transition-colors rounded-lg mx-1',
-            isActive ? 'bg-red-50' : 'hover:bg-gray-50',
+            'group flex items-center gap-3 px-3 py-2.5 transition-all rounded-lg mx-1 border border-transparent',
+            isActive ? 'bg-red-50 border-red-100' : 'hover:bg-gray-50 hover:border-gray-100',
           )}
         >
           {h.iconUrl ? (
             <img
               src={h.iconUrl}
               alt=""
-              className="h-10 w-10 rounded-lg object-cover border border-gray-100 shrink-0"
+              className="h-11 w-11 rounded-lg object-cover border border-gray-100 shrink-0"
               loading="lazy"
             />
           ) : (
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shrink-0 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shrink-0 flex items-center justify-center">
               <Package size={16} className="text-gray-400" />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-semibold text-sm text-gray-900 truncate">{h.displayName}</span>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border',
+                  meta.color,
+                )}
+              >
+                <Icon size={10} /> {meta.label}
+              </span>
               {h.featured && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200 shrink-0">
                   <Sparkles size={10} /> Popular
                 </span>
               )}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1">
-              {h.categories.slice(0, 3).map((c) => {
-                const meta = CATEGORY_META[c.cat];
-                const Icon = meta.icon;
-                return (
-                  <span
-                    key={c.cat}
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium border',
-                      meta.color,
-                    )}
-                  >
-                    <Icon size={10} /> {meta.label}
-                  </span>
-                );
-              })}
-            </div>
+            {h.siblingCats.length > 0 && (
+              <div className="mt-1 flex items-center gap-1 text-[10px] text-gray-500">
+                <span>Also available as:</span>
+                {h.siblingCats.slice(0, 2).map((sc) => {
+                  const sm = CATEGORY_META[sc];
+                  return (
+                    <span key={sc} className="inline-flex items-center gap-0.5 text-gray-600 font-medium">
+                      <sm.icon size={9} /> {sm.label}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
           {h.minPrice != null && (
             <div className="text-right shrink-0">
@@ -320,6 +325,7 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
       </li>
     );
   };
+
 
   return (
     <div ref={wrapperRef} className={cn('relative', className)}>
