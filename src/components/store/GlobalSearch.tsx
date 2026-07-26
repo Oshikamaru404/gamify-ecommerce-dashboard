@@ -40,13 +40,26 @@ const buildHref = (cat: CategoryKey, name: string): string => {
 const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
 
 type Hit = {
-  key: string;
+  key: string;            // unique per (product + category)
+  productKey: string;     // shared across categories of same product
   displayName: string;
   iconUrl?: string | null;
   featured: boolean;
   minPrice?: number | null;
-  categories: { cat: CategoryKey; href: string }[];
+  cat: CategoryKey;
+  href: string;
+  siblingCats: CategoryKey[]; // other categories where same product exists
   score: number;
+};
+
+// Priority ordering: subscription first (most requested), then panels, then activations
+const CAT_PRIORITY: Record<CategoryKey, number> = {
+  'subscription': 0,
+  'subscription-pkg': 0,
+  'panel-iptv': 2,
+  'player': 3,
+  'activation-player': 4,
+  'reseller': 5,
 };
 
 const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ className, compact }) => {
@@ -125,8 +138,17 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
   const hits: Hit[] = useMemo(() => {
     const q = normalize(query);
 
-    // Group by english-name to merge multi-category products
-    const groups = new Map<string, Hit>();
+    // First pass: aggregate per product
+    type Agg = {
+      productKey: string;
+      displayName: string;
+      iconUrl?: string | null;
+      featured: boolean;
+      minPrice: number | null;
+      score: number;
+      perCat: Map<CategoryKey, { price: number | null; featured: boolean }>;
+    };
+    const agg = new Map<string, Agg>();
 
     allRows.forEach((r) => {
       const englishName = getLocalizedText(r.name, 'en', 'en').trim();
@@ -139,44 +161,65 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
         score = Math.max(...allNames.map((n) => scoreMatch(n, q)), 0);
         if (score === 0) return;
       }
-      // Featured boost
       if (r.featured) score += 15;
-      // Sort order (lower = more popular)
       score += Math.max(0, 20 - (r.sort ?? 999));
 
-      const href = buildHref(r.cat, r.name);
-      if (!groups.has(key)) {
-        groups.set(key, {
-          key,
+      if (!agg.has(key)) {
+        agg.set(key, {
+          productKey: key,
           displayName: display,
           iconUrl: r.iconUrl,
           featured: r.featured,
           minPrice: r.price,
-          categories: [{ cat: r.cat, href }],
           score,
+          perCat: new Map([[r.cat, { price: r.price, featured: r.featured }]]),
         });
       } else {
-        const g = groups.get(key)!;
+        const g = agg.get(key)!;
         if (!g.iconUrl && r.iconUrl) g.iconUrl = r.iconUrl;
         if (r.featured) g.featured = true;
         if (r.price != null && (g.minPrice == null || r.price < g.minPrice)) g.minPrice = r.price;
-        if (!g.categories.some((c) => c.cat === r.cat)) g.categories.push({ cat: r.cat, href });
         g.score = Math.max(g.score, score);
+        const existing = g.perCat.get(r.cat);
+        if (!existing || (r.price != null && (existing.price == null || r.price < existing.price))) {
+          g.perCat.set(r.cat, { price: r.price, featured: r.featured });
+        }
       }
     });
 
-    const arr = Array.from(groups.values()).sort((a, b) => b.score - a.score);
-    return arr.slice(0, q ? 12 : 6);
+    // Second pass: expand into one Hit per (product, category)
+    const out: Hit[] = [];
+    agg.forEach((g) => {
+      const cats = Array.from(g.perCat.keys());
+      cats.forEach((cat) => {
+        const info = g.perCat.get(cat)!;
+        out.push({
+          key: `${g.productKey}::${cat}`,
+          productKey: g.productKey,
+          displayName: g.displayName,
+          iconUrl: g.iconUrl,
+          featured: info.featured || g.featured,
+          minPrice: info.price ?? g.minPrice,
+          cat,
+          href: buildHref(cat, g.displayName),
+          siblingCats: cats.filter((c) => c !== cat),
+          score: g.score + (100 - (CAT_PRIORITY[cat] ?? 9)),
+        });
+      });
+    });
+
+    out.sort((a, b) => b.score - a.score);
+    return out.slice(0, q ? 18 : 8);
   }, [query, allRows, language]);
 
   // Reset active index whenever hits change
   useEffect(() => { setActiveIndex(0); }, [query, open]);
 
-  // Group hits by primary category group for the "results" state
+  // Group hits by category group
   const grouped = useMemo(() => {
     const byGroup = new Map<string, Hit[]>();
     hits.forEach((h) => {
-      const grp = CATEGORY_META[h.categories[0].cat].group;
+      const grp = CATEGORY_META[h.cat].group;
       if (!byGroup.has(grp)) byGroup.set(grp, []);
       byGroup.get(grp)!.push(h);
     });
@@ -186,9 +229,10 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
   }, [hits]);
 
   const flatItems: { hit: Hit; href: string }[] = useMemo(
-    () => hits.map((h) => ({ hit: h, href: h.categories[0].href })),
+    () => hits.map((h) => ({ hit: h, href: h.href })),
     [hits],
   );
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!open || flatItems.length === 0) return;
@@ -214,57 +258,62 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
   };
 
   const renderHit = (h: Hit, index: number) => {
-    const primaryCat = h.categories[0];
     const isActive = flatItems[activeIndex]?.hit.key === h.key;
+    const meta = CATEGORY_META[h.cat];
+    const Icon = meta.icon;
     return (
       <li key={h.key}>
         <Link
-          to={primaryCat.href}
+          to={h.href}
           onClick={() => { setOpen(false); setQuery(''); }}
           onMouseEnter={() => setActiveIndex(index)}
           className={cn(
-            'flex items-center gap-3 px-3 py-2.5 transition-colors rounded-lg mx-1',
-            isActive ? 'bg-red-50' : 'hover:bg-gray-50',
+            'group flex items-center gap-3 px-3 py-2.5 transition-all rounded-lg mx-1 border border-transparent',
+            isActive ? 'bg-red-50 border-red-100' : 'hover:bg-gray-50 hover:border-gray-100',
           )}
         >
           {h.iconUrl ? (
             <img
               src={h.iconUrl}
               alt=""
-              className="h-10 w-10 rounded-lg object-cover border border-gray-100 shrink-0"
+              className="h-11 w-11 rounded-lg object-cover border border-gray-100 shrink-0"
               loading="lazy"
             />
           ) : (
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shrink-0 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 shrink-0 flex items-center justify-center">
               <Package size={16} className="text-gray-400" />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-semibold text-sm text-gray-900 truncate">{h.displayName}</span>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border',
+                  meta.color,
+                )}
+              >
+                <Icon size={10} /> {meta.label}
+              </span>
               {h.featured && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200 shrink-0">
                   <Sparkles size={10} /> Popular
                 </span>
               )}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1">
-              {h.categories.slice(0, 3).map((c) => {
-                const meta = CATEGORY_META[c.cat];
-                const Icon = meta.icon;
-                return (
-                  <span
-                    key={c.cat}
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium border',
-                      meta.color,
-                    )}
-                  >
-                    <Icon size={10} /> {meta.label}
-                  </span>
-                );
-              })}
-            </div>
+            {h.siblingCats.length > 0 && (
+              <div className="mt-1 flex items-center gap-1 text-[10px] text-gray-500">
+                <span>Also available as:</span>
+                {h.siblingCats.slice(0, 2).map((sc) => {
+                  const sm = CATEGORY_META[sc];
+                  return (
+                    <span key={sc} className="inline-flex items-center gap-0.5 text-gray-600 font-medium">
+                      <sm.icon size={9} /> {sm.label}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
           {h.minPrice != null && (
             <div className="text-right shrink-0">
@@ -276,6 +325,7 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
       </li>
     );
   };
+
 
   return (
     <div ref={wrapperRef} className={cn('relative', className)}>
