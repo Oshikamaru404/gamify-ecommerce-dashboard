@@ -138,8 +138,17 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
   const hits: Hit[] = useMemo(() => {
     const q = normalize(query);
 
-    // Group by english-name to merge multi-category products
-    const groups = new Map<string, Hit>();
+    // First pass: aggregate per product
+    type Agg = {
+      productKey: string;
+      displayName: string;
+      iconUrl?: string | null;
+      featured: boolean;
+      minPrice: number | null;
+      score: number;
+      perCat: Map<CategoryKey, { price: number | null; featured: boolean }>;
+    };
+    const agg = new Map<string, Agg>();
 
     allRows.forEach((r) => {
       const englishName = getLocalizedText(r.name, 'en', 'en').trim();
@@ -152,44 +161,65 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
         score = Math.max(...allNames.map((n) => scoreMatch(n, q)), 0);
         if (score === 0) return;
       }
-      // Featured boost
       if (r.featured) score += 15;
-      // Sort order (lower = more popular)
       score += Math.max(0, 20 - (r.sort ?? 999));
 
-      const href = buildHref(r.cat, r.name);
-      if (!groups.has(key)) {
-        groups.set(key, {
-          key,
+      if (!agg.has(key)) {
+        agg.set(key, {
+          productKey: key,
           displayName: display,
           iconUrl: r.iconUrl,
           featured: r.featured,
           minPrice: r.price,
-          categories: [{ cat: r.cat, href }],
           score,
+          perCat: new Map([[r.cat, { price: r.price, featured: r.featured }]]),
         });
       } else {
-        const g = groups.get(key)!;
+        const g = agg.get(key)!;
         if (!g.iconUrl && r.iconUrl) g.iconUrl = r.iconUrl;
         if (r.featured) g.featured = true;
         if (r.price != null && (g.minPrice == null || r.price < g.minPrice)) g.minPrice = r.price;
-        if (!g.categories.some((c) => c.cat === r.cat)) g.categories.push({ cat: r.cat, href });
         g.score = Math.max(g.score, score);
+        const existing = g.perCat.get(r.cat);
+        if (!existing || (r.price != null && (existing.price == null || r.price < existing.price))) {
+          g.perCat.set(r.cat, { price: r.price, featured: r.featured });
+        }
       }
     });
 
-    const arr = Array.from(groups.values()).sort((a, b) => b.score - a.score);
-    return arr.slice(0, q ? 12 : 6);
+    // Second pass: expand into one Hit per (product, category)
+    const out: Hit[] = [];
+    agg.forEach((g) => {
+      const cats = Array.from(g.perCat.keys());
+      cats.forEach((cat) => {
+        const info = g.perCat.get(cat)!;
+        out.push({
+          key: `${g.productKey}::${cat}`,
+          productKey: g.productKey,
+          displayName: g.displayName,
+          iconUrl: g.iconUrl,
+          featured: info.featured || g.featured,
+          minPrice: info.price ?? g.minPrice,
+          cat,
+          href: buildHref(cat, g.displayName),
+          siblingCats: cats.filter((c) => c !== cat),
+          score: g.score + (100 - (CAT_PRIORITY[cat] ?? 9)),
+        });
+      });
+    });
+
+    out.sort((a, b) => b.score - a.score);
+    return out.slice(0, q ? 18 : 8);
   }, [query, allRows, language]);
 
   // Reset active index whenever hits change
   useEffect(() => { setActiveIndex(0); }, [query, open]);
 
-  // Group hits by primary category group for the "results" state
+  // Group hits by category group
   const grouped = useMemo(() => {
     const byGroup = new Map<string, Hit[]>();
     hits.forEach((h) => {
-      const grp = CATEGORY_META[h.categories[0].cat].group;
+      const grp = CATEGORY_META[h.cat].group;
       if (!byGroup.has(grp)) byGroup.set(grp, []);
       byGroup.get(grp)!.push(h);
     });
@@ -199,9 +229,10 @@ const GlobalSearch: React.FC<{ className?: string; compact?: boolean }> = ({ cla
   }, [hits]);
 
   const flatItems: { hit: Hit; href: string }[] = useMemo(
-    () => hits.map((h) => ({ hit: h, href: h.categories[0].href })),
+    () => hits.map((h) => ({ hit: h, href: h.href })),
     [hits],
   );
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!open || flatItems.length === 0) return;
