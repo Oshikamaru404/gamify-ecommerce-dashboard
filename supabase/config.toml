@@ -23,7 +23,25 @@ verify_jwt = false
 [functions.paygate-callback]
 verify_jwt = false
 
+[functions.paygate-create-payment]
+verify_jwt = false
+
+[functions.paygate-create-direct-payment]
+verify_jwt = false
+
+[functions.crypto-create-payment]
+verify_jwt = false
+
+[functions.crypto-watcher]
+verify_jwt = false
+
 [functions.get-order-payment-status]
+verify_jwt = true
+
+[functions.storm-panel-bouquets]
+verify_jwt = true
+
+[functions.storm-panel-fulfill]
 verify_jwt = true
 
 [db]
