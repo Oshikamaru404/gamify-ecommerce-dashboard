@@ -7,16 +7,22 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Clock, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+type PaymentReturnOrder = {
+  payment_status: string;
+  package_name: string | null;
+  duration_months: number | null;
+  amount: number;
+};
+
 const PaymentReturn = () => {
   const [searchParams] = useSearchParams();
   const [paymentStatus, setPaymentStatus] = useState<'loading' | 'success' | 'failed' | 'pending'>('loading');
-  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [orderDetails, setOrderDetails] = useState<PaymentReturnOrder | null>(null);
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
       const orderId = searchParams.get('order_id');
       const uuid = searchParams.get('uuid');
-      const status = searchParams.get('status');
 
       if (!orderId && !uuid) {
         setPaymentStatus('failed');
@@ -24,20 +30,20 @@ const PaymentReturn = () => {
       }
 
       try {
-        // If we have an order_id, check directly in the database (PayGate callback may have already updated it)
+        // Order status is exposed through a limited server response, not the full order row.
         if (orderId) {
-          const { data: order, error: orderError } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('id', orderId)
-            .single();
+          const { data, error: orderError } = await supabase.functions.invoke(
+            'get-order-payment-status',
+            { body: { orderId } }
+          );
 
-          if (orderError) {
+          if (orderError || !data?.order) {
             console.error('Error fetching order:', orderError);
             setPaymentStatus('failed');
             return;
           }
 
+          const order = data.order as PaymentReturnOrder;
           setOrderDetails(order);
 
           if (order.payment_status === 'paid') {
@@ -63,32 +69,28 @@ const PaymentReturn = () => {
             return;
           }
 
-          let orderQuery = supabase.from('orders').select('*');
-          orderQuery = orderQuery.like('customer_whatsapp', `%cryptomus:${uuid}%`);
+          const { data: orderData, error: orderError } = await supabase.functions.invoke(
+            'get-order-payment-status',
+            { body: { providerUuid: uuid } }
+          );
 
-          const { data: orders, error: orderError } = await orderQuery.single();
-
-          if (orderError) {
+          if (orderError || !orderData?.order) {
             console.error('Error fetching order:', orderError);
             setPaymentStatus('failed');
             return;
           }
 
+          const orders = orderData.order as PaymentReturnOrder;
           setOrderDetails(orders);
 
-          if (paymentData?.result?.payment_status === 'paid') {
+          if (paymentData?.result?.payment_status === 'paid' && orders.payment_status === 'paid') {
             setPaymentStatus('success');
-            await supabase
-              .from('orders')
-              .update({ payment_status: 'paid', status: 'processing' })
-              .eq('id', orders.id);
-          } else if (paymentData?.result?.payment_status === 'cancel' || 
-                     paymentData?.result?.payment_status === 'fail') {
+          } else if (
+            orders.payment_status === 'failed' ||
+            paymentData?.result?.payment_status === 'cancel' ||
+            paymentData?.result?.payment_status === 'fail'
+          ) {
             setPaymentStatus('failed');
-            await supabase
-              .from('orders')
-              .update({ payment_status: 'failed', status: 'cancelled' })
-              .eq('id', orders.id);
           } else {
             setPaymentStatus('pending');
           }

@@ -33,11 +33,12 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
-async function sendViaResend(apiKey: string, payload: Record<string, unknown>) {
+async function sendViaResend(apiKey: string, payload: Record<string, unknown>, idempotencyKey?: string) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(payload),
@@ -64,11 +65,15 @@ Deno.serve(async (req) => {
 
   let templateName: string
   let recipientEmail: string
+  let idempotencyKey: string | undefined
   let templateData: Record<string, any> = {}
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
     recipientEmail = body.recipientEmail || body.recipient_email
+    if (typeof body.idempotencyKey === 'string' && /^[a-zA-Z0-9._:-]{1,256}$/.test(body.idempotencyKey)) {
+      idempotencyKey = body.idempotencyKey
+    }
     if (body.templateData && typeof body.templateData === 'object') {
       templateData = body.templateData
     }
@@ -142,7 +147,7 @@ Deno.serve(async (req) => {
     reply_to: REPLY_TO,
   }
 
-  let result = await sendViaResend(resendKey, { ...basePayload, from: PRIMARY_FROM })
+  let result = await sendViaResend(resendKey, { ...basePayload, from: PRIMARY_FROM }, idempotencyKey)
   let usedFrom = PRIMARY_FROM
 
   if (!result.ok) {
@@ -159,7 +164,7 @@ Deno.serve(async (req) => {
         status: result.status,
         message: result.json?.message,
       })
-      result = await sendViaResend(resendKey, { ...basePayload, from: FALLBACK_FROM })
+      result = await sendViaResend(resendKey, { ...basePayload, from: FALLBACK_FROM }, idempotencyKey)
       usedFrom = FALLBACK_FROM
     }
   }

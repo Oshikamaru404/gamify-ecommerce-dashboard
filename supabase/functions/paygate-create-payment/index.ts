@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { validateStormPanelOrder } from "../_shared/storm-panel-order-validation.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,7 +13,19 @@ serve(async (req) => {
   }
 
   try {
-    const { packageData, customerInfo, orderId, paymentType } = await req.json();
+    const { orderId, paymentType } = await req.json();
+    if (typeof orderId !== "string" || !/^[0-9a-f-]{36}$/i.test(orderId)) {
+      return Response.json({ error: "A valid order ID is required" }, {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (paymentType !== 'credit_card' && paymentType !== 'crypto') {
+      return Response.json({ error: "Unsupported payment type" }, {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const usdcWallet = Deno.env.get('PAYGATE_USDC_WALLET');
     if (!usdcWallet) {
@@ -19,12 +33,34 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, serviceKey);
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (orderError) throw orderError;
+    if (!order || order.payment_status !== 'pending') {
+      return Response.json({ error: "Order not found or no longer awaiting payment" }, {
+        status: 409,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const orderValidation = await validateStormPanelOrder(supabase, order);
+    if (orderValidation.error) {
+      return Response.json({ error: orderValidation.error }, {
+        status: 422,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Build callback URL - PayGate sends GET request to this URL
-    const callbackUrl = `${supabaseUrl}/functions/v1/paygate-callback?order_id=${orderId}`;
+    const intentProvider = paymentType === 'credit_card' ? 'paygate_card' : 'paygate_crypto';
+    const callbackUrl = `${supabaseUrl}/functions/v1/paygate-callback?order_id=${orderId}&provider=${intentProvider}`;
 
-    const amount = packageData.price.toFixed(2);
-    const email = customerInfo.customerEmail;
+    const amount = Number(order.amount).toFixed(2);
+    const email = order.customer_email;
 
     let checkoutUrl: string;
 
@@ -39,8 +75,6 @@ serve(async (req) => {
       // Step 1 – create a unique encrypted receiving wallet (address_in) tied to the order.
       const encodedCallback = encodeURIComponent(callbackUrl);
       const walletUrl = `https://api.paygate.to/control/wallet.php?address=${encodeURIComponent(usdcWallet)}&callback=${encodedCallback}`;
-      console.log('Credit card - Creating PayGate wallet:', walletUrl);
-
       const walletResponse = await fetch(walletUrl);
       const contentType = walletResponse.headers.get('content-type');
       if (!walletResponse.ok || !contentType?.includes('application/json')) {
@@ -50,11 +84,22 @@ serve(async (req) => {
       }
 
       const walletData = await walletResponse.json();
-      console.log('Wallet created:', JSON.stringify(walletData));
-
       if (!walletData.address_in) {
         throw new Error('PayGate did not return an encrypted address_in');
       }
+      const callbackAddress = walletData.polygon_address_in ?? walletData.address;
+      if (typeof callbackAddress !== 'string' || !callbackAddress.trim()) {
+        throw new Error('PayGate did not return the callback receiving address');
+      }
+      const { error: intentError } = await supabase
+        .from('storm_panel_payment_intents')
+        .insert({
+          order_id: orderId,
+          provider: 'paygate_card',
+          address_in: callbackAddress,
+          expected_amount: Number(amount),
+        });
+      if (intentError) throw intentError;
 
       const addressIn = walletData.address_in;
 
@@ -129,6 +174,17 @@ serve(async (req) => {
       if (!hostedData.payment_token) {
         throw new Error(`PayGate did not return payment_token: ${JSON.stringify(hostedData)}`);
       }
+      const invoiceId = hostedData.invoice_id ?? hostedData.payment_token;
+      const addressIn = hostedData.address_in ?? hostedData.wallet_address ?? null;
+      const { error: intentError } = await supabase
+        .from('storm_panel_payment_intents')
+        .insert({
+          order_id: orderId,
+          provider: 'paygate_crypto',
+          address_in: typeof addressIn === 'string' ? addressIn : null,
+          invoice_id: String(invoiceId),
+        });
+      if (intentError) throw intentError;
 
       checkoutUrl = `https://checkout.paygate.to/crypto/hosted.php?payment_token=${hostedData.payment_token}`;
       console.log('Crypto hosted checkout URL generated for order:', orderId);
@@ -148,7 +204,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in paygate-create-payment:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Payment creation failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

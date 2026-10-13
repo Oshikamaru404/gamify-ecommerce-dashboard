@@ -47,6 +47,14 @@ interface Props {
   xtreamPassword?: string
   expiration?: string
   notes?: string
+  accounts?: Array<{
+    type: 'm3u' | 'mag'
+    username?: string
+    password?: string
+    mac?: string
+    url?: string
+    expiration?: string
+  }>
   __overrides?: Record<string, string>
 }
 
@@ -63,6 +71,7 @@ const OrderCredentialsDeliveryEmail = (props: Props) => {
     xtreamPassword,
     expiration,
     notes,
+    accounts,
   } = props
   const greeting = ov(props, 'greeting', DEFAULTS.greeting).replace('{name}', customerName || '')
   const taglineText = ov(props, 'tagline', DEFAULTS.tagline)
@@ -151,6 +160,31 @@ const OrderCredentialsDeliveryEmail = (props: Props) => {
                 </div>
               </Section>
             ) : null}
+
+            {accounts?.map((account, index) => (
+              <Section key={`${account.type}-${index}`} style={credentialBox}>
+                <Text style={credentialLabel}>
+                  {account.type === 'mag' ? `MAG device ${index + 1}` : `M3U access ${index + 1}`}
+                </Text>
+                {account.url ? (
+                  <div style={codeBlock}>
+                    <Link href={account.url} style={codeLink}>{account.url}</Link>
+                  </div>
+                ) : null}
+                {account.mac ? (
+                  <Text style={credentialHint}>MAC address: {account.mac}</Text>
+                ) : null}
+                {account.username ? (
+                  <Text style={credentialHint}>Username: {account.username}</Text>
+                ) : null}
+                {account.password ? (
+                  <Text style={credentialHint}>Password: {account.password}</Text>
+                ) : null}
+                {account.expiration ? (
+                  <Text style={credentialHint}>Expires: {account.expiration}</Text>
+                ) : null}
+              </Section>
+            ))}
 
             {hasXtream ? (
               <Section style={credentialBox}>

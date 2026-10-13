@@ -21,6 +21,7 @@ import IPTVCreditOptionsManager from '@/components/admin/IPTVCreditOptionsManage
 import { getLocalizedText } from '@/lib/multilingualUtils';
 import StockPromoEditor, { StockPromoValue } from '@/components/admin/StockPromoEditor';
 import { normalizePromoTiers } from '@/lib/quantityPromo';
+import { useStormPanelBouquets } from '@/hooks/useStormPanelBouquets';
 
 const supportedLanguages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -48,6 +49,7 @@ const packageSchema = z.object({
   icon_url: z.string().optional(),
   sort_order: z.number().optional(),
   status: z.enum(['active', 'inactive', 'featured']).optional(),
+  storm_panel_bouquet_id: z.string().optional(),
 });
 
 type PackageFormValues = z.infer<typeof packageSchema>;
@@ -97,8 +99,12 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
       icon_url: '',
       sort_order: 0,
       status: 'active',
+      storm_panel_bouquet_id: '',
     },
   });
+  const isStormPanelProduct = form.watch('category') === 'subscription';
+  const { data: stormPanelBouquets, isLoading: bouquetsLoading, error: bouquetsError } =
+    useStormPanelBouquets(open && isStormPanelProduct);
 
   React.useEffect(() => {
     if (editingPackage) {
@@ -139,16 +145,17 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         icon_url: editingPackage.icon_url || '',
         sort_order: editingPackage.sort_order || 0,
         status: editingPackage.status || 'active',
+        storm_panel_bouquet_id: editingPackage.storm_panel_bouquet_id || '',
       });
       setStockPromo({
-        stock_enabled: !!(editingPackage as any).stock_enabled,
-        stock_quantity: Number((editingPackage as any).stock_quantity ?? 0),
-        low_stock_threshold: Number((editingPackage as any).low_stock_threshold ?? 5),
-        stock_by_plan: ((editingPackage as any).stock_by_plan && typeof (editingPackage as any).stock_by_plan === 'object')
-          ? (editingPackage as any).stock_by_plan as Record<string, number>
+        stock_enabled: !!editingPackage.stock_enabled,
+        stock_quantity: Number(editingPackage.stock_quantity ?? 0),
+        low_stock_threshold: Number(editingPackage.low_stock_threshold ?? 5),
+        stock_by_plan: (editingPackage.stock_by_plan && typeof editingPackage.stock_by_plan === 'object')
+          ? editingPackage.stock_by_plan
           : {},
-        quantity_promo_mode: ((editingPackage as any).quantity_promo_mode === 'fixed' ? 'fixed' : 'percentage'),
-        quantity_promos: normalizePromoTiers((editingPackage as any).quantity_promos),
+        quantity_promo_mode: (editingPackage.quantity_promo_mode === 'fixed' ? 'fixed' : 'percentage'),
+        quantity_promos: normalizePromoTiers(editingPackage.quantity_promos),
       });
     } else {
       form.reset({
@@ -168,6 +175,7 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         icon_url: '',
         sort_order: 0,
         status: 'active',
+        storm_panel_bouquet_id: '',
       });
       setStockPromo({
         stock_enabled: false,
@@ -206,7 +214,8 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
         stock_by_plan: stockPromo.stock_by_plan ?? {},
         quantity_promo_mode: stockPromo.quantity_promo_mode,
         quantity_promos: stockPromo.quantity_promos,
-      } as any;
+        storm_panel_bouquet_id: data.storm_panel_bouquet_id || null,
+      };
 
       if (editingPackage) {
         await updatePackage.mutateAsync({ id: editingPackage.id, ...packageData });
@@ -317,6 +326,41 @@ const MultilingualPackageDialog: React.FC<MultilingualPackageDialogProps> = ({
                 )}
               />
             </div>
+
+            {isStormPanelProduct && (
+              <div className="space-y-2 rounded-lg border p-4">
+                <Label htmlFor="storm-panel-bouquet">Storm Panel channel package</Label>
+                <Select
+                  value={form.watch('storm_panel_bouquet_id') || 'unassigned'}
+                  onValueChange={(value) =>
+                    form.setValue('storm_panel_bouquet_id', value === 'unassigned' ? '' : value, {
+                      shouldDirty: true,
+                    })
+                  }
+                  disabled={bouquetsLoading}
+                >
+                  <SelectTrigger id="storm-panel-bouquet">
+                    <SelectValue placeholder={bouquetsLoading ? 'Loading packages…' : 'Select a channel package'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Not mapped</SelectItem>
+                    {(stormPanelBouquets || []).map((bouquet) => (
+                      <SelectItem key={bouquet.id} value={bouquet.id}>
+                        {bouquet.name} (ID {bouquet.id})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Select the matching Storm Panel bouquet. Unmapped products will not be activated automatically.
+                </p>
+                {bouquetsError && (
+                  <p role="alert" className="text-sm text-destructive">
+                    Could not load Storm Panel packages. Check the provider API key and retry.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Multilingual Content Section */}
             <div className="space-y-4">

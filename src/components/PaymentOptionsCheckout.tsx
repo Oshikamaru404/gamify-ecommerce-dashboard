@@ -159,7 +159,11 @@ const PaymentOptionsCheckout: React.FC<PaymentOptionsCheckoutProps> = ({
     !!stockPromo?.stock_enabled &&
     stockAvailable > 0 &&
     stockAvailable <= (stockPromo?.low_stock_threshold ?? 0);
-  const maxQty = supportsQuantity ? Math.min(50, stockAvailable === Infinity ? 50 : stockAvailable) : 1;
+  const maxQty = supportsQuantity
+    ? isRenewal && isIptvM3U
+      ? 1
+      : Math.min(50, stockAvailable === Infinity ? 50 : stockAvailable)
+    : 1;
 
   // Effective qty (capped by stock and feature gate)
   const effectiveQty = supportsQuantity ? Math.min(Math.max(1, quantity), maxQty || 1) : 1;
@@ -815,7 +819,9 @@ Order ID: ${orderData.id}`;
                       <p className="text-[11px] text-muted-foreground">
                         {offerKind === 'player_activation'
                           ? 'Pick how many devices to activate (one MAC per device).'
-                          : 'Pick how many subscriptions you need.'}
+                          : isRenewal && isIptvM3U
+                            ? 'M3U renewals apply to one existing account per order.'
+                            : 'Pick how many subscriptions you need.'}
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5">

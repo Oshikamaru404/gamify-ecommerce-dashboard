@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { validateStormPanelOrder } from "../_shared/storm-panel-order-validation.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,9 +29,15 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    const { orderId, network, coin, address, amountUsd } = await req.json();
+    const { orderId, network, coin, address } = await req.json();
 
-    if (!orderId || !network || !coin || !address || !amountUsd) {
+    if (
+      typeof orderId !== 'string' ||
+      !/^[0-9a-f-]{36}$/i.test(orderId) ||
+      typeof network !== 'string' ||
+      typeof coin !== 'string' ||
+      typeof address !== 'string'
+    ) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -39,6 +46,58 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const sb = createClient(supabaseUrl, serviceKey);
+
+    const { data: order, error: orderError } = await sb
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (orderError) throw orderError;
+    if (!order || order.payment_status !== 'pending') {
+      return new Response(JSON.stringify({ error: 'Order not found or no longer awaiting payment' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const orderValidation = await validateStormPanelOrder(sb, order);
+    if (orderValidation.error) {
+      return new Response(JSON.stringify({ error: orderValidation.error }), {
+        status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const amountUsd = Number(order.amount);
+    if (!Number.isFinite(amountUsd) || amountUsd <= 0) {
+      return new Response(JSON.stringify({ error: 'Order has an invalid payment amount' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: walletSetting, error: walletError } = await sb
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'crypto_wallets')
+      .maybeSingle();
+    if (walletError) throw walletError;
+
+    let configuredWallets: Array<{ network?: string; coin?: string; address?: string }> = [];
+    try {
+      const parsed: unknown = JSON.parse(walletSetting?.setting_value ?? '[]');
+      if (Array.isArray(parsed)) configuredWallets = parsed;
+    } catch {
+      throw new Error('Configured crypto wallets are invalid');
+    }
+    const addressMatches = (configured: string, requested: string) =>
+      configured === requested || (/^0x[0-9a-f]{40}$/i.test(configured) && configured.toLowerCase() === requested.toLowerCase());
+    const walletIsConfigured = configuredWallets.some((wallet) =>
+      wallet.network?.toLowerCase() === network.toLowerCase() &&
+      wallet.coin?.toLowerCase() === coin.toLowerCase() &&
+      typeof wallet.address === 'string' &&
+      addressMatches(wallet.address, address)
+    );
+    if (!walletIsConfigured) {
+      return new Response(JSON.stringify({ error: 'The selected payment wallet is not configured for this store' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Get USD price via crypto-price function
     const priceRes = await fetch(
@@ -50,23 +109,26 @@ serve(async (req) => {
     const baseAmount: number = priceData.cryptoAmount;
     const decimals = COIN_DECIMALS[coin.toLowerCase()] ?? 6;
 
-    // Dust offset: count pending intents on same (network, coin) with similar amount
-    const lower = baseAmount * 0.98;
-    const upper = baseAmount * 1.02;
-    const { data: collisions } = await sb
+    const { data: activeIntents, error: activeIntentsError } = await sb
       .from('crypto_payment_intents')
-      .select('id')
+      .select('expected_amount')
       .eq('network', network)
       .eq('coin', coin)
-      .eq('status', 'pending')
-      .gte('expected_amount', lower)
-      .lte('expected_amount', upper);
+      .eq('receiving_address', address)
+      .in('status', ['pending', 'detected']);
+    if (activeIntentsError) throw activeIntentsError;
 
-    const collisionCount = (collisions?.length ?? 0);
     const smallestUnit = Math.pow(10, -decimals);
-    const expectedAmount = parseFloat(
-      (baseAmount + collisionCount * smallestUnit).toFixed(decimals)
-    );
+    const occupiedAmounts = new Set((activeIntents ?? []).map((intent) =>
+      Number(intent.expected_amount).toFixed(decimals)
+    ));
+    let expectedAmount = Number(baseAmount.toFixed(decimals));
+    for (let offset = 0; offset < 1000 && occupiedAmounts.has(expectedAmount.toFixed(decimals)); offset++) {
+      expectedAmount = Number((expectedAmount + smallestUnit).toFixed(decimals));
+    }
+    if (occupiedAmounts.has(expectedAmount.toFixed(decimals))) {
+      throw new Error('Unable to allocate a unique crypto amount; try again shortly');
+    }
 
     const networkKey = network.toLowerCase();
     const minConfirmations =
@@ -83,7 +145,7 @@ serve(async (req) => {
         receiving_address: address,
         expected_amount: expectedAmount,
         amount_usd: amountUsd,
-        tolerance_pct: 2,
+        tolerance_pct: 0,
         min_confirmations: minConfirmations,
         status: 'pending',
         expires_at: expiresAt,

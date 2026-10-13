@@ -203,7 +203,10 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length) return parsed;
-    } catch {}
+    } catch (error) {
+      console.error('Invalid crypto wallet configuration:', error);
+      return [];
+    }
     return DEFAULT_CRYPTO_WALLETS;
   }, [siteSettings]);
 
@@ -311,7 +314,14 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
       } else {
         // ─── PayGate (default) ───
         const { data, error } = await supabase.functions.invoke('paygate-create-direct-payment', {
-          body: { ticker, merchantAddress: selected.address, amountUsd, orderId },
+          body: {
+            ticker,
+            merchantAddress: selected.address,
+            amountUsd,
+            orderId,
+            network: selected.network,
+            coin: selected.coin,
+          },
         });
         if (error) throw error;
         if (!data?.addressIn) throw new Error(data?.error || 'No address returned');
@@ -325,9 +335,9 @@ const DirectCryptoPayment: React.FC<DirectCryptoPaymentProps> = ({ amountUsd, on
         onPaymentReady?.();
         toast.success('Payment address generated. Send the exact amount to confirm.');
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Generate payment error:', e);
-      const msg = e?.message || 'Failed to generate payment address. Please try again.';
+      const msg = e instanceof Error ? e.message : 'Failed to generate payment address. Please try again.';
       setErrorMsg(msg);
       toast.error(msg);
     } finally {

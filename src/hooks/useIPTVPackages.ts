@@ -23,6 +23,7 @@ export type IPTVPackage = {
   sort_order: number | null;
   created_at: string | null;
   updated_at: string | null;
+  storm_panel_bouquet_id?: string | null;
   stock_enabled?: boolean;
   stock_quantity?: number;
   low_stock_threshold?: number;

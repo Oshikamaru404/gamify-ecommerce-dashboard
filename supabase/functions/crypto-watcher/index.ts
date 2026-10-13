@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requestStormPanelFulfillment } from "../_shared/storm-panel-fulfillment.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -371,7 +372,9 @@ async function bchAddressToScripthash(address: string): Promise<string | null> {
   const decoded = decodeCashAddr(address);
   if (!decoded) return null;
   const spk = bchScriptPubKey(decoded);
-  const hashBuf = await crypto.subtle.digest('SHA-256', spk);
+  const digestInput = new Uint8Array(new ArrayBuffer(spk.length));
+  digestInput.set(spk);
+  const hashBuf = await crypto.subtle.digest('SHA-256', digestInput.buffer);
   // ElectrumX wants the scripthash byte-reversed (little-endian display)
   const h = new Uint8Array(hashBuf);
   const reversed = new Uint8Array(32);
@@ -990,20 +993,26 @@ serve(async (req) => {
     let processed = 0, confirmed = 0;
     for (const intent of list) {
       processed++;
-      const sinceTs = Math.floor(new Date(intent.created_at).getTime() / 1000) - 60;
+      const sinceTs = Math.floor(new Date(intent.created_at).getTime() / 1000);
       const txs = await getIncomingTxs(intent.network, intent.coin, intent.receiving_address, sinceTs);
 
-      const tol = intent.tolerance_pct / 100;
-      const lower = intent.expected_amount * (1 - tol);
-      const upper = intent.expected_amount * (1 + tol);
+      const amountDecimals = COIN_DECIMALS[intent.coin.toLowerCase()] ?? 6;
+      const expectedAmount = Number(intent.expected_amount).toFixed(amountDecimals);
 
       // If we already have a tx_hash, just refresh confirmations
       let match: IncomingTx | undefined;
       if (intent.tx_hash) {
-        match = txs.find(t => t.txHash === intent.tx_hash);
+        match = txs.find(t =>
+          t.txHash === intent.tx_hash &&
+          t.timestamp >= sinceTs &&
+          Number(t.amount).toFixed(amountDecimals) === expectedAmount
+        );
       }
       if (!match) {
-        match = txs.find(t => t.amount >= lower && t.amount <= upper);
+        match = txs.find(t =>
+          t.timestamp >= sinceTs &&
+          Number(t.amount).toFixed(amountDecimals) === expectedAmount
+        );
       }
 
       const update: Record<string, unknown> = { last_checked_at: new Date().toISOString() };
@@ -1014,20 +1023,51 @@ serve(async (req) => {
         update.detected_amount = match.amount;
 
         if (match.confirmations >= intent.min_confirmations) {
-          update.status = 'confirmed';
-          update.confirmed_at = new Date().toISOString();
-          // Mark order paid and fetch updated row.
-          // NOTE: orders.status check constraint allows: pending|processing|shipped|delivered|cancelled
+          const { error: proofError } = await sb
+            .from('storm_panel_payment_proofs')
+            .insert({
+              order_id: intent.order_id,
+              provider: 'self_hosted',
+              transaction_id: match.txHash,
+              metadata: {
+                intent_id: intent.id,
+                network: intent.network,
+                coin: intent.coin,
+                amount: match.amount,
+                confirmations: match.confirmations,
+              },
+            });
+          if (proofError && proofError.code !== '23505') throw proofError;
+          if (proofError?.code === '23505') {
+            const { data: existingProof, error: existingProofError } = await sb
+              .from('storm_panel_payment_proofs')
+              .select('order_id')
+              .eq('provider', 'self_hosted')
+              .eq('transaction_id', match.txHash)
+              .maybeSingle();
+            if (existingProofError) throw existingProofError;
+            if (existingProof?.order_id !== intent.order_id) {
+              throw new Error('Confirmed blockchain transaction is already attached to another order');
+            }
+          }
+
           const { data: paidOrder, error: orderUpdErr } = await sb
             .from('orders')
             .update({ payment_status: 'paid', status: 'processing' })
             .eq('id', intent.order_id)
+            .eq('payment_status', 'pending')
             .select()
-            .single();
+            .maybeSingle();
           if (orderUpdErr) {
             console.error(`Order update failed for ${intent.order_id}:`, orderUpdErr);
-          } else {
-            console.log(`Order ${intent.order_id} marked paid/processing`);
+            throw orderUpdErr;
+          }
+          const { data: currentOrder, error: currentOrderError } = paidOrder
+            ? { data: paidOrder, error: null }
+            : await sb.from('orders').select('*').eq('id', intent.order_id).maybeSingle();
+          if (currentOrderError) throw currentOrderError;
+          if (!currentOrder || currentOrder.payment_status !== 'paid') {
+            throw new Error(`Order ${intent.order_id} is not eligible for paid fulfillment`);
           }
           // Best-effort WhatsApp notification
           try {
@@ -1073,13 +1113,29 @@ serve(async (req) => {
               });
             } catch (e) { console.warn('Email notify failed:', e); }
           }
+          try {
+            await requestStormPanelFulfillment(
+              Deno.env.get('SUPABASE_URL')!,
+              Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+              intent.order_id,
+            );
+            update.status = 'confirmed';
+            update.confirmed_at = new Date().toISOString();
+          } catch (e) {
+            console.error(`Storm Panel fulfillment will be retried for ${intent.order_id}:`, e);
+            update.status = 'detected';
+          }
           confirmed++;
         } else if (intent.status === 'pending') {
           update.status = 'detected';
         }
       }
 
-      await sb.from('crypto_payment_intents').update(update).eq('id', intent.id);
+      const { error: intentUpdateError } = await sb
+        .from('crypto_payment_intents')
+        .update(update)
+        .eq('id', intent.id);
+      if (intentUpdateError) throw intentUpdateError;
     }
 
     return new Response(JSON.stringify({ ok: true, processed, confirmed }), {

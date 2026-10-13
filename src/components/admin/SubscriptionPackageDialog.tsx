@@ -12,6 +12,7 @@ import EditableFeatureList from '@/components/admin/EditableFeatureList';
 import ImageUploader from './ImageUploader';
 import CreditOptionsManager from './CreditOptionsManager';
 import StockPromoEditor, { StockPromoValue } from './StockPromoEditor';
+import { useStormPanelBouquets } from '@/hooks/useStormPanelBouquets';
 
 type SubscriptionPackageDialogProps = {
   open: boolean;
@@ -26,6 +27,8 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
 }) => {
   const createPackage = useCreateSubscriptionPackage();
   const updatePackage = useUpdateSubscriptionPackage();
+  const { data: stormPanelBouquets, isLoading: bouquetsLoading, error: bouquetsError } =
+    useStormPanelBouquets(open);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -45,11 +48,13 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
     quantity_promo_mode: 'percentage',
     quantity_promos: [],
   });
+  const [stormPanelBouquetId, setStormPanelBouquetId] = useState('');
   
   
 
   useEffect(() => {
     if (pkg) {
+      setStormPanelBouquetId(pkg.storm_panel_bouquet_id || '');
       setFormData({
         name: pkg.name || '',
         description: pkg.description || '',
@@ -60,16 +65,17 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
         sort_order: pkg.sort_order?.toString() || '0',
       });
       setStockPromo({
-        stock_enabled: !!(pkg as any).stock_enabled,
-        stock_quantity: (pkg as any).stock_quantity ?? 0,
-        low_stock_threshold: (pkg as any).low_stock_threshold ?? 5,
-        stock_by_plan: ((pkg as any).stock_by_plan && typeof (pkg as any).stock_by_plan === 'object')
-          ? (pkg as any).stock_by_plan as Record<string, number>
+        stock_enabled: !!pkg.stock_enabled,
+        stock_quantity: pkg.stock_quantity ?? 0,
+        low_stock_threshold: pkg.low_stock_threshold ?? 5,
+        stock_by_plan: (pkg.stock_by_plan && typeof pkg.stock_by_plan === 'object')
+          ? pkg.stock_by_plan
           : {},
-        quantity_promo_mode: (pkg as any).quantity_promo_mode ?? 'percentage',
-        quantity_promos: Array.isArray((pkg as any).quantity_promos) ? (pkg as any).quantity_promos : [],
+        quantity_promo_mode: pkg.quantity_promo_mode ?? 'percentage',
+        quantity_promos: Array.isArray(pkg.quantity_promos) ? pkg.quantity_promos : [],
       });
     } else {
+      setStormPanelBouquetId('');
       setFormData({
         name: '',
         description: '',
@@ -106,6 +112,7 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
       stock_by_plan: stockPromo.stock_by_plan ?? {},
       quantity_promo_mode: stockPromo.quantity_promo_mode,
       quantity_promos: stockPromo.quantity_promos,
+      storm_panel_bouquet_id: stormPanelBouquetId || null,
       // Legacy fields for backward compatibility - these are no longer used in the new dynamic credit system
       price_3_credits: null,
       price_6_credits: null,
@@ -113,7 +120,7 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
       credits_3_months: null,
       credits_6_months: null,
       credits_12_months: null,
-    } as any;
+    };
     
     if (pkg) {
       updatePackage.mutate({ id: pkg.id, ...packageData });
@@ -144,6 +151,34 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
           </TabsList>
           
           <TabsContent value="basic" className="space-y-4">
+            <div className="space-y-2 rounded-lg border p-4">
+              <Label htmlFor="storm-panel-subscription-bouquet">Storm Panel channel package</Label>
+              <Select
+                value={stormPanelBouquetId || 'unassigned'}
+                onValueChange={(value) => setStormPanelBouquetId(value === 'unassigned' ? '' : value)}
+                disabled={bouquetsLoading}
+              >
+                <SelectTrigger id="storm-panel-subscription-bouquet">
+                  <SelectValue placeholder={bouquetsLoading ? 'Loading packages…' : 'Select a channel package'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Not mapped</SelectItem>
+                  {(stormPanelBouquets || []).map((bouquet) => (
+                    <SelectItem key={bouquet.id} value={bouquet.id}>
+                      {bouquet.name} (ID {bouquet.id})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Select the matching Storm Panel bouquet. Unmapped products will not be activated automatically.
+              </p>
+              {bouquetsError && (
+                <p role="alert" className="text-sm text-destructive">
+                  Could not load Storm Panel packages. Check the provider API key and retry.
+                </p>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="name">Package Name</Label>
@@ -177,7 +212,11 @@ const SubscriptionPackageDialog: React.FC<SubscriptionPackageDialogProps> = ({
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
+                  onValueChange={(value) => {
+                    if (value === 'active' || value === 'inactive' || value === 'featured') {
+                      setFormData(prev => ({ ...prev, status: value }));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
