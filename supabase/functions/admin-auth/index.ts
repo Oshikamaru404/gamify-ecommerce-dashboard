@@ -5,7 +5,7 @@ import * as OTPAuth from "npm:otpauth@9.4.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-recovery-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -26,19 +26,6 @@ function response(body: Record<string, unknown>, status = 200): Response {
 
 function getSyntheticEmail(adminId: string): string {
   return `admin-${adminId}@bwivox.invalid`;
-}
-
-function secretsMatch(expected: string, provided: string): boolean {
-  const encoder = new TextEncoder();
-  const expectedBytes = encoder.encode(expected);
-  const providedBytes = encoder.encode(provided);
-  let difference = expectedBytes.length ^ providedBytes.length;
-
-  for (let index = 0; index < Math.max(expectedBytes.length, providedBytes.length); index++) {
-    difference |= (expectedBytes[index] ?? 0) ^ (providedBytes[index] ?? 0);
-  }
-
-  return difference === 0;
 }
 
 function generateBackupCodes(): string[] {
@@ -121,39 +108,6 @@ serve(async (req) => {
     }
     const payload = body as Record<string, unknown>;
     const action = payload.action;
-
-    if (action === "recover-shika-password") {
-      const recoverySecret = Deno.env.get("ADMIN_RECOVERY_TOKEN");
-      if (!recoverySecret || new TextEncoder().encode(recoverySecret).length < 32) {
-        console.error("Admin recovery is not configured with a sufficiently long secret");
-        return response({ error: "Temporary recovery is unavailable" }, 503);
-      }
-
-      const providedSecret = req.headers.get("x-admin-recovery-token") ?? "";
-      if (
-        new TextEncoder().encode(providedSecret).length < 32 ||
-        !secretsMatch(recoverySecret, providedSecret)
-      ) {
-        return response({ error: "Invalid recovery authorization" }, 401);
-      }
-
-      const newPassword = typeof payload.newPassword === "string" ? payload.newPassword : "";
-      const newPasswordBytes = new TextEncoder().encode(newPassword).length;
-      if (newPassword.length < 12 || newPasswordBytes > 72) {
-        return response({ error: "New password must be at least 12 characters and no more than 72 UTF-8 bytes" }, 400);
-      }
-
-      const passwordHash = await bcrypt.hash(newPassword, 12);
-      const { data, error } = await service.rpc("recover_shika_admin_password", {
-        p_password_hash: passwordHash,
-      });
-      if (error) throw error;
-      if (data !== true) {
-        return response({ error: "Temporary recovery has expired or was already used" }, 410);
-      }
-
-      return response({ success: true });
-    }
 
     if (action === "login") {
       const username = typeof payload.username === "string" ? payload.username.trim() : "";

@@ -1,0 +1,1 @@
+DROP FUNCTION public.recover_shika_admin_password(text);
