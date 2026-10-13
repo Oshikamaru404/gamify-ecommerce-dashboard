@@ -2,8 +2,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function invokeAdminAuth<T extends Record<string, unknown>>(
   body: Record<string, unknown>,
+  headers?: Record<string, string>,
 ): Promise<T> {
-  const { data, error } = await supabase.functions.invoke('admin-auth', { body });
+  const { data, error } = await supabase.functions.invoke('admin-auth', { body, headers });
 
   if (error) {
     let message = error.message;

@@ -8,12 +8,22 @@ import { Label } from '@/components/ui/label';
 import { Shield } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { invokeAdminAuth } from '@/lib/adminAuth';
+
+interface RecoveryResponse extends Record<string, unknown> {
+  error?: string;
+}
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [recoveryToken, setRecoveryToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [isRecovering, setIsRecovering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, verifyOtp, adminUser, isLoading: authLoading } = useAdminAuth();
   const { toast } = useToast();
@@ -26,6 +36,45 @@ const AdminLogin = () => {
       navigate('/diza', { replace: true });
     }
   }, [adminUser, authLoading, navigate]);
+
+  const handleRecovery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: 'Error',
+        description: 'The new passwords do not match',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsRecovering(true);
+    try {
+      const result = await invokeAdminAuth<RecoveryResponse>(
+        { action: 'recover-shika-password', newPassword },
+        { 'x-admin-recovery-token': recoveryToken },
+      );
+      if (result.error) throw new Error(result.error);
+
+      setRecoveryToken('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setShowRecovery(false);
+      toast({
+        title: 'Password reset',
+        description: 'You can now sign in as shika. The temporary recovery can only be used once.',
+      });
+    } catch (error) {
+      console.error('Admin recovery failed', error);
+      toast({
+        title: 'Recovery failed',
+        description: error instanceof Error ? error.message : 'Could not recover admin access',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRecovering(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,65 +205,140 @@ const AdminLogin = () => {
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!showOtpInput ? (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
-                    disabled={isLoading}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    disabled={isLoading}
-                    required
+          {showRecovery ? (
+            <form onSubmit={handleRecovery} className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                One-time recovery for the shika administrator account. Enter the temporary secret
+                configured in Supabase and choose a new password. Do not share either value.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="recoveryToken">Temporary recovery secret</Label>
+                <Input
+                  id="recoveryToken"
+                  type="password"
+                  value={recoveryToken}
+                  onChange={(e) => setRecoveryToken(e.target.value)}
+                  minLength={32}
+                  maxLength={256}
+                  autoComplete="off"
+                  disabled={isRecovering}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newAdminPassword">New password</Label>
+                <Input
+                  id="newAdminPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  minLength={12}
+                  maxLength={72}
+                  autoComplete="new-password"
+                  disabled={isRecovering}
+                  required
                 />
                 <p className="text-xs text-muted-foreground">
-                  Enter your 6-digit code from Google Authenticator or an 8-character backup code
+                  Use at least 12 characters; passwords over 72 UTF-8 bytes are not accepted.
                 </p>
               </div>
-              </>
-            ) : (
               <div className="space-y-2">
-                <Label htmlFor="otp">Authentication Code</Label>
+                <Label htmlFor="confirmAdminPassword">Confirm new password</Label>
                 <Input
-                  id="otp"
-                  type="text"
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
-                  placeholder="Enter code"
-                  disabled={isLoading}
-                  maxLength={8}
+                  id="confirmAdminPassword"
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  minLength={12}
+                  maxLength={72}
+                  autoComplete="new-password"
+                  disabled={isRecovering}
                   required
-                  className="text-center text-xl tracking-widest font-mono"
                 />
-                <p className="text-sm text-muted-foreground text-center">
-                  Enter the code from your authenticator app
-                </p>
               </div>
-            )}
-            <Button
-              type="submit"
-              className="w-full bg-red-600 hover:bg-red-700"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full" disabled={isRecovering}>
+                {isRecovering ? 'Recovering...' : 'Reset password once'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={isRecovering}
+                onClick={() => setShowRecovery(false)}
+              >
+                Back to sign in
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {!showOtpInput ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Enter your username"
+                      disabled={isLoading}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      disabled={isLoading}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Enter your 6-digit code from Google Authenticator or an 8-character backup code
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="otp">Authentication Code</Label>
+                  <Input
+                    id="otp"
+                    type="text"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
+                    placeholder="Enter code"
+                    disabled={isLoading}
+                    maxLength={8}
+                    required
+                    className="text-center text-xl tracking-widest font-mono"
+                  />
+                  <p className="text-sm text-muted-foreground text-center">
+                    Enter the code from your authenticator app
+                  </p>
+                </div>
+              )}
+              <Button
+                type="submit"
+                className="w-full bg-red-600 hover:bg-red-700"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Signing in...' : 'Sign In'}
+              </Button>
+              {!showOtpInput && (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full"
+                  onClick={() => setShowRecovery(true)}
+                >
+                  Recover shika admin access
+                </Button>
+              )}
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
