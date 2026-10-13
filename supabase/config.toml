@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.send-chat-notification]
 verify_jwt = false
+
+[functions.admin-auth]
+verify_jwt = false

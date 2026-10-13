@@ -35,10 +35,11 @@ export const UserAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     // Set up listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      if (newSession?.user) {
-        setTimeout(() => loadProfile(newSession.user.id), 0);
+      const customerSession = newSession?.user.app_metadata?.admin === true ? null : newSession;
+      setSession(customerSession);
+      setUser(customerSession?.user ?? null);
+      if (customerSession?.user) {
+        setTimeout(() => loadProfile(customerSession.user.id), 0);
       } else {
         setProfile(null);
       }
@@ -46,9 +47,10 @@ export const UserAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Then check existing session
     supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) loadProfile(s.user.id);
+      const customerSession = s?.user.app_metadata?.admin === true ? null : s;
+      setSession(customerSession);
+      setUser(customerSession?.user ?? null);
+      if (customerSession?.user) loadProfile(customerSession.user.id);
       setLoading(false);
     });
 

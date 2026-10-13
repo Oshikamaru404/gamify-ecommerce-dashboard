@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,7 +67,7 @@ const AdminLogin = () => {
           console.log('AdminLogin - Login failed');
           toast({
             title: 'Login Failed',
-            description: 'Invalid username or password. Please try again.',
+            description: result.error || 'Invalid username or password. Please try again.',
             variant: 'destructive',
           });
         }
@@ -75,7 +75,7 @@ const AdminLogin = () => {
         console.error('AdminLogin - Login error:', error);
         toast({
           title: 'Error',
-          description: 'An error occurred during login. Please try again.',
+          description: error instanceof Error ? error.message : 'An error occurred during login. Please try again.',
           variant: 'destructive',
         });
       } finally {
@@ -115,7 +115,7 @@ const AdminLogin = () => {
         console.error('AdminLogin - OTP verification error:', error);
         toast({
           title: 'Error',
-          description: 'An error occurred during verification. Please try again.',
+          description: error instanceof Error ? error.message : 'An error occurred during verification. Please try again.',
           variant: 'destructive',
         });
       } finally {
@@ -214,17 +214,6 @@ const AdminLogin = () => {
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
-            
-            {!showOtpInput && (
-              <div className="text-center mt-4">
-                <Link 
-                  to="/diza/reset-password" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
-            )}
           </form>
         </CardContent>
       </Card>

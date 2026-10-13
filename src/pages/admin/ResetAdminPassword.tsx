@@ -1,73 +1,65 @@
 import React, { useState } from 'react';
+import { Navigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import bcrypt from 'bcryptjs';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { invokeAdminAuth } from '@/lib/adminAuth';
+
+interface AdminAuthActionResponse extends Record<string, unknown> {
+  error?: string;
+}
 
 const ResetAdminPassword = () => {
-  const [username, setUsername] = useState('admin');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { adminUser, isLoading: isAuthLoading } = useAdminAuth();
+
+  if (isAuthLoading) return null;
+  if (!adminUser) return <Navigate to="/diza/login" replace />;
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newPassword || newPassword.length < 6) {
-      toast({
-        title: 'Error',
-        description: 'Password must be at least 6 characters',
-        variant: 'destructive',
-      });
+    if (newPassword.length < 8) {
+      toast({ title: 'Error', description: 'Password must contain at least 8 characters', variant: 'destructive' });
       return;
     }
-
     if (newPassword !== confirmPassword) {
-      toast({
-        title: 'Error',
-        description: 'Passwords do not match',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Passwords do not match', variant: 'destructive' });
       return;
     }
 
-    setIsLoading(true);
-
+    setIsSaving(true);
     try {
-      // Hash the new password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-      // Update the admin user password
-      const { error } = await supabase
-        .from('admin_users')
-        .update({ password_hash: hashedPassword } as any)
-        .eq('username', username);
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: 'Success',
-        description: 'Admin password has been reset successfully!',
+      const data = await invokeAdminAuth<AdminAuthActionResponse>({
+        action: 'change-credentials',
+        currentPassword,
+        newPassword,
+        otpCode,
       });
+      if (data?.error) throw new Error(data.error);
 
-      // Clear form
+      toast({ title: 'Success', description: 'Password updated successfully.' });
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setOtpCode('');
     } catch (error) {
-      console.error('Password reset error:', error);
+      console.error('Admin password update failed', error);
       toast({
         title: 'Error',
-        description: 'Failed to reset password. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to update password',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -75,21 +67,21 @@ const ResetAdminPassword = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Reset Admin Password</CardTitle>
+          <CardTitle className="text-2xl font-bold">Change Admin Password</CardTitle>
+          <p className="text-sm text-muted-foreground">Your current password is required to continue.</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleReset} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="currentPassword">Current Password</Label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="newPassword">New Password</Label>
               <Input
@@ -97,11 +89,10 @@ const ResetAdminPassword = () => {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
+                minLength={8}
                 required
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <Input
@@ -109,13 +100,25 @@ const ResetAdminPassword = () => {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
+                minLength={8}
                 required
               />
             </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Resetting...' : 'Reset Password'}
+            <div className="space-y-2">
+              <Label htmlFor="otpCode">Authenticator or Backup Code (if 2FA is enabled)</Label>
+              <Input
+                id="otpCode"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
+                maxLength={8}
+                autoComplete="one-time-code"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isSaving}>
+              {isSaving ? 'Updating...' : 'Update Password'}
+            </Button>
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/diza">Back to Admin</Link>
             </Button>
           </form>
         </CardContent>

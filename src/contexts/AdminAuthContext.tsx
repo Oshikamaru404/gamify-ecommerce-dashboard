@@ -1,43 +1,57 @@
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
-import * as OTPAuth from 'otpauth';
-import bcrypt from 'bcryptjs';
+import { invokeAdminAuth } from '@/lib/adminAuth';
 
 interface AdminUser {
   id: string;
   username: string;
-  email?: string;
-  twoFactorEnabled?: boolean;
 }
 
 interface LoginResult {
   success: boolean;
   requires2FA?: boolean;
+  error?: string;
 }
 
 interface AdminAuthContextType {
   adminUser: AdminUser | null;
   login: (username: string, password: string) => Promise<LoginResult>;
   verifyOtp: (code: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
 interface PendingAuth {
-  id: string;
   username: string;
-  role: string;
+  password: string;
+}
+
+interface LoginResponse extends Record<string, unknown> {
+  success?: boolean;
+  requires2FA?: boolean;
+  error?: string;
+  session?: {
+    access_token?: unknown;
+    refresh_token?: unknown;
+  };
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
+function getAdminUser(user: User | null): AdminUser | null {
+  if (!user || user.app_metadata?.admin !== true) return null;
+  return {
+    id: user.id,
+    username: typeof user.app_metadata.admin_username === 'string'
+      ? user.app_metadata.admin_username
+      : 'admin',
+  };
+}
+
 export const useAdminAuth = () => {
   const context = useContext(AdminAuthContext);
-  if (context === undefined) {
-    throw new Error('useAdminAuth must be used within an AdminAuthProvider');
-  }
+  if (!context) throw new Error('useAdminAuth must be used within an AdminAuthProvider');
   return context;
 };
 
@@ -47,169 +61,81 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [pendingAuth, setPendingAuth] = useState<PendingAuth | null>(null);
 
   useEffect(() => {
-    // Check for existing admin session in localStorage
-    const checkAdminSession = () => {
-      try {
-        const savedAdmin = localStorage.getItem('admin_user');
-        if (savedAdmin) {
-          const adminData = JSON.parse(savedAdmin);
-          console.log('AdminAuth - Found saved admin session:', adminData);
-          setAdminUser(adminData);
-        }
-      } catch (error) {
-        console.error('AdminAuth - Error checking saved session:', error);
-        localStorage.removeItem('admin_user');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    localStorage.removeItem('admin_user');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAdminUser(getAdminUser(session?.user ?? null));
+      setIsLoading(false);
+    });
 
-    checkAdminSession();
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        console.error('Could not restore admin authentication session', error);
+        setAdminUser(null);
+      } else {
+        setAdminUser(getAdminUser(data.session?.user ?? null));
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (username: string, password: string): Promise<LoginResult> => {
-    try {
-      console.log('AdminAuth - Attempting admin login with:', { username });
-      
-      // Fetch admin user from database
-      const { data: adminUserData, error: fetchError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('username', username)
-        .maybeSingle() as any;
-
-      if (fetchError) {
-        console.error('Error fetching admin user:', fetchError);
-        return { success: false };
-      }
-
-      if (!adminUserData) {
-        console.log('AdminAuth - User not found');
-        return { success: false };
-      }
-
-      // Verify password hash
-      const isPasswordValid = await bcrypt.compare(password, adminUserData.password_hash || '');
-      
-      if (!isPasswordValid) {
-        console.log('AdminAuth - Invalid password');
-        return { success: false };
-      }
-
-      // Check if 2FA is enabled
-      if (adminUserData.two_factor_enabled && adminUserData.two_factor_secret) {
-        console.log('AdminAuth - 2FA enabled, requiring OTP');
-        setPendingAuth({
-          id: adminUserData.id,
-          username: adminUserData.username,
-          role: adminUserData.role
-        });
-        return { success: true, requires2FA: true };
-      }
-
-      // No 2FA required, complete login
-      const adminData = {
-        id: adminUserData.id,
-        username: adminUserData.username,
-        twoFactorEnabled: adminUserData.two_factor_enabled || false
-      };
-      
-      console.log('AdminAuth - Login successful, setting admin user:', adminData);
-      setAdminUser(adminData);
-      localStorage.setItem('admin_user', JSON.stringify(adminData));
-      
-      return { success: true, requires2FA: false };
-    } catch (error) {
-      console.error('AdminAuth - Login error:', error);
-      return { success: false };
+  const establishSession = async (
+    credentials: PendingAuth,
+    otpCode?: string,
+  ): Promise<LoginResult> => {
+    const data = await invokeAdminAuth<LoginResponse>({
+      action: 'login',
+      ...credentials,
+      ...(otpCode ? { otpCode } : {}),
+    });
+    if (data?.success !== true) {
+      return { success: false, error: typeof data?.error === 'string' ? data.error : undefined };
     }
+    if (data.requires2FA === true) return { success: true, requires2FA: true };
+    if (
+      typeof data.session?.access_token !== 'string' ||
+      typeof data.session?.refresh_token !== 'string'
+    ) {
+      throw new Error('Admin authentication returned an incomplete session');
+    }
+
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    });
+    if (sessionError) throw sessionError;
+    const authenticatedAdmin = getAdminUser(sessionData.session?.user ?? null);
+    if (!authenticatedAdmin) {
+      await supabase.auth.signOut({ scope: 'local' });
+      throw new Error('The authenticated account is not authorized as an administrator');
+    }
+
+    setAdminUser(authenticatedAdmin);
+    setPendingAuth(null);
+    return { success: true };
+  };
+
+  const login = async (username: string, password: string): Promise<LoginResult> => {
+    const credentials = { username, password };
+    const result = await establishSession(credentials);
+    if (result.requires2FA) setPendingAuth(credentials);
+    return result;
   };
 
   const verifyOtp = async (code: string): Promise<{ success: boolean; error?: string }> => {
-    if (!pendingAuth) {
-      return { success: false, error: 'No pending authentication' };
-    }
-
-    try {
-      const { data: adminUser } = await supabase
-        .from('admin_users')
-        .select('two_factor_secret, backup_codes')
-        .eq('username', pendingAuth.username)
-        .single();
-
-      if (!adminUser?.two_factor_secret) {
-        return { success: false, error: 'Two-factor authentication not configured' };
-      }
-
-      // Check if it's a backup code (8 characters)
-      if (code.length === 8) {
-        const backupCodes = adminUser.backup_codes || [];
-        const codeIndex = backupCodes.indexOf(code.toUpperCase());
-        
-        if (codeIndex === -1) {
-          return { success: false, error: 'Invalid backup code' };
-        }
-
-        // Remove used backup code
-        const updatedCodes = backupCodes.filter((_, index) => index !== codeIndex);
-        await supabase
-          .from('admin_users')
-          .update({ backup_codes: updatedCodes })
-          .eq('username', pendingAuth.username);
-
-        const adminUserData: AdminUser = {
-          id: pendingAuth.id,
-          username: pendingAuth.username,
-          twoFactorEnabled: true,
-        };
-
-        setAdminUser(adminUserData);
-        setPendingAuth(null);
-        localStorage.setItem('admin_user', JSON.stringify(adminUserData));
-
-        return { success: true };
-      }
-
-      // Verify TOTP code (6 digits)
-      const totp = new OTPAuth.TOTP({
-        issuer: 'Admin Panel',
-        label: pendingAuth.username,
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32(adminUser.two_factor_secret),
-      });
-
-      const delta = totp.validate({ token: code, window: 1 });
-      
-      if (delta === null) {
-        return { success: false, error: 'Invalid verification code' };
-      }
-
-      const adminUserData: AdminUser = {
-        id: pendingAuth.id,
-        username: pendingAuth.username,
-        twoFactorEnabled: true,
-      };
-
-      setAdminUser(adminUserData);
-      setPendingAuth(null);
-      localStorage.setItem('admin_user', JSON.stringify(adminUserData));
-
-      return { success: true };
-    } catch (error) {
-      console.error('OTP verification error:', error);
-      return { success: false, error: 'Verification failed' };
-    }
+    if (!pendingAuth) return { success: false, error: 'No pending authentication' };
+    const result = await establishSession(pendingAuth, code);
+    return { success: result.success, error: result.error };
   };
 
-  const logout = () => {
-    try {
-      console.log('AdminAuth - Logging out admin user');
-      setAdminUser(null);
-      localStorage.removeItem('admin_user');
-    } catch (error) {
-      console.error('AdminAuth - Logout error:', error);
+  const logout = async (): Promise<void> => {
+    setPendingAuth(null);
+    setAdminUser(null);
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
+    if (error) {
+      console.error('Admin sign out failed', error);
+      throw error;
     }
   };
 
