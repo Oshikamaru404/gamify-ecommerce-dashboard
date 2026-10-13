@@ -23,9 +23,6 @@ verify_jwt = false
 [functions.paygate-callback]
 verify_jwt = false
 
-[functions.paygate-create-payment]
-verify_jwt = false
-
 [functions.paygate-create-direct-payment]
 verify_jwt = false
 
