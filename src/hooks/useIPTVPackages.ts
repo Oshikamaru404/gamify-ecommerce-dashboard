@@ -29,7 +29,7 @@ export type IPTVPackage = {
   low_stock_threshold?: number;
   quantity_promo_mode?: 'percentage' | 'fixed';
   quantity_promos?: Array<{ qty: number; value: number }>;
-};
+  stock_by_plan?: Record<string, number> | null;
 
 export const useIPTVPackages = () => {
   return useQuery({
