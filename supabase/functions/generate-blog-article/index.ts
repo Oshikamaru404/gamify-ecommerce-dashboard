@@ -1,7 +1,7 @@
 // Auto-generates SEO-optimized blog articles in EN/FR/AR using Lovable AI
 // Triggered by pg_cron 3x/week or manually from admin panel
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -198,7 +198,7 @@ async function generateImage(prompt: string, model: string): Promise<Uint8Array>
 }
 
 async function uploadImage(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<any, "public", any>,
   bytes: Uint8Array,
   slug: string,
   lang: string
@@ -216,7 +216,7 @@ async function uploadImage(
 }
 
 async function processLanguage(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<any, "public", any>,
   topic: any,
   lang: string,
   config: any
