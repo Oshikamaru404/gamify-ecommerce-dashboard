@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.3"
   }
   public: {
     Tables: {
@@ -1136,6 +1136,7 @@ export type Database = {
           stock_by_plan: Json
           stock_enabled: boolean
           stock_quantity: number
+          storm_panel_bouquet_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1163,6 +1164,7 @@ export type Database = {
           stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
+          storm_panel_bouquet_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1190,6 +1192,7 @@ export type Database = {
           stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
+          storm_panel_bouquet_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1287,6 +1290,7 @@ export type Database = {
           quantity: number
           referral_cookie_id: string | null
           status: string
+          storm_panel_fulfillment_status: string | null
           updated_at: string | null
           xtream_host: string | null
           xtream_password: string | null
@@ -1319,6 +1323,7 @@ export type Database = {
           quantity?: number
           referral_cookie_id?: string | null
           status?: string
+          storm_panel_fulfillment_status?: string | null
           updated_at?: string | null
           xtream_host?: string | null
           xtream_password?: string | null
@@ -1351,6 +1356,7 @@ export type Database = {
           quantity?: number
           referral_cookie_id?: string | null
           status?: string
+          storm_panel_fulfillment_status?: string | null
           updated_at?: string | null
           xtream_host?: string | null
           xtream_password?: string | null
@@ -1444,6 +1450,123 @@ export type Database = {
         }
         Relationships: []
       }
+      storm_panel_fulfillments: {
+        Row: {
+          accounts: Json
+          attempts: number
+          completed_at: string | null
+          credentials_email_sent_at: string | null
+          error_message: string | null
+          order_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accounts?: Json
+          attempts?: number
+          completed_at?: string | null
+          credentials_email_sent_at?: string | null
+          error_message?: string | null
+          order_id: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accounts?: Json
+          attempts?: number
+          completed_at?: string | null
+          credentials_email_sent_at?: string | null
+          error_message?: string | null
+          order_id?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storm_panel_fulfillments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storm_panel_payment_intents: {
+        Row: {
+          address_in: string | null
+          created_at: string
+          expected_amount: number | null
+          id: string
+          invoice_id: string | null
+          order_id: string
+          provider: string
+        }
+        Insert: {
+          address_in?: string | null
+          created_at?: string
+          expected_amount?: number | null
+          id?: string
+          invoice_id?: string | null
+          order_id: string
+          provider: string
+        }
+        Update: {
+          address_in?: string | null
+          created_at?: string
+          expected_amount?: number | null
+          id?: string
+          invoice_id?: string | null
+          order_id?: string
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storm_panel_payment_intents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storm_panel_payment_proofs: {
+        Row: {
+          id: string
+          metadata: Json
+          order_id: string
+          provider: string
+          transaction_id: string
+          verified_at: string
+        }
+        Insert: {
+          id?: string
+          metadata?: Json
+          order_id: string
+          provider: string
+          transaction_id: string
+          verified_at?: string
+        }
+        Update: {
+          id?: string
+          metadata?: Json
+          order_id?: string
+          provider?: string
+          transaction_id?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storm_panel_payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_credit_options: {
         Row: {
           created_at: string | null
@@ -1508,6 +1631,7 @@ export type Database = {
           stock_by_plan: Json
           stock_enabled: boolean
           stock_quantity: number
+          storm_panel_bouquet_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1532,6 +1656,7 @@ export type Database = {
           stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
+          storm_panel_bouquet_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1556,6 +1681,7 @@ export type Database = {
           stock_by_plan?: Json
           stock_enabled?: boolean
           stock_quantity?: number
+          storm_panel_bouquet_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1643,6 +1769,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_auth_rate_limit: {
+        Args: { p_key: string; p_success: boolean }
+        Returns: boolean
+      }
+      consume_admin_backup_code: {
+        Args: { p_admin_id: string; p_code: string }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           p_body: string
@@ -1707,12 +1841,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1736,11 +1870,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1761,11 +1895,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1786,11 +1920,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1803,11 +1937,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
